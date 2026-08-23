@@ -137,6 +137,18 @@
           "tag": "课程"
         }
       ]
+    },
+    {
+      "name": "编程学习",
+      "links": [
+        {
+          "title": "Python 游戏化课程",
+          "subtitle": "30 课修炼之旅 · 从新手村到大师之路",
+          "url": "python-course/index.html",
+          "emoji": "🐍",
+          "tag": "课程"
+        }
+      ]
     }
   ]
 }

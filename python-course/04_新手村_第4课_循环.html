@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第4课 · 循环 —— 无限回廊</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(74,222,128,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4ade80,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--green),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#9fe8b8;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .warn-box{
+    background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.4);border-radius:12px;
+    padding:12px 16px;font-size:13px;margin:12px 0;color:var(--gold);
+  }
+  /* 回廊动画 */
+  .corridor{
+    position:relative;height:74px;background:#0a0d1e;border:1px solid var(--line);
+    border-radius:12px;overflow:hidden;margin:16px 0;display:flex;align-items:center;
+  }
+  .arches{display:flex;white-space:nowrap;font-size:28px;line-height:1;color:var(--purple);opacity:.55;animation:slide 5s linear infinite;}
+  @keyframes slide{to{transform:translateX(-50%);}}
+  .runner{position:absolute;left:26px;font-size:24px;animation:hop 1s ease-in-out infinite;}
+  @keyframes hop{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+  .corridor-cap{text-align:center;font-size:12px;color:var(--muted);margin-bottom:14px;}
+  /* 传送带 */
+  .conv-area{display:flex;gap:10px;flex-wrap:wrap;align-items:center;min-height:64px;margin:10px 0;}
+  .conv-item{
+    min-width:52px;text-align:center;background:var(--card);border:2px solid var(--cyan);border-radius:12px;
+    padding:8px 10px;font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:800;color:var(--cyan);
+    animation:popIn .4s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .conv-end{
+    font-size:13px;color:var(--gold);border:1px dashed rgba(245,197,66,.5);border-radius:10px;
+    padding:6px 12px;animation:fadeIn .5s both;
+  }
+  /* break/continue 格子 */
+  .cells{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .cell{
+    width:64px;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:var(--card);border:2px solid var(--green);border-radius:12px;
+    font-family:ui-monospace,Menlo,monospace;font-size:20px;font-weight:800;color:var(--green);
+    transition:all .3s;
+  }
+  .cell small{font-size:10px;font-weight:400;color:var(--muted);}
+  .cell.brk{border-color:var(--red);color:var(--red);box-shadow:0 0 16px rgba(248,113,113,.3);}
+  .cell.dim{opacity:.25;filter:grayscale(.8);}
+  /* 乘法表 */
+  .mult-table{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;margin:14px 0;}
+  .mcell{
+    text-align:center;background:#0a0d1e;border:1px solid var(--line);border-radius:7px;
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:5px 2px;color:var(--muted);
+    transition:all .25s;
+  }
+  .mcell.lit{border-color:var(--green);color:var(--green);background:rgba(74,222,128,.12);transform:scale(1.06);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--green),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,222,128,.3);}
+  .btn.alt{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;}
+  .game-msg{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;padding:12px 16px;
+    font-size:13px;white-space:pre-line;min-height:64px;margin:8px 0 12px;color:var(--text);
+  }
+  .monitor{
+    display:flex;gap:14px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 18px;font-size:13px;color:var(--muted);margin-bottom:12px;
+  }
+  .monitor b{color:var(--cyan);font-family:ui-monospace,Menlo,monospace;}
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;color:var(--gold);}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  .hero-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(74,222,128,.15);color:var(--green);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(74,222,128,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 新手村 · <b>第 4 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 1 · NEWBIE VILLAGE</div>
+    <h1>循环 —— 无限回廊</h1>
+    <div class="subtitle">今日目标：让程序学会自己重复刷怪，而不是你复制粘贴一百遍</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握 <span class="hl">while</span> 条件循环，看懂并躲避「死循环」陷阱</li>
+      <li>学会 <span class="hl">for + range()</span> 计数循环，牢记 <span class="hl">range(1, 101) 不含 101</span></li>
+      <li>用 <span class="hl">break</span> 破门而出、<span class="hl">continue</span> 跳过一格</li>
+      <li>掌握累加器模式与嵌套循环，亲手打出九九乘法表</li>
+      <li>通关实验室「猜数字游戏」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 while -->
+  <section>
+    <h2><span class="num">1</span>while：无限回廊的开启条件</h2>
+    <p>想象一座回廊：<b>门口有一个守卫</b>，每次你想再绕一圈，他都会检查一次「通行条件」。条件为 <span class="hl-c">True</span>，放行继续绕；条件为 <span class="hl-c">False</span>，把你扔出出口。这就是 <span class="hl">while 循环</span>。</p>
+
+    <div class="corridor">
+      <div class="arches"><span>⛩ ⛩ ⛩ ⛩ ⛩ ⛩ ⛩ ⛩ </span><span>⛩ ⛩ ⛩ ⛩ ⛩ ⛩ ⛩ ⛩ </span></div>
+      <div class="runner">🚶</div>
+    </div>
+    <div class="corridor-cap">条件 hp &gt; 0 一直为真：英雄在回廊里一圈又一圈……直到 hp 归零，出口才打开</div>
+
+    <div class="code"><span class="v">hp</span> = <span class="n">5</span>
+<span class="k">while</span> <span class="v">hp</span> &gt; <span class="n">0</span>:              <span class="c"># 守卫检查条件：hp 大于 0 就继续绕</span>
+    <span class="k">print</span>(<span class="s">"战斗中，剩余 HP："</span>, <span class="v">hp</span>)
+    <span class="v">hp</span> -= <span class="n">1</span>                 <span class="c"># 每绕一圈扣 1 点，条件迟早会变 False</span>
+<span class="k">print</span>(<span class="s">"回廊出口已开启"</span>)      <span class="c"># 循环结束后才执行这一行</span></div>
+    <div class="out">战斗中，剩余 HP： 5
+战斗中，剩余 HP： 4
+战斗中，剩余 HP： 3
+战斗中，剩余 HP： 2
+战斗中，剩余 HP： 1
+回廊出口已开启</div>
+
+    <div class="warn-box">⚠️ 死循环警告：如果忘了写 <code>hp -= 1</code>，条件永远为 True，程序将无限刷屏停不下来——这就是<b>死循环</b>。在终端里按 <b>Ctrl + C</b> 可以强制停止它。写 while 时永远先问自己：<b>什么东西在让条件走向 False？</b></div>
+  </section>
+
+  <!-- 2 for + range -->
+  <section>
+    <h2><span class="num">2</span>for + range()：计数型回廊</h2>
+    <p>如果你只是想「精确绕 3 圈」，用 while 得自己维护计数器，太麻烦。Python 给你一台<span class="hl">传送带</span>：<span class="hl-c">range()</span> 负责按顺序吐出数字，<span class="hl">for</span> 负责每个都接住处理一遍。</p>
+
+    <div class="lab-input">
+      <button class="btn" onclick="runConveyor()">▶ 启动 range(3) 传送带</button>
+    </div>
+    <div class="conv-area" id="conv-items"></div>
+
+    <div class="code"><span class="k">for</span> <span class="v">i</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">3</span>):
+    <span class="k">print</span>(<span class="s">"第"</span>, <span class="v">i</span>, <span class="s">"圈"</span>)</div>
+    <div class="out">第 0 圈
+第 1 圈
+第 2 圈</div>
+
+    <p><span class="hl">range(3) 只送出 0、1、2 三个数字</span>——从 0 开始、共 3 个、<b>不含 3</b>。记住这个规则，能帮你避开新手村一半的 bug：</p>
+    <div class="code"><span class="k">range</span>(<span class="n">101</span>)        <span class="c"># 0, 1, 2, ... 100（从 0 开始，共 101 个）</span>
+<span class="k">range</span>(<span class="n">1</span>, <span class="n">101</span>)      <span class="c"># 1, 2, 3, ... 100 —— 从 1 数到 100，不含 101！</span>
+<span class="k">range</span>(<span class="n">1</span>, <span class="n">10</span>, <span class="n">2</span>)    <span class="c"># 1, 3, 5, 7, 9 —— 第三个参数是步长，每次跳 2</span></div>
+
+    <div class="warn-box">🧭 最重要的边界：想「从 1 数到 100」，要写 range(1, 101) 而不是 range(1, 100)。range 是<b>左闭右开</b>区间：包含左端，不含右端。</div>
+  </section>
+
+  <!-- 3 break/continue -->
+  <section>
+    <h2><span class="num">3</span>break 与 continue：暗门与跳过格</h2>
+    <p>回廊里有两个特殊机关：<span class="hl">break</span> 是一扇<b>暗门</b>——踩到立刻离开整条回廊；<span class="hl">continue</span> 是一块<b>跳过格</b>——跳过这一格的剩余机关，直接去下一格。</p>
+
+    <div class="cells">
+      <div class="cell">1</div>
+      <div class="cell">2</div>
+      <div class="cell">3</div>
+      <div class="cell brk">4<small>break 🚪</small></div>
+      <div class="cell dim">5<small>没机会了</small></div>
+    </div>
+
+    <div class="code"><span class="k">for</span> <span class="v">i</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">1</span>, <span class="n">6</span>):
+    <span class="k">if</span> <span class="v">i</span> == <span class="n">4</span>:
+        <span class="k">break</span>            <span class="c"># 破门而出：整个循环立刻结束</span>
+    <span class="k">print</span>(<span class="v">i</span>)</div>
+    <div class="out">1
+2
+3</div>
+
+    <p>把 <span class="hl-c">break</span> 换成 <span class="hl-c">continue</span>，结果完全不同：</p>
+    <div class="code"><span class="k">for</span> <span class="v">i</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">1</span>, <span class="n">6</span>):
+    <span class="k">if</span> <span class="v">i</span> == <span class="n">4</span>:
+        <span class="k">continue</span>         <span class="c"># 只跳过 4 这一格，继续 5</span>
+    <span class="k">print</span>(<span class="v">i</span>)</div>
+    <div class="out">1
+2
+3
+5</div>
+
+    <p>🧠 记忆口诀：<span class="hl">break 是「我不玩了」，continue 是「这个不要，下一个」。</span></p>
+  </section>
+
+  <!-- 4 遍历字符串 -->
+  <section>
+    <h2><span class="num">4</span>for 遍历字符串：逐字扫描</h2>
+    <p>for 不只能配 range，还能直接把<b>字符串</b>当成传送带：每次送出一个字符。</p>
+    <div class="code"><span class="v">skill</span> = <span class="s">"冰霜箭"</span>
+<span class="k">for</span> <span class="v">ch</span> <span class="k">in</span> <span class="v">skill</span>:          <span class="c"># ch 依次是 '冰'、'霜'、'箭'</span>
+    <span class="k">print</span>(<span class="s">"飞出符文："</span>, <span class="v">ch</span>)</div>
+    <div class="out">飞出符文： 冰
+飞出符文： 霜
+飞出符文： 箭</div>
+    <p>这个技巧以后天天用：比如数一句话里有多少个字、把名字逐个字母加密。字符串有几个字符，循环就转几圈。</p>
+  </section>
+
+  <!-- 5 累加器 -->
+  <section>
+    <h2><span class="num">5</span>累加器模式：循环 + 存钱罐</h2>
+    <p>「循环 + 一个不断累积的变量」是编程世界<span class="hl">出镜率最高的模式</span>。就像存钱罐：出发前先清空（<code>total = 0</code>），每绕一圈存一点（<code>total += x</code>）。</p>
+
+    <div class="boxes" style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
+      <div class="mbox" style="width:120px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;padding:10px;text-align:center;">
+        <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--cyan);">+1 后</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);">1</div>
+      </div>
+      <div class="mbox" style="width:120px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;padding:10px;text-align:center;">
+        <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--cyan);">+2 后</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);">3</div>
+      </div>
+      <div class="mbox" style="width:120px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;padding:10px;text-align:center;">
+        <div style="font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--cyan);">+3 后</div>
+        <div style="font-size:22px;font-weight:800;color:var(--gold);">6</div>
+      </div>
+    </div>
+
+    <div class="code"><span class="v">total</span> = <span class="n">0</span>                    <span class="c"># 出发前清空存钱罐</span>
+<span class="k">for</span> <span class="v">x</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">1</span>, <span class="n">101</span>):       <span class="c"># 1, 2, 3, ... 100（不含 101）</span>
+    <span class="v">total</span> += <span class="v">x</span>               <span class="c"># 等价于 total = total + x</span>
+<span class="k">print</span>(<span class="s">"1 加到 100 ="</span>, <span class="v">total</span>)</div>
+    <div class="out">1 加到 100 = 5050</div>
+
+    <p>传说高斯手算的题，你的程序 100 圈循环秒解。把 <code>+=</code> 换成 <code>*=</code> 就是累乘（算阶乘），把 <code>total = 0</code> 换成 <code>total = 1</code> 即可——模式不变，只换运算。</p>
+  </section>
+
+  <!-- 6 嵌套循环 -->
+  <section>
+    <h2><span class="num">6</span>嵌套循环：回廊里套回廊</h2>
+    <p>循环体里还能再放一个循环——<span class="hl">外层每绕一圈，内层就完整跑一遍</span>。经典实战：九九乘法表。外层 <code>i</code> 控制第几行，内层 <code>j</code> 打印行里的每个算式。</p>
+
+    <div class="lab-input">
+      <button class="btn" onclick="playTable()">▶ 播放嵌套循环填表（外层 i 行 × 内层 j 列）</button>
+    </div>
+    <div class="mult-table" id="mult-table"></div>
+
+    <div class="code"><span class="k">for</span> <span class="v">i</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">1</span>, <span class="n">10</span>):          <span class="c"># i：第 1~9 行</span>
+    <span class="k">for</span> <span class="v">j</span> <span class="k">in</span> <span class="k">range</span>(<span class="n">1</span>, <span class="v">i</span> + <span class="n">1</span>):    <span class="c"># j：每行打印 i 个算式</span>
+        <span class="k">print</span>(<span class="v">j</span>, <span class="s">"x"</span>, <span class="v">i</span>, <span class="s">"="</span>, <span class="v">i</span> * <span class="v">j</span>, end=<span class="s">"\t"</span>)
+    <span class="k">print</span>()                     <span class="c"># 一行打完，换行（end="\t" 让算式留在同一行）</span></div>
+    <div class="out">1 x 1 = 1
+1 x 2 = 2  2 x 2 = 4
+1 x 3 = 3  2 x 3 = 6  3 x 3 = 9
+……（每行比上一行多一个算式，一直到第 9 行）</div>
+
+    <p>算一笔账：内层总共执行 1+2+3+…+9 = <span class="hl">45 次</span>。嵌套循环的总执行次数 = <span class="hl">外层次数 × 内层次数</span>，数据一大就会变慢，心里要有这本账。</p>
+  </section>
+
+  <!-- 7 实验室 -->
+  <section>
+    <h2><span class="num">7</span>🎮 实验室 · 猜数字大作战</h2>
+    <p>回廊深处藏着一个 1~100 的神秘数字（程序随机出数，每局都不同）。你负责猜，程序提示「大了 / 小了」，直到猜中为止。右侧代码区<span class="hl">实时展示这局游戏对应的 Python while 循环</span>——玩着玩着，你就把循环学会了。</p>
+    <div class="lab-input">
+      <input id="guess-input" type="number" min="1" max="100" placeholder="输入 1~100 之间的整数" onkeydown="if(event.key==='Enter'){makeGuess();}">
+      <button class="btn" onclick="makeGuess()">🎯 提交猜测</button>
+      <button class="btn alt" onclick="resetGame()">🔄 重新开局</button>
+    </div>
+    <div class="game-msg" id="game-msg">回廊守卫已藏好数字，开始你的第一次猜测吧！</div>
+    <div class="monitor">
+      <div>已猜次数：<b id="m-count">0</b></div>
+      <div>锁定范围：<b id="m-range">1 ~ 100</b></div>
+      <div>猜测记录：<b id="m-log">—</b></div>
+    </div>
+    <div class="code" id="game-code"></div>
+    <div class="hero-card" id="win-card">
+      <h3>🏆 回廊密钥破解！</h3>
+      <div class="attr">
+        <div><b id="win-secret">—</b><span>神秘数字</span></div>
+        <div><b id="win-count">—</b><span>使用次数</span></div>
+        <div><b id="win-rank" style="font-size:18px;">—</b><span>猎人评价</span></div>
+      </div>
+      <div class="quote" id="win-quote">—</div>
+    </div>
+    <div class="code" id="replay-code" style="display:none"></div>
+  </section>
+
+  <!-- 8 预言机 -->
+  <section>
+    <h2><span class="num">8</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 9 记忆卡片 -->
+  <section>
+    <h2><span class="num">9</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 10 Quiz -->
+  <section>
+    <h2><span class="num">10</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 11 课后 -->
+  <section class="homework">
+    <h2><span class="num">11</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开电脑上的 Python（IDLE 或终端输入 <code>python</code>），逐行敲一遍上面所有代码块，<b>亲手打字，不要复制粘贴</b></li>
+    <li>② 故意删掉 <code>hp -= 1</code> 跑一次死循环，亲眼看程序刷屏，然后按 <code>Ctrl + C</code> 停下来——见过一次，终生免疫</li>
+    <li>③ 小挑战：用 while 或 for 求 <b>1~100 中所有偶数的和</b>（提示：range 的步长参数能帮大忙；算完对答案，应该是 2550）</li>
+    <li>④ 把九九乘法表完整跑一遍，再改成「倒序三角形」（第 1 行 9 个算式，最后一行 1 个）</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>函数 —— 技能封装</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具：代码高亮 ============ */
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hl(code){
+  var t = escHtml(code);
+  var strs = [];
+  t = t.replace(/("[^"\n]*")|('[^'\n]*')/g, function(m){
+    strs.push('<span style="color:var(--green)">'+m+'</span>');
+    return '\u0000' + String.fromCharCode(65 + strs.length - 1) + '\u0000';
+  });
+  t = t.replace(/\b(for|in|while|break|continue|if|elif|else|def|return|and|or|not|True|False|None|import|global|pass)\b/g,
+    '<span style="color:var(--pink)">$1</span>');
+  t = t.replace(/\b(print|range|len|type|input|int|str|float|random|randint)\b/g,
+    '<span style="color:var(--cyan)">$1</span>');
+  t = t.replace(/\u0000([A-Z])\u0000/g, function(m, ch){
+    return strs[ch.charCodeAt(0) - 65];
+  });
+  t = t.replace(/\b(\d+)\b/g, '<span style="color:var(--orange)">$1</span>');
+  return t;
+}
+
+/* ============ 知识点小动画：range 传送带 ============ */
+var convRunning = false;
+function runConveyor(){
+  if(convRunning){ return; }
+  convRunning = true;
+  var area = document.getElementById('conv-items');
+  area.innerHTML = '';
+  var items = [0, 1, 2];
+  var i = 0;
+  var timer = setInterval(function(){
+    if(i < items.length){
+      var d = document.createElement('div');
+      d.className = 'conv-item';
+      d.textContent = items[i];
+      area.appendChild(d);
+      i++;
+    }else{
+      var end = document.createElement('div');
+      end.className = 'conv-end';
+      end.textContent = '传送带结束：range(3) 只送出 0、1、2 —— 没有 3！';
+      area.appendChild(end);
+      clearInterval(timer);
+      convRunning = false;
+    }
+  }, 550);
+}
+
+/* ============ 知识点小动画：九九乘法表 ============ */
+var tableCells = [];
+(function(){
+  var box = document.getElementById('mult-table');
+  for(var i = 1; i <= 9; i++){
+    for(var j = 1; j <= i; j++){
+      var d = document.createElement('div');
+      d.className = 'mcell';
+      d.textContent = j + 'x' + i + '=' + (i * j);
+      box.appendChild(d);
+      tableCells.push(d);
+    }
+  }
+})();
+var tableTimer = null;
+function playTable(){
+  if(tableTimer){ clearInterval(tableTimer); }
+  tableCells.forEach(function(c){ c.classList.remove('lit'); });
+  var i = 0;
+  tableTimer = setInterval(function(){
+    if(i >= tableCells.length){
+      clearInterval(tableTimer);
+      tableTimer = null;
+      return;
+    }
+    tableCells[i].classList.add('lit');
+    i++;
+  }, 60);
+}
+
+/* ============ 实验室：猜数字游戏 ============ */
+var secret = 0;
+var guessCount = 0;
+var guessLog = [];
+var lowBound = 1;
+var highBound = 100;
+var gameOver = false;
+
+function buildGameCode(){
+  var code = '# 猜数字游戏 · 当前状态对应的 Python 逻辑\n'
+    + 'import random\n'
+    + 'secret = random.randint(1, 100)   # 程序已出数（猜中后揭晓）\n'
+    + 'low, high = ' + lowBound + ', ' + highBound + '                # 你已锁定的范围\n'
+    + 'count = 0\n'
+    + 'while True:\n'
+    + '    guess = int(input("猜一个 1~100 的数："))\n'
+    + '    count += 1\n'
+    + '    if guess > secret:\n'
+    + '        high = guess - 1          # 猜大了，上限收紧\n'
+    + '        print("大了！")\n'
+    + '    elif guess < secret:\n'
+    + '        low = guess + 1           # 猜小了，下限收紧\n'
+    + '        print("小了！")\n'
+    + '    else:\n'
+    + '        print("猜中了！你用了", count, "次")\n'
+    + '        break';
+  return code;
+}
+function renderGame(){
+  document.getElementById('m-count').textContent = guessCount;
+  document.getElementById('m-range').textContent = lowBound + ' ~ ' + highBound;
+  document.getElementById('m-log').textContent = guessLog.length ? guessLog.join(' → ') : '—';
+  document.getElementById('game-code').innerHTML = hl(buildGameCode());
+}
+function resetGame(){
+  secret = Math.floor(Math.random() * 100) + 1;
+  guessCount = 0;
+  guessLog = [];
+  lowBound = 1;
+  highBound = 100;
+  gameOver = false;
+  document.getElementById('guess-input').value = '';
+  document.getElementById('game-msg').textContent = '新一局开始！回廊守卫重新藏好了数字，猜吧（1~100）。';
+  document.getElementById('win-card').classList.remove('show');
+  document.getElementById('replay-code').style.display = 'none';
+  renderGame();
+}
+function makeGuess(){
+  if(gameOver){
+    alert('本局已通关，点击「重新开局」再来一局！');
+    return;
+  }
+  var input = document.getElementById('guess-input');
+  var v = parseInt(input.value, 10);
+  if(isNaN(v) || v < 1 || v > 100){
+    alert('请输入 1~100 之间的整数！');
+    return;
+  }
+  input.value = '';
+  guessCount++;
+  guessLog.push(v);
+  var msgBox = document.getElementById('game-msg');
+  if(v > secret){
+    if(v - 1 < highBound){ highBound = v - 1; }
+    msgBox.textContent = '第 ' + guessCount + ' 次猜测 ' + v + '：大了！↑（神秘数字在 ' + lowBound + ' ~ ' + highBound + ' 之间）';
+  }else if(v < secret){
+    if(v + 1 > lowBound){ lowBound = v + 1; }
+    msgBox.textContent = '第 ' + guessCount + ' 次猜测 ' + v + '：小了！↓（神秘数字在 ' + lowBound + ' ~ ' + highBound + ' 之间）';
+  }else{
+    gameOver = true;
+    msgBox.textContent = '第 ' + guessCount + ' 次猜测 ' + v + '：🎯 猜中了！神秘数字就是 ' + secret + '！';
+    showWin();
+  }
+  renderGame();
+}
+function showWin(){
+  var rank, quote;
+  if(guessCount <= 5){ rank = '预言家'; quote = '「二分法猎人：每次砍掉一半可能性，最多 7 次必中。」'; }
+  else if(guessCount <= 7){ rank = '精英猎人'; quote = '「不错的直觉，但二分法能让你更快。」'; }
+  else if(guessCount <= 9){ rank = '合格侦探'; quote = '「范围收窄得还不够狠，试试每次都猜正中间。」'; }
+  else{ rank = '青铜学徒'; quote = '「下次从 50 开始猜，每次取中点，最多 7 次稳赢。」'; }
+  document.getElementById('win-secret').textContent = secret;
+  document.getElementById('win-count').textContent = guessCount;
+  document.getElementById('win-rank').textContent = rank;
+  document.getElementById('win-quote').textContent = quote;
+  var card = document.getElementById('win-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  var replay = '# 本局完整回放：secret = ' + secret + '，你用了 ' + guessCount + ' 次猜中\n'
+    + '# 你的猜测轨迹：' + guessLog.join(' -> ') + '\n'
+    + 'import random\n'
+    + 'secret = random.randint(1, 100)   # 本局随机出了 ' + secret + '\n'
+    + 'count = 0\n'
+    + 'while True:\n'
+    + '    guess = int(input("猜一个 1~100 的数："))\n'
+    + '    count += 1\n'
+    + '    if guess > secret:\n'
+    + '        print("大了！")\n'
+    + '    elif guess < secret:\n'
+    + '        print("小了！")\n'
+    + '    else:\n'
+    + '        print("猜中了！你用了", count, "次")\n'
+    + '        break';
+  var rc = document.getElementById('replay-code');
+  rc.innerHTML = hl(replay);
+  rc.style.display = 'block';
+}
+resetGame();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · range(3) 的真面目',
+    code:'for i in range(3):\n    print(i)',
+    opts:['0 1 2（各占一行）','1 2 3（各占一行）','0 1 2 3（各占一行）','只输出 3'],
+    ans:0,
+    exp:'range(3) 从 0 开始、共 3 个数字：0、1、2，不含 3。循环因此转 3 圈，每圈打印一个。'
+  },
+  {
+    title:'第 2 预言 · break 与 continue 的差异',
+    code:'for i in range(5):\n    if i == 3:\n        break\n    print(i)',
+    opts:['0 1 2','0 1 2 3 4','0 1 2 4','0 1 2 3'],
+    ans:0,
+    exp:'i 等于 3 时 break 直接终止整个循环，3 和 4 都没机会被打印。若换成 continue，则只跳过 3，输出 0 1 2 4。'
+  },
+  {
+    title:'第 3 预言 · 谁在阻止死循环？',
+    code:'n = 5\nwhile n > 0:\n    print(n)',
+    opts:['输出 5 4 3 2 1 然后结束','只输出一个 5 就结束','陷入死循环，需 Ctrl+C 停止','报错 SyntaxError'],
+    ans:2,
+    exp:'循环体里没有任何语句让 n 变小，n 永远是 5，条件 n > 0 永远为 True——程序无限打印 5。写 while 必须保证有东西在推动条件走向 False。'
+  },
+  {
+    title:'第 4 预言 · 累加器的最终值',
+    code:'total = 0\nfor x in range(1, 5):\n    total += x\nprint(total)',
+    opts:['10','15','4','5'],
+    ans:0,
+    exp:'range(1, 5) 是 1、2、3、4（不含 5！）。0+1+2+3+4 = 10。如果答 15，就是忘了"不含右端"这个边界。'
+  },
+  {
+    title:'第 5 预言 · 嵌套循环跑几圈？',
+    code:'count = 0\nfor i in range(3):\n    for j in range(4):\n        count += 1\nprint(count)',
+    opts:['7','12','3','4'],
+    ans:1,
+    exp:'外层跑 3 圈，每圈里内层完整跑 4 次，总共 3 × 4 = 12 次。嵌套循环总次数 = 外层次数 × 内层次数。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hl(q.code);
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="'+i+'">'+escHtml(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0;white-space:pre-wrap">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['while 循环何时结束？','条件变为 False 时退出；条件一直为 True 就一直转'],
+  ['while True: 且没有 break','死循环！终端里按 Ctrl + C 强制停止'],
+  ['range(3) 产出哪些数？','0、1、2（从 0 开始共 3 个，不含 3）'],
+  ['range(1, 101) 产出哪些数？','1 到 100 共 100 个数，不含 101（左闭右开）'],
+  ['break 干什么？','立即跳出整个循环，执行循环后面的代码'],
+  ['continue 干什么？','跳过本次循环剩余语句，直接进入下一次循环'],
+  ['for 遍历字符串','每次取一个字符："冰霜箭" → 冰、霜、箭，共 3 圈'],
+  ['累加器模式第一步','total = 0 先初始化，否则 total += x 会报错 NameError'],
+  ['total += x 等价于','total = total + x（先算右边，再放回左边）'],
+  ['嵌套循环总次数','外层次数 × 内层次数，如 3×4 = 12 次']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'while 循环什么时候结束？',
+   opts:['条件变为 False 时','条件变为 True 时','执行满 100 次后','永远不会结束'], ans:0,
+   exp:'while 每圈开始前检查条件：True 继续转，False 立刻退出。'},
+  {q:'range(1, 101) 生成哪些整数？',
+   opts:['1 到 100（不含 101）','1 到 101（含 101）','0 到 100（含 0）','0 到 101'], ans:0,
+   exp:'range 左闭右开：含 1 不含 101，共 100 个数。想含 101 得写 range(1, 102)。'},
+  {q:'for i in range(3): print(i) 的输出是？',
+   opts:['0 1 2','1 2 3','0 1 2 3','3'], ans:0,
+   exp:'range(3) 从 0 开始共 3 个数：0、1、2。'},
+  {q:'哪个关键字能立即跳出整个循环？',
+   opts:['continue','break','pass','exit'], ans:1,
+   exp:'break 直接终止整个循环；pass 是占位符什么都不做；exit 不用于跳出循环。'},
+  {q:'continue 的作用是？',
+   opts:['结束整个循环','跳过本次循环剩余语句，进入下一次','跳过整个循环体','删除当前变量'], ans:1,
+   exp:'continue 只放弃"这一圈"的剩余代码，循环本身继续；break 才是结束整个循环。'},
+  {q:'for ch in "ABC": 循环体执行时 ch 依次是？',
+   opts:["'A'、'B'、'C'，共 3 次","'ABC'，共 1 次","'A'、'B'，共 2 次","报错"], ans:0,
+   exp:'字符串按字符逐个送入循环，3 个字符转 3 圈。'},
+  {q:'累加器模式的第一步通常是？',
+   opts:['total = 0 初始化','total += 1','print(total)','while True:'], ans:0,
+   exp:'必须先创建变量 total = 0（存钱罐先清空），否则 total += x 会报 NameError。'},
+  {q:'total += x 等价于下面哪一行？',
+   opts:['total = total + x','total = x','x = total + x','total == x'], ans:0,
+   exp:'+= 是"自己加上 x 再存回自己"的简写。'},
+  {q:'s = 0\nfor i in range(4):\n    s += i\nprint(s) 输出？',
+   opts:['6','10','4','0'], ans:0,
+   exp:'range(4) 是 0、1、2、3，0+1+2+3 = 6。'},
+  {q:'for i in range(2):\n    for j in range(5):\n        print("打")  一共打印几个"打"？',
+   opts:['7 个','10 个','2 个','5 个'], ans:1,
+   exp:'外层 2 圈 × 内层 5 次 = 10 次。嵌套循环总次数 = 外层 × 内层。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+escHtml(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+escHtml(q.q).replace(/\n/g,'<br>')+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！无限回廊真正的主人，下一课已为你解锁 🔓' : '通关成功！第 5 课「函数 —— 技能封装」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

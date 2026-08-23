@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★ BOSS 战 · 卡牌对战游戏 —— 进阶秘境毕业试炼</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167,139,250,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--purple);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:30px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#a78bfa,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--purple);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#c4b5fd;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 类图卡片 */
+  .clsmap{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0;}
+  .clsbox{
+    background:var(--card);border:2px solid var(--purple);border-radius:14px;padding:14px 16px;
+    transition:all .3s;
+  }
+  .clsbox:hover{transform:translateY(-4px);box-shadow:0 6px 22px rgba(167,139,250,.25);}
+  .clsbox h4{color:var(--purple);font-size:15px;font-family:ui-monospace,Menlo,monospace;margin-bottom:6px;}
+  .clsbox .duty{font-size:12px;color:var(--gold);margin-bottom:6px;}
+  .clsbox li{font-size:12.5px;color:var(--text);list-style:none;margin:2px 0;}
+  .clsbox li b{color:var(--cyan);font-weight:600;font-family:ui-monospace,Menlo,monospace;}
+  /* 步骤标题 */
+  .step-title{
+    font-size:16px;color:var(--gold);margin:22px 0 8px;font-weight:700;
+    border-left:4px solid var(--purple);padding-left:10px;
+  }
+  /* 验收清单 */
+  .check-item{
+    display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:10px 14px;margin:8px 0;font-size:14px;cursor:pointer;transition:all .2s;
+  }
+  .check-item:hover{border-color:var(--purple);}
+  .check-item .ck{
+    width:20px;height:20px;border-radius:6px;border:2px solid var(--purple);flex-shrink:0;margin-top:3px;
+    display:inline-flex;align-items:center;justify-content:center;color:#0d1021;font-size:13px;font-weight:900;
+  }
+  .check-item.done{background:rgba(167,139,250,.10);}
+  .check-item.done .ck{background:var(--purple);}
+  .check-item.done span{color:var(--muted);text-decoration:line-through;}
+  .progress-wrap{background:#0a0d1e;border:1px solid var(--line);border-radius:10px;height:14px;margin:10px 0;overflow:hidden;}
+  #check-bar{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--cyan));transition:width .4s;}
+  #check-text{font-size:13px;color:var(--muted);}
+  /* 打分表 */
+  table.score{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;}
+  table.score th, table.score td{border:1px solid var(--line);padding:9px 12px;text-align:left;}
+  table.score th{color:var(--purple);background:rgba(167,139,250,.08);}
+  table.score input[type=range]{width:100%;accent-color:var(--purple);}
+  #score-total{font-size:15px;color:var(--gold);font-weight:700;margin-top:8px;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--purple);color:var(--purple);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(167,139,250,.3);}
+  /* 挑战卡片 */
+  .chal{background:var(--card);border:1px solid var(--purple);border-radius:14px;padding:16px 20px;margin:12px 0;}
+  .chal h4{color:var(--purple);font-size:15px;margin-bottom:6px;}
+  .chal p{font-size:13.5px;color:var(--muted);margin-bottom:6px;}
+  .chal .lvl{display:inline-block;font-size:11px;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:1px 10px;margin-left:8px;vertical-align:2px;}
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(167,139,250,.1);color:var(--purple);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  /* 认证横幅 */
+  .cert{
+    margin-top:26px;text-align:center;padding:26px 20px;border-radius:18px;
+    background:linear-gradient(140deg,rgba(167,139,250,.18),rgba(77,214,255,.10));
+    border:2px solid var(--purple);animation:popIn .5s both;
+  }
+  .cert .badge-icon{font-size:40px;}
+  .cert h3{font-size:22px;color:var(--gold);letter-spacing:3px;margin:8px 0;}
+  .cert p{color:var(--muted);font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 进阶秘境 · <b>BOSS 战 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ADVANCED DUNGEON · FINAL BOSS</div>
+    <h1>★ BOSS 战 · 卡牌对战游戏</h1>
+    <div class="subtitle">进阶秘境毕业试炼 —— 用面向对象造一个完整的双人卡牌对战</div>
+    <div class="mission">
+      <h3>👹 BOSS 宣言 · 需求书</h3>
+      <li>用<b>面向对象</b>做一个双人卡牌对战游戏，需要四个类：</li>
+      <li><span class="hl-p">Card 类</span>：一张卡牌（名字、攻击力），能被漂亮地打印和比较</li>
+      <li><span class="hl-p">Deck 类</span>：牌库（生成 24 张牌、洗牌、抽牌）</li>
+      <li><span class="hl-p">Player 类</span>：玩家（名字、HP、手牌、摸牌、出牌、挨打）</li>
+      <li><span class="hl-p">Game 类</span>：裁判（回合制循环、伤害结算、胜负判定）</li>
+      <li>综合运用：<span class="hl">类 / 继承 / 魔法方法 / 列表 / 随机模块</span></li>
+      <li>通关奖励：BOSS 掉落 <span class="hl">「系统设计师」称号</span> 🏆</li>
+    </div>
+  </header>
+
+  <!-- 1 作战计划 -->
+  <section>
+    <h2><span class="num">1</span>🗺️ 作战计划 · 先画类图再写代码</h2>
+    <p>打 BOSS 之前先看地图。写大项目最忌讳「想到哪写到哪」，正确姿势是<span class="hl">先设计类的关系，再动手敲代码</span>。</p>
+    <p>我们的系统有 4 个类，职责划分如下（鼠标悬停查看）：</p>
+    <div class="clsmap">
+      <div class="clsbox">
+        <h4>Card 🃏</h4>
+        <div class="duty">数据小兵 · 一张牌</div>
+        <li><b>name</b> 名字 · <b>attack</b> 攻击力</li>
+        <li><b>__str__</b> 显示成 "炎龙(攻6)"</li>
+        <li><b>__eq__</b> 两张牌能 == 比较</li>
+      </div>
+      <div class="clsbox">
+        <h4>Deck 🎴</h4>
+        <div class="duty">发牌员 · 管理 24 张牌</div>
+        <li><b>cards</b> 列表存所有牌</li>
+        <li><b>shuffle()</b> 洗牌（random.shuffle）</li>
+        <li><b>draw()</b> 抽一张（list.pop）</li>
+      </div>
+      <div class="clsbox">
+        <h4>Player ⚔️</h4>
+        <div class="duty">战士 · 只管自己</div>
+        <li><b>hp</b> 血量 · <b>hand</b> 手牌列表</li>
+        <li><b>draw_from()</b> 摸牌</li>
+        <li><b>play_best()</b> 打出最强牌</li>
+        <li><b>take_damage()</b> 挨打扣血</li>
+      </div>
+      <div class="clsbox">
+        <h4>Game ⚖️</h4>
+        <div class="duty">裁判 · 定规则判胜负</div>
+        <li><b>players</b> 两名玩家 + 共用牌库</li>
+        <li><b>battle()</b> 回合循环</li>
+        <li><b>one_turn()</b> 一次出牌结算</li>
+        <li>HP ≤ 0 立判胜负 / 无牌平局</li>
+      </div>
+    </div>
+    <p>类关系一图流：<span class="hl-c">Deck 拥有 24 张 Card</span>（组合），<span class="hl-c">Player 手里拿着若干 Card</span>（组合），<span class="hl-c">Game 指挥两个 Player 打架</span>（组合 + 规则）。进阶挑战里我们还会让「技能牌」<span class="hl-p">继承</span> Card。</p>
+    <div class="code">┌──────────┐  24 张   ┌──────────┐
+│   Card   │◄─────────│   Deck   │
+│ 一张卡牌  │          │  发牌员   │
+└──────────┘          └────┬─────┘
+     ▲ 摸牌/打出             │ 双方共用一个牌库
+     │              ┌───────┴──────┐
+┌────┴─────┐        │              │
+│  Player  │◄──┐    │    Game      │
+│  战士×2   │   └────│  裁判·回合循环 │
+└──────────┘        └──────────────┘</div>
+  </section>
+
+  <!-- 2 分步搭建 -->
+  <section>
+    <h2><span class="num">2</span>🔨 分步搭建 · 六步斩杀 BOSS</h2>
+    <p>每一小步都是<span class="hl">可以独立运行验证</span>的代码。跟着敲，每敲完一步就在电脑上跑一遍，确认输出一致再进下一步。</p>
+
+    <div class="step-title">第 1 步 · Card 类：让一张牌能"自我介绍"</div>
+    <p>先用 <span class="hl-c">__init__</span> 存数据，再配两个魔法方法：<span class="hl-c">__str__</span> 决定 print 时的样子，<span class="hl-c">__eq__</span> 决定 == 怎么比较。</p>
+    <div class="code"><span class="k">class</span> <span class="v">Card</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, name, attack):
+        self.name = name          <span class="c"># 卡牌名字</span>
+        self.attack = attack      <span class="c"># 攻击力</span>
+
+    <span class="k">def</span> <span class="f">__str__</span>(self):            <span class="c"># print(卡牌) 时调用</span>
+        <span class="k">return</span> <span class="s">"%s(攻%d)"</span> % (self.name, self.attack)
+
+    __repr__ = __str__            <span class="c"># 放进列表打印时也好看</span>
+
+    <span class="k">def</span> <span class="f">__eq__</span>(self, other):         <span class="c"># 定义 == 的比较规则</span>
+        <span class="k">if</span> <span class="k">not</span> isinstance(other, Card):
+            <span class="k">return</span> <span class="k">NotImplemented</span>
+        <span class="k">return</span> self.name == other.name <span class="k">and</span> self.attack == other.attack
+
+card = Card(<span class="s">"炎龙"</span>, <span class="n">6</span>)
+<span class="k">print</span>(card)
+<span class="k">print</span>(card == Card(<span class="s">"炎龙"</span>, <span class="n">6</span>), card == Card(<span class="s">"火精灵"</span>, <span class="n">1</span>))</div>
+    <div class="out">炎龙(攻6)
+True False</div>
+    <p>💡 没有 <span class="hl-c">__eq__</span> 时，<code>card == Card("炎龙", 6)</code> 比较的是两个对象的<b>内存地址</b>，结果会是 False——这是第 18 课讲过的坑。</p>
+
+    <div class="step-title">第 2 步 · Deck 类：发牌员上岗（洗牌 + 抽牌）</div>
+    <p>牌库本质是一个<span class="hl">列表</span>。洗牌用 <span class="hl-c">random.shuffle</span>；抽牌用 <span class="hl-c">list.pop()</span> 从尾部弹出，一步到位还高效。</p>
+    <div class="code"><span class="k">import</span> random
+
+<span class="k">class</span> <span class="v">Deck</span>:
+    POOL = [(<span class="s">"火精灵"</span>, <span class="n">1</span>), (<span class="s">"石盾卫"</span>, <span class="n">2</span>), (<span class="s">"雷刃客"</span>, <span class="n">3</span>),
+            (<span class="s">"暗影刺客"</span>, <span class="n">4</span>), (<span class="s">"圣光骑士"</span>, <span class="n">5</span>), (<span class="s">"炎龙"</span>, <span class="n">6</span>)]
+
+    <span class="k">def</span> <span class="f">__init__</span>(self):
+        self.cards = []
+        <span class="k">for</span> name, attack <span class="k">in</span> self.POOL:
+            <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">4</span>):        <span class="c"># 每种牌 4 张，共 24 张</span>
+                self.cards.append(Card(name, attack))
+        self.shuffle()              <span class="c"># 建好就洗牌</span>
+
+    <span class="k">def</span> <span class="f">shuffle</span>(self):
+        random.shuffle(self.cards)  <span class="c"># 原地打乱列表</span>
+
+    <span class="k">def</span> <span class="f">draw</span>(self):
+        <span class="k">if</span> <span class="k">not</span> self.cards:       <span class="c"># 牌库空了</span>
+            <span class="k">return</span> <span class="k">None</span>
+        <span class="k">return</span> self.cards.pop()  <span class="c"># 从牌库顶抽走一张</span>
+
+    <span class="k">def</span> <span class="f">__len__</span>(self):             <span class="c"># len(牌库) 直接看剩几张</span>
+        <span class="k">return</span> len(self.cards)
+
+random.seed(<span class="n">1</span>)               <span class="c"># 固定种子，方便核对输出</span>
+deck = Deck()
+<span class="k">print</span>(<span class="s">"牌库张数："</span>, len(deck))
+<span class="k">print</span>(<span class="s">"抽到："</span>, deck.draw(), <span class="s">"/"</span>, deck.draw())
+<span class="k">print</span>(<span class="s">"剩："</span>, len(deck), <span class="s">"张"</span>)</div>
+    <div class="out">牌库张数： 24
+抽到： 石盾卫(攻2) / 圣光骑士(攻5)
+剩： 22 张</div>
+
+    <div class="step-title">第 3 步 · Player 类：战士的诞生</div>
+    <p>玩家有名字、HP 和一手牌。出牌策略先用最简单的：<span class="hl">永远打出攻击力最高的牌</span>（用 max + remove 组合拳）。</p>
+    <div class="code"><span class="k">class</span> <span class="v">Player</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, name, hp=<span class="n">30</span>):
+        self.name = name
+        self.hp = hp
+        self.hand = []              <span class="c"># 手牌列表</span>
+
+    <span class="k">def</span> <span class="f">draw_from</span>(self, deck, n=<span class="n">1</span>):    <span class="c"># 摸 n 张牌</span>
+        <span class="k">for</span> _ <span class="k">in</span> range(n):
+            card = deck.draw()
+            <span class="k">if</span> card <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>:     <span class="c"># 牌库空了就摸不到</span>
+                self.hand.append(card)
+
+    <span class="k">def</span> <span class="f">play_best</span>(self):              <span class="c"># 打出攻击力最高的牌</span>
+        <span class="k">if</span> <span class="k">not</span> self.hand:
+            <span class="k">return</span> <span class="k">None</span>
+        best = max(self.hand, key=<span class="k">lambda</span> c: c.attack)
+        self.hand.remove(best)
+        <span class="k">return</span> best
+
+    <span class="k">def</span> <span class="f">take_damage</span>(self, dmg):        <span class="c"># 挨打，血量不低于 0</span>
+        self.hp = max(<span class="n">0</span>, self.hp - dmg)
+
+    <span class="k">def</span> <span class="f">is_alive</span>(self):
+        <span class="k">return</span> self.hp &gt; <span class="n">0</span>
+
+hero = Player(<span class="s">"阿呆"</span>)
+hero.draw_from(deck, <span class="n">3</span>)            <span class="c"># 接着第 2 步的 deck 摸 3 张</span>
+<span class="k">print</span>(hero.name, <span class="s">"HP:"</span>, hero.hp)
+<span class="k">print</span>(<span class="s">"手牌："</span>, hero.hand)
+<span class="k">print</span>(<span class="s">"打出："</span>, hero.play_best())
+hero.take_damage(<span class="n">6</span>)
+<span class="k">print</span>(<span class="s">"挨了 6 点伤害，HP:"</span>, hero.hp)</div>
+    <div class="out">阿呆 HP: 30
+手牌： [火精灵(攻1), 雷刃客(攻3), 火精灵(攻1)]
+打出： 雷刃客(攻3)
+挨了 6 点伤害，HP: 24</div>
+    <p>💡 注意 print(手牌列表) 时，列表里的每张牌走的是 <span class="hl-c">__repr__</span>——这就是第 1 步里 <code>__repr__ = __str__</code> 的功劳。</p>
+
+    <div class="step-title">第 4 步 · Game 类：裁判进场</div>
+    <p>回合循环写在 Game 而不是 Player 里：玩家只管自己的动作，<span class="hl">规则和节奏归裁判管</span>。每个回合双方各行动一次：抽 1 张 → 打出最强牌 → 对方扣血。</p>
+    <div class="code"><span class="k">class</span> <span class="v">Game</span>:
+    <span class="k">def</span> <span class="f">__init__</span>(self, p1, p2):
+        self.players = [p1, p2]    <span class="c"># 两名玩家</span>
+        self.deck = Deck()         <span class="c"># 双方共用一个牌库</span>
+        self.round_no = <span class="n">0</span>
+
+    <span class="k">def</span> <span class="f">start</span>(self):                     <span class="c"># 开局：起手各抽 3 张</span>
+        <span class="k">for</span> p <span class="k">in</span> self.players:
+            p.draw_from(self.deck, <span class="n">3</span>)
+
+    <span class="k">def</span> <span class="f">one_turn</span>(self, attacker, defender):
+        <span class="s">"""一个玩家的一回合：抽 1 张 → 打出最强牌"""</span>
+        attacker.draw_from(self.deck, <span class="n">1</span>)
+        card = attacker.play_best()
+        <span class="k">if</span> card <span class="k">is</span> <span class="k">None</span>:
+            <span class="k">print</span>(<span class="s">"%s 没牌可出，只能干瞪眼！"</span> % attacker.name)
+            <span class="k">return</span>
+        defender.take_damage(card.attack)
+        <span class="k">print</span>(<span class="s">"%s 打出 %s，对 %s 造成 %d 点伤害（%s 剩余 HP %d）"</span>
+              % (attacker.name, card, defender.name,
+                 card.attack, defender.name, defender.hp))
+
+    <span class="k">def</span> <span class="f">battle</span>(self):                    <span class="c"># 回合循环 + 胜负判定</span>
+        <span class="k">print</span>(<span class="s">"=== 卡牌对战：%s VS %s ==="</span> % (self.players[<span class="n">0</span>].name, self.players[<span class="n">1</span>].name))
+        self.start()
+        p1, p2 = self.players
+        winner = <span class="k">None</span>
+        <span class="k">while</span> <span class="k">True</span>:
+            self.round_no += <span class="n">1</span>
+            <span class="k">print</span>(<span class="s">"—— 第 %d 回合（牌库剩 %d 张）——"</span> % (self.round_no, len(self.deck)))
+            <span class="k">for</span> attacker, defender <span class="k">in</span> ((p1, p2), (p2, p1)):  <span class="c"># 各行动一次</span>
+                self.one_turn(attacker, defender)
+                <span class="k">if</span> <span class="k">not</span> defender.is_alive():      <span class="c"># 有人倒下！</span>
+                    winner = attacker
+                    <span class="k">break</span>
+            <span class="k">if</span> winner:
+                <span class="k">break</span>
+            <span class="k">if</span> len(self.deck) == <span class="n">0</span> <span class="k">and</span> all(len(p.hand) == <span class="n">0</span> <span class="k">for</span> p <span class="k">in</span> self.players):
+                <span class="k">print</span>(<span class="s">"双方都没牌了，握手言和，平局！"</span>)   <span class="c"># 平局出口</span>
+                <span class="k">return</span> <span class="k">None</span>
+        <span class="k">print</span>(<span class="s">"🏆 %s 获胜！大战 %d 回合"</span> % (winner.name, self.round_no))
+        <span class="k">return</span> winner</div>
+
+    <div class="step-title">第 5 步 · 组装开战！</div>
+    <div class="code"><span class="k">if</span> __name__ == <span class="s">"__main__"</span>:
+    random.seed(<span class="n">42</span>)     <span class="c"># 固定种子 → 战局可复现；换个数字就是全新战局</span>
+    game = Game(Player(<span class="s">"勇者阿呆"</span>), Player(<span class="s">"BOSS·暗影领主"</span>))
+    game.battle()</div>
+    <div class="out">=== 卡牌对战：勇者阿呆 VS BOSS·暗影领主 ===
+—— 第 1 回合（牌库剩 18 张）——
+勇者阿呆 打出 炎龙(攻6)，对 BOSS·暗影领主 造成 6 点伤害（BOSS·暗影领主 剩余 HP 24）
+BOSS·暗影领主 打出 炎龙(攻6)，对 勇者阿呆 造成 6 点伤害（勇者阿呆 剩余 HP 24）
+—— 第 2 回合（牌库剩 16 张）——
+勇者阿呆 打出 石盾卫(攻2)，对 BOSS·暗影领主 造成 2 点伤害（BOSS·暗影领主 剩余 HP 22）
+BOSS·暗影领主 打出 圣光骑士(攻5)，对 勇者阿呆 造成 5 点伤害（勇者阿呆 剩余 HP 19）
+—— 第 3 回合（牌库剩 14 张）——
+勇者阿呆 打出 石盾卫(攻2)，对 BOSS·暗影领主 造成 2 点伤害（BOSS·暗影领主 剩余 HP 20）
+BOSS·暗影领主 打出 炎龙(攻6)，对 勇者阿呆 造成 6 点伤害（勇者阿呆 剩余 HP 13）
+—— 第 4 回合（牌库剩 12 张）——
+勇者阿呆 打出 暗影刺客(攻4)，对 BOSS·暗影领主 造成 4 点伤害（BOSS·暗影领主 剩余 HP 16）
+BOSS·暗影领主 打出 雷刃客(攻3)，对 勇者阿呆 造成 3 点伤害（勇者阿呆 剩余 HP 10）
+—— 第 5 回合（牌库剩 10 张）——
+勇者阿呆 打出 圣光骑士(攻5)，对 BOSS·暗影领主 造成 5 点伤害（BOSS·暗影领主 剩余 HP 11）
+BOSS·暗影领主 打出 暗影刺客(攻4)，对 勇者阿呆 造成 4 点伤害（勇者阿呆 剩余 HP 6）
+—— 第 6 回合（牌库剩 8 张）——
+勇者阿呆 打出 雷刃客(攻3)，对 BOSS·暗影领主 造成 3 点伤害（BOSS·暗影领主 剩余 HP 8）
+BOSS·暗影领主 打出 圣光骑士(攻5)，对 勇者阿呆 造成 5 点伤害（勇者阿呆 剩余 HP 1）
+—— 第 7 回合（牌库剩 6 张）——
+勇者阿呆 打出 雷刃客(攻3)，对 BOSS·暗影领主 造成 3 点伤害（BOSS·暗影领主 剩余 HP 5）
+BOSS·暗影领主 打出 暗影刺客(攻4)，对 勇者阿呆 造成 4 点伤害（勇者阿呆 剩余 HP 0）
+🏆 BOSS·暗影领主 获胜！大战 7 回合</div>
+    <p>😱 BOSS 赢了？没关系——把 <span class="hl-c">random.seed(42)</span> 换成别的数字重跑，每次都是不同的战局。随机性正是卡牌游戏的灵魂（第 20 课 random 模块的实战）。</p>
+
+    <div class="step-title">第 6 步 · 完整合并代码（约 120 行 · 可直接运行）</div>
+    <p>把前 5 步合并成一个完整文件 <code>card_battle.py</code>，从上往下就是最终答案。运行输出与第 5 步完全一致（seed=42 固定战局）。</p>
+    <div class="code"><span class="c"># card_battle.py —— BOSS 战完整答案（Python 3 可直接运行）</span>
+<span class="k">import</span> random
+
+
+<span class="k">class</span> Card:
+    <span class="s">"""一张卡牌：名字 + 攻击力"""</span>
+
+    <span class="k">def</span> __init__(self, name, attack):
+        self.name = name
+        self.attack = attack
+
+    <span class="k">def</span> __str__(self):
+        <span class="k">return</span> <span class="s">"%s(攻%d)"</span> % (self.name, self.attack)
+
+    __repr__ = __str__
+
+    <span class="k">def</span> __eq__(self, other):
+        <span class="k">if</span> <span class="k">not</span> isinstance(other, Card):
+            <span class="k">return</span> <span class="k">NotImplemented</span>
+        <span class="k">return</span> self.name == other.name <span class="k">and</span> self.attack == other.attack
+
+
+<span class="k">class</span> Deck:
+    <span class="s">"""牌库：生成 24 张牌，支持洗牌和抽牌"""</span>
+
+    POOL = [(<span class="s">"火精灵"</span>, 1), (<span class="s">"石盾卫"</span>, 2), (<span class="s">"雷刃客"</span>, 3),
+            (<span class="s">"暗影刺客"</span>, 4), (<span class="s">"圣光骑士"</span>, 5), (<span class="s">"炎龙"</span>, 6)]
+
+    <span class="k">def</span> __init__(self):
+        self.cards = []
+        <span class="k">for</span> name, attack <span class="k">in</span> self.POOL:
+            <span class="k">for</span> _ <span class="k">in</span> range(4):
+                self.cards.append(Card(name, attack))
+        self.shuffle()
+
+    <span class="k">def</span> shuffle(self):
+        random.shuffle(self.cards)
+
+    <span class="k">def</span> draw(self):
+        <span class="k">if</span> <span class="k">not</span> self.cards:
+            <span class="k">return</span> <span class="k">None</span>
+        <span class="k">return</span> self.cards.pop()
+
+    <span class="k">def</span> __len__(self):
+        <span class="k">return</span> len(self.cards)
+
+
+<span class="k">class</span> Player:
+    <span class="s">"""玩家：HP、手牌、摸牌出牌"""</span>
+
+    <span class="k">def</span> __init__(self, name, hp=30):
+        self.name = name
+        self.hp = hp
+        self.hand = []
+
+    <span class="k">def</span> draw_from(self, deck, n=1):
+        <span class="k">for</span> _ <span class="k">in</span> range(n):
+            card = deck.draw()
+            <span class="k">if</span> card <span class="k">is</span> <span class="k">not</span> <span class="k">None</span>:
+                self.hand.append(card)
+
+    <span class="k">def</span> play_best(self):
+        <span class="k">if</span> <span class="k">not</span> self.hand:
+            <span class="k">return</span> <span class="k">None</span>
+        best = max(self.hand, key=<span class="k">lambda</span> c: c.attack)
+        self.hand.remove(best)
+        <span class="k">return</span> best
+
+    <span class="k">def</span> take_damage(self, dmg):
+        self.hp = max(0, self.hp - dmg)
+
+    <span class="k">def</span> is_alive(self):
+        <span class="k">return</span> self.hp &gt; 0
+
+
+<span class="k">class</span> Game:
+    <span class="s">"""裁判：组织回合、结算伤害、判定胜负"""</span>
+
+    <span class="k">def</span> __init__(self, p1, p2):
+        self.players = [p1, p2]
+        self.deck = Deck()
+        self.round_no = 0
+
+    <span class="k">def</span> start(self):
+        <span class="k">for</span> p <span class="k">in</span> self.players:
+            p.draw_from(self.deck, 3)
+
+    <span class="k">def</span> one_turn(self, attacker, defender):
+        attacker.draw_from(self.deck, 1)
+        card = attacker.play_best()
+        <span class="k">if</span> card <span class="k">is</span> <span class="k">None</span>:
+            <span class="k">print</span>(<span class="s">"%s 没牌可出，只能干瞪眼！"</span> % attacker.name)
+            <span class="k">return</span>
+        defender.take_damage(card.attack)
+        <span class="k">print</span>(<span class="s">"%s 打出 %s，对 %s 造成 %d 点伤害（%s 剩余 HP %d）"</span>
+              % (attacker.name, card, defender.name,
+                 card.attack, defender.name, defender.hp))
+
+    <span class="k">def</span> battle(self):
+        <span class="k">print</span>(<span class="s">"=== 卡牌对战：%s VS %s ==="</span>
+              % (self.players[0].name, self.players[1].name))
+        self.start()
+        p1, p2 = self.players
+        winner = <span class="k">None</span>
+        <span class="k">while</span> <span class="k">True</span>:
+            self.round_no += 1
+            <span class="k">print</span>(<span class="s">"—— 第 %d 回合（牌库剩 %d 张）——"</span>
+                  % (self.round_no, len(self.deck)))
+            <span class="k">for</span> attacker, defender <span class="k">in</span> ((p1, p2), (p2, p1)):
+                self.one_turn(attacker, defender)
+                <span class="k">if</span> <span class="k">not</span> defender.is_alive():
+                    winner = attacker
+                    <span class="k">break</span>
+            <span class="k">if</span> winner:
+                <span class="k">break</span>
+            <span class="k">if</span> len(self.deck) == 0 <span class="k">and</span> all(len(p.hand) == 0 <span class="k">for</span> p <span class="k">in</span> self.players):
+                <span class="k">print</span>(<span class="s">"双方都没牌了，握手言和，平局！"</span>)
+                <span class="k">return</span> <span class="k">None</span>
+        <span class="k">print</span>(<span class="s">"🏆 %s 获胜！大战 %d 回合"</span> % (winner.name, self.round_no))
+        <span class="k">return</span> winner
+
+
+<span class="k">if</span> __name__ == <span class="s">"__main__"</span>:
+    random.seed(42)
+    game = Game(Player(<span class="s">"勇者阿呆"</span>), Player(<span class="s">"BOSS·暗影领主"</span>))
+    game.battle()</div>
+  </section>
+
+  <!-- 3 验收清单 -->
+  <section>
+    <h2><span class="num">3</span>✅ 功能验收清单 · 8 项逐个勾</h2>
+    <p>把代码跑通后，逐项验证。全部勾上才算真正击败 BOSS。</p>
+    <div id="checklist"></div>
+    <div class="progress-wrap"><div id="check-bar"></div></div>
+    <div id="check-text">已勾选 0 / 8 —— 每验一项勾一项，不许跳！</div>
+  </section>
+
+  <!-- 4 自评打分 -->
+  <section>
+    <h2><span class="num">4</span>📊 自评打分表 · 5 维度 × 20 分</h2>
+    <p>拖动滑块给自己打分（0-20 分/维度）。低于 60 分建议回炉第 16-19 课。</p>
+    <table class="score">
+      <tr><th>维度</th><th>评价标准</th><th style="width:170px">打分（0-20）</th></tr>
+      <tr><td>类的职责划分</td><td>Card/Deck/Player/Game 各司其职，没有"上帝类"</td><td><input type="range" min="0" max="20" value="10" class="score-slider"></td></tr>
+      <tr><td>魔法方法运用</td><td>__init__/__str__/__repr__/__eq__/__len__ 用对场景</td><td><input type="range" min="0" max="20" value="10" class="score-slider"></td></tr>
+      <tr><td>数据结构运用</td><td>列表 + pop/max/remove/shuffle 组合得当</td><td><input type="range" min="0" max="20" value="10" class="score-slider"></td></tr>
+      <tr><td>游戏流程完整</td><td>回合循环、伤害结算、KO 判胜、平局出口都齐</td><td><input type="range" min="0" max="20" value="10" class="score-slider"></td></tr>
+      <tr><td>代码可读性</td><td>命名见名知意、注释清楚、战报信息易读</td><td><input type="range" min="0" max="20" value="10" class="score-slider"></td></tr>
+    </table>
+    <div id="score-total">总分：50 / 100</div>
+  </section>
+
+  <!-- 5 进阶挑战 -->
+  <section>
+    <h2><span class="num">5</span>⚡ 进阶挑战 · 三种隐藏难度</h2>
+    <div class="chal">
+      <h4>挑战一 · 技能牌（继承）<span class="lvl">难度 ★★</span></h4>
+      <p>用继承扩展 Card：治疗牌不攻击，而是给自己回血。</p>
+      <div class="code"><span class="k">class</span> HealCard(Card):                  <span class="c"># 继承 Card 的名字/攻击力/__str__</span>
+    <span class="k">def</span> __init__(self, name, heal):
+        super().__init__(name, <span class="n">0</span>)      <span class="c"># 攻击力 0</span>
+        self.heal = heal                 <span class="c"># 新增：治疗量</span>
+
+    <span class="k">def</span> cast(self, player):              <span class="c"># 新增：施放技能</span>
+        player.hp += self.heal
+        <span class="k">print</span>(<span class="s">"%s 使用 %s，回复 %d 点 HP！"</span> % (player.name, self.name, self.heal))</div>
+    </div>
+    <div class="chal">
+      <h4>挑战二 · Buff 系统（状态）<span class="lvl">难度 ★★★</span></h4>
+      <p>给 Player 加 <code>attack_buff</code> 属性：打出牌时伤害 = 攻击力 + buff，每个回合结束后 buff 减 1。提示：在 Game 的回合循环末尾调用 <code>player.tick_buff()</code>。</p>
+    </div>
+    <div class="chal">
+      <h4>挑战三 · 简单 AI 对手（策略）<span class="lvl">难度 ★★★★</span></h4>
+      <p>给 BOSS 换个脑子：写一个 <code>class SmartPlayer(Player)</code>，重写 <code>play_best()</code>——当自己 HP 危急时才出大牌，优势时出小牌"省着打"（提示：<code>if self.hp &lt; 10: 出最大 else: 出最小</code>）。让普通 Player 和 SmartPlayer 打 100 局统计胜率！</p>
+    </div>
+  </section>
+
+  <!-- 6 记忆卡片 -->
+  <section>
+    <h2><span class="num">6</span>🃏 记忆卡片 · 第 16-20 课核心考点</h2>
+    <p>BOSS 战前把装备检查一遍：这 10 张卡片覆盖了第 16-20 课的核心考点，翻到全对再进考场。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 7 设计决策 Quiz -->
+  <section>
+    <h2><span class="num">7</span>🧠 设计决策 Quiz · 5 题 · 80 分拿下称号</h2>
+    <p>BOSS 战不考"代码是什么"，考"<span class="hl">为什么这么设计</span>"——这才是系统设计师的思维。</p>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 8 通关认证 -->
+  <section>
+    <h2><span class="num">8</span>🏆 通关认证</h2>
+    <p>当功能验收 8/8 全勾 + 自评 ≥ 60 分 + 设计决策 Quiz ≥ 80 分，恭喜你——进阶秘境毕业！</p>
+    <div class="cert">
+      <div class="badge-icon">🎖️</div>
+      <h3>「系统设计师」称号</h3>
+      <p>获得者已证明：能从零设计类的关系图，独立完成一个包含 4 个类、魔法方法、继承潜力与完整游戏循环的面向对象项目。</p>
+      <p>下一站 → 大师之路 · 第 21 课「多线程与并发 —— 分身术」</p>
+    </div>
+  </section>
+
+  <section class="homework">
+    <h2><span class="num">🌙</span>今晚的修炼（真实上机 · 约 40 分钟）</h2>
+    <li>① 把第 6 步完整代码亲手敲一遍（不要复制粘贴），用不同 <code>random.seed</code> 跑 5 局，记录谁的胜率高</li>
+    <li>② 完成挑战一（治疗牌），把 2 张治疗牌混进 POOL 看战局变化</li>
+    <li>③ 尝试挑战三（SmartPlayer），让普通玩家 vs AI 打 100 局统计胜率</li>
+    <li>④ 写学习日志：哪个类设计时纠结最久 / 学到的最重要一课</li>
+  </section>
+
+  <footer>
+    通关条件：验收 8/8 + 自评 ≥ 60 + Quiz ≥ 80 ｜ 掉落奖励：<b>「系统设计师」称号</b> ｜ 下一站：大师之路 · 第 21 课「多线程与并发 —— 分身术」
+  </footer>
+</div>
+
+<script>
+/* ============ 验收清单 ============ */
+var checkItems = [
+  'print(Card("炎龙", 6)) 能输出「炎龙(攻6)」—— __str__ 生效',
+  'Card("炎龙", 6) == Card("炎龙", 6) 返回 True —— __eq__ 生效',
+  'Deck 生成后 len(deck) 是 24 —— __len__ 生效',
+  '多跑几次，抽牌顺序每次都不同 —— random.shuffle 生效',
+  '把牌库抽空后 deck.draw() 返回 None，程序不崩溃',
+  'Player 能摸牌、打出攻击力最高的牌、HP 归零后 is_alive() 为 False',
+  '任一玩家 HP 到 0 时，Game 立即结束并打印获胜者',
+  '换 random.seed 的数字能得到完全不同的战局'
+];
+(function(){
+  var box = document.getElementById('checklist');
+  checkItems.forEach(function(text, idx){
+    var d = document.createElement('div');
+    d.className = 'check-item';
+    d.innerHTML = '<span class="ck"></span><span>' + text + '</span>';
+    d.addEventListener('click', function(){
+      d.classList.toggle('done');
+      var done = document.querySelectorAll('.check-item.done').length;
+      document.getElementById('check-bar').style.width = (done / checkItems.length * 100) + '%';
+      var t = document.getElementById('check-text');
+      if(done === checkItems.length){
+        t.innerHTML = '已勾选 8 / 8 —— 全部验收通过，BOSS 血条清空！👹💀';
+        t.style.color = 'var(--purple)';
+        t.style.fontWeight = '700';
+      }else{
+        t.innerHTML = '已勾选 ' + done + ' / 8 —— 每验一项勾一项，不许跳！';
+        t.style.color = '';
+        t.style.fontWeight = '';
+      }
+    });
+    box.appendChild(d);
+  });
+})();
+
+/* ============ 自评打分表 ============ */
+(function(){
+  var dims = ['类的职责划分', '魔法方法运用', '数据结构运用', '游戏流程完整', '代码可读性'];
+  var sliders = document.querySelectorAll('.score-slider');
+  function update(){
+    var total = 0;
+    sliders.forEach(function(s){ total += parseInt(s.value, 10); });
+    var el = document.getElementById('score-total');
+    var msg;
+    if(total >= 85){ msg = '总分：' + total + ' / 100 —— 系统设计师实至名归！🏆'; }
+    else if(total >= 60){ msg = '总分：' + total + ' / 100 —— 通关！想拿满分可回去重构一版。'; }
+    else{ msg = '总分：' + total + ' / 100 —— 低于 60，建议回炉第 16-19 课再战一次。'; }
+    el.innerHTML = msg;
+  }
+  sliders.forEach(function(s){ s.addEventListener('input', update); });
+  update();
+})();
+
+/* ============ 记忆卡片（第 16-20 课考点）============ */
+var cardData = [
+  ['类和对象的关系？','类是图纸，对象是按图纸造出的产品；一个类可以造无数个对象'],
+  ['__init__ 是什么？','构造方法：创建对象时自动调用，用来初始化实例属性'],
+  ['self 是什么？','代表"这个对象自己"；方法的第一个参数，调用时不用手动传'],
+  ['继承怎么写？','class 子类(父类):——子类自动拥有父类的属性和方法'],
+  ['super() 什么时候用？','子类重写 __init__ 时，用 super().__init__() 先完成父类的初始化'],
+  ['方法重写（override）？','子类定义与父类同名的方法，调用时优先用子类版本'],
+  ['__str__ 和 __repr__ 区别？','print(对象) 走 __str__；放进列表打印/交互式回显走 __repr__'],
+  ['__eq__ 的作用？','自定义 == 的比较规则；不定义则比较内存地址，同内容也返回 False'],
+  ['__len__ 的作用？','让 len(对象) 可用，常用于容器类（如 Deck 剩余张数）'],
+  ['random 三兄弟？','shuffle 原地打乱列表 · choice 随机选一个 · seed 固定随机序列让结果可复现']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[1] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ 设计决策 Quiz ============ */
+var quizData = [
+  {q:'Deck.draw() 用 self.cards.pop() 而不是 self.cards.remove(某张牌)，主要原因是？',
+   opts:['pop() 写起来字母更少','pop() 从列表尾部弹出，O(1) 高效；remove() 要先逐个搜索再删，O(n)','remove() 会报错不能用','pop() 抽出来的牌攻击力更高'], ans:1,
+   exp:'牌已经洗过，抽"哪张"无所谓，所以直接从尾部 pop 最快。remove 需要先在列表里找到目标元素，还要把后面元素前移，代价更高。'},
+  {q:'回合制循环 while True 写在 Game.battle() 里，而不是 Player 里的主要原因是？',
+   opts:['写在 Game 里代码行数更多显得厉害','Player 只该负责自己的动作（摸牌/出牌/挨打），规则与节奏归裁判 Game 管——职责单一','while 循环不能写在类的方法里','写在 Player 里会死循环'], ans:1,
+   exp:'如果玩家自己控制回合，它就必须认识对手和牌库，耦合飙升。让 Game 当裁判指挥双方，Player 保持"无知"，才能复用（比如换成 AI 玩家）。'},
+  {q:'给 Card 实现 __eq__ 的最大好处是？',
+   opts:['运行速度大幅提升','能用 == 按内容比较两张牌，方便手牌去重、in 判断和测试断言','不实现 __eq__ 就不能创建对象','让卡牌攻击力变强'], ans:1,
+   exp:'默认 == 比较内存地址，两张"炎龙(攻6)"也会被判为不相等。实现 __eq__ 后按内容比较，这是数据类（第 18 课）的标配。'},
+  {q:'为什么同时定义 __str__ 且让 __repr__ = __str__？',
+   opts:['Python 强制要求两个都写','print(单张牌) 走 __str__；print(手牌列表) 时列表内元素走 __repr__，不定义会显示 &lt;__main__.Card object at 0x...&gt;','不写 __repr__ 程序会报错','为了占两个名字防止别人占用'], ans:1,
+   exp:'print(hero.hand) 时列表里的对象用 __repr__ 展示。两个都定义，单张和列表里的牌都能显示成 "炎龙(攻6)" 这样的友好格式。'},
+  {q:'像 Card 这种"主要用来存数据"的类，Python 3.7+ 还可以怎么偷懒写？',
+   opts:['用 @dataclass 装饰器，自动生成 __init__/__repr__/__eq__','用 struct 模块','必须手写所有方法，没有别的办法','把类定义成字典就不需要类了'], ans:0,
+   exp:'from dataclasses import dataclass 后加 @dataclass，字段一行一个，__init__、__repr__、__eq__ 全部自动生成。本课手写是为了让你理解底层原理。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + o + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + q.q + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 20;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！BOSS 秒杀，「系统设计师」称号到手 🏆' : '通关！BOSS 被击败，「系统设计师」称号到手 🏆')
+      : '差一点点！把错题对应的板块再看一遍，点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  }
+})();
+</script>
+</body>
+</html>

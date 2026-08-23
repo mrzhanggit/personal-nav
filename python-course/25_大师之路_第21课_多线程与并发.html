@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第21课 · 多线程与并发 —— 分身术</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(244,114,182,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--pink);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(244,114,182,.12);color:var(--pink);border:1px solid rgba(244,114,182,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f472b6,#a78bfa 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--pink);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f9a8d4;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 概念卡片 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:200px;background:var(--card);border:2px solid var(--pink);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(244,114,182,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--pink);font-weight:700;
+    background:rgba(244,114,182,.1);border-radius:8px;padding:2px 10px;display:inline-block;
+  }
+  .mbox .val{font-size:14px;font-weight:700;margin:8px 0 4px;color:var(--gold);}
+  .mbox .tip{font-size:12px;color:var(--muted);}
+  /* 实验室 */
+  .btn{
+    background:linear-gradient(135deg,var(--pink),var(--purple));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;margin:4px 6px 4px 0;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,114,182,.3);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+  .lab-note{font-size:12.5px;color:var(--muted);margin-top:8px;}
+  .dl-panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0;}
+  .dl-panel h4{color:var(--pink);font-size:15px;margin-bottom:12px;}
+  .dl-row{margin:12px 0;}
+  .dl-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
+  .dl-head .fname{color:var(--text);}
+  .dl-head .fstat{color:var(--muted);}
+  .dl-track{height:16px;background:#0a0d1e;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .dl-fill{height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:8px;}
+  .lab-clock{font-size:14px;margin:10px 0 4px;}
+  .lab-clock b{color:var(--gold);font-family:ui-monospace,Menlo,monospace;font-size:18px;}
+  #lab-total{font-size:13.5px;margin-top:6px;min-height:22px;color:var(--text);}
+  .race-out{
+    display:none;background:linear-gradient(140deg,#1d2448,#141833);border:2px solid var(--pink);
+    border-radius:14px;padding:16px 20px;margin-top:14px;animation:popIn .4s both;
+  }
+  .race-out.show{display:block;}
+  .race-out .rc{font-size:15px;margin-bottom:4px;}
+  .race-out .rc b{font-size:26px;font-family:ui-monospace,Menlo,monospace;}
+  .race-log{font-size:12.5px;color:var(--muted);margin-top:8px;font-family:ui-monospace,Menlo,monospace;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--pink);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);color:var(--pink);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--pink);color:var(--pink);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 选型表 */
+  table.pick{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px;}
+  table.pick th, table.pick td{border:1px solid var(--line);padding:8px 12px;text-align:left;}
+  table.pick th{color:var(--pink);background:rgba(244,114,182,.08);}
+  table.pick td b.y{color:var(--cyan);}
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(244,114,182,.1);color:var(--pink);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 大师之路 · <b>第 21 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 3 · MASTER ROAD</div>
+    <h1>多线程与并发 —— 分身术</h1>
+    <div class="subtitle">今日目标：让程序学会"同时干几件事"，并管住抢数据的分身们</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>分清<span class="hl">串行 / 并发 / 并行</span>三兄弟</li>
+      <li>会用 <span class="hl">threading.Thread</span> 创建线程，掌握 <span class="hl">start() / join()</span></li>
+      <li>亲眼看到<span class="hl">竞态条件</span>：两个线程抢一个变量，数据真的会丢</li>
+      <li>学会用 <span class="hl">Lock 互斥锁</span> 保住数据，搞懂 <span class="hl">GIL</span> 与选型心法</li>
+      <li>通关实验室「并发对比实验台」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 串行/并发/并行 -->
+  <section>
+    <h2><span class="num">1</span>串行 / 并发 / 并行：三个容易混的词</h2>
+    <p>想象你在边打电话边吃饭：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">串行 Serial</div><div class="val">先打完电话，再吃饭</div><div class="tip">一件事做完才开始下一件，排队</div></div>
+      <div class="mbox"><div class="tag">并发 Concurrency</div><div class="val">吃一口、说一句、再吃一口</div><div class="tip">一个人交替做多件事（快速切换）</div></div>
+      <div class="mbox"><div class="tag">并行 Parallelism</div><div class="val">你吃饭，另一个人帮你打电话</div><div class="tip">多个人/多个核真正同时干</div></div>
+    </div>
+    <p>再听声音的比喻：<span class="hl">两首歌在同一台旧收音机上轮流播半句 = 并发；两首歌各用一台收音机同时放 = 并行。</span></p>
+    <p>关键区别：<span class="hl-c">并发是"交替处理"多件事（一个 CPU 核也行），并行是"同时执行"（必须多个核）</span>。Python 的 <code>threading</code> 模块给你的正是<b>并发</b>——一具身体（进程）里的多个分身（线程）。</p>
+  </section>
+
+  <!-- 2 Thread -->
+  <section>
+    <h2><span class="num">2</span>threading.Thread：召唤分身</h2>
+    <p>创建分身三步走：<span class="hl">① 把要做的事写成函数 → ② 交给 Thread(target=函数) → ③ start() 放它出去干活</span>。</p>
+    <div class="code"><span class="k">import</span> threading, time
+
+<span class="k">def</span> <span class="v">sing</span>():                      <span class="c"># ① 要做的事：唱 3 声</span>
+    <span class="k">for</span> i <span class="k">in</span> range(<span class="n">1</span>, <span class="n">4</span>):
+        <span class="k">print</span>(<span class="s">"🎵 唱歌第"</span>, i, <span class="s">"声"</span>)
+        time.sleep(<span class="n">0.1</span>)         <span class="c"># 模拟耗时</span>
+
+t = threading.Thread(target=sing)  <span class="c"># ② 创建分身，指定任务</span>
+t.start()                          <span class="c"># ③ 放分身出去！主线程继续往下走</span>
+<span class="k">print</span>(<span class="s">"主线程：歌手已上场，我继续干自己的活"</span>)
+t.join()                           <span class="c"># 等分身唱完，主线程再收工</span>
+<span class="k">print</span>(<span class="s">"主线程：歌手唱完了，我也收工"</span>)</div>
+    <div class="out">🎵 唱歌第 1 声
+主线程：歌手已上场，我继续干自己的活
+🎵 唱歌第 2 声
+🎵 唱歌第 3 声
+主线程：歌手唱完了，我也收工</div>
+    <p>⚠️ 多线程程序的示例输出中，<span class="hl">print 顺序可能每次不同</span>（谁先抢到输出权不确定），这是正常现象。</p>
+
+    <p>两个必考方法：</p>
+    <p>· <span class="hl-c">start()</span>：真正创建新线程，系统会在新线程里自动调用它的 run()。<b>同一个 Thread 对象只能 start 一次</b>，重复调用直接 RuntimeError。</p>
+    <p>· <span class="hl-c">join()</span>：主线程在这里<b>原地等待</b>，直到该分身任务结束才继续往下走。不 join 就退出程序的话，分身可能还没干完活就被强制带走了。</p>
+
+    <p class="hl-p">❓ start() 和 run() 有什么区别？</p>
+    <p>直接调用 <code>t.run()</code> 只是<b>普通函数调用</b>——在主线程里执行，根本不会创建新线程！实测对比：</p>
+    <div class="code"><span class="k">import</span> threading
+
+<span class="k">def</span> <span class="v">hello</span>():
+    <span class="k">print</span>(<span class="s">"本函数运行在："</span>, threading.current_thread().name)
+
+t1 = threading.Thread(target=hello)
+t1.run()      <span class="c"># 普通调用：不开新线程，在主线程里执行</span>
+
+t2 = threading.Thread(target=hello)
+t2.start()    <span class="c"># 启动新线程：run() 由新线程自动调用</span></div>
+    <div class="out">本函数运行在： MainThread
+本函数运行在： Thread-2 (hello)</div>
+    <p>看到没——run() 那次打印的是 <span class="hl">MainThread</span>，start() 那次才是新线程。这是面试和预言机的高频考点。</p>
+  </section>
+
+  <!-- 3 竞态条件 -->
+  <section>
+    <h2><span class="num">3</span>竞态条件：两个分身抢一个账本</h2>
+    <p>多线程最经典的坑：多个线程<span class="hl">同时读改写同一个变量</span>。<code>count += 1</code> 看着是一行，实际是三步：</p>
+    <div class="code">count += 1  实际上是：
+① 读：把 count 的当前值读进"手心"   count → 5
+② 算：手心里算出 5 + 1 = 6
+③ 写：把 6 写回 count
+
+💥 如果线程 A 在①和③之间被切走，线程 B 抢先完成了自己的一次 +1，
+   A 醒来后把"过时的 6"写回去 —— B 那次 +1 就凭空消失了！</div>
+    <p>两个线程各加 1000 次，理论上 count 应该是 2000，但丢更新后<b>可能小于 2000</b>。注意一个阴险的事实：在新版 CPython 上，窗口极窄的小循环常常"碰巧"得到 2000——bug 时隐时现，<span class="hl">不是每次都出错，才是最可怕的 bug</span>。把窗口稍微拉宽（读和写之间夹一次耗时操作），丢更新就现形了：</p>
+    <div class="code"><span class="k">import</span> threading, time
+
+count = <span class="n">0</span>
+
+<span class="k">def</span> <span class="v">worker</span>():
+    <span class="k">global</span> count
+    <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">1000</span>):
+        tmp = count          <span class="c"># ① 读取当前值</span>
+        time.sleep(<span class="n">0.001</span>)    <span class="c"># ② 模拟耗时：此刻极可能切到另一个线程</span>
+        count = tmp + <span class="n">1</span>      <span class="c"># ③ 写回"旧值+1"，覆盖掉对方刚写的新值</span>
+
+t1 = threading.Thread(target=worker)
+t2 = threading.Thread(target=worker)
+t1.start(); t2.start()
+t1.join(); t2.join()
+<span class="k">print</span>(<span class="s">"期望 2000，实际："</span>, count)</div>
+    <div class="out">期望 2000，实际： 1000</div>
+    <p>实测这台电脑上稳定输出 1000：两个线程读到的总是同一个旧值，各写一次"旧值+1"，<span class="hl">一半的更新被覆盖丢失</span>（每次运行结果可能略有不同）。这种"多个线程访问共享数据的时机不对，导致结果取决于运气"的问题，就叫<span class="hl-p">竞态条件（Race Condition）</span>。</p>
+  </section>
+
+  <!-- 4 Lock -->
+  <section>
+    <h2><span class="num">4</span>Lock 互斥锁：给账本配一把锁</h2>
+    <p>解药：<span class="hl">同一时刻只允许一个线程进入"读改写"的敏感区</span>。用 <code>threading.Lock()</code> 造一把锁，进门前 acquire（上锁），出门 release（开锁）：</p>
+    <div class="code"><span class="k">import</span> threading, time
+
+count = <span class="n">0</span>
+lock = threading.Lock()      <span class="c"># 造一把锁</span>
+
+<span class="k">def</span> <span class="v">worker</span>():
+    <span class="k">global</span> count
+    <span class="k">for</span> _ <span class="k">in</span> range(<span class="n">1000</span>):
+        <span class="k">with</span> lock:           <span class="c"># 进入敏感区自动上锁，离开自动解锁（推荐写法）</span>
+            tmp = count
+            time.sleep(<span class="n">0.001</span>)
+            count = tmp + <span class="n">1</span>
+
+t1 = threading.Thread(target=worker)
+t2 = threading.Thread(target=worker)
+t1.start(); t2.start()
+t1.join(); t2.join()
+<span class="k">print</span>(<span class="s">"加锁后："</span>, count)</div>
+    <div class="out">加锁后： 2000</div>
+    <p><code>with lock:</code> 等价于 <code>lock.acquire()</code> + try/finally + <code>lock.release()</code>——就算敏感区里出了异常也保证解锁，<span class="hl">永远推荐 with 写法</span>。</p>
+    <p>🧠 记忆口诀：<span class="hl">共享数据要读改写？先问锁拿钥匙。</span>注意别把锁的范围扩得太大——锁住的代码越多，多线程"同时干"的优势就越小，还可能死锁（两个线程互相等对方的钥匙）。</p>
+  </section>
+
+  <!-- 5 GIL -->
+  <section>
+    <h2><span class="num">5</span>GIL 与选型心法：分身不是万能的</h2>
+    <p class="hl-p">❓ GIL 是什么？</p>
+    <p>GIL（Global Interpreter Lock，全局解释器锁）是 CPython 解释器的一把大锁：<span class="hl">同一时刻，一个进程里只有一个线程在真正执行 Python 字节码</span>。别的线程就算被操作系统调度了，也得排队等 GIL。所以你的 4 个分身疯狂计算时，其实是轮流上场的。</p>
+    <p>但注意：<span class="hl-c">线程遇到 IO 等待（网络、磁盘、sleep）时会主动让出 GIL</span>，别的线程趁机干活——这正是多线程的用武之地。实测对比（下载 3 个文件，各等 1 秒）：</p>
+    <div class="code"><span class="k">import</span> threading, time
+
+<span class="k">def</span> <span class="v">download</span>(name, seconds):
+    <span class="k">print</span>(<span class="s">"开始下载"</span>, name)
+    time.sleep(seconds)            <span class="c"># 模拟网络等待（IO 密集）</span>
+    <span class="k">print</span>(<span class="s">"完成下载"</span>, name)
+
+<span class="c"># ① 串行：一个下完再下一个</span>
+t0 = time.time()
+download(<span class="s">"a.zip"</span>, <span class="n">1</span>); download(<span class="s">"b.zip"</span>, <span class="n">1</span>); download(<span class="s">"c.zip"</span>, <span class="n">1</span>)
+<span class="k">print</span>(<span class="s">"串行总耗时：%.1f 秒"</span> % (time.time() - t0))
+
+<span class="c"># ② 多线程：三个一起等</span>
+t0 = time.time()
+ts = [threading.Thread(target=download, args=(n, <span class="n">1</span>))
+      <span class="k">for</span> n <span class="k">in</span> (<span class="s">"a.zip"</span>, <span class="s">"b.zip"</span>, <span class="s">"c.zip"</span>)]
+<span class="k">for</span> t <span class="k">in</span> ts: t.start()
+<span class="k">for</span> t <span class="k">in</span> ts: t.join()
+<span class="k">print</span>(<span class="s">"多线程总耗时：%.1f 秒"</span> % (time.time() - t0))</div>
+    <div class="out">开始下载 a.zip
+完成下载 a.zip
+开始下载 b.zip
+完成下载 b.zip
+开始下载 c.zip
+完成下载 c.zip
+串行总耗时：3.0 秒
+开始下载 a.zip
+开始下载 b.zip
+开始下载 c.zip
+完成下载 a.zip
+完成下载 c.zip
+完成下载 b.zip
+多线程总耗时：1.0 秒
+（多线程部分的 print 顺序可能每次不同）</div>
+    <p>等待时间是"重叠"的：3 秒压缩成约 1 秒（最长那条）。而换成 <span class="hl">CPU 密集</span>任务（纯计算，如累加两千万个数），多线程就露馅了——GIL 让两个线程轮流用同一个核，总耗时几乎不变（实测一台电脑：串行 0.7 秒 vs 双线程 0.6 秒，不同电脑数字不同，但结论一致：<b>没有翻倍加速，甚至可能更慢</b>）。</p>
+    <p>选型心法一张表：</p>
+    <table class="pick">
+      <tr><th>任务类型</th><th>典型例子</th><th>特点</th><th>正确姿势</th></tr>
+      <tr><td><b class="y">IO 密集</b></td><td>下载网页、读写文件、数据库查询</td><td>大部分时间在"等"</td><td><b class="y">threading 多线程 ✓</b>（等待时让出 GIL）</td></tr>
+      <tr><td><b class="y">CPU 密集</b></td><td>算圆周率、图像处理、压缩加密</td><td>大部分时间在"算"</td><td><b class="y">multiprocessing 多进程 ✓</b>（每个进程有自己的 GIL）</td></tr>
+    </table>
+    <p>🧠 口诀：<span class="hl">在等就用线程，在算就开进程。</span></p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 并发对比实验台 + 竞态演示器</h2>
+
+    <div class="dl-panel">
+      <h4>📦 实验一 · 三个文件怎么下载最快？</h4>
+      <p style="font-size:13.5px;color:var(--muted)">模拟下载 3 个文件（大小不同、耗时不同），选一种模式开工。注意对比"总耗时"。</p>
+      <div class="dl-row">
+        <div class="dl-head"><span class="fname">📄 a.zip · 500KB（需 1.5 秒）</span><span class="fstat" id="st0">等待中</span></div>
+        <div class="dl-track"><div class="dl-fill" id="bar0"></div></div>
+      </div>
+      <div class="dl-row">
+        <div class="dl-head"><span class="fname">📄 b.zip · 800KB（需 2.0 秒）</span><span class="fstat" id="st1">等待中</span></div>
+        <div class="dl-track"><div class="dl-fill" id="bar1"></div></div>
+      </div>
+      <div class="dl-row">
+        <div class="dl-head"><span class="fname">📄 c.zip · 1.2MB（需 2.5 秒）</span><span class="fstat" id="st2">等待中</span></div>
+        <div class="dl-track"><div class="dl-fill" id="bar2"></div></div>
+      </div>
+      <div class="lab-clock">⏱ 模拟时间：<b id="lab-clock">0.0</b> 秒</div>
+      <div id="lab-total">选一种模式开始实验（动画已加速 2.4 倍播放）</div>
+      <button class="btn" id="btn-serial" onclick="startLab('serial')">▶ 串行模式（排队下载）</button>
+      <button class="btn" id="btn-thread" onclick="startLab('thread')">⚡ 多线程模式（同时下载）</button>
+      <button class="btn" id="btn-reset" onclick="resetLab()">↺ 重置</button>
+    </div>
+
+    <div class="dl-panel">
+      <h4>🔓🔒 实验二 · 竞态条件演示器</h4>
+      <p style="font-size:13.5px;color:var(--muted)">两个线程各对同一个计数器 +1000 次（共 2000 次）。无锁模式模拟"读→算→写"三步被随时打断交错执行；加锁模式一次三步原子完成。每次点击，无锁结果都不同！</p>
+      <button class="btn" onclick="runRace(false)">🔓 无锁运行（看丢数据）</button>
+      <button class="btn" onclick="runRace(true)">🔒 加锁运行（看稳定性）</button>
+      <div class="race-out" id="race-result">
+        <div class="rc" id="race-line1"></div>
+        <div class="rc" id="race-line2"></div>
+        <div class="race-log" id="race-log"></div>
+      </div>
+    </div>
+    <div class="lab-note">实验一是纯前端 JS 动画模拟（等价于 Python 里 time.sleep 代表的网络等待）；实验二用 JS 精确模拟了 CPython 中"读→算→写"被 GIL 切换打断的交错过程，与第 3 节的 Python 实验原理相同。</div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 25 分钟）</h2>
+    <li>① 逐行敲一遍第 2、3、4 节的代码，<b>亲手打字，不要复制粘贴</b></li>
+    <li>② 把第 3 节竞态实验连跑 10 次，记录每次 count 的值——这就是你的第一份"bug 复现记录"</li>
+    <li>③ 小挑战：写一个「三线程倒计时」——三个线程分别打印 3、2、1 各自数完，最后主线程打印 <code>GO!</code>（提示：三个 <code>threading.Thread</code> + 三个 <code>join()</code>）</li>
+    <li>④ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>第 22 课「异步初步 —— 顺风耳」</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室一：并发对比实验台 ============ */
+var labTasks = [
+  {dur: 1.5},
+  {dur: 2.0},
+  {dur: 2.5}
+];
+var labSpeed = 2.4;        /* 动画加速倍率：6 秒 → 2.5 秒真实播放 */
+var labTimer = null;
+var labElapsed = 0;
+
+function resetLab(){
+  if(labTimer){ clearInterval(labTimer); labTimer = null; }
+  labElapsed = 0;
+  for(var i = 0; i < 3; i++){
+    document.getElementById('bar' + i).style.width = '0%';
+    document.getElementById('st' + i).textContent = '等待中';
+    document.getElementById('st' + i).style.color = 'var(--muted)';
+  }
+  document.getElementById('lab-clock').textContent = '0.0';
+  document.getElementById('lab-total').innerHTML = '选一种模式开始实验（动画已加速 2.4 倍播放）';
+  document.getElementById('btn-serial').disabled = false;
+  document.getElementById('btn-thread').disabled = false;
+}
+
+function startLab(mode){
+  resetLab();
+  document.getElementById('btn-serial').disabled = true;
+  document.getElementById('btn-thread').disabled = true;
+  /* 串行：依次排队；多线程：同时开始 */
+  var offsets = (mode === 'serial') ? [0, 1.5, 3.0] : [0, 0, 0];
+  var ends = (mode === 'serial') ? [1.5, 3.5, 6.0] : [1.5, 2.0, 2.5];
+  var totalSim = 6.0;
+  labTimer = setInterval(function(){
+    labElapsed += 0.05 * labSpeed;
+    var allDone = true;
+    for(var i = 0; i < 3; i++){
+      var p;
+      if(labElapsed <= offsets[i]) p = 0;
+      else if(labElapsed >= ends[i]) p = 1;
+      else p = (labElapsed - offsets[i]) / labTasks[i].dur;
+      document.getElementById('bar' + i).style.width = (p * 100).toFixed(1) + '%';
+      var st = document.getElementById('st' + i);
+      if(p >= 1){ st.textContent = '✓ 完成'; st.style.color = 'var(--cyan)'; }
+      else if(p > 0){ st.textContent = '下载中… ' + Math.round(p * 100) + '%'; st.style.color = 'var(--pink)'; allDone = false; }
+      else{ st.textContent = '等待中'; st.style.color = 'var(--muted)'; allDone = false; }
+    }
+    document.getElementById('lab-clock').textContent = labElapsed.toFixed(1);
+    if(labElapsed >= totalSim || allDone){
+      clearInterval(labTimer); labTimer = null;
+      var finalT = (mode === 'serial') ? totalSim : 2.5;
+      document.getElementById('lab-clock').textContent = finalT.toFixed(1);
+      var msg;
+      if(mode === 'serial'){
+        msg = '总耗时 <b style="color:var(--gold)">6.0 秒</b> —— 1.5 + 2.0 + 2.5 依次排队，时间全部相加。';
+      }else{
+        msg = '总耗时 <b style="color:var(--gold)">2.5 秒 ≈ 最长那条</b> —— 三个等待完全重叠，6 秒的任务 2.5 秒收工，提速 2.4 倍！';
+      }
+      document.getElementById('lab-total').innerHTML = msg;
+      document.getElementById('btn-serial').disabled = false;
+      document.getElementById('btn-thread').disabled = false;
+    }
+  }, 50);
+}
+
+/* ============ 实验室二：竞态条件演示器 ============ */
+function runRace(useLock){
+  var count = 0;
+  var threads = [
+    {name: '线程A', reg: 0, pc: 0, left: 1000},
+    {name: '线程B', reg: 0, pc: 0, left: 1000}
+  ];
+  var lockHolder = -1;
+  var events = [];
+  var guard = 0;
+  while(guard < 2000000){
+    guard++;
+    /* 检查是否全部干完 */
+    var allDone = true;
+    for(var k = 0; k < 2; k++){
+      if(threads[k].left > 0 || threads[k].pc > 0){ allDone = false; break; }
+    }
+    if(allDone) break;
+    /* 调度器：锁被占用时只能运行持锁线程；否则随机挑一个（模拟 GIL 随时切换，每次点击都不同） */
+    var i;
+    if(useLock && lockHolder !== -1){
+      i = lockHolder;
+    }else{
+      i = (Math.random() < 0.5) ? 0 : 1;
+    }
+    var t = threads[i];
+    if(t.left <= 0 && t.pc === 0) continue;
+    if(useLock && lockHolder !== -1 && lockHolder !== i) continue;
+    if(t.pc === 0){
+      if(useLock) lockHolder = i;     /* 进入敏感区：拿锁 */
+      t.reg = count;                  /* ① 读 */
+      t.pc = 1;
+    }else if(t.pc === 1){
+      t.reg = t.reg + 1;              /* ② 算 */
+      t.pc = 2;
+    }else{
+      var before = count;
+      count = t.reg;                  /* ③ 写回 */
+      t.pc = 0;
+      t.left--;
+      if(useLock) lockHolder = -1;    /* 离开敏感区：还锁 */
+      if(!useLock && t.reg <= before && events.length < 3 && before > 0){
+        events.push(t.name + ' 把 count 写回 ' + t.reg + '，可另一个线程已把它推到 ' + before + ' —— 覆盖！');
+      }
+    }
+  }
+  var el = document.getElementById('race-result');
+  var l1 = document.getElementById('race-line1');
+  var l2 = document.getElementById('race-line2');
+  var lg = document.getElementById('race-log');
+  if(!useLock){
+    var lost = 2000 - count;
+    l1.innerHTML = '🔓 无锁：期望 2000，实际 <b style="color:var(--red)">' + count + '</b>';
+    l2.innerHTML = '丢失了 <b style="color:var(--red)">' + lost + '</b> 次更新 —— 再点一次，数字还不一样！';
+    lg.innerHTML = '现场抓到的覆盖瞬间（最多 3 条）：<br>' + (events.length ? events.join('<br>') : '这轮运气好没抓到（多试几次）');
+  }else{
+    l1.innerHTML = '🔒 加锁：期望 2000，实际 <b style="color:var(--gold)">2000</b>';
+    l2.innerHTML = '一次三步"读→算→写"原子完成，<b style="color:var(--gold)">每次点都是 2000，稳如老狗</b> ✓';
+    lg.innerHTML = 'with lock: 保证了同一时刻只有一个线程能碰 count，另一个只能排队等钥匙。';
+  }
+  el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title: '第 1 预言 · run() 还是 start()？',
+    code: 'import threading\n\ndef hello():\n    print("我运行在：", threading.current_thread().name)\n\nt = threading.Thread(target=hello)\nt.run()',
+    opts: ['我运行在： MainThread', '我运行在： Thread-1', '我运行在： Thread-2', '什么都不输出'],
+    ans: 0,
+    exp: '直接调 run() 是普通函数调用，不开新线程，所以在主线程 MainThread 里执行。换成 t.start() 才会打印 Thread-2 之类的新线程名。'
+  },
+  {
+    title: '第 2 预言 · join 的等待',
+    code: 'import threading, time\n\ndef worker():\n    time.sleep(0.2)\n    print("B")\n\nt = threading.Thread(target=worker)\nt.start()\nprint("A")\nt.join()\nprint("C")',
+    opts: ['A B C', 'B A C', 'A C B', 'C A B'],
+    ans: 0,
+    exp: 'start 后主线程立刻打印 A；join() 让主线程原地等分身干完，0.2 秒后分身打印 B；最后主线程才打印 C。'
+  },
+  {
+    title: '第 3 预言 · 无锁共享变量',
+    code: 'count = 0\n\ndef worker():\n    global count\n    for _ in range(1000):\n        count = count + 1   # 读 → 算 → 写\n\nt1 = threading.Thread(target=worker)\nt2 = threading.Thread(target=worker)\nt1.start(); t2.start()\nt1.join(); t2.join()\nprint(count)',
+    opts: ['一定是 2000', '可能是 2000，也可能小于 2000（丢更新）', '一定是 1000', '一定会报错'],
+    ans: 1,
+    exp: '两个线程各 +1000 次，理想是 2000；但"读→算→写"被打断就会覆盖对方的更新，结果看运气——这正是竞态条件的定义：结果取决于切换时机。'
+  },
+  {
+    title: '第 4 预言 · GIL 与纯计算',
+    code: '# 两个线程同时各自计算\n# 1+2+3+...+20000000（纯 CPU 计算，无任何等待）\n# 单线程串行跑两遍要 5 秒，\n# 改成两个线程同时跑，总耗时大约？',
+    opts: ['约 2.5 秒，快一倍', '约 5 秒甚至更慢——GIL 让同一时刻只有一个线程执行字节码', '约 1 秒', '一定报错'],
+    ans: 1,
+    exp: 'CPU 密集任务没有 IO 等待可让出 GIL，两个线程只是轮流用同一个核，总时间几乎不变，切换开销还可能让它更慢。该用 multiprocessing。'
+  },
+  {
+    title: '第 5 预言 · 下载网页的总耗时',
+    code: 'import threading, time\n\ndef download(url):\n    time.sleep(1)   # 模拟网络等待\n\nts = [threading.Thread(target=download,\n      args=(u,)) for u in ["a", "b", "c"]]\nt0 = time.time()\nfor t in ts: t.start()\nfor t in ts: t.join()\nprint("%.1f 秒" % (time.time() - t0))',
+    opts: ['约 3.0 秒', '约 1.0 秒——等待网络时线程让出 GIL，三个等待重叠', '约 0.3 秒', '约 6.0 秒'],
+    ans: 1,
+    exp: 'IO 密集任务：sleep（等网络）时线程让出 GIL，三个下载同时等待，总耗时约等于最长的那条（1 秒）。这就是多线程的甜区。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/("[^"]*")/g, '<span style="color:var(--green)">$1</span>')
+        .replace(/(^|[^#\w])(\d+\.?\d*)/g, '$1<span style="color:var(--orange)">$2</span>')
+        .replace(/\b(import|threading|Thread|print|def|for|in|range|global|with|start|join|run|time|sleep|current_thread|target|args|lambda)\b/g, '<span style="color:var(--pink)">$1</span>')
+        .replace(/(#.*)$/, '<span style="color:#5b648f">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="' + i + '">' + o + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">' + q.title + '</div>' +
+      '<div class="code" style="margin:6px 0">' + codeHtml + '</div>' +
+      '<div class="oracle-opts">' + optsHtml + '</div>' +
+      '<div class="explain">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['串行 / 并发 / 并行的区别','串行=排队一件件做；并发=一人交替做多件；并行=多人（多核）真同时'],
+  ['创建线程三步','def 函数 → threading.Thread(target=函数) → t.start()'],
+  ['start() 和 run() 的区别','start() 创建新线程执行；run() 只是普通函数调用，在主线程执行'],
+  ['join() 的作用','让当前线程原地等待目标线程结束，再继续往下执行'],
+  ['什么是竞态条件','多线程读写共享数据的时机不确定，导致结果"看运气"，可能丢更新'],
+  ['count += 1 为什么不安全','它分三步：读 → 算 → 写；中途被切换就会用过时的值覆盖别人的更新'],
+  ['Lock 的推荐用法','lock = threading.Lock()；用 with lock: 包住敏感代码，自动上锁解锁'],
+  ['GIL 是什么','CPython 的全局解释器锁：同一时刻一个进程只有一个线程在执行 Python 字节码'],
+  ['为什么 IO 密集适合多线程','等网络/磁盘/sleep 时线程会让出 GIL，其他线程趁机干活，等待时间重叠'],
+  ['CPU 密集任务用什么','multiprocessing 多进程——每个进程有独立的 GIL，才能真正用多核并行']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[1] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'threading.Thread(target=f) 创建线程后，真正启动新线程要调用？',
+   opts:['f.run()', 't.start()', 't.run()', 't.launch()'], ans:1,
+   exp:'start() 才会创建新线程并在其中执行任务；直接调 t.run() 只是普通函数调用。'},
+  {q:'下面关于 t.run() 的说法正确的是？',
+   opts:['run() 会创建一个新线程', 'run() 是普通方法调用，在当前线程（通常是主线程）里执行', 'run() 和 start() 完全等价', 'run() 不能被调用'], ans:1,
+   exp:'run() 就是个普通方法：谁调用它，它就在谁身上执行。start() 才负责开新线程并自动调用 run。'},
+  {q:'t.join() 的作用是？',
+   opts:['杀死线程 t', '让当前线程暂停随机时间', '让当前线程等待 t 结束后再继续', '给线程 t 加锁'], ans:2,
+   exp:'join = "等它干完再走"。主线程常用 join 等所有分身收工后再汇总结果。'},
+  {q:'两个线程同时不加锁地对同一变量 count = count + 1 各 1000 次，最可能出现？',
+   opts:['count 一定正确等于 2000', 'count 可能小于 2000（丢更新）', 'count 一定等于 1000', '程序报错'], ans:1,
+   exp:'读→算→写三步中间被切换，就会覆盖对方的更新。结果取决于切换时机，这就是竞态条件。'},
+  {q:'Lock 的最佳使用姿势是？',
+   opts:['lock.acquire() 后不管它', 'with lock: 包住敏感代码', '把整个程序都锁起来', '每个变量配 100 把锁'], ans:1,
+   exp:'with lock: 进入自动上锁、离开（含异常）自动解锁，安全省心。'},
+  {q:'GIL 的含义是？',
+   opts:['Python 禁止多线程', 'CPython 中同一时刻一个进程只有一个线程在执行 Python 字节码', '一种数据库锁', '图形界面库'], ans:1,
+   exp:'GIL 是 CPython 解释器的全局锁，让多线程在纯计算时无法真正并行。'},
+  {q:'下列哪个任务最适合用 threading 多线程？',
+   opts:['计算圆周率一百万位', '批量下载 100 个网页', '压缩 10GB 视频', '暴力破解密码'], ans:1,
+   exp:'下载网页是 IO 密集：等待时让出 GIL，多线程能重叠等待时间。其余是 CPU 密集。'},
+  {q:'想用满 8 个 CPU 核心做纯计算，应该用？',
+   opts:['threading 多线程', 'multiprocessing 多进程', '更多 sleep', 'GIL 加速包'], ans:1,
+   exp:'多进程每个进程有独立解释器和 GIL，才能真正并行吃满多核。'},
+  {q:'IO 密集任务用多线程能提速的根本原因是？',
+   opts:['线程比进程跑得快', '等待 IO 时线程会让出 GIL，其他线程趁机干活', 'GIL 会消失', '网络因为多线程变快了'], ans:1,
+   exp:'提速来自"等待重叠"：A 等 1 秒的同时 B、C 也在等，总耗时约等于最长的那条。'},
+  {q:'两个线程同时各自 time.sleep(1)（都启动后 join），主线程总等待约？',
+   opts:['约 2 秒', '约 1 秒', '约 0.5 秒', '约 4 秒'], ans:1,
+   exp:'sleep 是 IO 等待，会让出 GIL，两个 1 秒的等待重叠进行，总耗时约 1 秒。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + o + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + q.q + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！分身术大成，下一课已为你解锁 🔓' : '通关成功！第 22 课「异步初步」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior: 'smooth', block: 'center'});
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第16课 · 类与对象 —— 创建种族</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#a78bfa; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167,139,250,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--purple);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#a78bfa,#4dd6ff 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--purple);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--purple);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#d6c9ff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 图纸与实例示意 */
+  .blueprint{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;align-items:stretch;}
+  .bp-card{
+    flex:1;min-width:180px;max-width:260px;background:var(--card);border:2px solid var(--purple);
+    border-radius:14px;padding:14px;text-align:center;position:relative;transition:all .3s;
+  }
+  .bp-card:hover{transform:translateY(-6px);box-shadow:0 8px 28px rgba(167,139,250,.25);}
+  .bp-card .bp-tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--purple);
+    background:rgba(167,139,250,.1);border-radius:8px;padding:2px 8px;display:inline-block;margin-bottom:8px;
+  }
+  .bp-card .bp-title{font-size:16px;font-weight:800;margin-bottom:6px;}
+  .bp-card .bp-list{font-size:12px;color:var(--muted);text-align:left;line-height:1.9;}
+  .bp-arrow{display:flex;align-items:center;color:var(--gold);font-size:22px;font-weight:800;}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--purple);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(167,139,250,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(167,139,250,.3);}
+  .pet-lab{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:14px;}
+  .pet-code{flex:1.2;min-width:300px;margin:0;font-size:13px;}
+  .pet-zone{flex:1;min-width:250px;}
+  .pm{border-radius:6px;padding:0 2px;transition:background .35s;}
+  .pm.on{background:rgba(167,139,250,.20);box-shadow:inset 2px 0 0 var(--purple);}
+  .pet-card{
+    background:var(--card);border:1px solid rgba(167,139,250,.45);border-radius:14px;
+    padding:14px 16px;margin-bottom:12px;animation:popIn .4s both;
+  }
+  .pet-name{font-size:17px;font-weight:800;color:var(--purple);letter-spacing:1px;}
+  .pet-species{font-size:11px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-bottom:6px;}
+  .pet-row{display:flex;justify-content:space-between;font-size:13px;margin:3px 0;}
+  .pet-row b{color:var(--gold);}
+  .hpbar{height:9px;background:#0a0d1e;border-radius:999px;overflow:hidden;margin:6px 0;border:1px solid var(--line);}
+  .hpfill{height:100%;width:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:999px;transition:width .4s;}
+  .pbtn{
+    background:#0a0d1e;border:1px solid var(--purple);color:var(--purple);border-radius:8px;
+    padding:6px 13px;font-size:13px;cursor:pointer;margin:8px 5px 0 0;font-family:inherit;
+    transition:all .2s;font-weight:600;
+  }
+  .pbtn:hover{background:rgba(167,139,250,.15);transform:translateY(-2px);}
+  .lab-log{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:10px;padding:10px 14px;
+    font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--muted);
+    margin-top:12px;min-height:72px;white-space:pre-wrap;
+  }
+  .lab-log b{color:var(--purple);}
+  .lab-note{font-size:13px;color:var(--muted);margin-top:12px;border-left:3px solid var(--gold);padding-left:12px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);color:var(--purple);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--purple);color:var(--purple);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(167,139,250,.1);color:var(--purple);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 进阶秘境 · <b>第 16 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 4 · ADVANCED MYSTIC REALM</div>
+    <h1>类与对象 —— 创建种族</h1>
+    <div class="subtitle">今日目标：设计自己的种族图纸，批量召唤独一无二的实例</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解「<span class="hl">类是图纸、对象是实例</span>」这个关键比喻</li>
+      <li>学会 <span class="hl-p">class</span> 定义类、<span class="hl-p">__init__</span> 构造方法、<span class="hl-p">self</span> 的真面目</li>
+      <li>分清<span class="hl">实例属性</span>和<span class="hl">类属性</span>，弄懂同名时谁优先</li>
+      <li>通关实验室「宠物养成系统」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 图纸与实例 -->
+  <section>
+    <h2><span class="num">1</span>类是图纸，对象是实例</h2>
+    <p>前面 15 课，我们用的都是 Python 自带的"种族"：int、str、list、dict……进阶秘境第一课，你要学会<span class="hl">创造自己的种族</span>。</p>
+    <p>关键比喻来了：<span class="hl">类（class）是图纸，对象（object）是照着图纸造出来的实物</span>。游戏里"幻兽"是一个种族设定（图纸），而你抓的那只"小白"是一只具体的幻兽（实例）——图纸只有一张，实例可以造无限多只。</p>
+
+    <div class="blueprint">
+      <div class="bp-card">
+        <div class="bp-tag">class Pet:</div>
+        <div class="bp-title">📋 图纸 · 类</div>
+        <div class="bp-list">· 只有一份，静静躺在代码里<br>· 规定"每只宠物有哪些属性"<br>· 规定"宠物会哪些动作（方法）"</div>
+      </div>
+      <div class="bp-arrow">➜ 造 ➜</div>
+      <div class="bp-card">
+        <div class="bp-tag">Pet("小白") / Pet("小黑")</div>
+        <div class="bp-title">🐾 实物 · 实例</div>
+        <div class="bp-list">· 可以造很多只，各自独立<br>· 小白有小白的名字和 HP<br>· 小黑有小黑的名字和 HP</div>
+      </div>
+    </div>
+
+    <p>把图纸写出来，只需要 <span class="hl-p">class</span> 关键字：</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:                <span class="c"># 定义一个类，注意行尾的冒号</span>
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):   <span class="c"># 构造方法：出生登记处（下一步细讲）</span>
+        <span class="v">self</span>.name = <span class="v">name</span>     <span class="c"># 给这只宠物登记名字</span>
+
+<span class="v">pet</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)      <span class="c"># 实例化：照着图纸造一只，取名小白</span>
+<span class="k">print</span>(<span class="v">pet</span>.name)         <span class="c"># 用 点号 访问它的属性</span></div>
+    <div class="out">小白</div>
+
+    <p>三个术语对齐一下：<span class="hl">定义类</span>（写 class Pet:）→ <span class="hl">实例化</span>（执行 Pet("小白")，也叫"创建对象"）→ <span class="hl">实例/对象</span>（造出来的 pet）。类名习惯用<span class="hl-c">大驼峰命名</span>：Pet、PlayerAccount——一看就知道是个类。</p>
+  </section>
+
+  <!-- 2 __init__ -->
+  <section>
+    <h2><span class="num">2</span>__init__ 构造方法 —— 出生登记处</h2>
+    <p><span class="hl-p">__init__</span>（init 是 initialize"初始化"的缩写，前后各两条下划线）会在<span class="hl">实例化的那一刻自动执行</span>，专门负责给新生的实例登记属性。眼见为实——</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):
+        <span class="k">print</span>(<span class="v">name</span>, <span class="s">"出生了！"</span>)      <span class="c"># 出生时喊一嗓子</span>
+
+<span class="k">print</span>(<span class="s">"—— 召唤之前 ——"</span>)
+<span class="v">pet</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)                   <span class="c"># 实例化：__init__ 此刻自动执行！</span>
+<span class="k">print</span>(<span class="s">"—— 召唤之后 ——"</span>)</div>
+    <div class="out">—— 召唤之前 ——
+小白 出生了！
+—— 召唤之后 ——</div>
+
+    <p>看到了吗？<span class="hl">"小白 出生了！"出现在两句之间</span>——没人手动调用它，是 <span class="hl-c">Pet("小白")</span> 这一行触发的。实例化时你传的 <span class="hl-c">"小白"</span>，会作为参数传给 <span class="hl-c">__init__</span> 的 <span class="hl-c">name</span> 形参。</p>
+    <p>⚠️ 常见误区：<span class="hl">__init__ 不是你调用的，是 Python 替你调用的</span>。写 <code>pet.__init__()</code> 手动调用反而是错误用法；初始化逻辑永远只写在定义里，让每一次实例化都自动走一遍。</p>
+  </section>
+
+  <!-- 3 self -->
+  <section>
+    <h2><span class="num">3</span>self 是谁 —— 指向实例自身</h2>
+    <p>所有方法的<span class="hl">第一个参数永远是 self</span>，它指向<span class="hl">当前这个实例自己</span>。同一个方法要伺候千千万万只宠物，靠什么知道"现在轮到谁"？靠 self。</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):
+        <span class="v">self</span>.name = <span class="v">name</span>      <span class="c"># self.name = "这只宠物"的名字</span>
+
+    <span class="k">def</span> <span class="v">eat</span>(<span class="v">self</span>):           <span class="c"># 方法：每个都带 self</span>
+        <span class="v">self</span>.hp = <span class="n">100</span>       <span class="c"># 只改"这只宠物"的 HP</span>
+
+<span class="v">a</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)
+<span class="v">b</span> = <span class="v">Pet</span>(<span class="s">"小黑"</span>)
+<span class="k">print</span>(<span class="v">a</span>.name, <span class="v">b</span>.name)</div>
+    <div class="out">小白 小黑</div>
+
+    <p>调用方法时，<span class="hl">a.eat() 其实等价于 Pet.eat(a)</span>——Python 悄悄把 a 塞给了 self！这就是为什么方法定义必须写 self、调用时却不用传它：</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):
+        <span class="v">self</span>.name = <span class="v">name</span>
+        <span class="v">self</span>.hp = <span class="n">100</span>
+    <span class="k">def</span> <span class="v">eat</span>(<span class="v">self</span>):
+        <span class="v">self</span>.hp = <span class="v">self</span>.hp + <span class="n">10</span>
+
+<span class="v">a</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)
+<span class="v">a</span>.eat()                <span class="c"># 等价于 Pet.eat(a)，self 接住了 a</span>
+<span class="k">print</span>(<span class="v">a</span>.hp)</div>
+    <div class="out">110</div>
+
+    <p>🧠 记忆口诀：<span class="hl">定义写 self，调用不用传；点号前是谁，self 就是谁。</span>忘了写 self 会怎样？预言机第 5 题会给你看"惨案现场"。</p>
+  </section>
+
+  <!-- 4 类属性 vs 实例属性 -->
+  <section>
+    <h2><span class="num">4</span>实例属性 vs 类属性 —— 一人一份 vs 全族共享</h2>
+    <p>两种属性存放位置不同、归属不同：</p>
+    <p>① <span class="hl">实例属性</span>：写在 <span class="hl-c">self.xxx =</span> 后面，<span class="hl">每个实例各自一份</span>——小白的 HP、小黑的名字，互不相干；</p>
+    <p>② <span class="hl">类属性</span>：直接写在 class 里面（不在任何方法里），<span class="hl">全体实例共享一份</span>——适合放"全族通用的设定"，比如种族名。</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="v">species</span> = <span class="s">"幻兽"</span>              <span class="c"># 类属性：写在方法外面，全族共享</span>
+
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):
+        <span class="v">self</span>.name = <span class="v">name</span>          <span class="c"># 实例属性：写在 self. 后面，每只一份</span>
+
+<span class="v">a</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)
+<span class="v">b</span> = <span class="v">Pet</span>(<span class="s">"小黑"</span>)
+<span class="k">print</span>(<span class="v">a</span>.species, <span class="v">b</span>.species)      <span class="c"># 两只都能查到种族</span>
+<span class="v">b</span>.species = <span class="s">"神兽"</span>                <span class="c"># 给 b 单独赋值：给 b 自己发了一张</span>
+<span class="k">print</span>(<span class="v">a</span>.species, <span class="v">b</span>.species)      <span class="c"># a 不受影响！</span>
+<span class="k">print</span>(<span class="v">Pet</span>.species)                <span class="c"># 类属性本体还在类身上</span></div>
+    <div class="out">幻兽 幻兽
+幻兽 神兽
+幻兽</div>
+
+    <p>⚠️ 高频考点：<span class="hl">实例属性和类属性同名时，实例属性优先</span>。查 <span class="hl-c">b.species</span> 时 Python 先翻 b 自己的口袋（实例属性），翻到就不再看类了；而 a 的口袋里没有 species，才去类身上找到 "幻兽"。给 b 赋值永远只是给 b 自己发新卡片，<span class="hl">绝不会改动类属性本体</span>。</p>
+  </section>
+
+  <!-- 5 多实例 + 为什么需要类 -->
+  <section>
+    <h2><span class="num">5</span>多实例互不干扰 & 为什么需要类</h2>
+    <p>多只宠物、各自的数据、互不干扰——这是实例属性的天性，也是本课实验室的核心看点：</p>
+    <div class="code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):
+        <span class="v">self</span>.name = <span class="v">name</span>
+        <span class="v">self</span>.hp = <span class="n">100</span>
+    <span class="k">def</span> <span class="v">take_damage</span>(<span class="v">self</span>):
+        <span class="v">self</span>.hp = <span class="v">self</span>.hp - <span class="n">30</span>
+
+<span class="v">a</span> = <span class="v">Pet</span>(<span class="s">"小白"</span>)
+<span class="v">b</span> = <span class="v">Pet</span>(<span class="s">"小黑"</span>)
+<span class="v">a</span>.take_damage()
+<span class="v">a</span>.take_damage()          <span class="c"># 只有小白挨打</span>
+<span class="k">print</span>(<span class="s">"小白 HP:"</span>, <span class="v">a</span>.hp)
+<span class="k">print</span>(<span class="s">"小黑 HP:"</span>, <span class="v">b</span>.hp)</div>
+    <div class="out">小白 HP: 40
+小黑 HP: 100</div>
+
+    <p>小白被打掉 60 点血，小黑毫发无伤——<span class="hl">每个实例的属性都存在自己身上</span>，改 a 不碰 b。</p>
+    <p>那<span class="hl">为什么需要类</span>？想想没有类的日子：数据（一堆字典）和行为（一堆函数）各管各的，函数一多就乱——</p>
+    <div class="code"><span class="c"># 没有类：数据和行为分离，像散装的零件</span>
+<span class="k">def</span> <span class="v">eat</span>(<span class="v">pet</span>):
+    <span class="v">pet</span>[<span class="s">"hp"</span>] = <span class="v">pet</span>[<span class="s">"hp"</span>] + <span class="n">10</span>     <span class="c"># 每个函数都要把字典传来传去</span>
+
+<span class="v">pet1</span> = {<span class="s">"name"</span>: <span class="s">"小白"</span>, <span class="s">"hp"</span>: <span class="n">80</span>}
+<span class="v">eat</span>(<span class="v">pet1</span>)
+<span class="k">print</span>(<span class="v">pet1</span>[<span class="s">"name"</span>], <span class="v">pet1</span>[<span class="s">"hp"</span>])</div>
+    <div class="out">小白 90</div>
+
+    <p>有了类，<span class="hl">数据和行为打包在同一个图纸里</span>：属性（数据）+ 方法（行为）+ 一份图纸批量制造——这叫<span class="hl-c">面向对象编程</span>（OOP）。宠物多到 100 只时，字典方案要写 100 套键名不出错，而类方案只是 <span class="hl-c">Pet("名字")</span> 一行接一行。下一课的"继承"还会让图纸之间互相传承——OOP 的爽点才刚开始。</p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 宠物养成系统</h2>
+    <p>左边是 <span class="hl-p">Pet 类的图纸</span>（Python 定义），右边是照图纸造出来的<span class="hl">实例卡片</span>。点击卡片上的按钮，等价的 Python 方法就会执行——<span class="hl">左侧代码会高亮当前执行到的方法</span>。先召唤第二只宠物，再分别操作它们，亲眼验证「<span class="hl-c">所有宠物共享图纸、各自有独立属性</span>」。</p>
+    <div class="lab-input">
+      <input id="pet-name" maxlength="8" placeholder="给第二只宠物取名，如：小黑">
+      <button class="btn" onclick="summonPet()">🐾 召唤第二只宠物</button>
+    </div>
+    <div class="pet-lab">
+      <div class="code pet-code" id="pet-code"><span class="k">class</span> <span class="v">Pet</span>:
+    <span class="v">species</span> = <span class="s">"幻兽"</span>              <span class="c"># 类属性：全族共享一份</span>
+<span class="pm" data-m="__init__">
+    <span class="k">def</span> <span class="v">__init__</span>(<span class="v">self</span>, <span class="v">name</span>):       <span class="c"># 出生登记处：实例化时自动执行</span>
+        <span class="v">self</span>.name = <span class="v">name</span>          <span class="c"># ↓ 以下全是实例属性：每只一份</span>
+        <span class="v">self</span>.hp = <span class="n">100</span>
+        <span class="v">self</span>.mood = <span class="s">"开心"</span>
+        <span class="v">self</span>.level = <span class="n">1</span>
+        <span class="v">self</span>.exp = <span class="n">0</span>
+</span>
+<span class="pm" data-m="eat">
+    <span class="k">def</span> <span class="v">eat</span>(<span class="v">self</span>):                 <span class="c"># 喂食：self 就是点号前那只</span>
+        <span class="v">self</span>.hp = <span class="k">min</span>(<span class="n">100</span>, <span class="v">self</span>.hp + <span class="n">10</span>)
+</span>
+<span class="pm" data-m="play">
+    <span class="k">def</span> <span class="v">play</span>(<span class="v">self</span>):                <span class="c"># 玩耍：心情变兴奋，经验 +5</span>
+        <span class="v">self</span>.mood = <span class="s">"兴奋"</span>
+        <span class="v">self</span>.exp = <span class="v">self</span>.exp + <span class="n">5</span>
+        <span class="k">if</span> <span class="v">self</span>.exp &gt;= <span class="n">10</span>:         <span class="c"># 经验攒满 10 → 升 1 级</span>
+            <span class="v">self</span>.level = <span class="v">self</span>.level + <span class="n">1</span>
+            <span class="v">self</span>.exp = <span class="v">self</span>.exp - <span class="n">10</span>
+</span>
+<span class="pm" data-m="sleep">
+    <span class="k">def</span> <span class="v">sleep</span>(<span class="v">self</span>):               <span class="c"># 睡觉：回满血，心情安静</span>
+        <span class="v">self</span>.hp = <span class="n">100</span>
+        <span class="v">self</span>.mood = <span class="s">"安静"</span>
+</span></div>
+      <div class="pet-zone">
+        <div id="pet-cards"></div>
+      </div>
+    </div>
+    <div class="lab-log" id="lab-log"></div>
+    <div class="lab-note">🔍 观察要点：① 所有卡片都写着同样的种族 <code>幻兽</code>（类属性，共享图纸）；② 每只宠物的 HP / 心情 / 等级 / 经验<span class="hl">各改各的</span>，怎么喂小白都喂不到小黑肚子里（实例属性，独立存放）；③ 每次操作，左侧高亮的方法里那句 <span class="hl-c">self</span>，指的就是你点的那张卡片。（本页用内存 JS 对象模拟实例，刷新后宠物回到出生状态）</div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开 IDLE 或编辑器，<b>亲手敲出</b>本课所有代码块——尤其第 3 节的 <code>a.eat() 等价于 Pet.eat(a)</code> 实验，敲完用 <code>print(a.hp)</code> 验证</li>
+    <li>② 设计你自己的种族：<code>class Hero</code>（英雄）——<code>__init__</code> 里登记名字、HP、攻击力三个实例属性，再写 <code>attack</code> 和 <code>heal</code> 两个方法</li>
+    <li>③ 实例化两个英雄，让 A 攻击 B：验证 B 的 HP 变化而 A 不受影响；再给类加一个类属性 <code>camp = "联盟"</code>，观察两个实例都能读到它</li>
+    <li>④ 挑战：给 <code>__init__</code> 加一个默认参数 <code>level=1</code>，试试 <code>Hero("阿呆")</code> 和 <code>Hero("大神", level=99)</code> 两种实例化写法</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>继承与魔法方法 —— 血脉传承</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：宠物养成系统（内存 JS 对象模拟实例） ============ */
+var DEFAULT_NAMES = ['小黑', '小灰', '小花', '小金', '小紫'];
+var pets = [];
+var petLogs = [];
+var nextDefault = 0;
+
+function Pet(name){
+  /* 对应 Python 的 __init__：实例属性，每只一份 */
+  this.name = name;
+  this.hp = 100;
+  this.mood = '开心';
+  this.level = 1;
+  this.exp = 0;
+}
+/* 对应 Python 的类属性：挂在"图纸"上，全体共享 */
+Pet.species = '幻兽';
+
+Pet.prototype.eat = function(){ this.hp = Math.min(100, this.hp + 10); };
+Pet.prototype.play = function(){
+  this.mood = '兴奋';
+  this.exp = this.exp + 5;
+  if(this.exp >= 10){
+    this.level = this.level + 1;
+    this.exp = this.exp - 10;
+    return true;
+  }
+  return false;
+};
+Pet.prototype.sleep = function(){ this.hp = 100; this.mood = '安静'; };
+
+function addLog(msg){
+  petLogs.unshift(msg);
+  if(petLogs.length > 5){ petLogs.pop(); }
+  var box = document.getElementById('lab-log');
+  var html = '';
+  for(var i=0;i<petLogs.length;i++){
+    html += '<div>&gt; ' + petLogs[i] + '</div>';
+  }
+  box.innerHTML = html;
+}
+
+function highlightMethod(m){
+  var blocks = document.querySelectorAll('.pm');
+  for(var i=0;i<blocks.length;i++){
+    blocks[i].classList.remove('on');
+  }
+  if(!m){ return; }
+  var target = document.querySelectorAll('.pm[data-m="' + m + '"]');
+  for(var j=0;j<target.length;j++){
+    target[j].classList.add('on');
+  }
+}
+
+function summonPet(){
+  if(pets.length >= 4){ alert('宠物屋最多住 4 只！先照顾好现有的伙伴吧。'); return; }
+  var name = document.getElementById('pet-name').value.trim();
+  if(!name){ name = DEFAULT_NAMES[nextDefault % DEFAULT_NAMES.length]; nextDefault++; }
+  var p = new Pet(name);
+  pets.push(p);
+  highlightMethod('__init__');
+  addLog('<b>' + p.name + ' = Pet("' + p.name + '")</b> → __init__ 自动执行：' + p.name + ' 出生了！（HP:100 · 等级:1）');
+  document.getElementById('pet-name').value = '';
+  renderPets();
+}
+
+function petAct(idx, method){
+  var p = pets[idx];
+  if(!p){ return; }
+  var before = p.hp;
+  var msg = '';
+  if(method === 'eat'){
+    p.eat();
+    msg = (before >= 100) ? '（已经满血啦，min 上限 100 挡住了）' : '（HP ' + before + ' → ' + p.hp + '）';
+    addLog('<b>' + p.name + '.eat()</b> → 喂食成功' + msg);
+  }else if(method === 'play'){
+    var up = p.play();
+    addLog('<b>' + p.name + '.play()</b> → 心情：兴奋 · 经验+5' + (up ? ' · <b style="color:var(--gold)">升级！Lv.' + p.level + '</b>' : ''));
+  }else if(method === 'sleep'){
+    p.sleep();
+    addLog('<b>' + p.name + '.sleep()</b> → HP 回满（' + before + ' → 100）· 心情：安静');
+  }
+  highlightMethod(method);
+  renderPets();
+}
+
+function renderPets(){
+  var box = document.getElementById('pet-cards');
+  var html = '';
+  for(var i=0;i<pets.length;i++){
+    var p = pets[i];
+    html += '<div class="pet-card">' +
+      '<div class="pet-name">🐾 ' + p.name + '</div>' +
+      '<div class="pet-species">种族 = Pet.species = "' + Pet.species + '"（类属性 · 全体共享）</div>' +
+      '<div class="hpbar"><div class="hpfill" style="width:' + p.hp + '%"></div></div>' +
+      '<div class="pet-row"><span>HP</span><b>' + p.hp + ' / 100</b></div>' +
+      '<div class="pet-row"><span>心情</span><b>' + p.mood + '</b></div>' +
+      '<div class="pet-row"><span>等级 / 经验</span><b>Lv.' + p.level + ' · ' + p.exp + '/10</b></div>' +
+      '<button class="pbtn" onclick="petAct(' + i + ',\'eat\')">🍖 喂食</button>' +
+      '<button class="pbtn" onclick="petAct(' + i + ',\'play\')">🎾 玩耍</button>' +
+      '<button class="pbtn" onclick="petAct(' + i + ',\'sleep\')">💤 睡觉</button>' +
+      '</div>';
+  }
+  box.innerHTML = html;
+}
+
+(function(){
+  var first = new Pet('小白');
+  pets.push(first);
+  addLog('<b>小白 = Pet("小白")</b> → __init__ 自动执行：小白 出生了！（HP:100 · 等级:1）');
+  renderPets();
+})();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · __init__ 什么时候执行？',
+    code:'class Pet:\n    def __init__(self, name):\n        print(name, "出生了！")\n\nprint("—— 召唤之前 ——")\npet = Pet("小白")\nprint("—— 召唤之后 ——")',
+    opts:['定义 class 的那一刻就执行','实例化 Pet("小白") 的那一刻自动执行','第一次调用方法时执行','永远不会自动执行'],
+    ans:1,
+    exp:'class Pet: 只是画图纸，啥也不执行；Pet("小白") 实例化的一瞬间，Python 自动调用 __init__ 完成出生登记。所以"小白 出生了！"出现在两句横幅之间。'
+  },
+  {
+    title:'第 2 预言 · self 到底是谁？',
+    code:'class Pet:\n    def __init__(self, name):\n        self.name = name\n\na = Pet("小白")\nb = Pet("小黑")\nprint(a.name, b.name)',
+    opts:['小白 小黑','小黑 小白','小白 小白','报错'],
+    ans:0,
+    exp:'self 永远指向"当前实例"：实例化 a 时 self 是 a，所以 a.name 是"小白"；实例化 b 时 self 是 b，所以 b.name 是"小黑"。同一张图纸，各领各的证。'
+  },
+  {
+    title:'第 3 预言 · 实例属性会不会互相干扰？',
+    code:'class Pet:\n    def __init__(self):\n        self.hp = 100\n    def take_damage(self):\n        self.hp = self.hp - 30\n\na = Pet()\nb = Pet()\na.take_damage()\na.take_damage()\nprint(a.hp, b.hp)',
+    opts:['40 100','40 40','100 100','70 100'],
+    ans:0,
+    exp:'a 挨了两刀：100-30-30=40；b 一次没挨，还是 100。实例属性每个对象各存一份，改 a 的 hp 碰不到 b 的 hp——互不干扰是天性。'
+  },
+  {
+    title:'第 4 预言 · 类属性与实例属性同名，听谁的？',
+    code:'class Pet:\n    species = "幻兽"\n\na = Pet()\nb = Pet()\nb.species = "神兽"\nprint(a.species, b.species)',
+    opts:['幻兽 神兽','神兽 神兽','幻兽 幻兽','报错'],
+    ans:0,
+    exp:'b.species = "神兽" 是给 b 自己发了张实例属性卡片；查 a.species 时 a 口袋里没有，才去类身上找，所以还是"幻兽"。同名时实例属性优先，类属性本体纹丝不动。'
+  },
+  {
+    title:'第 5 预言 · 忘了写 self 会怎样？',
+    code:'class Dog:\n    def bark():\n        print("汪汪！")\n\ndog = Dog()\ndog.bark()',
+    opts:['正常输出 汪汪！','报错 TypeError','报错 SyntaxError','什么都不发生'],
+    ans:1,
+    exp:'dog.bark() 会把 dog 作为第一个参数传进去，而 bark() 定义时一个参数都没收——TypeError: Dog.bark() takes 0 positional arguments but 1 was given。记住：方法的第一个参数永远是 self。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l.replace(/("[^"]*")/g,'<span style="color:var(--purple)">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|class|def|self|return)/g,'<span style="color:var(--pink)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['类和对象的关系？','类是图纸，对象（实例）是照图纸造出来的实物；图纸一张，实例无数'],
+  ['定义类用什么关键字？','class，例如 class Pet: —— 类名习惯用大驼峰（Pet、PlayerAccount）'],
+  ['__init__ 是什么？','构造方法：实例化的那一刻自动执行，负责给新实例登记初始属性'],
+  ['self 是谁？','方法的第一个参数，指向当前实例自身；点号前是谁，self 就是谁'],
+  ['实例化的语法是？','pet = Pet("小白") —— 类名加括号，括号里传给 __init__ 的参数'],
+  ['pet.eat() 调用时发生了什么？','等价于 Pet.eat(pet)：Python 悄悄把 pet 塞给 self'],
+  ['实例属性和类属性的区别','实例属性写在 self. 后面，每只一份；类属性写在方法外，全族共享一份'],
+  ['实例属性与类属性同名，谁优先？','实例属性优先：先查实例自己的口袋，没有才去类身上找'],
+  ['两个实例的属性互相影响吗？','不。改 a.hp 不影响 b.hp——实例属性各自独立存放'],
+  ['为什么需要类？','把数据（属性）和行为（方法）打包在一张图纸上，批量制造、各管各的——面向对象编程']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'定义一个类的关键字是？',
+   opts:['def','class','object','struct'], ans:1,
+   exp:'def 定义函数，class 定义类。类名习惯用大驼峰：class Pet:'},
+  {q:'__init__ 方法在什么时候执行？',
+   opts:['写 class 语句时','实例化（如 pet = Pet("小白")）时自动执行','第一次调用其他方法时','需要手动调用它才执行'], ans:1,
+   exp:'__init__ 是构造方法，实例化的一瞬间 Python 自动调用它完成初始化——所以叫"出生登记处"。'},
+  {q:'self 指向的是？',
+   opts:['类本身','当前调用方法的实例自身','父类','随便一个全局变量'], ans:1,
+   exp:'self 永远指向当前实例：a.eat() 时 self 是 a，b.eat() 时 self 是 b。同一份方法代码，靠 self 分辨伺候的是谁。'},
+  {q:'pet = Pet("小白") 这行代码叫什么？',
+   opts:['定义类','声明函数','实例化（创建对象）','继承'], ans:2,
+   exp:'类名加括号 = 照图纸造实物。这一刻 __init__ 自动执行，pet 就是一个全新的实例。'},
+  {q:'下面关于实例属性和类属性的说法，正确的是？',
+   opts:['都存在每个实例身上，各一份','类属性全族共享一份；实例属性每个实例各一份','实例属性全族共享；类属性各一份','两者完全一样'], ans:1,
+   exp:'类属性写在方法外、挂在类身上（如 species）；实例属性写在 self. 后面、每只自己存（如 name、hp）。'},
+  {q:'类属性 species = "幻兽"，某实例执行了 b.species = "神兽"，则 a.species（a 是另一实例）是？',
+   opts:['神兽','幻兽','报错','None'], ans:1,
+   exp:'赋值只给 b 自己发了张实例属性卡片，类属性本体没动。a 口袋里没有 species，仍去类身上找到"幻兽"。'},
+  {q:'a.eat() 在 Python 内部等价于？',
+   opts:['Pet.eat()','Pet.eat(a)','eat(a)','a.__init__()'], ans:1,
+   exp:'点号前是谁，就把谁传给 self。这正是方法定义必须写 self、调用却不用传的原因。'},
+  {q:'a 和 b 是同一个类的两个实例，执行 a.hp = 40 之后，b.hp 是？（初始都是 100）',
+   opts:['40','100','报错','不确定'], ans:1,
+   exp:'实例属性各自独立存放，改 a 的 hp 碰不到 b 的 hp——多实例互不干扰。'},
+  {q:'class Dog: 里写 def bark():（漏了 self），调用 dog.bark() 会怎样？',
+   opts:['正常执行','输出 None','报错 TypeError（参数数量不符）','自动补上 self'], ans:2,
+   exp:'dog.bark() 会把 dog 传给第一个参数，而 bark() 一个参数都没收——TypeError: takes 0 positional arguments but 1 was given。'},
+  {q:'相比"字典存数据 + 函数处理数据"的写法，类最大的好处是？',
+   opts:['代码行数一定更少','运行速度一定更快','数据和行为打包在同一张图纸上，可批量制造互相独立的实例','Python 里不用类就写不了函数'], ans:2,
+   exp:'类把属性（数据）和方法（行为）封装在一起，一张图纸批量实例化，每只实例各管各的——这就是面向对象编程的出发点。行数和速度未必占优，结构和可维护性才是重点。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！造物主本主，下一课已为你解锁 🔓' : '通关成功！第 17 课「继承与魔法方法」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

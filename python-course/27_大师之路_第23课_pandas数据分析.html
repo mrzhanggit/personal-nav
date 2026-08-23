@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第23课 · pandas 数据分析 —— 千里眼</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(244,114,182,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--pink);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(244,114,182,.12);color:var(--pink);border:1px solid rgba(244,114,182,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f472b6,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--pink);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--purple);} /* 关键字/函数 */
+  .code .s{color:var(--pink);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f9a8d4;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* DataFrame 结构示意 */
+  .df-demo{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap;justify-content:center;margin:20px 0;}
+  .df-demo .side{
+    width:170px;background:var(--card);border:2px solid var(--pink);border-radius:14px;
+    padding:14px;text-align:center;cursor:default;transition:all .3s;
+  }
+  .df-demo .side:hover{transform:translateY(-6px);box-shadow:0 8px 28px rgba(244,114,182,.25);}
+  .df-demo .side b{color:var(--pink);font-size:16px;}
+  .df-demo .side p{font-size:12px;color:var(--muted);margin:6px 0 0;text-align:center;}
+  .df-demo .arrow{align-self:center;font-size:26px;color:var(--gold);}
+  /* 实验室 */
+  .lab-btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
+  .btn{
+    background:linear-gradient(135deg,var(--pink),var(--purple));color:#0d1021;border:none;
+    padding:9px 18px;border-radius:10px;font-size:13.5px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,114,182,.3);}
+  .btn.ghost{background:#0a0d1e;color:var(--text);border:1px solid var(--line);}
+  .lab-status{
+    font-size:13px;color:var(--gold);background:#0a0d1e;border:1px dashed var(--line);
+    border-radius:10px;padding:8px 14px;margin:8px 0;font-family:ui-monospace,Menlo,monospace;
+  }
+  .dftable{
+    width:100%;border-collapse:collapse;font-family:ui-monospace,Menlo,monospace;
+    font-size:13px;margin:10px 0;background:#0a0d1e;border-radius:10px;overflow:hidden;
+  }
+  .dftable th{
+    background:rgba(244,114,182,.16);color:var(--pink);padding:8px 10px;
+    border-bottom:2px solid rgba(244,114,182,.4);text-align:center;font-weight:700;
+  }
+  .dftable td{
+    padding:7px 10px;text-align:center;border-bottom:1px solid var(--line);color:var(--text);
+  }
+  .dftable tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+  .dftable td.idx{color:var(--muted);}
+  .dftable td.hi{color:var(--gold);font-weight:700;}
+  .lab-note{font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;margin-top:10px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);color:var(--pink);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#331a2e,#141833);border:1px solid var(--pink);color:var(--pink);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#2a1a3d,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 大师之路 · <b>第 23 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 5 · MASTER ROAD</div>
+    <h1>pandas 数据分析 —— 千里眼</h1>
+    <div class="subtitle">今日目标：让程序一眼看穿整张数据表</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解 <span class="hl">Series</span> 与 <span class="hl">DataFrame</span>：带标签的一列 vs 带标签的表格</li>
+      <li>掌握读数据与三板斧：<span class="hl">read_csv / head / info / describe</span></li>
+      <li>会选列、条件筛选（<span class="hl">&amp; 和 |</span>）、排序、分组聚合 <span class="hl">groupby</span></li>
+      <li>会新增计算列、<span class="hl">value_counts</span> 统计分布、<span class="hl">to_csv</span> 保存结果</li>
+      <li>通关实验室「迷你 DataFrame 工作台」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 DataFrame 与 Series -->
+  <section>
+    <h2><span class="num">1</span>千里眼的两件法宝：DataFrame 与 Series</h2>
+    <p>前 22 课你的数据都是一个个零散的变量。真实世界的数据是<b>一整张表</b>：几百行学生成绩、几万条销售记录。pandas 的 <span class="hl">DataFrame</span> 就是<span class="hl">带标签的二维表格</span>——每列有列名，每行有行号（索引）。</p>
+
+    <div class="df-demo">
+      <div class="side"><b>📐 DataFrame</b><p>整张表：行索引 + 列名<br>像一张会计算的 Excel</p></div>
+      <div class="arrow">→ 抽出一列 →</div>
+      <div class="side"><b>📏 Series</b><p>带标签的一维序列<br>DataFrame 的每一列就是一个 Series</p></div>
+    </div>
+
+    <p>手工造一张小表感受一下（把鼠标移到上面的卡片上）：</p>
+    <div class="code"><span class="k">import</span> <span class="v">pandas</span> <span class="k">as</span> <span class="v">pd</span>
+
+<span class="v">df</span> = <span class="v">pd</span>.<span class="v">DataFrame</span>({
+    <span class="s">"姓名"</span>: [<span class="s">"阿呆"</span>, <span class="s">"小满"</span>, <span class="s">"铁柱"</span>],
+    <span class="s">"科目"</span>: [<span class="s">"数学"</span>, <span class="s">"语文"</span>, <span class="s">"英语"</span>],
+    <span class="s">"分数"</span>: [<span class="n">92</span>, <span class="n">85</span>, <span class="n">78</span>],
+})
+<span class="k">print</span>(<span class="v">df</span>)</div>
+    <div class="out">   姓名  科目  分数
+0  阿呆  数学  92
+1  小满  语文  85
+2  铁柱  英语  78</div>
+    <p>最左边一列 <span class="hl-c">0 1 2</span> 就是行索引（自动生成），第一行是列名。<span class="hl">DataFrame 的每一列，单独拿出来就是一个 Series。</span></p>
+    <p>🧠 记忆口诀：<span class="hl">DataFrame 是一张表，Series 是表里的一列。</span></p>
+  </section>
+
+  <!-- 2 读数据与三板斧 -->
+  <section>
+    <h2><span class="num">2</span>读数据 + 三板斧：先看一眼再动手</h2>
+    <p>真实数据通常存在 CSV 文件里（逗号分隔的表格文本）。一行代码读进来：</p>
+    <div class="code"><span class="k">import</span> <span class="v">pandas</span> <span class="k">as</span> <span class="v">pd</span>
+
+<span class="v">df</span> = <span class="v">pd</span>.<span class="v">read_csv</span>(<span class="s">"scores.csv"</span>)   <span class="c"># 读入 CSV，得到 DataFrame（15 名学生的成绩表）</span></div>
+    <p>拿到陌生数据，先抡<b>三板斧</b>，从粗到细看清全貌：</p>
+    <p>① <span class="hl">df.head()</span> —— 看前几行，数据长什么样：</p>
+    <div class="code"><span class="v">df</span>.<span class="k">head</span>()   <span class="c"># 默认看前 5 行，也可以 df.head(8)</span></div>
+    <div class="out">   姓名  科目  分数  学习时长
+0  阿呆  数学  92   5.0
+1  小满  语文  85   4.5
+2  铁柱  英语  78   3.0
+3  灵儿  数学  95   6.0
+4  大熊  语文  66   2.0</div>
+    <p>② <span class="hl">df.info()</span> —— 体检表：每列叫什么、什么类型、有没有缺失值：</p>
+    <div class="out">&lt;class 'pandas.DataFrame'&gt;
+RangeIndex: 15 entries, 0 to 14
+Data columns (total 4 columns):
+ #   Column  Non-Null Count  Dtype
+---  ------  --------------  -----
+ 0   姓名      15 non-null     str
+ 1   科目      15 non-null     str
+ 2   分数      15 non-null     int64
+ 3   学习时长    15 non-null     float64
+（旧版 pandas 中文字列显示为 object，新版显示为 str，含义相同）</div>
+    <p>③ <span class="hl">df["分数"].describe()</span> —— 统计摘要：均值、最值、四分位数，一眼看穿分布：</p>
+    <div class="out">count    15.000000
+mean     81.600000
+std      11.127829
+min      59.000000
+25%      74.500000
+50%      84.000000
+75%      90.000000
+max      97.000000
+Name: 分数, dtype: float64</div>
+    <p>🧠 记忆口诀：<span class="hl">head 看脸，info 体检，describe 摸底。</span></p>
+  </section>
+
+  <!-- 3 选列与条件筛选 -->
+  <section>
+    <h2><span class="num">3</span>选列与条件筛选：千里眼的透视眼</h2>
+    <p><b>选一列</b>：用中括号 + 列名（字符串），返回 <span class="hl">Series</span>：</p>
+    <div class="code"><span class="v">scores</span> = <span class="v">df</span>[<span class="s">"分数"</span>]        <span class="c"># 一列 → Series</span>
+<span class="k">print</span>(<span class="k">type</span>(<span class="v">df</span>[<span class="s">"分数"</span>]))</div>
+    <div class="out">&lt;class 'pandas.core.series.Series'&gt;</div>
+    <p><b>条件筛选</b>：方括号里放一个「布尔条件」，pandas 只留下条件为 True 的行——这是数据分析最高频的操作：</p>
+    <div class="code"><span class="v">df</span>[<span class="v">df</span>[<span class="s">"分数"</span>] &gt; <span class="n">90</span>]   <span class="c"># 筛出分数大于 90 的所有行</span></div>
+    <div class="out">    姓名  科目  分数  学习时长
+0   阿呆  数学  92   5.0
+3   灵儿  数学  95   6.0
+7   月月  语文  91   6.5
+10  阿宝  语文  97   7.0</div>
+    <p>注意行索引还是 <span class="hl-c">0 3 7 10</span>——筛选不重排行号，只是抽出了符合条件的行。</p>
+    <p><b>多条件</b>：用 <code class="hl-p">&amp;</code>（且）和 <code class="hl-p">|</code>（或）连接，<span class="hl">每个条件必须用括号包住</span>：</p>
+    <div class="code"><span class="v">df</span>[(<span class="v">df</span>[<span class="s">"分数"</span>] &gt; <span class="n">90</span>) &amp; (<span class="v">df</span>[<span class="s">"科目"</span>] == <span class="s">"数学"</span>)]   <span class="c"># 分数&gt;90 且 是数学</span></div>
+    <div class="out">   姓名  科目  分数  学习时长
+0  阿呆  数学  92   5.0
+3  灵儿  数学  95   6.0</div>
+    <p>⚠️ 经典大坑：<span class="hl">不能写成 and / or</span>！Python 的 <code class="hl-c">and</code> 试图对整个 Series 求真假，pandas 会直接拒绝：</p>
+    <div class="code"><span class="v">df</span>[(<span class="v">df</span>[<span class="s">"分数"</span>] &gt; <span class="n">90</span>) <span class="k">and</span> (<span class="v">df</span>[<span class="s">"科目"</span>] == <span class="s">"数学"</span>)]   <span class="c"># 💥 报错！</span>
+<span class="c"># ValueError: The truth value of a Series is ambiguous</span></div>
+    <p>🧠 记忆口诀：<span class="hl">pandas 里「且 &amp; 或 |」，括号一个不能少。</span></p>
+  </section>
+
+  <!-- 4 排序与分组 -->
+  <section>
+    <h2><span class="num">4</span>排序与分组聚合：排出英雄榜</h2>
+    <p><b>排序</b>：<span class="hl">sort_values</span> 按某一列排，<code class="hl-c">ascending=False</code> 表示从高到低（默认从低到高）：</p>
+    <div class="code"><span class="v">df</span>.<span class="k">sort_values</span>(<span class="s">"分数"</span>, ascending=<span class="k">False</span>).<span class="k">head</span>(<span class="n">3</span>)   <span class="c"># 分数前三名</span></div>
+    <div class="out">    姓名  科目  分数  学习时长
+10  阿宝  语文  97   7.0
+3   灵儿  数学  95   6.0
+0   阿呆  数学  92   5.0</div>
+    <p><b>分组聚合</b>：分组聚合是数据分析的灵魂操作——<span class="hl">groupby 先按某列分组，再对每组算一个统计量</span>。「每个科目的平均分是多少？」一句话搞定：</p>
+    <div class="code"><span class="v">df</span>.<span class="k">groupby</span>(<span class="s">"科目"</span>)[<span class="s">"分数"</span>].<span class="k">mean</span>()   <span class="c"># 按科目分组，对分数求平均</span></div>
+    <div class="out">科目
+数学    85.0
+英语    76.8
+语文    83.0
+Name: 分数, dtype: float64</div>
+    <p>结果从 15 行变成 <span class="hl">每组一行</span>——这正是「分组」的含义。把 mean 换成 sum、max、min 同理；想一次算多个指标就用 <span class="hl">agg</span>：</p>
+    <div class="code"><span class="v">df</span>.<span class="k">groupby</span>(<span class="s">"科目"</span>)[<span class="s">"分数"</span>].<span class="k">agg</span>([<span class="s">"mean"</span>, <span class="s">"max"</span>])   <span class="c"># 每科的平均分 + 最高分</span></div>
+    <div class="out">     mean  max
+科目
+数学  85.0   95
+英语  76.8   89
+语文  83.0   97</div>
+    <p>🧠 记忆口诀：<span class="hl">groupby 分家，聚合算总账。</span></p>
+  </section>
+
+  <!-- 5 新增列 / value_counts / to_csv -->
+  <section>
+    <h2><span class="num">5</span>新增列 · 统计分布 · 保存结果</h2>
+    <p><b>新增计算列</b>：像给普通变量赋值一样，直接给一个新列名赋值——整列会<b>逐行自动计算</b>：</p>
+    <div class="code"><span class="v">df</span>[<span class="s">"效率"</span>] = (<span class="v">df</span>[<span class="s">"分数"</span>] / <span class="v">df</span>[<span class="s">"学习时长"</span>]).<span class="k">round</span>(<span class="n">1</span>)   <span class="c"># 每小时得几分</span>
+<span class="v">df</span>.<span class="k">head</span>(<span class="n">3</span>)</div>
+    <div class="out">  姓名  科目  分数  学习时长   效率
+0  阿呆  数学  92   5.0  18.4
+1  小满  语文  85   4.5  18.9
+2  铁柱  英语  78   3.0  26.0</div>
+    <p>铁柱效率 26.0 全班第一——分数不是唯一的标准，这就是「新增列」的价值：<span class="hl">派生出新的观察角度</span>。</p>
+    <p><b>统计分布</b>：<span class="hl">value_counts()</span> 数一数每类出现了几次（调查问卷、分类统计神器）：</p>
+    <div class="code"><span class="v">df</span>[<span class="s">"科目"</span>].<span class="k">value_counts</span>()</div>
+    <div class="out">科目
+数学    5
+语文    5
+英语    5
+Name: count, dtype: int64</div>
+    <p><b>保存结果</b>：分析完的表一行存回 CSV，<code class="hl-c">index=False</code> 表示不把行号写进文件：</p>
+    <div class="code"><span class="v">df</span>.<span class="k">to_csv</span>(<span class="s">"result.csv"</span>, index=<span class="k">False</span>)   <span class="c"># 保存为 result.csv，可用 Excel 打开</span></div>
+    <p>至于<b>画图</b>：pandas 和 matplotlib 是黄金搭档，一行就能出柱状图（如 <code class="hl-c">df["科目"].value_counts().plot(kind="bar")</code>），以后再专门修炼，今天先会算就行。</p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 迷你 DataFrame 工作台</h2>
+    <p>这是一份虚拟班级成绩表 <b>df</b>（15 名学生，4 列）。点击下方按钮，就像在 Jupyter 里逐行执行 pandas 代码——每次操作都会展示等价代码和表格变化。操作可叠加：先筛选再排序，试试看！</p>
+    <div class="lab-btns">
+      <button class="btn ghost" onclick="opReset()">↺ 重置 df</button>
+      <button class="btn" onclick="opHead()">head() 前五行</button>
+      <button class="btn" onclick="opFilter()">筛选 分数&gt;90</button>
+      <button class="btn" onclick="opSort()">排序 分数↓</button>
+      <button class="btn" onclick="opGroup()">groupby 科目求平均</button>
+      <button class="btn" onclick="opAddCol()">新增列 效率</button>
+      <button class="btn" onclick="opVC()">value_counts 科目</button>
+    </div>
+    <div class="lab-status" id="lab-status">当前 df：15 行 × 4 列</div>
+    <div class="code" id="lab-code"><span class="c"># 等价 pandas 代码会显示在这里，点上面的按钮试试 ↓</span></div>
+    <div id="df-view"></div>
+    <div class="lab-note">💡 表格由页面内置的同一份数据实时计算，与真实 pandas 的输出一致（小数位数可能略有差异）。操作顺序不同，结果就不同——这正是 pandas 的魅力。</div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测结果，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 25 分钟）</h2>
+    <li>① 安装 pandas：终端执行 <code>pip install pandas</code>（装过就跳过）</li>
+    <li>② 用记事本造一个 <code>scores.csv</code>：第一行写 <code>姓名,科目,分数,学习时长</code>，下面抄 5~10 行自己的数据</li>
+    <li>③ 写一个 <code>analyze.py</code>：read_csv 读入 → 三板斧看一眼 → 筛出分数最高的 3 人 → 按科目求平均分</li>
+    <li>④ 挑战：新增一列「效率 = 分数 / 学习时长」，找出效率之王；用 <code>to_csv</code> 把结果存成 <code>result.csv</code>，用 Excel 打开检查</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>Git 与工程化 —— 公会规范</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：迷你 DataFrame 工作台 ============ */
+var rawData = [
+  ["阿呆","数学",92,5.0],["小满","语文",85,4.5],["铁柱","英语",78,3.0],
+  ["灵儿","数学",95,6.0],["大熊","语文",66,2.0],["糖糖","英语",88,5.5],
+  ["阿吉","数学",73,3.5],["月月","语文",91,6.5],["石头","英语",59,1.5],
+  ["妞妞","数学",84,4.0],["阿宝","语文",97,7.0],["花花","英语",70,2.5],
+  ["冬冬","数学",81,5.0],["米粒","语文",76,3.0],["布丁","英语",89,6.0]
+];
+var df = [];              /* 工作区：[{i, 姓名, 科目, 分数, 时长, 效率?}, ...] */
+
+function resetDf(){
+  df = rawData.map(function(r, i){
+    return {i:i, name:r[0], subj:r[1], score:r[2], hours:r[3], eff:null};
+  });
+}
+function esc(s){ return String(s); }
+function renderTable(cols, rows, note){
+  var html = '<table class="dftable"><tr>' +
+    cols.map(function(c){ return '<th>' + c + '</th>'; }).join('') + '</tr>';
+  rows.forEach(function(r){ html += '<tr>' + r.map(function(c){ return c; }).join('') + '</tr>'; });
+  html += '</table>';
+  document.getElementById('df-view').innerHTML = html +
+    (note ? '<p style="font-size:12.5px;color:var(--muted)">' + note + '</p>' : '');
+}
+function showFullTable(){
+  var hasEff = df.length > 0 && df[0].eff !== null;
+  var cols = ['', '姓名', '科目', '分数', '学习时长'].concat(hasEff ? ['效率'] : []);
+  var rows = df.map(function(r){
+    var cells = [
+      '<td class="idx">' + r.i + '</td>',
+      '<td>' + r.name + '</td>', '<td>' + r.subj + '</td>',
+      '<td>' + r.score + '</td>', '<td>' + r.hours.toFixed(1) + '</td>'
+    ];
+    if(hasEff) cells.push('<td class="hi">' + r.eff.toFixed(1) + '</td>');
+    return cells;
+  });
+  var ncol = hasEff ? 5 : 4;
+  renderTable(cols, rows,
+    '▶ ' + df.length + ' 行 × ' + ncol + ' 列' + (df.length < 15 ? '（行索引保留原编号，和 pandas 行为一致）' : ''));
+  document.getElementById('lab-status').textContent =
+    '当前 df：' + df.length + ' 行 × ' + ncol + ' 列' + (hasEff ? '（已含 效率 列）' : '');
+}
+function setCode(html){ document.getElementById('lab-code').innerHTML = html; }
+
+function opReset(){
+  resetDf(); showFullTable();
+  setCode('<span class="v">df</span> = <span class="v">pd</span>.<span class="k">read_csv</span>(<span class="s">"scores.csv"</span>)   <span class="c"># 重新读入原始 15 行数据</span>');
+}
+function opHead(){
+  df = df.slice(0, 5); showFullTable();
+  setCode('<span class="v">df</span> = <span class="v">df</span>.<span class="k">head</span>()   <span class="c"># 只保留前 5 行（默认 n=5）</span>');
+}
+function opFilter(){
+  var before = df.length;
+  df = df.filter(function(r){ return r.score > 90; }); showFullTable();
+  setCode('<span class="v">df</span> = <span class="v">df</span>[<span class="v">df</span>[<span class="s">"分数"</span>] &gt; <span class="n">90</span>]   <span class="c"># 筛掉 ' + (before - df.length) + ' 行，只剩分数&gt;90 的行</span>');
+}
+function opSort(){
+  df = df.slice().sort(function(a, b){ return b.score - a.score; }); showFullTable();
+  setCode('<span class="v">df</span> = <span class="v">df</span>.<span class="k">sort_values</span>(<span class="s">"分数"</span>, ascending=<span class="k">False</span>)   <span class="c"># 按分数从高到低，行索引跟着行走</span>');
+}
+function opGroup(){
+  var groups = {};
+  df.forEach(function(r){
+    if(!groups[r.subj]) groups[r.subj] = [];
+    groups[r.subj].push(r.score);
+  });
+  var keys = Object.keys(groups).sort();
+  var rows = keys.map(function(k){
+    var arr = groups[k];
+    var sum = 0;
+    arr.forEach(function(x){ sum += x; });
+    var mean = Math.round(sum / arr.length * 10) / 10;
+    return ['<td class="hi">' + k + '</td>', '<td>' + mean.toFixed(1) + '</td>'];
+  });
+  renderTable(['科目', '分数 mean'], rows,
+    '▶ groupby 聚合结果：' + keys.length + ' 组（每组一行）。df 本身不变，还可以继续叠加其他操作');
+  setCode('<span class="v">df</span>.<span class="k">groupby</span>(<span class="s">"科目"</span>)[<span class="s">"分数"</span>].<span class="k">mean</span>()   <span class="c"># 按科目分组，对分数求平均</span>');
+}
+function opAddCol(){
+  if(df.length === 0){ return; }
+  if(df[0].eff !== null){
+    document.getElementById('lab-status').textContent = '「效率」列已存在，不能再添加（可先重置）';
+    return;
+  }
+  df.forEach(function(r){ r.eff = Math.round(r.score / r.hours * 10) / 10; });
+  showFullTable();
+  setCode('<span class="v">df</span>[<span class="s">"效率"</span>] = (<span class="v">df</span>[<span class="s">"分数"</span>] / <span class="v">df</span>[<span class="s">"学习时长"</span>]).<span class="k">round</span>(<span class="n">1</span>)   <span class="c"># 整列逐行自动计算</span>');
+}
+function opVC(){
+  var groups = {};
+  df.forEach(function(r){
+    if(!groups[r.subj]) groups[r.subj] = 0;
+    groups[r.subj]++;
+  });
+  var keys = Object.keys(groups).sort();
+  var rows = keys.map(function(k){
+    return ['<td class="hi">' + k + '</td>', '<td>' + groups[k] + '</td>'];
+  });
+  renderTable(['科目', 'count'], rows,
+    '▶ value_counts 统计「科目」列每个取值出现的次数，共统计 ' + df.length + ' 行');
+  setCode('<span class="v">df</span>[<span class="s">"科目"</span>].<span class="k">value_counts</span>()   <span class="c"># 数一数每类出现几次</span>');
+}
+resetDf(); showFullTable();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 抽出一列是什么',
+    code:'import pandas as pd\n\ndf = pd.read_csv("scores.csv")\nprint(type(df["分数"]))',
+    opts:["&lt;class 'pandas.DataFrame'&gt;","&lt;class 'pandas.core.series.Series'&gt;","&lt;class 'list'&gt;","&lt;class 'str'&gt;"],
+    ans:1,
+    exp:'df["列名"] 抽出的是一列，也就是一个 Series。整张表才是 DataFrame。'
+  },
+  {
+    title:'第 2 预言 · and 惹的祸',
+    code:'df[(df["分数"] > 90) and (df["科目"] == "数学")]',
+    opts:['正常筛出两科条件都满足的行','ValueError：The truth value of a Series is ambiguous','只执行了分数条件','报错 SyntaxError'],
+    ans:1,
+    exp:'and 试图把整个 Series 压成一个 True/False，pandas 直接报 ValueError。多条件要用 & 和 |，且每个条件加括号。'
+  },
+  {
+    title:'第 3 预言 · groupby 之后',
+    code:'df.groupby("科目")["分数"].mean()',
+    opts:['所有分数的总平均分（一个数字）','每个科目一行的平均分','报错，mean 不能接在 groupby 后面','原表 15 行原样返回'],
+    ans:1,
+    exp:'groupby 按科目分成 3 组，mean 分别对每组求平均，结果是每组一行（带科目索引）的 Series，不是一个数字。'
+  },
+  {
+    title:'第 4 预言 · head 的默认值',
+    code:'df.head()   # 一张 15 行的表',
+    opts:['显示前 3 行','显示前 5 行','显示前 10 行','显示全部 15 行'],
+    ans:1,
+    exp:'head() 默认 n=5，返回前 5 行。想看别的行数就写 df.head(8)。'
+  },
+  {
+    title:'第 5 预言 · 新增一列的写法',
+    code:'# 想给 df 新增一列"效率"',
+    opts:['df["效率"] = df["分数"] / df["学习时长"]','df.add_column("效率", df["分数"] / df["学习时长"])','df.append("效率")','效率 = df["分数"] / df["学习时长"]'],
+    ans:0,
+    exp:'pandas 新增列就是给一个新列名直接赋值，整列逐行自动计算；没有 add_column 这种方法，最后一个只是普通变量。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l.replace(/("[^"]*")/g,'<span style="color:var(--pink)">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|import|type|pd|read_csv|groupby|mean|head)/g,'<span style="color:var(--purple)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['DataFrame 是什么','带行列标签的二维表格（行索引 + 列名），像一张会计算的 Excel'],
+  ['Series 是什么','带标签的一维数据；DataFrame 的每一列单独拿出来就是一个 Series'],
+  ['三板斧是哪三板','head() 看前几行 · info() 看类型和缺失 · describe() 看统计摘要'],
+  ['df["分数"] 返回什么','一个 Series（不是列表，也不是 DataFrame）'],
+  ['条件筛选怎么写','df[df["分数"] > 90]：方括号里放布尔条件，留下为 True 的行'],
+  ['多条件怎么连接','用 &（且）和 |（或），且每个条件必须用括号包住'],
+  ['为什么不能用 and','and 要对整个 Series 求真假，触发 ValueError；必须用 & |'],
+  ['groupby + mean 干什么','按某列分组，再对每组分别求平均，结果每组一行'],
+  ['新增列怎么写','df["新列"] = 计算式，直接赋值，整列逐行自动计算'],
+  ['value_counts 干什么','统计某列中每个取值出现的次数，看分布神器']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'DataFrame 可以理解为？',
+   opts:['一个普通列表','带行列标签的二维表格','一个 Python 字典','一种循环结构'], ans:1,
+   exp:'DataFrame = 行索引 + 列名 + 数据，是 pandas 里最核心的表格结构。'},
+  {q:'pd.read_csv("scores.csv") 的作用是？',
+   opts:['把 DataFrame 存成 CSV 文件','读入 CSV 文件生成 DataFrame','打印 CSV 全部内容','创建空表'], ans:1,
+   exp:'read_csv 是"读"，to_csv 是"存"，方向别搞反。'},
+  {q:'df.head() 默认显示前几行？',
+   opts:['3 行','5 行','10 行','全部'], ans:1,
+   exp:'默认 n=5；想看 8 行就写 df.head(8)。'},
+  {q:'describe() 主要用来看什么？',
+   opts:['前几行长什么样','每列的类型和缺失值','均值、最值、四分位数等统计摘要','表的行数和列数'], ans:2,
+   exp:'describe() 是摸底统计：count/mean/std/min/四分位/max。看类型和缺失是 info() 的工作。'},
+  {q:'df["分数"] 返回的类型是？',
+   opts:['DataFrame','Series','list','str'], ans:1,
+   exp:'抽一列得到 Series；抽多列 df[["姓名", "分数"]] 才得到 DataFrame。'},
+  {q:'df[df["分数"] > 90] 执行后得到？',
+   opts:['一个布尔列表','分数大于 90 的所有行','分数大于 90 的行数','报错'], ans:1,
+   exp:'方括号里放布尔条件，pandas 保留条件为 True 的行，行索引跟着行走。'},
+  {q:'把 (df["分数"]>90) & (df["科目"]=="数学") 中的 & 换成 and 会？',
+   opts:['结果完全一样','自动等价转换','报 ValueError','只保留第一个条件'], ans:2,
+   exp:'and 对整个 Series 求真假，报 ValueError: The truth value of a Series is ambiguous。记住：pandas 用 & 和 |。'},
+  {q:'sort_values("分数", ascending=False) 表示？',
+   opts:['按分数从低到高','按分数从高到低','按行号排序','报错，缺少参数'], ans:1,
+   exp:'ascending 默认 True（升序）；改成 False 就是降序，做排行榜必用。'},
+  {q:'df.groupby("科目")["分数"].mean() 的结果是？',
+   opts:['全表分数的一个总平均','每个科目一行的平均分','每个学生一行的明细','报错'], ans:1,
+   exp:'groupby 分组后聚合，结果是"每组一行"：数学/英语/语文各自的平均分。'},
+  {q:'把分析结果保存成 CSV 的正确写法是？',
+   opts:['df.read_csv("result.csv")','df.to_csv("result.csv", index=False)','df.save("result.csv")','pd.write_csv(df, "result.csv")'], ans:1,
+   exp:'to_csv 是保存；index=False 表示不把行号写进文件，用 Excel 打开更干净。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！千里眼本眼，下一课已为你解锁 🔓' : '通关成功！第 24 课「Git 与工程化」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

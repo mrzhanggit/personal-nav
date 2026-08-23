@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第15课 · 正则表达式 —— 密码猎人</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(244,114,182,.08), transparent);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fb923c 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f2d98a;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 元字符盒子 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(245,197,66,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:16px;color:var(--gold);
+    background:rgba(245,197,66,.1);border-radius:8px;padding:2px 8px;display:inline-block;font-weight:700;
+  }
+  .mbox .val{
+    font-size:14px;margin:8px 0 4px;color:var(--text);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 贪婪演示 */
+  .demo-str{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;padding:14px 18px;
+    font-family:ui-monospace,Menlo,monospace;font-size:16px;margin:12px 0;text-align:center;letter-spacing:1px;
+  }
+  .demo-str .hit{
+    background:rgba(245,197,66,.25);border-bottom:2px solid var(--gold);border-radius:4px;padding:1px 2px;
+  }
+  /* 实验室通用 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input select{
+    flex:1;min-width:160px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;font-family:inherit;
+  }
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600;}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);box-shadow:none;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+  /* 情报挖掘机 */
+  .chatlog{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;padding:16px 18px;
+    font-family:ui-monospace,Menlo,monospace;font-size:13.5px;margin:12px 0;
+    white-space:pre-wrap;line-height:1.9;
+  }
+  .chatlog .hit{
+    background:rgba(245,197,66,.22);border-bottom:2px solid var(--gold);border-radius:4px;padding:0 2px;
+    color:var(--gold);font-weight:700;animation:fadeIn .5s;
+  }
+  .chatlog .hit.masked{background:rgba(244,114,182,.2);border-bottom-color:var(--pink);color:var(--pink);}
+  .mine-list{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  .mine-chip{
+    background:rgba(245,197,66,.12);border:1px solid var(--gold);border-radius:9px;color:var(--gold);
+    padding:4px 14px;font-family:ui-monospace,Menlo,monospace;font-size:13px;animation:popIn .35s both;
+  }
+  .mine-count{font-size:13px;color:var(--muted);margin-top:6px;}
+  .pitfall{
+    background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);border-radius:14px;
+    padding:12px 18px;margin:12px 0;font-size:13px;
+  }
+  .pitfall b{color:var(--red);}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);color:var(--gold);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>第 15 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 15 · DUNGEON</div>
+    <h1>正则表达式 —— 密码猎人</h1>
+    <div class="subtitle">今日目标：从一大堆文字里，精准搜出你要的情报</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握 re 三大武器：<span class="hl">findall / search / match</span></li>
+      <li>认全元字符 <span class="hl">\d \w \s .</span>、量词 <span class="hl">+ * {m,n}</span>、锚点 <span class="hl">^ $</span></li>
+      <li>学会字符组 <span class="hl">[a-z]</span>、分组 <span class="hl">()</span>、非贪婪 <span class="hl">.*?</span> 和原始字符串 <span class="hl">r""</span></li>
+      <li>通关实验室「情报挖掘机」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 三大武器 -->
+  <section>
+    <h2><span class="num">1</span>re 三大武器：findall / search / match</h2>
+    <p>在一大段文字里找东西，字符串的 <span class="hl-c">in</span> 和 <span class="hl-c">.find()</span> 只能找"死字"。要找"所有手机号"、"所有日期"这种<span class="hl">有规律的目标</span>，就得用<span class="hl">正则表达式</span>——一串描述规律的暗号，交给 <span class="hl">re 模块</span>去执行。</p>
+    <p>三大武器各司其职：</p>
+    <div class="code"><span class="k">import</span> <span class="v">re</span>
+
+<span class="v">text</span> = <span class="s">"订单A102已发货"</span>
+
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"\d+"</span>, <span class="v">text</span>))  <span class="c"># 武器一：一网打尽，返回列表</span>
+<span class="v">m</span> = <span class="v">re</span>.search(<span class="s">r"\d+"</span>, <span class="v">text</span>)      <span class="c"># 武器二：只找第一处，返回 Match 对象</span>
+<span class="k">print</span>(<span class="v">m</span>.group())                   <span class="c"># 用 .group() 取出匹配到的文字</span>
+<span class="k">print</span>(<span class="v">re</span>.match(<span class="s">r"\d+"</span>, <span class="v">text</span>))    <span class="c"># 武器三：只从开头找 → 没找到，None</span></div>
+    <div class="out">['102']
+102
+None</div>
+    <p>① <span class="hl">findall</span>：找出<b>所有</b>匹配，装进列表还给你——用得最多。</p>
+    <p>② <span class="hl">search</span>：全文扫描，找到<b>第一处</b>就收手，结果要用 <span class="hl-c">.group()</span> 取出来；没找到返回 <span class="hl-c">None</span>。</p>
+    <p>③ <span class="hl">match</span>：只肯从<b>字符串开头</b>匹配。开头不对，后面再像也白搭：</p>
+    <div class="code"><span class="v">m</span> = <span class="v">re</span>.match(<span class="s">r"\d+"</span>, <span class="s">"102元已支付"</span>)  <span class="c"># 开头就是数字，match 有戏</span>
+<span class="k">print</span>(<span class="v">m</span>.group())  <span class="c"># 102</span></div>
+  </section>
+
+  <!-- 2 元字符与字符组 -->
+  <section>
+    <h2><span class="num">2</span>元字符：一个符号，一类字符</h2>
+    <p>正则的精髓是"暗号"：一个反斜杠符号代表一整类字符。先认识四大天王——</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">\d</div><div class="val">任意一个数字</div><div class="tip">0-9，共 10 种</div></div>
+      <div class="mbox"><div class="tag">\w</div><div class="val">字母/数字/下划线</div><div class="tip">Python 里连中文都认</div></div>
+      <div class="mbox"><div class="tag">\s</div><div class="val">任意一个空白</div><div class="tip">空格、Tab、换行</div></div>
+      <div class="mbox"><div class="tag">.</div><div class="val">任意一个字符</div><div class="tip">几乎啥都行，唯独不匹配换行</div></div>
+    </div>
+    <p>把鼠标移到暗号卡片上感受一下。实战验证：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"\w+"</span>, <span class="s">"hi 你好 666"</span>))    <span class="c"># \w 连中文都认</span>
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"a.c"</span>, <span class="s">"abc a c a\nc"</span>))  <span class="c"># 点号不匹配换行符</span></div>
+    <div class="out">['hi', '你好', '666']
+['abc', 'a c']</div>
+
+    <p>想自定义"备选名单"？用<span class="hl">字符组 [ ]</span>：方括号里列出可选字符，<b>只能选一个</b>；中间加 <span class="hl-c">-</span> 表示范围。</p>
+    <div class="code"><span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"[A-Za-z]+"</span>, <span class="s">"Hello World 123"</span>))  <span class="c"># 只抓英文单词</span>
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"[0-9]"</span>, <span class="s">"a1b2"</span>))                  <span class="c"># 等价于 \d</span></div>
+    <div class="out">['Hello', 'World']
+['1', '2']</div>
+    <p>[abc] 表示 a 或 b 或 c；[a-z] 表示小写字母；[a-zA-Z0-9] 表示字母加数字。字符组是"点菜"，一次只上一个字符。</p>
+  </section>
+
+  <!-- 3 量词与锚点 -->
+  <section>
+    <h2><span class="num">3</span>量词与锚点：几个？在哪？</h2>
+    <p>元字符一次只匹配一个字符。想匹配"一串"，得在后面挂<span class="hl">量词</span>：</p>
+    <div class="code"><span class="c"># + 一个及以上   * 零个及以上   ? 零个或一个   {m,n} m 到 n 个</span>
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"colou?r"</span>, <span class="s">"color colour colouur"</span>))  <span class="c"># u 可有可无</span>
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"\d{2,4}"</span>, <span class="s">"1 12 123 1234"</span>))            <span class="c"># 2~4 位数字</span></div>
+    <div class="out">['color', 'colour']
+['12', '123', '1234']</div>
+    <p>注意上面第二行：单独的 "1" 不够 2 位，被跳过了；"colouur" 有两个 u 也不符合 u?，所以没被选中。</p>
+    <p>还有两个"钉子"——<span class="hl">锚点</span>：^ 钉在字符串<span class="hl">开头</span>，$ 钉在<span class="hl">结尾</span>。它们不匹配任何字符，只规定位置：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">re</span>.search(<span class="s">r"^Py"</span>, <span class="s">"Python"</span>))        <span class="c"># 开头是 Py → 中！</span>
+<span class="k">print</span>(<span class="v">re</span>.search(<span class="s">r"^Py"</span>, <span class="s">"I love Python"</span>))  <span class="c"># Py 不在开头 → None，search 也救不了 ^</span></div>
+    <div class="out">&lt;re.Match object; span=(0, 2), match='Py'&gt;
+None</div>
+  </section>
+
+  <!-- 4 分组 / 贪婪 / r"" -->
+  <section>
+    <h2><span class="num">4</span>分组、贪婪与 r"" 三大心法</h2>
+    <p><span class="hl">分组 ( )</span>：把正则里的一段圈起来，既能整体引用，也能单独提取。用 <span class="hl-c">group(1)</span> 取第 1 个括号里的内容，<span class="hl-c">group(0)</span> 是整个匹配：</p>
+    <div class="code"><span class="v">m</span> = <span class="v">re</span>.search(<span class="s">r"(\d{4})-(\d{2})-(\d{2})"</span>, <span class="s">"今天 2025-01-18 开会"</span>)
+<span class="k">print</span>(<span class="v">m</span>.group(<span class="n">0</span>))  <span class="c"># 整个匹配：2025-01-18</span>
+<span class="k">print</span>(<span class="v">m</span>.group(<span class="n">1</span>))  <span class="c"># 第 1 组：年</span>
+<span class="k">print</span>(<span class="v">m</span>.group(<span class="n">2</span>))  <span class="c"># 第 2 组：月</span></div>
+    <div class="out">2025-01-18
+2025
+01</div>
+    <p>⚠️ 小心：<span class="hl">findall 遇到分组会变脸</span>——返回的不再是整个匹配，而是分组内容组成的元组：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"(\d{4})-(\d{2})"</span>, <span class="s">"2025-01-18 和 2025-02-14"</span>))</div>
+    <div class="out">[('2025', '01'), ('2025', '02')]</div>
+
+    <p><span class="hl">贪婪 vs 非贪婪</span>：量词默认贪心，能多吃绝不停嘴；加个 <span class="hl-c">?</span> 变成"见好就收"。点下面按钮体会区别：</p>
+    <div class="demo-str" id="greedy-str">&lt;a&gt;&lt;b&gt;&lt;c&gt;</div>
+    <div class="lab-input">
+      <button class="btn" onclick="showGreedy(true)">😈 贪婪 r"&lt;.*&gt;"</button>
+      <button class="btn" onclick="showGreedy(false)">🙂 非贪婪 r"&lt;.*?&gt;"</button>
+    </div>
+    <div class="code" id="greedy-code" style="display:none"></div>
+    <div class="out" id="greedy-out" style="display:none"></div>
+
+    <p><span class="hl">原始字符串 r""</span>：正则里全是反斜杠，而普通字符串会先把 <span class="hl-c">\b</span>、<span class="hl-c">\d</span> 这类组合"翻译"掉。给正则穿上 <span class="hl-c">r</span> 外套，反斜杠才能原样送达 re 引擎：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">"\bcat\b"</span>, <span class="s">"the cat sat"</span>))   <span class="c"># 普通字符串：空手而归</span>
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="s">r"\bcat\b"</span>, <span class="s">"the cat sat"</span>))  <span class="c"># 原始字符串：抓到猫！</span></div>
+    <div class="out">[]
+['cat']</div>
+    <p>原来普通字符串里的 \b 早已被 Python 翻译成"退格"字符，正则引擎根本没见到 \b（单词边界）。<b>写正则，永远加 r。</b></p>
+  </section>
+
+  <!-- 5 实战套路 -->
+  <section>
+    <h2><span class="num">5</span>猎人的弹药库：三大经典套路</h2>
+    <p>把学过的招式串起来，就能猎捕真实世界的"情报"：</p>
+    <div class="code"><span class="v">phone</span> = <span class="s">r"1[3-9]\d{9}"</span>        <span class="c"># 手机号：1 开头，第 2 位 3-9，再跟 9 位数字</span>
+<span class="v">email</span> = <span class="s">r"[\w.]+@[\w.]+"</span>      <span class="c"># 邮箱（简化版）：字符@字符</span>
+<span class="v">date</span>  = <span class="s">r"\d{4}-\d{2}-\d{2}"</span>    <span class="c"># 日期：2025-01-18 这种</span>
+
+<span class="k">print</span>(<span class="v">re</span>.findall(<span class="v">phone</span>, <span class="s">"电话13812345678，备用15987654321"</span>))
+<span class="k">print</span>(<span class="v">re</span>.search(<span class="v">date</span>, <span class="s">"截止 2025-01-20"</span>).group())</div>
+    <div class="out">['13812345678', '15987654321']
+2025-01-20</div>
+    <p>最后是打码神器 <span class="hl">re.sub</span>：把匹配到的内容批量替换。配合分组引用 <span class="hl-c">\1 \2</span>，只遮住中间 4 位：</p>
+    <div class="code"><span class="v">secret</span> = <span class="v">re</span>.sub(<span class="s">r"(\d{3})\d{4}(\d{4})"</span>, <span class="s">r"\1****\2"</span>, <span class="s">"13812345678"</span>)
+<span class="k">print</span>(<span class="v">secret</span>)</div>
+    <div class="out">138****5678</div>
+    <p>(\d{3}) 和 (\d{4}) 抓住头尾，中间 4 位换成星号；替换文本里的 \1、\2 表示"把第 1、2 组原样放回"。</p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 情报挖掘机</h2>
+    <p>截获一份公会群聊记录，里面藏着手机号、邮箱、日期、金额。选择<b>猎物类型</b>，点<b>开始挖掘</b>，正则会把情报全部高亮揪出，并附上等价 Python 代码和 findall 结果。还能一键把手机号打码。</p>
+    <div class="lab-input">
+      <select id="prey-sel">
+        <option>手机号</option>
+        <option>邮箱</option>
+        <option>日期</option>
+        <option>金额</option>
+      </select>
+      <button class="btn" id="btn-mine" onclick="mine()">⛏️ 开始挖掘</button>
+      <button class="btn btn-ghost" id="btn-mask" onclick="maskPhones()">🙈 手机号打码</button>
+      <button class="btn btn-ghost" onclick="resetMine()">🔄 重置</button>
+    </div>
+    <div class="chatlog" id="chatlog"></div>
+    <div class="mine-list" id="mine-list"></div>
+    <div class="mine-count" id="mine-count" style="display:none"></div>
+    <div class="code" id="mine-code" style="display:none"></div>
+    <div class="out" id="mine-out" style="display:none"></div>
+    <div class="pitfall" id="amount-tip" style="display:none">
+      ⚠️ <b>分组陷阱</b>：金额模式里写的是非捕获分组 <b>(?:\.\d+)?</b>。如果写成普通分组 (\.\d+)?，findall 会只返回括号里的内容：<b>['', '', '.9']</b>（空字符串和 ".9"），而不是你想要的金额整体。规则：<b>findall 遇到分组，返回分组内容</b>；只想分组不想提取，就用 (?:...)。
+    </div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开终端输入 <code>python</code> 进入交互模式，敲 <code>import re</code>，把上面每个代码块逐行<b>亲手敲一遍</b>，对照输出</li>
+    <li>② 把实验室那段聊天记录用三引号存成变量 <code>text</code>，逐个跑 4 个 findall，和页面结果对照</li>
+    <li>③ 小挑战：写正则提取你自己的生日（提示 <code>r"\d{4}-\d{2}-\d{2}"</code>），再用 <code>re.sub</code> 把一个假手机号打码成 138****5678 的形式</li>
+    <li>④ 进阶：给 QQ 号写一个模式（提示：<code>r"QQ\s*\d+"</code>），跑跑看能挖出聊天记录里的那个 QQ 号吗</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>★ BOSS 战「桌面自动整理器」—— os + shutil + 正则三合一！</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用：Python 代码高亮 ============ */
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function pyHi(line){
+  var t = escHtml(line);
+  var comment = '';
+  var h = t.indexOf('#');
+  if(h > -1){
+    comment = '<span class="c">' + t.slice(h) + '</span>';
+    t = t.slice(0, h);
+  }
+  t = t.replace(/(r?"""[^"]*"""|r?"[^"]*")/g,'<span class="s">$1</span>');
+  t = t.replace(/(re\.[a-zA-Z]+)/g,'<span class="k">$1</span>');
+  t = t.replace(/(\bimport\b|\bfor\b|\bin\b|\bif\b|\bnot\b|\belse\b|\bprint\b|\bTrue\b|\bFalse\b|\bNone\b)/g,'<span class="k">$1</span>');
+  t = t.replace(/(^|\s)(\d+)(?=\s|$)/g,'$1<span class="n">$2</span>');
+  return t + comment;
+}
+
+/* ============ 贪婪 vs 非贪婪 演示 ============ */
+function showGreedy(greedy){
+  var s = document.getElementById('greedy-str');
+  if(greedy){
+    s.innerHTML = '<span class="hit">&lt;a&gt;&lt;b&gt;&lt;c&gt;</span>';
+  }else{
+    s.innerHTML = '<span class="hit">&lt;a&gt;</span><span class="hit">&lt;b&gt;</span><span class="hit">&lt;c&gt;</span>';
+  }
+  var code = document.getElementById('greedy-code');
+  var out = document.getElementById('greedy-out');
+  code.style.display = 'block';
+  out.style.display = 'block';
+  if(greedy){
+    code.innerHTML = pyHi('print(re.findall(r"<.*>", "<a><b><c>"))   # 贪婪：一口吞到底');
+    out.textContent = "['<a><b><c>']\n↑ .* 太贪心，从第一个 < 一路吃到最后一个 >，全串一口吞";
+  }else{
+    code.innerHTML = pyHi('print(re.findall(r"<.*?>", "<a><b><c>"))  # 非贪婪：见好就收');
+    out.textContent = "['<a>', '<b>', '<c>']\n↑ .*? 一碰到 > 就撒嘴，找到 3 个标签";
+  }
+}
+
+/* ============ 实验室：情报挖掘机 ============ */
+var CHAT_LINES = [
+  '【苍穹公会 · 群聊记录 2025-01-18 20:35】',
+  '阿呆：今晚9点开荒新副本，都别迟到！',
+  '大牛：收到！有事的打我电话 13812345678',
+  '小美：攻略发我邮箱 xiaomei@example.com，谢谢~',
+  '老王：客服邮箱是 support@game.cn，之前的作废',
+  '阿呆：报名截止 2025-01-20，逾期不候',
+  '大牛：装备修理费转账 250元 已发，收到请回复',
+  '小美：我的新手机号 15987654321，记一下',
+  '老王：比赛日期改成 2025-02-14 了，冠军奖金 1500元',
+  '阿呆：入会费 99.9元 打给会长，QQ 987654321 联系他'
+];
+var CHAT = CHAT_LINES.join('\n');
+
+/* 每种猎物：正则 + 实测匹配结果（与 Python 3 re 模块输出一致） */
+var PREY = {
+  '手机号': {
+    pat: '1[3-9]\\d{9}',
+    patShow: '1[3-9]\\d{9}',
+    matches: ['13812345678', '15987654321'],
+    tip: '以 1 开头，第 2 位是 3-9，后面恰好 9 位数字，共 11 位'
+  },
+  '邮箱': {
+    pat: '[\\w.]+@[\\w.]+',
+    patShow: '[\\w.]+@[\\w.]+',
+    matches: ['xiaomei@example.com', 'support@game.cn'],
+    tip: '@ 前后各是一串"字母/数字/下划线/点"'
+  },
+  '日期': {
+    pat: '\\d{4}-\\d{2}-\\d{2}',
+    patShow: '\\d{4}-\\d{2}-\\d{2}',
+    matches: ['2025-01-18', '2025-01-20', '2025-02-14'],
+    tip: '4 位年 - 2 位月 - 2 位日'
+  },
+  '金额': {
+    pat: '\\d+(?:\\.\\d+)?元',
+    patShow: '\\d+(?:\\.\\d+)?元',
+    matches: ['250元', '1500元', '99.9元'],
+    tip: '一串数字，可带小数，后跟"元"；(?:...) 是非捕获分组'
+  }
+};
+var PHONES = ['13812345678', '15987654321'];
+
+function buildChatHtml(hitList, masked){
+  /* hitList: 按出现顺序排列的匹配串；masked: true 时命中显示打码版 */
+  var parts = [];
+  var pos = 0;
+  for(var i = 0; i < hitList.length; i++){
+    var m = hitList[i];
+    var idx = CHAT.indexOf(m, pos);
+    if(idx === -1){ continue; }
+    parts.push(escHtml(CHAT.slice(pos, idx)));
+    var show = masked ? (m.slice(0, 3) + '****' + m.slice(7)) : m;
+    parts.push('<span class="hit' + (masked ? ' masked' : '') + '">' + escHtml(show) + '</span>');
+    pos = idx + m.length;
+  }
+  parts.push(escHtml(CHAT.slice(pos)));
+  return parts.join('');
+}
+function renderChat(hitList, masked){
+  var box = document.getElementById('chatlog');
+  if(!hitList){ box.textContent = CHAT; return; }
+  box.innerHTML = buildChatHtml(hitList, masked);
+}
+function mine(){
+  var kind = document.getElementById('prey-sel').value;
+  var p = PREY[kind];
+  renderChat(p.matches, false);
+  var list = document.getElementById('mine-list');
+  list.innerHTML = p.matches.map(function(m){
+    return '<span class="mine-chip">' + escHtml(m) + '</span>';
+  }).join('');
+  var count = document.getElementById('mine-count');
+  count.style.display = 'block';
+  count.textContent = '⛏️ 挖到 ' + p.matches.length + ' 条' + kind + '情报（模式：' + p.patShow + ' —— ' + p.tip + '）';
+  var code = document.getElementById('mine-code');
+  code.style.display = 'block';
+  code.innerHTML = pyHi('import re') + '\n\n' +
+    pyHi('text = """（上面那段聊天记录）"""') + '\n\n' +
+    pyHi('result = re.findall(r"' + p.patShow + '", text)') + '\n' +
+    pyHi('print(result)');
+  var out = document.getElementById('mine-out');
+  out.style.display = 'block';
+  var pyList = '[' + p.matches.map(function(m){ return "'" + m + "'"; }).join(', ') + ']';
+  out.textContent = pyList;
+  document.getElementById('amount-tip').style.display = (kind === '金额') ? 'block' : 'none';
+}
+function maskPhones(){
+  renderChat(PHONES, true);
+  var list = document.getElementById('mine-list');
+  list.innerHTML = PHONES.map(function(m){
+    return '<span class="mine-chip">' + escHtml(m.slice(0, 3) + '****' + m.slice(7)) + '</span>';
+  }).join('');
+  var count = document.getElementById('mine-count');
+  count.style.display = 'block';
+  count.textContent = '🙈 2 个手机号已打码（138****5678 / 159****4321）';
+  var code = document.getElementById('mine-code');
+  code.style.display = 'block';
+  code.innerHTML = pyHi('import re') + '\n\n' +
+    pyHi('text = """（上面那段聊天记录）"""') + '\n\n' +
+    pyHi('masked = re.sub(r"(\\d{3})\\d{4}(\\d{4})", r"\\1****\\2", text)') + '\n' +
+    pyHi('print(masked)');
+  var out = document.getElementById('mine-out');
+  out.style.display = 'block';
+  var maskedText = CHAT;
+  for(var i = 0; i < PHONES.length; i++){
+    var p = PHONES[i];
+    maskedText = maskedText.replace(p, p.slice(0, 3) + '****' + p.slice(7));
+  }
+  out.textContent = maskedText + '\n\n（对照原文：两处手机号都变成 138****5678 这样的形式，其余原样保留）';
+  document.getElementById('amount-tip').style.display = 'none';
+}
+function resetMine(){
+  renderChat(null);
+  document.getElementById('mine-list').innerHTML = '';
+  document.getElementById('mine-count').style.display = 'none';
+  document.getElementById('mine-code').style.display = 'none';
+  document.getElementById('mine-out').style.display = 'none';
+  document.getElementById('amount-tip').style.display = 'none';
+}
+renderChat(null);
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 数字连环抓',
+    code:'import re\nprint(re.findall(r"\\d+", "副本编号A102，B305，C7"))',
+    opts:["['102', '305', '7']", "['102', '305']", "['1023057']", "['A102', 'B305', 'C7']"],
+    ans:0,
+    exp:'\\d+ 表示"一个及以上数字"，findall 会把每一串数字都抓出来装进列表：102、305、7 三串，一个不漏。'
+  },
+  {
+    title:'第 2 预言 · findall 的返回类型',
+    code:'import re\nprint(re.findall(r"\\d", "ab12"))',
+    opts:["['1', '2']", "['12']", "2", "12"],
+    ans:0,
+    exp:'findall 永远返回列表。\\d 没有量词，一次只匹配一个字符，所以 1 和 2 各自成一项——返回的是两个字符串的列表，不是数字 2。'
+  },
+  {
+    title:'第 3 预言 · 开头钉子 ^',
+    code:'import re\nprint(re.search(r"^Py", "I love Python"))',
+    opts:['None', 'Py', "<re.Match object; span=(7, 9), match='Py'>", '报错'],
+    ans:0,
+    exp:'^ 把模式钉死在字符串开头。"I love Python" 开头是 I 不是 P，所以即使 search 全文扫描也无能为力，返回 None。'
+  },
+  {
+    title:'第 4 预言 · r 外套的秘密',
+    code:'import re\nprint(re.findall("\\bcat\\b", "the cat sat"))   # 普通字符串\nprint(re.findall(r"\\bcat\\b", "the cat sat"))  # 原始字符串',
+    opts:["['cat'] 和 ['cat']", "[] 和 ['cat']", "['\\\\bcat\\\\b'] 和 ['cat']", "报错 和 ['cat']"],
+    ans:1,
+    exp:'普通字符串里的 \\b 先被 Python 翻译成"退格"字符，正则引擎根本没见到单词边界 \\b，所以空手而归；r"" 让反斜杠原样送达。写正则永远加 r！'
+  },
+  {
+    title:'第 5 预言 · 打码魔法 sub',
+    code:'import re\nprint(re.sub(r"\\d", "*", "密码a1b2c3"))',
+    opts:['密码a*b*c*', '密码abc', '密码a*b2c3', '报错'],
+    ans:0,
+    exp:'sub(模式, 替换, 文本) 把每个匹配都换成替换串：三个数字 1、2、3 各被换成 *，字母原样保留。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(pyHi).join('\n');
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="' + i + '">' + escHtml(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">' + q.title + '</div>' +
+      '<div class="code" style="margin:6px 0">' + codeHtml + '</div>' +
+      '<div class="oracle-opts">' + optsHtml + '</div>' +
+      '<div class="explain">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')){ return; }
+        var i = +btn.getAttribute('data-i');
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['re.findall() 返回什么？','所有匹配结果组成的字符串列表；没有匹配就返回空列表 []'],
+  ['search 和 match 的区别？','search 全文找第一处；match 只从字符串开头找，开头不匹配就返回 None'],
+  ['\\d \\w \\s 各匹配什么？','\\d 数字；\\w 字母/数字/下划线（Python 中还包括中文）；\\s 空白（空格、Tab、换行）'],
+  ['点号 . 匹配什么？','任意一个字符，但默认不匹配换行符 \\n'],
+  ['+ * ? 各重复几次？','+ 一次及以上；* 零次及以上；? 零次或一次'],
+  ['{m,n} 什么意思？','重复 m 到 n 次，如 \\d{2,4} 匹配 2~4 位连续数字'],
+  ['^ 和 $ 是什么？','锚点：^ 钉在字符串开头，$ 钉在结尾，本身不占字符'],
+  ['[abc] 和 [a-z]？','字符组：从方括号里任选一个字符；- 表示范围'],
+  ['分组 () 有什么用？','圈住一段做捕获：group(1) 提取第 1 组；findall 遇分组返回元组列表'],
+  ['正则为什么要写 r"..."？','原始字符串：防止 \\b、\\d 被 Python 字符串先转义，不加 r 可能悄悄匹配失败']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + escHtml(c[0]) + '</div>' +
+      '<div class="mface mback">' + escHtml(c[1]) + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'re.findall(r"\\d+", "a1b22c333") 的结果是？',
+   opts:["['1', '22', '333']", "['1', '2', '3']", "['12333']", "['a', 'b', 'c']"], ans:0,
+   exp:'\\d+ 把连续数字整串抓取：1、22、333 各是一串，共三项。'},
+  {q:'re.match(r"\\d+", "房号102") 的结果是？',
+   opts:['None（match 只从开头匹配，开头是"房"）', "Match 到 '102'", "Match 到 '房号'", '报错'], ans:0,
+   exp:'match 只认字符串开头；"房"不是数字，直接 None。想全文找第一处要用 search。'},
+  {q:'元字符 \\w 能匹配下面哪个？',
+   opts:['下划线 _', '空格', '点号 .', '换行符 \\n'], ans:0,
+   exp:'\\w = 字母/数字/下划线（Python 中还含中文）。空格归 \\s 管，点号和换行都不属于 \\w。'},
+  {q:'正则 [a-z] 表示？',
+   opts:['小写字母 a 到 z 中任意一个', '字母 a、减号、字母 z 这三个字符', '所有大小写字母', '一个具体单词"a-z"'], ans:0,
+   exp:'字符组内 - 表示范围；[a-z] 匹配任一个小写字母，且只选一个字符。'},
+  {q:'\\d{3} 要求匹配什么？',
+   opts:['恰好连续 3 个数字', '3 个以上数字', '数字 3', '第 3 个数字'], ans:0,
+   exp:'{m} 是 {m,m} 的缩写，表示恰好 m 次。\\d{3} 只认连续三位数字。'},
+  {q:'^ 和 $ 的作用分别是？',
+   opts:['锚定字符串开头和结尾', '匹配加法和减号', '开头注释和结尾注释', '转义符和换行符'], ans:0,
+   exp:'^ 匹配开头位置，$ 匹配结尾位置，都是"钉子"，不消耗字符。'},
+  {q:'m = re.search(r"(\\d+)-(\\d+)", "编号 2025-01")，m.group(1) 是？',
+   opts:["'2025'", "'2025-01'", "'01'", '报错'], ans:0,
+   exp:'第 1 个括号圈住的是年份数字 2025；group(0) 才是整个匹配 "2025-01"。'},
+  {q:'re.findall(r"<.*?>", "<a><b>") 的结果是？',
+   opts:["['<a>', '<b>']", "['<a><b>']", "['<a>', '<b>', '']", '报错'], ans:0,
+   exp:'.*? 是非贪婪：碰到第一个 > 就收手，所以抓到两个完整标签。贪婪的 .* 会一口吞成 <a><b>。'},
+  {q:'写正则字符串时加 r 前缀（如 r"\\d+"）是为了？',
+   opts:['防止 \\b、\\d 等反斜杠组合先被 Python 字符串转义掉', '让正则速度更快', '让字符串可以跨行', '不加 r 会报语法错误'], ans:0,
+   exp:'普通字符串会先"消化"反斜杠组合（如 \\b 变退格符），正则引擎就见不到它们了；r"" 原样送达。'},
+  {q:'re.sub(r"o", "0", "hello world") 的结果是？',
+   opts:["'hell0 w0rld'", "'hello world'", "'hellO wOrld'", "['hell0', 'w0rld']"], ans:0,
+   exp:'sub 把所有匹配到的 o 都替换成 0，返回替换后的整个字符串（不是列表）。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + escHtml(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + escHtml(q.q) + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + escHtml(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')){ return; }
+        var i = +btn.getAttribute('data-i');
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length){ showResult(score); }
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！密码猎人本家，BOSS 战已为你解锁 🔓' : '通关成功！★ BOSS 战「桌面自动整理器」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>
