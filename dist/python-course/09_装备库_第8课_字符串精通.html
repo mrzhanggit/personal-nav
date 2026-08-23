@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第8课 · 字符串精通 —— 密文破译</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#9be8ff; --purple:#a78bfa;
+    --green:#4dd6ff; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(167,139,250,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--green);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4dd6ff,#9be8ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4dd6ff,#9be8ff);
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:#4dd6ff;font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:#4dd6ff;} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#a5ecff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 不可变演示 */
+  .strrow{
+    display:flex;gap:12px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .strbox{
+    background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 18px;
+    font-family:ui-monospace,Menlo,monospace;font-size:16px;font-weight:700;
+  }
+  .strbox.origin{border-color:var(--muted);color:var(--text);}
+  .strbox.fresh{border-color:#4dd6ff;color:#4dd6ff;animation:popIn .4s cubic-bezier(.2,1.4,.4,1) both;}
+  .strbox small{display:block;font-size:11px;font-weight:400;color:var(--muted);text-align:center;}
+  .arrow{color:var(--gold);font-size:18px;font-weight:700;}
+  /* 切片标尺 */
+  .ruler{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;}
+  .rcell{width:46px;text-align:center;}
+  .rcell .ri{display:block;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted);}
+  .rcell .ri.neg{color:var(--purple);}
+  .rcell .rc{
+    display:flex;align-items:center;justify-content:center;height:42px;
+    border:1px solid var(--cyan);border-radius:9px;background:#0a0d1e;
+    font-family:ui-monospace,Menlo,monospace;font-size:18px;font-weight:700;color:var(--gold);margin:2px 0;
+  }
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid #4dd6ff;border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,#4dd6ff,#9be8ff);color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  /* 凯撒密码字母盒 */
+  .crow{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;min-height:48px;}
+  .cbox{
+    width:36px;height:44px;border:1px solid var(--line);border-radius:9px;background:#0a0d1e;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:700;color:var(--text);
+    transition:all .25s;
+  }
+  .cbox.pass{color:var(--muted);opacity:.6;}
+  .cbox.shifted{border-color:#4dd6ff;color:#4dd6ff;transform:translateY(-5px);box-shadow:0 5px 14px rgba(77,214,255,.25);}
+  .crow-label{font-size:12px;color:var(--muted);margin-bottom:-8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:#4dd6ff;}
+  .opt.right{border-color:#4dd6ff;background:rgba(77,214,255,.15);color:#4dd6ff;}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:#4dd6ff;font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:#4dd6ff;}
+  .qq-opt.right{border-color:#4dd6ff;background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:#4dd6ff;padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>第 8 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY</div>
+    <h1>字符串精通 —— 密文破译</h1>
+    <div class="subtitle">今日目标：把字符串玩出花，破译你的第一份密文</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握 <span class="hl">f-string</span> 格式化，含 <span class="hl">:.2f</span> 保留小数</li>
+      <li>理解字符串<span class="hl">不可变</span>：所有方法都返回新串</li>
+      <li>六大神技：<span class="hl">upper / lower / strip / replace / split / join</span></li>
+      <li>find 与 index 的区别、in 判断子串、切片与 <span class="hl">[::-1]</span> 逆序、ord/chr</li>
+      <li>通关实验室「凯撒密码工坊」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 f-string -->
+  <section>
+    <h2><span class="num">1</span>f-string：一句话生成情报</h2>
+    <p>上一课你可能已经吃过 <code class="hl-c">"等级：" + str(10)</code> 的苦。f-string 把这件事变成享受：字符串前加个 <span class="hl">f</span>，{} 里直接填变量甚至表达式。</p>
+    <div class="code"><span class="v">name</span> = <span class="s">"阿呆"</span>
+<span class="v">level</span> = <span class="n">10</span>
+<span class="k">print</span>(<span class="s">f"{name} 达到 Lv.{level}，携带 {name} 的剑"</span>)</div>
+    <div class="out">阿呆 达到 Lv.10，携带 阿呆 的剑</div>
+
+    <p>{} 里还能放<span class="hl">表达式</span>和<span class="hl">格式指令</span>——冒号后面的 <code class="hl-c">:.2f</code> 表示保留两位小数：</p>
+    <div class="code"><span class="k">print</span>(<span class="s">f"力量：{10 + 5}"</span>)          <span class="c"># 占位里可以直接算</span>
+<span class="k">print</span>(<span class="s">f"{3.14159:.2f}"</span>)          <span class="c"># 保留两位小数</span>
+<span class="k">print</span>(<span class="s">f"暴击率 {0.256:.1%}"</span>)      <span class="c"># 百分比格式，保留一位</span></div>
+    <div class="out">力量：15
+3.14
+暴击率 25.6%</div>
+
+    <p>👆 自己动手做一张装备价签（含 :.2f 实战）：</p>
+    <div class="lab-input">
+      <input id="fmt-item" maxlength="8" placeholder="物品名，如：龙鳞剑" value="龙鳞剑">
+      <input id="fmt-price" maxlength="8" placeholder="单价，如 199.9" value="199.9">
+      <button class="btn" onclick="fmtDemo()">💎 生成价签</button>
+    </div>
+    <div class="code" id="fmt-code" style="display:none"></div>
+    <div class="out" id="fmt-out" style="display:none"></div>
+  </section>
+
+  <!-- 2 不可变 -->
+  <section>
+    <h2><span class="num">2</span>铁律：字符串不可变</h2>
+    <p>字符串是<span class="hl">刻在石碑上的字</span>——一旦创建，一个字符都改不了。所有「变身」方法（upper、replace……）都只会<b>返回一个新字符串</b>，原串纹丝不动。</p>
+    <div class="code"><span class="v">s</span> = <span class="s">"abc"</span>
+<span class="v">t</span> = <span class="v">s</span>.upper()
+<span class="k">print</span>(<span class="v">s</span>)   <span class="c"># abc —— 原串没变</span>
+<span class="k">print</span>(<span class="v">t</span>)   <span class="c"># ABC —— 新串才是变身后的</span></div>
+    <div class="out">abc
+ABC</div>
+
+    <p>👆 点按钮给石碑「变身」——看看新串诞生、原串依旧：</p>
+    <div class="strrow" id="str-row">
+      <div class="strbox origin"><small>原串 s</small>"abc"</div>
+      <span class="arrow" id="str-arrow" style="display:none">➜</span>
+      <div class="strbox fresh" id="str-new" style="display:none"></div>
+    </div>
+    <div class="lab-input">
+      <button class="btn" onclick="mutDemo('upper')">⚡ s.upper()</button>
+      <button class="btn" onclick="mutDemo('at')">⚡ s.replace("a", "@")</button>
+    </div>
+    <div class="code" id="mut-code" style="display:none"></div>
+
+    <p>最经典的翻车现场：调了方法却没人接住返回值：</p>
+    <div class="code"><span class="v">msg</span> = <span class="s">"fire ball"</span>
+<span class="v">msg</span>.replace(<span class="s">"fire"</span>, <span class="s">"ice"</span>)   <span class="c"># 💡 返回了新串，但没人接，直接丢了</span>
+<span class="k">print</span>(<span class="v">msg</span>)                    <span class="c"># fire ball —— 原串当然没变</span></div>
+    <div class="out">fire ball</div>
+    <p>想更新必须自己接住：<span class="hl-c">msg = msg.replace("fire", "ice")</span>。还有一条铁律的推论——按下标改字符直接报错：</p>
+    <div class="code"><span class="v">s</span> = <span class="s">"abc"</span>
+<span class="v">s</span>[<span class="n">0</span>] = <span class="s">"X"</span>   <span class="c"># 💥 TypeError: 'str' object does not support item assignment</span></div>
+  </section>
+
+  <!-- 3 六大神技 -->
+  <section>
+    <h2><span class="num">3</span>六大神技：字符串方法全家桶</h2>
+    <p>这六个方法是日常装备，全部<b>返回新串、不改原串</b>：</p>
+    <div class="code"><span class="v">pwd</span> = <span class="s">"  AbC123  "</span>
+<span class="k">print</span>(<span class="v">pwd</span>.strip())            <span class="c"># 去掉两端空白</span>
+<span class="k">print</span>(<span class="v">pwd</span>.strip().lower())     <span class="c"># 链式调用：先 strip 再 lower</span></div>
+    <div class="out">AbC123
+abc123</div>
+
+    <div class="code"><span class="v">msg</span> = <span class="s">"fire ball"</span>
+<span class="k">print</span>(<span class="v">msg</span>.replace(<span class="s">"fire"</span>, <span class="s">"ice"</span>))   <span class="c"># 把子串全部替换（返回新串）</span>
+
+<span class="v">skills</span> = <span class="s">"剑,盾,药水"</span>
+<span class="k">print</span>(<span class="v">skills</span>.split(<span class="s">","</span>))            <span class="c"># 按分隔符切开 → 得到列表！</span>
+
+<span class="v">team</span> = [<span class="s">"阿呆"</span>, <span class="s">"小红"</span>]
+<span class="k">print</span>(<span class="s">" & "</span>.join(<span class="v">team</span>))              <span class="c"># 用分隔符把列表拼回字符串</span></div>
+    <div class="out">ice ball
+['剑', '盾', '药水']
+阿呆 & 小红</div>
+
+    <p>🧠 记忆口诀：<span class="hl">split 切成列表，join 拼回字符串</span>——这对搭档经常在处理输入时联手。注意 join 的写法是「分隔符打头」：<code class="hl-c">"-".join(列表)</code>。</p>
+  </section>
+
+  <!-- 4 find vs index -->
+  <section>
+    <h2><span class="num">4</span>find 与 index：侦察兵双胞胎</h2>
+    <p>两个都能查「子串第一次出现的下标」，<span class="hl">唯一的区别在找不到时</span>：</p>
+    <div class="code"><span class="v">s</span> = <span class="s">"hello world"</span>
+<span class="k">print</span>(<span class="v">s</span>.find(<span class="s">"world"</span>))    <span class="c"># 6 —— 找到，返回起始下标</span>
+<span class="k">print</span>(<span class="v">s</span>.find(<span class="s">"python"</span>))   <span class="c"># -1 —— 找不到，安静返回 -1</span>
+<span class="k">print</span>(<span class="v">s</span>.index(<span class="s">"python"</span>))   <span class="c"># 💥 ValueError: substring not found</span></div>
+    <div class="out">6
+-1</div>
+
+    <p>🛡 结论：<span class="hl">不确定在不在，就用 find</span>（最坏拿个 -1）；index 找不到会当场爆炸。</p>
+    <p>如果只是想问「在不在」，根本不用查下标——<span class="hl">in 岗哨</span>一句搞定（区分大小写）：</p>
+    <div class="code"><span class="v">s</span> = <span class="s">"hello world"</span>
+<span class="k">print</span>(<span class="s">"world"</span> <span class="k">in</span> <span class="v">s</span>)   <span class="c"># True</span>
+<span class="k">print</span>(<span class="s">"World"</span> <span class="k">in</span> <span class="v">s</span>)   <span class="c"># False —— 大小写不同，不算子串</span></div>
+    <div class="out">True
+False</div>
+  </section>
+
+  <!-- 5 切片 -->
+  <section>
+    <h2><span class="num">5</span>切片与逆序：[ : : -1] 三件套</h2>
+    <p>切片语法 <code class="hl-c">s[起点:终点:步长]</code>，规则只有一条：<span class="hl">包头不包尾</span>。先认识双向下标——上排从 0 数，下排从 -1 倒着数：</p>
+    <div class="ruler">
+      <div class="rcell"><span class="ri">0</span><span class="rc">P</span><span class="ri neg">-6</span></div>
+      <div class="rcell"><span class="ri">1</span><span class="rc">y</span><span class="ri neg">-5</span></div>
+      <div class="rcell"><span class="ri">2</span><span class="rc">t</span><span class="ri neg">-4</span></div>
+      <div class="rcell"><span class="ri">3</span><span class="rc">h</span><span class="ri neg">-3</span></div>
+      <div class="rcell"><span class="ri">4</span><span class="rc">o</span><span class="ri neg">-2</span></div>
+      <div class="rcell"><span class="ri">5</span><span class="rc">n</span><span class="ri neg">-1</span></div>
+    </div>
+    <div class="lab-input">
+      <button class="btn" onclick="sliceDemo('s[0]')">s[0]</button>
+      <button class="btn" onclick="sliceDemo('s[1:4]')">s[1:4]</button>
+      <button class="btn" onclick="sliceDemo('s[-2:]')">s[-2:]</button>
+      <button class="btn" onclick="sliceDemo('s[::-1]')">s[::-1]</button>
+    </div>
+    <div class="out" id="slice-out" style="display:none"></div>
+    <div class="code"><span class="v">s</span> = <span class="s">"Python"</span>
+<span class="k">print</span>(<span class="v">s</span>[<span class="n">1</span>:<span class="n">4</span>])   <span class="c"># yth —— 从下标 1 取到 3（包头不包尾）</span>
+<span class="k">print</span>(<span class="v">s</span>[-<span class="n">2</span>:])   <span class="c"># on —— 负下标从尾部数，冒号后留空=取到底</span>
+<span class="k">print</span>(<span class="v">s</span>[::-<span class="n">1</span>])  <span class="c"># nohtyP —— 步长 -1，倒着走，整串逆序</span></div>
+    <div class="out">yth
+on
+nohtyP</div>
+    <p>🧠 记忆口诀：<span class="hl">逆序三件套，冒号加负一。</span>面试和实战都高频出现。</p>
+  </section>
+
+  <!-- 6 ord/chr -->
+  <section>
+    <h2><span class="num">6</span>ord 与 chr：字符的身份证号</h2>
+    <p>每个字符在电脑里都有一个编号（编码）。<span class="hl">ord()</span> 查「字符 → 编号」，<span class="hl">chr()</span> 反查「编号 → 字符」。这对搭档是<b>一切加密术的地基</b>。</p>
+    <div class="code"><span class="k">print</span>(<span class="k">ord</span>(<span class="s">"A"</span>))   <span class="c"># 65</span>
+<span class="k">print</span>(<span class="k">ord</span>(<span class="s">"a"</span>))   <span class="c"># 97 —— 小写比大写大 32</span>
+<span class="k">print</span>(<span class="k">chr</span>(<span class="n">66</span>))    <span class="c"># B</span>
+<span class="k">print</span>(<span class="k">chr</span>(<span class="k">ord</span>(<span class="s">"a"</span>) + <span class="n">3</span>))   <span class="c"># d —— a 向后移 3 位！</span></div>
+    <div class="out">65
+97
+B
+d</div>
+
+    <p>👆 最后那行就是凯撒密码的全部秘密。先来手动体验一下「移位」：</p>
+    <div class="lab-input">
+      <input id="ord-in" maxlength="1" placeholder="输入 1 个字符" style="max-width:150px">
+      <button class="btn" onclick="ordDemo()">→ 编号</button>
+      <input id="chr-in" maxlength="7" placeholder="输入编号，如 97" style="max-width:150px">
+      <button class="btn" onclick="chrDemo()">→ 字符</button>
+    </div>
+    <div class="code" id="ord-code" style="display:none"></div>
+    <div class="out" id="ord-out" style="display:none"></div>
+    <div class="code" id="chr-code" style="display:none"></div>
+    <div class="out" id="chr-out" style="display:none"></div>
+  </section>
+
+  <!-- 7 实验室 -->
+  <section>
+    <h2><span class="num">7</span>🎮 实验室 · 凯撒密码工坊</h2>
+    <p>两千年前凯撒大帝用它传军令：把每个字母在字母表里向后移 N 位。输入明文和位移量，点「加密」看每个字母逐个变身；把密文再填回去点「解密」即可还原。</p>
+    <p>🔒 <b>本演示只处理英文字母（A-Z / a-z）</b>，其他字符（中文、数字、空格、标点）会原样保留、不变身。</p>
+    <div class="lab-input">
+      <input id="caesar-text" maxlength="40" placeholder="输入明文或密文，如：Attack at dawn" value="Attack at dawn">
+      <input id="caesar-shift" type="number" value="3" style="flex:none;max-width:110px" title="位移量">
+      <button class="btn" onclick="caesarRun(1)">🔒 加密</button>
+      <button class="btn" onclick="caesarRun(-1)">🔓 解密</button>
+    </div>
+    <div class="crow-label">字母逐个位移（暗淡的格子 = 非英文字母，原样保留）：</div>
+    <div class="crow" id="caesar-row"></div>
+    <div class="out" id="caesar-out" style="display:none"></div>
+    <div class="code" id="caesar-code" style="display:none"></div>
+    <p class="cards-tip">💡 提示：解密就是用「负位移」再加密一遍，比如加密用 3，解密就用 -3。位移量可以随便玩——26 会被整除抵消，位移 26 等于没移。</p>
+  </section>
+
+  <!-- 8 预言机 -->
+  <section>
+    <h2><span class="num">8</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。（选项中的 ⏎ 表示换行）</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 9 记忆卡片 -->
+  <section>
+    <h2><span class="num">9</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 10 Quiz -->
+  <section>
+    <h2><span class="num">10</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 11 课后 -->
+  <section class="homework">
+    <h2><span class="num">11</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开终端输入 <code>python</code> 进入交互模式（没装的去 python.org 装，一路下一步）</li>
+    <li>② 逐行敲一遍上面所有代码块，<b>亲手打字，不要复制粘贴</b>——重点体验「方法返回新串、原串不变」</li>
+    <li>③ 核心挑战：把实验室的 <code>caesar</code> 函数完整敲进一个 <code>cipher.py</code> 文件，加密自己名字的拼音，再用负位移解密验证能还原</li>
+    <li>④ 用 f-string 打印你的装备栏：武器名、等级、金币（金币用 <code>:.2f</code> 保留两位小数）</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>文件读写 —— 存档系统</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具 ============ */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ============ 板块1：f-string 价签 ============ */
+function fmtDemo(){
+  var item = document.getElementById('fmt-item').value.trim();
+  var priceStr = document.getElementById('fmt-price').value.trim();
+  if(!item || !priceStr){ alert('先填物品名和单价！'); return; }
+  var price = parseFloat(priceStr);
+  if(isNaN(price)){ alert('单价请填数字，比如 199.9'); return; }
+  document.getElementById('fmt-code').style.display = 'block';
+  document.getElementById('fmt-code').innerHTML =
+    '<span class="v">item</span> = <span class="s">"' + esc(item) + '"</span>\n' +
+    '<span class="v">price</span> = <span class="n">' + price + '</span>\n' +
+    '<span class="k">print</span>(<span class="s">f"「{item}」售价 {price:.2f} 金币"</span>)   <span class="c"># :.2f 保留两位小数</span>';
+  var o = document.getElementById('fmt-out');
+  o.style.display = 'block';
+  o.textContent = '「' + item + '」售价 ' + price.toFixed(2) + ' 金币';
+}
+
+/* ============ 板块2：不可变演示 ============ */
+function mutDemo(kind){
+  var fresh, codeHtml;
+  if(kind === 'upper'){
+    fresh = '"ABC"';
+    codeHtml = '<span class="v">s</span> = <span class="s">"abc"</span>\n<span class="v">t</span> = <span class="v">s</span>.upper()\n<span class="k">print</span>(<span class="v">s</span>)   <span class="c"># abc —— 石碑上的原字没变</span>\n<span class="k">print</span>(<span class="v">t</span>)   <span class="c"># ABC —— 新串诞生</span>';
+  } else {
+    fresh = '"@bc"';
+    codeHtml = '<span class="v">s</span> = <span class="s">"abc"</span>\n<span class="v">t</span> = <span class="v">s</span>.replace(<span class="s">"a"</span>, <span class="s">"@"</span>)\n<span class="k">print</span>(<span class="v">s</span>)   <span class="c"># abc —— 原串还是 abc</span>\n<span class="k">print</span>(<span class="v">t</span>)   <span class="c"># @bc —— 新串才是换过的</span>';
+  }
+  var box = document.getElementById('str-new');
+  box.style.display = 'none';
+  box.innerHTML = '<small>新串 t</small>' + fresh;
+  box.classList.remove('fresh'); void box.offsetWidth; box.classList.add('fresh');
+  box.style.display = 'inline-block';
+  document.getElementById('str-arrow').style.display = 'inline';
+  var c = document.getElementById('mut-code');
+  c.style.display = 'block';
+  c.innerHTML = codeHtml;
+}
+
+/* ============ 板块5：切片演示 ============ */
+var sliceMap = {'s[0]':'P', 's[1:4]':'yth', 's[-2:]':'on', 's[::-1]':'nohtyP'};
+function sliceDemo(expr){
+  var o = document.getElementById('slice-out');
+  o.style.display = 'block';
+  o.textContent = sliceMap[expr] + '   （对应 print(' + expr + ')）';
+}
+
+/* ============ 板块6：ord/chr 转换器 ============ */
+function ordDemo(){
+  var raw = document.getElementById('ord-in').value;
+  if(!raw){ alert('先输入一个字符，比如 a'); return; }
+  var ch = raw.charAt(0);
+  var code = ch.charCodeAt(0);
+  document.getElementById('ord-code').style.display = 'block';
+  document.getElementById('ord-code').innerHTML = '<span class="k">print</span>(<span class="k">ord</span>(<span class="s">"' + esc(ch) + '"</span>))   <span class="c"># 字符 → 编号</span>';
+  var o = document.getElementById('ord-out');
+  o.style.display = 'block';
+  o.textContent = code;
+}
+function chrDemo(){
+  var raw = document.getElementById('chr-in').value.trim();
+  if(!raw){ alert('先输入一个编号，比如 97'); return; }
+  var n = parseInt(raw, 10);
+  if(isNaN(n) || n < 0 || n > 1114111){ alert('编号请填 0 到 1114111 之间的整数，比如 97'); return; }
+  document.getElementById('chr-code').style.display = 'block';
+  document.getElementById('chr-code').innerHTML = '<span class="k">print</span>(<span class="k">chr</span>(<span class="n">' + n + '</span>))   <span class="c"># 编号 → 字符</span>';
+  var o = document.getElementById('chr-out');
+  o.style.display = 'block';
+  o.textContent = String.fromCharCode(n);
+}
+
+/* ============ 实验室：凯撒密码工坊 ============ */
+function shiftChar(ch, k){
+  var c = ch.charCodeAt(0);
+  if(c >= 97 && c <= 122){ return String.fromCharCode((c - 97 + k) % 26 + 97); }
+  if(c >= 65 && c <= 90){ return String.fromCharCode((c - 65 + k) % 26 + 65); }
+  return ch;
+}
+var CAESAR_FN_HTML =
+  '<span class="k">def</span> <span class="v">caesar</span>(<span class="v">text</span>, <span class="v">shift</span>):\n' +
+  '    <span class="v">result</span> = <span class="s">""</span>\n' +
+  '    <span class="k">for</span> <span class="v">ch</span> <span class="k">in</span> <span class="v">text</span>:\n' +
+  '        <span class="k">if</span> <span class="s">"a"</span> &lt;= <span class="v">ch</span> &lt;= <span class="s">"z"</span>:\n' +
+  '            <span class="v">result</span> += <span class="k">chr</span>((<span class="k">ord</span>(<span class="v">ch</span>) - <span class="k">ord</span>(<span class="s">"a"</span>) + <span class="v">shift</span>) % <span class="n">26</span> + <span class="k">ord</span>(<span class="s">"a"</span>))\n' +
+  '        <span class="k">elif</span> <span class="s">"A"</span> &lt;= <span class="v">ch</span> &lt;= <span class="s">"Z"</span>:\n' +
+  '            <span class="v">result</span> += <span class="k">chr</span>((<span class="k">ord</span>(<span class="v">ch</span>) - <span class="k">ord</span>(<span class="s">"A"</span>) + <span class="v">shift</span>) % <span class="n">26</span> + <span class="k">ord</span>(<span class="s">"A"</span>))\n' +
+  '        <span class="k">else</span>:\n' +
+  '            <span class="v">result</span> += <span class="v">ch</span>   <span class="c"># 非英文字母原样保留</span>\n' +
+  '    <span class="k">return</span> <span class="v">result</span>';
+function caesarRun(dir){
+  var text = document.getElementById('caesar-text').value;
+  if(!text.trim()){ alert('先输入一段文字吧，比如 Attack at dawn'); return; }
+  var shift = parseInt(document.getElementById('caesar-shift').value, 10);
+  if(isNaN(shift)){ alert('位移量请填整数，比如 3'); return; }
+  var signed = shift * dir;
+  var k = ((signed % 26) + 26) % 26;
+  var row = document.getElementById('caesar-row');
+  row.innerHTML = '';
+  var boxes = [];
+  var shifted = [];
+  var result = '';
+  for(var i = 0; i < text.length; i++){
+    var ch = text.charAt(i);
+    var sp = document.createElement('span');
+    sp.className = 'cbox';
+    sp.textContent = ch;
+    if(!/[a-zA-Z]/.test(ch)){ sp.className = 'cbox pass'; }
+    row.appendChild(sp);
+    boxes.push(sp);
+    var nc = shiftChar(ch, k);
+    shifted.push(nc);
+    result += nc;
+  }
+  for(var j = 0; j < boxes.length; j++){
+    (function(idx){
+      setTimeout(function(){
+        if(boxes[idx].className.indexOf('pass') < 0){
+          boxes[idx].textContent = shifted[idx];
+        }
+        boxes[idx].className += ' shifted';
+      }, 260 + idx * 70);
+    })(j);
+  }
+  var out = document.getElementById('caesar-out');
+  out.style.display = 'block';
+  out.textContent = result;
+  var verb = dir === 1 ? 'cipher' : 'plain';
+  document.getElementById('caesar-code').style.display = 'block';
+  document.getElementById('caesar-code').innerHTML = CAESAR_FN_HTML + '\n\n' +
+    '<span class="v">' + verb + '</span> = <span class="v">caesar</span>(<span class="s">"' + esc(text) + '"</span>, <span class="n">' + signed + '</span>)\n' +
+    '<span class="k">print</span>(<span class="v">' + verb + '</span>)   <span class="c"># ' + esc(result) + '</span>';
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · f-string 读心术',
+    code:'name = "阿呆"\nlevel = 10\nprint(f"{name} 达到 Lv.{level}")',
+    opts:['{name} 达到 Lv.{level}','阿呆 达到 Lv.10','f"{name} 达到 Lv.{level}"','报错'],
+    ans:1,
+    exp:'f 开头的字符串里，{} 会被替换成变量的真实值。没有 f 前缀才会把大括号原样输出。'
+  },
+  {
+    title:'第 2 预言 · 铁打的原串',
+    code:'msg = "fire ball"\nmsg.replace("fire", "ice")\nprint(msg)',
+    opts:['ice ball','fire ball','ice fire ball','报错'],
+    ans:1,
+    exp:'字符串不可变！replace 返回了新串，但没人接住它，msg 还是原样。要写 msg = msg.replace(...) 才会更新。'
+  },
+  {
+    title:'第 3 预言 · split 的真身',
+    code:'parts = "剑,盾,药水".split(",")\nprint(type(parts))',
+    opts:["<class 'str'>","<class 'list'>","<class 'tuple'>","<class 'set'>"],
+    ans:1,
+    exp:'split 把字符串按分隔符切成列表 list，之后可以用下标取：parts[1] 是 "盾"。'
+  },
+  {
+    title:'第 4 预言 · 倒着走',
+    code:'s = "Python"\nprint(s[::-1])',
+    opts:['nohtyP','Python','yPthon','报错'],
+    ans:0,
+    exp:'[::-1] 表示步长为 -1：从最后一个字符倒着走到第一个，正好是整串逆序。'
+  },
+  {
+    title:'第 5 预言 · 潜伏者 in',
+    code:'print("Py" in "Python")',
+    opts:['True','False','0','报错'],
+    ans:0,
+    exp:'in 判断左边是不是右边的子串。"Py" 正是 "Python" 的开头，所以是 True（注意区分大小写）。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      var e = esc(l);
+      return e.replace(/("[^"]*")/g,'<span style="color:#4dd6ff">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|type|ord|chr|upper|lower|strip|replace|split|join|find|index|for|in|not|len)/g,'<span style="color:var(--pink)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['f-string 怎么写？','字符串前加 f：f"...{表达式}..."，{} 里可放变量或算式'],
+  [':.2f 是什么意思？','保留两位小数：f"{3.14159:.2f}" 得到 "3.14"'],
+  ['字符串可变吗？','不可变！所有方法都返回新字符串，原串永远不变'],
+  ['replace 会改原串吗？','不会，它返回新串。想更新要自己接：s = s.replace(a, b)'],
+  ['strip() 干嘛的','去掉字符串两端的空白（空格、换行），返回新串'],
+  ['split() 返回什么','按分隔符把字符串切成列表 list，如 "a,b".split(",")'],
+  ['join() 怎么用','分隔符打头把列表拼成字符串：".".join(["a","b"]) → "a.b"'],
+  ['find 和 index 的区别','都返回首次出现的下标；找不到时 find 返回 -1，index 抛 ValueError'],
+  ['s[::-1] 是什么','步长 -1 的切片，整串逆序；s[1:4] 是从下标 1 取到 3'],
+  ['ord 和 chr','ord("A") → 65 字符变编号；chr(66) → "B" 编号变字符，加密术的地基']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'哪一行能正确用 f-string 输出变量 gold 的值？',
+   opts:['print(f"我有{gold}金币")','print("我有{gold}金币")','print(f"我有gold金币")','print(f"我有$gold金币")'], ans:0,
+   exp:'f-string 三要素：引号前有 f、变量放进大括号 {}。没有 f 时 {} 只是普通字符。'},
+  {q:'print(f"{3.14159:.2f}") 输出什么？',
+   opts:['3.14','3.1','3.142','3.14159'], ans:0,
+   exp:':.2f 表示保留两位小数，四舍五入到 3.14。'},
+  {q:'print(f"{2 + 3}") 输出什么？',
+   opts:['5','2 + 3','{2 + 3}','报错'], ans:0,
+   exp:'大括号里可以放任意表达式，先算 2+3=5 再填进字符串。'},
+  {q:'s = "abc"，执行 s.upper() 后再 print(s)，输出什么？',
+   opts:['ABC','abc','报错','ABCabc'], ans:1,
+   exp:'字符串不可变：upper() 返回新串 "ABC"，但没人接住它，s 还是 "abc"。'},
+  {q:'print("  hi  ".strip()) 输出什么？',
+   opts:['hi','  hi','hi  ','  hi  '], ans:0,
+   exp:'strip() 去掉两端的所有空白，中间的不动，得到 "hi"。'},
+  {q:'"a-b-c".split("-") 的结果是？',
+   opts:["['a', 'b', 'c']","'abc'","'a-b-c'","('a', 'b', 'c')"], ans:0,
+   exp:'split 按分隔符把字符串切成列表，得到 [\'a\', \'b\', \'c\']。'},
+  {q:'print("-".join(["火", "冰", "雷"])) 输出什么？',
+   opts:['火-冰-雷','火冰雷','["火", "冰", "雷"]','报错'], ans:0,
+   exp:'join 用分隔符把列表元素拼成一个字符串："火-冰-雷"。'},
+  {q:'print("hello".find("l")) 输出什么？',
+   opts:['1','2','3','-1'], ans:1,
+   exp:'"hello" 里第一个 l 在下标 2（h=0, e=1, l=2），find 返回第一次出现的下标。'},
+  {q:'"hello".find("z") 和 "hello".index("z") 分别发生什么？',
+   opts:['都返回 -1','都报错','find 返回 -1，index 抛 ValueError','find 报错，index 返回 -1'], ans:2,
+   exp:'找不到子串时：find 安静返回 -1，index 当场抛 ValueError。这就是双胞胎唯一的区别。'},
+  {q:'s = "abc"，执行 s[0] = "X" 会怎样？',
+   opts:['输出 Xbc','输出 abc','抛出 TypeError','输出 X'], ans:2,
+   exp:'字符串不可变，不允许按下标修改字符，直接 TypeError。想换字符得用 replace 生成新串。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！密码学大师本家，下一课已为你解锁 🔓' : '通关成功！第 9 课「文件读写 —— 存档系统」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

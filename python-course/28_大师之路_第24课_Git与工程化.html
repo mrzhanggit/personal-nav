@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第24课 · Git 与工程化 —— 公会规范</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(244,114,182,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--pink);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(244,114,182,.12);color:var(--pink);border:1px solid rgba(244,114,182,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f472b6,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--purple);} /* 关键字/函数 */
+  .code .s{color:var(--pink);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .code .cmd{color:#f9a8d4;font-weight:600;} /* 终端命令行 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f9a8d4;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 魔法盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:22px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 三区模型 */
+  .git-zones{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;margin:18px 0;}
+  .gzone{
+    flex:1;min-width:170px;background:var(--card);border:2px solid var(--line);
+    border-radius:14px;padding:12px 14px;
+  }
+  .gzone h4{font-size:13px;letter-spacing:1px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
+  .gzone h4 small{color:var(--muted);font-weight:400;font-size:11px;}
+  .gzone.z-work{border-color:var(--cyan);}
+  .gzone.z-work h4{color:var(--cyan);}
+  .gzone.z-stage{border-color:var(--gold);}
+  .gzone.z-stage h4{color:var(--gold);}
+  .gzone.z-repo{border-color:var(--pink);}
+  .gzone.z-repo h4{color:var(--pink);}
+  .garrow{
+    align-self:center;color:var(--muted);font-size:11.5px;text-align:center;
+    font-family:ui-monospace,Menlo,monospace;min-width:58px;
+  }
+  .zline{
+    font-family:ui-monospace,Menlo,monospace;font-size:12.5px;background:#0a0d1e;
+    border-radius:6px;padding:2px 8px;margin:3px 0;color:var(--text);word-break:break-all;
+    animation:popIn .35s both;
+  }
+  .zempty{font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;}
+  .gcommit{border:1px solid var(--line);border-radius:8px;padding:5px 10px;margin:4px 0;animation:popIn .4s both;}
+  .gcommit b{font-family:ui-monospace,Menlo,monospace;color:var(--pink);font-size:12.5px;}
+  .gcommit .gmsg{font-size:11.5px;color:var(--muted);}
+  .zhead{font-size:10px;color:var(--gold);border:1px solid rgba(245,197,66,.4);border-radius:5px;padding:0 5px;margin-left:4px;}
+  @keyframes zoneFlash{0%{box-shadow:0 0 0 0 rgba(244,114,182,.55);}100%{box-shadow:0 0 0 16px rgba(244,114,182,0);}}
+  .gzone.flash{animation:zoneFlash .7s ease;}
+  /* 实验室 */
+  .lab-btns{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .btn{
+    background:linear-gradient(135deg,var(--pink),var(--purple));color:#0d1021;border:none;
+    padding:11px 22px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,114,182,.3);}
+  .btn2{background:transparent;border:1px solid var(--line);color:var(--muted);}
+  .btn2:hover{color:var(--text);box-shadow:none;}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none;}
+  .term{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;white-space:pre-wrap;
+    max-height:320px;overflow-y:auto;margin-top:14px;line-height:1.6;
+  }
+  .term::before{content:"▍终端 · terminal";color:var(--muted);font-size:11px;display:block;margin-bottom:6px;font-family:inherit;}
+  .t-cmd{color:#f9a8d4;}
+  .t-out{color:var(--text);}
+  .t-cmt{color:#5b648f;}
+  .lab-warn{
+    display:none;margin:12px 0;background:rgba(248,113,113,.08);border:1px dashed rgba(248,113,113,.4);
+    border-radius:10px;padding:10px 16px;font-size:13px;color:#fca5a5;
+  }
+  .lab-warn.show{display:block;animation:fadeIn .4s;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);color:var(--pink);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#331a2e,#141833);border:1px solid var(--pink);color:var(--pink);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#2a1a3d,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 大师之路 · <b>第 24 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 5 · MASTER ROAD</div>
+    <h1>Git 与工程化 —— 公会规范</h1>
+    <div class="subtitle">今日目标：给你的项目装上「随时读档」的存档系统</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解版本控制：像游戏存档一样随时回档、多开剧情线</li>
+      <li>掌握三板斧 <span class="hl">git init / add / commit</span> 与「工作区 → 暂存区 → 仓库」三区模型</li>
+      <li>学会时间旅行：<span class="hl">git log / diff / checkout</span> 回档，<span class="hl">branch / merge</span> 多剧情线</li>
+      <li>建立公会规范：<span class="hl">.gitignore</span>、标准项目结构、pytest 测试意识、commit message 写法</li>
+      <li>通关实验室「Git 时光机」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 为什么需要版本控制 -->
+  <section>
+    <h2><span class="num">1</span>为什么需要版本控制：你的项目需要存档系统</h2>
+    <p>每个写过代码的人都经历过这个惨案文件夹：</p>
+    <div class="code">毕业设计/
+├── 报告.docx
+├── 报告_最终版.docx
+├── 报告_最终版2.docx
+├── 报告_真最终版.docx
+└── 报告_真最终版_打死不改.docx   <span class="c"># ……然后导师说：还是第 2 版好</span></div>
+
+    <p>更惨的是：<b>改崩了没法撤销</b>、<b>删错了没法找回</b>、<b>两台电脑来回拷贝覆盖</b>。<span class="hl">Git 就是代码界的游戏存档系统</span>——它把项目的每一次改动都拍成快照存起来，你随时可以读档。</p>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">git checkout</div><div class="val">回档</div><div class="tip">打崩了？读任意一次旧存档</div></div>
+      <div class="mbox"><div class="tag">git branch</div><div class="val">多剧情线</div><div class="tip">开新支线，翻车不伤主线</div></div>
+      <div class="mbox"><div class="tag">commit -m</div><div class="val">存档说明</div><div class="tip">每档写清楚存了什么</div></div>
+      <div class="mbox"><div class="tag">push / pull</div><div class="val">云存档</div><div class="tip">换电脑不丢档，队友共享</div></div>
+    </div>
+
+    <p>从今天起，你写的不只是「脚本」，而是有历史、有档案、可回溯的<span class="hl">工程项目</span>。这也是公会对高阶玩家的硬性要求。</p>
+  </section>
+
+  <!-- 2 三板斧与三区模型 -->
+  <section>
+    <h2><span class="num">2</span>三板斧与三区模型：存档的正确姿势</h2>
+    <p>把一个普通文件夹变成 Git 仓库、完成第一次存档，只需要三条命令：</p>
+    <div class="code"><span class="cmd">$ git init</span>                            <span class="c"># ① 开机：把当前文件夹升级成 Git 仓库</span>
+Initialized empty Git repository in /Users/hero/quest/.git/
+
+<span class="cmd">$ git add quest.py</span>                      <span class="c"># ② 打包：把 quest.py 的改动放入暂存区（成功时无输出）</span>
+
+<span class="cmd">$ git commit -m "feat: 角色名片第一版"</span>    <span class="c"># ③ 存档：把暂存区快照永久写入仓库</span>
+[main (root-commit) a1b2c3d] feat: 角色名片第一版
+ 1 file changed, 2 insertions(+)
+ create mode 100644 quest.py</div>
+
+    <p>理解 Git 的钥匙是这张<span class="hl">三区模型图</span>——你的文件改动像闯关一样，要穿过三个区域：</p>
+    <div class="git-zones">
+      <div class="gzone z-work">
+        <h4>🖥 工作区 <small>Working Dir</small></h4>
+        <div class="zline">你正在编辑的文件</div>
+        <div class="zempty">最新改动，还没打包</div>
+      </div>
+      <div class="garrow">git add<br>────➤</div>
+      <div class="gzone z-stage">
+        <h4>📦 暂存区 <small>Staging</small></h4>
+        <div class="zline">打包好的待存档清单</div>
+        <div class="zempty">决定「这一档存什么」</div>
+      </div>
+      <div class="garrow">git commit<br>────➤</div>
+      <div class="gzone z-repo">
+        <h4>🗄 仓库 <small>.git</small></h4>
+        <div class="gline" style="font-size:12.5px;color:var(--muted)">带哈希的永久快照</div>
+        <div class="zempty">a1b2c3d ← 第一档</div>
+      </div>
+    </div>
+
+    <p>为什么要多一个「暂存区」，不直接存档？因为存档前你常常想<span class="hl">挑着存</span>：这一关你打了 3 个怪、捡了 2 件装备，可以只存「捡装备」这件事。<span class="hl-c">add 负责挑，commit 负责存</span>——分工明确。</p>
+
+    <p>继续修改、继续存档，历史就一档一档摞起来了：</p>
+    <div class="code"><span class="c"># ……给 quest.py 又加了两行代码，然后：</span>
+<span class="cmd">$ git add quest.py</span>
+<span class="cmd">$ git commit -m "feat: 增加金币系统"</span>
+[main 7d2e4b9] feat: 增加金币系统
+ 1 file changed, 2 insertions(+)</div>
+  </section>
+
+  <!-- 3 log diff checkout -->
+  <section>
+    <h2><span class="num">3</span>时间旅行：git log / diff / checkout</h2>
+    <p><b>查看存档历史</b>——每个快照都有一个 7 位短哈希当「存档编号」：</p>
+    <div class="code"><span class="cmd">$ git log --oneline</span></div>
+    <div class="out">7d2e4b9 (HEAD -> main) feat: 增加金币系统
+a1b2c3d feat: 角色名片第一版</div>
+    <p>最新的在最上面，<span class="hl-c">HEAD</span> 指向当前所在的存档。想知道这次到底改了什么？</p>
+    <div class="code"><span class="cmd">$ git diff</span>   <span class="c"># 查看工作区里还没提交的改动</span></div>
+    <div class="out">diff --git a/quest.py b/quest.py
+index 83db23f..4a2c9e1 100644
+--- a/quest.py
++++ b/quest.py
+@@ -1,2 +1,3 @@
+ hero = "阿呆"
+ print("你好，" + hero)
++gold = 300</div>
+    <p><span class="hl">+ 开头的行是新增，- 开头是删除</span>——diff 就是改动的「对账单」。</p>
+
+    <p>最刺激的来了：<b>读档回退</b>。把 quest.py 恢复到第一版：</p>
+    <div class="code"><span class="cmd">$ git checkout a1b2c3d -- quest.py</span>
+<span class="c"># 命令本身没有任何输出，但 quest.py 已悄悄变回第一版</span></div>
+
+    <p>⚠️ <span class="hl">回档风险须知</span>：checkout 会用旧版本<span class="hl">覆盖工作区</span>——你手头还没 commit 的新改动会被直接冲掉，且基本找不回来。<b>读档之前，先存档。</b>想再回到最新版，读 main 线的最新存档即可：<code style="color:var(--cyan)">git checkout main -- quest.py</code>。</p>
+  </section>
+
+  <!-- 4 分支 远程 规范 -->
+  <section>
+    <h2><span class="num">4</span>剧情线、云存档与公会规范</h2>
+    <p><b>① 分支：多开剧情线。</b>主线 <span class="hl-c">main</span> 是稳定通关版；想试新功能，开一条支线随便浪，翻车了主线毫发无伤：</p>
+    <div class="code"><span class="cmd">$ git branch dev</span>          <span class="c"># 创建剧情线 dev</span>
+<span class="cmd">$ git switch dev</span>           <span class="c"># 切换到 dev 上开发</span>
+Switched to branch 'dev'
+<span class="c"># ……在 dev 上改代码、add、commit……</span>
+<span class="cmd">$ git switch main</span>           <span class="c"># 试炼结束回主线</span>
+Switched to branch 'main'
+<span class="cmd">$ git merge dev</span>             <span class="c"># 把 dev 的剧情并入主线</span>
+Updating a1b2c3d..7d2e4b9
+Fast-forward
+ quest.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)</div>
+
+    <p><b>② 远程仓库：云存档。</b>GitHub / Gitee 就是你的云存档服务器。push 上传、pull 下载：</p>
+    <div class="code"><span class="cmd">$ git push -u origin main</span>   <span class="c"># 上传：本地存档 → 云端</span>
+Enumerating objects: 6, done.
+Counting objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 1.02 KiB | 1.02 MiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0), pack-reused 0
+To github.com:hero/quest.git
+ * [new branch]      main -> main
+branch 'main' set up to track remote branch 'main' from 'origin'.
+
+<span class="cmd">$ git pull</span>                      <span class="c"># 下载：把云端最新进度拉回本地</span>
+Already up to date.</div>
+
+    <p><b>③ .gitignore：不是所有东西都配进存档。</b>可重建的、体积巨大的、以及<span class="hl">会害死你的秘钥</span>，都要拉黑：</p>
+    <div class="code"><span class="c"># .gitignore —— Git 的忽略清单</span>
+__pycache__/    <span class="c"># Python 运行缓存，每台机器自己会生成</span>
+venv/           <span class="c"># 虚拟环境，几百 MB 且一条命令就能重建</span>
+.env            <span class="c"># 秘钥文件！API key 一旦推上 GitHub 全网可见，立刻作废</span>
+*.pyc           <span class="c"># 所有编译产物</span></div>
+    <p>🚨 血泪规矩：<span class="hl">.env 必须在第一次 add 之前就写进 .gitignore</span>。秘钥一旦推上公开仓库，唯一正确操作是立刻去平台后台作废重发。</p>
+
+    <p><b>④ 标准项目结构：一个像样的 Python 项目长这样。</b>（明天毕业设计就照这个骨架搭）：</p>
+    <div class="code">my_assistant/
+├── README.md           <span class="c"># 说明书：干什么的、怎么安装、怎么运行</span>
+├── main.py             <span class="c"># 主程序入口，只负责调度</span>
+├── config.py           <span class="c"># 配置集中营：路径、开关、常量</span>
+├── modules/            <span class="c"># 功能模块：一个职责一个文件</span>
+│   ├── organizer.py
+│   └── reporter.py
+├── tests/              <span class="c"># 测试代码，与模块一一对应</span>
+│   └── test_organizer.py
+├── requirements.txt    <span class="c"># 依赖清单：pip install -r requirements.txt 一键装齐</span>
+└── .gitignore          <span class="c"># 忽略清单（见上）</span></div>
+
+    <p><b>⑤ 写测试的意识。</b>项目越大，越不敢「改一行跑全篇」。用 <span class="hl">pytest</span> 给核心函数上保险：</p>
+    <div class="code"><span class="c"># tests/test_add.py</span>
+<span class="k">def</span> <span class="v">add</span>(a, b):
+    <span class="k">return</span> a + b
+
+<span class="k">def</span> <span class="v">test_add</span>():
+    <span class="k">assert</span> <span class="v">add</span>(<span class="n">1</span>, <span class="n">2</span>) == <span class="n">3</span>      <span class="c"># 断言：add(1,2) 必须等于 3</span>
+    <span class="k">assert</span> <span class="v">add</span>(<span class="n">-1</span>, <span class="n">1</span>) == <span class="n">0</span></div>
+    <div class="code"><span class="cmd">$ pytest</span></div>
+    <div class="out">================= test session starts =================
+platform darwin -- Python 3.12.0, pytest-8.2.0, pluggy-1.5.0
+rootdir: /Users/hero/my_assistant
+collected 1 item
+
+tests/test_add.py .                              [100%]
+
+================== 1 passed in 0.01s ==================</div>
+    <p>pytest 会自动发现所有 <span class="hl-c">test_</span> 开头的函数并运行，通过一个绿点、失败一片红——改完代码跑一遍，心里有底。</p>
+
+    <p><b>⑥ commit message：写给未来的自己的短信。</b>半年后翻 log，全靠它认出每档存了什么：</p>
+    <div class="code">✅ feat: 增加金币掉落系统          <span class="c"># 类型 + 干了什么，一目了然</span>
+✅ fix: 修复背包溢出时的崩溃
+❌ 改了点东西                      <span class="c"># 等于没写</span>
+❌ final_final_v2_真的最终版        <span class="c"># 这是文件名的惨案，别让它复活</span></div>
+    <p>常用类型：<span class="hl-c">feat</span> 新功能、<span class="hl-c">fix</span> 修 bug、<span class="hl-c">docs</span> 改文档、<span class="hl-c">refactor</span> 重构。一行说清，动词开头。</p>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · Git 时光机</h2>
+    <p>三区模型光看不练等于没学。这台「时光机」里有一个 quest.py：点 <b>编辑</b> 改代码，<b>git add</b> 打包进暂存区，<b>git commit</b> 生成带哈希的存档。存两档以上后，点「<b>回到第一次提交</b>」亲眼看 checkout 读档。下方终端同步打印每一步<b>真实的 git 命令与输出</b>。</p>
+    <div class="lab-btns">
+      <button class="btn" onclick="labEdit()">✏️ 编辑 quest.py</button>
+      <button class="btn" onclick="labAdd()">📦 git add</button>
+      <button class="btn" onclick="labCommit()">💾 git commit</button>
+      <button class="btn" onclick="labLog()">📜 git log</button>
+      <button class="btn btn2" onclick="labReset()">🔄 重置实验</button>
+    </div>
+    <div style="margin:6px 0 2px;">
+      <button class="btn" id="btn-checkout" onclick="labCheckout()" disabled>⏪ 回到第一次提交（git checkout）</button>
+    </div>
+    <div class="lab-warn" id="checkout-warn">⚠️ 读档完成。注意：如果你刚才在工作区有<b>还没 commit</b>的新改动，它们已经被旧版本覆盖——这就是 checkout 的代价。重要的新改动，永远先 commit 再回档。</div>
+    <div class="git-zones">
+      <div class="gzone z-work" id="z-work">
+        <h4>🖥 工作区 <small>quest.py</small></h4>
+        <div id="z-work-files"></div>
+      </div>
+      <div class="garrow">git add<br>────➤</div>
+      <div class="gzone z-stage" id="z-stage">
+        <h4>📦 暂存区 <small>index</small></h4>
+        <div id="z-stage-files"></div>
+      </div>
+      <div class="garrow">git commit<br>────➤</div>
+      <div class="gzone z-repo" id="z-repo">
+        <h4>🗄 仓库 <small>.git</small></h4>
+        <div id="z-repo-files"></div>
+      </div>
+    </div>
+    <div class="term" id="term"></div>
+    <div class="cards-tip">隐藏玩法：先「编辑」再直接「git commit」（跳过 add），看看真实 Git 会怎么吐槽你。也可以 checkout 回第一档后再 add + commit，把「回档版」存成新一档。</div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段命令，<span class="hl">先在心里预测结果，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 安装 Git 后运行 <code>git --version</code> 验证；给任意一个旧项目 <code>git init</code> 建仓库，完成第一次 <code>add + commit</code></li>
+    <li>② 故意修改三次代码，每次用规范 message 提交，然后 <code>git log --oneline</code> 欣赏你的存档时间线</li>
+    <li>③ 写一个 <code>.gitignore</code>（<code>__pycache__/</code>、<code>venv/</code>、<code>.env</code>），用 <code>git status</code> 确认它们真的消失了</li>
+    <li>④ 给某个旧函数补一个 <code>tests/test_xxx.py</code>，<code>pip install pytest</code> 后运行 <code>pytest</code>，看到绿点</li>
+    <li>⑤ 注册 GitHub，把仓库 <code>push</code> 上云——推之前务必确认 <code>.env</code> 没被追踪（<code>git status</code> 里不该出现它）</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：♛ 毕业设计 · 个人自动化助手 —— 大师之路终极试炼
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：Git 时光机 ============ */
+var versions = [
+  {msg:'feat: 创建角色名片', lines:['hero = "阿呆"', 'print("你好，" + hero)']},
+  {msg:'feat: 增加金币系统', lines:['hero = "阿呆"', 'print("你好，" + hero)', 'gold = 300', 'print("金币：", gold)']},
+  {msg:'feat: 富翁彩蛋上线', lines:['hero = "阿呆"', 'print("你好，" + hero)', 'gold = 300', 'print("金币：", gold)', 'if gold >= 300:', '    print("土豪，交个朋友")']}
+];
+var G = { vi:0, working:null, staged:null, stagedMsg:'', commits:[], term:[] };
+
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hash7(){
+  var chars='0123456789abcdef', s='', i;
+  for(i=0;i<7;i++){ s += chars.charAt(Math.floor(Math.random()*16)); }
+  return s;
+}
+function term(kind, text){ G.term.push({k:kind, s:text}); renderTerm(); }
+function termOut(text){
+  text.split('\n').forEach(function(l){ term('out', l); });
+}
+function renderTerm(){
+  var box = document.getElementById('term');
+  var html = G.term.map(function(t){
+    if(t.k==='cmd'){ return '<span class="t-cmd">$ '+esc(t.s)+'</span>'; }
+    if(t.k==='cmt'){ return '<span class="t-cmt"># '+esc(t.s)+'</span>'; }
+    return '<span class="t-out">'+esc(t.s)+'</span>';
+  }).join('\n');
+  box.innerHTML = html;
+  box.scrollTop = box.scrollHeight;
+}
+function sameLines(a, b){
+  if(!a || !b || a.length !== b.length){ return false; }
+  for(var i=0;i<a.length;i++){ if(a[i] !== b[i]){ return false; } }
+  return true;
+}
+function headLines(){ return G.commits.length ? G.commits[G.commits.length-1].lines : []; }
+function diffStat(oldL, newL){
+  var oldC = {}, newC = {}, i, k;
+  for(i=0;i<oldL.length;i++){ oldC[oldL[i]] = (oldC[oldL[i]]||0)+1; }
+  for(i=0;i<newL.length;i++){ newC[newL[i]] = (newC[newL[i]]||0)+1; }
+  var ins=0, del=0;
+  for(k in newC){ ins += Math.max(0, newC[k] - (oldC[k]||0)); }
+  for(k in oldC){ del += Math.max(0, oldC[k] - (newC[k]||0)); }
+  return {ins:ins, del:del};
+}
+function renderZones(){
+  document.getElementById('z-work-files').innerHTML =
+    G.working.map(function(l){ return '<div class="zline">'+esc(l)+'</div>'; }).join('');
+  document.getElementById('z-stage-files').innerHTML =
+    G.staged ? G.staged.map(function(l){ return '<div class="zline">'+esc(l)+'</div>'; }).join('')
+             : '<div class="zempty">（空 · 还没 git add）</div>';
+  var r = '';
+  if(!G.commits.length){
+    r = '<div class="zempty">（空 · 还没 git commit）</div>';
+  } else {
+    for(var i=G.commits.length-1;i>=0;i--){
+      var c = G.commits[i];
+      var head = (i===G.commits.length-1) ? '<span class="zhead">HEAD → main</span>' : '';
+      r += '<div class="gcommit"><b>'+c.hash+'</b>'+head+'<div class="gmsg">'+esc(c.msg)+'</div></div>';
+    }
+  }
+  document.getElementById('z-repo-files').innerHTML = r;
+  document.getElementById('btn-checkout').disabled = (G.commits.length === 0);
+}
+function flashZone(id){
+  var z = document.getElementById(id);
+  z.classList.remove('flash'); void z.offsetWidth; z.classList.add('flash');
+}
+function labEdit(){
+  if(G.vi < versions.length-1){
+    G.vi++;
+    G.working = versions[G.vi].lines.slice();
+    term('cmt', '你在编辑器里改了 quest.py（改动只在工作区，Git 还没记）');
+    renderZones();
+    flashZone('z-work');
+  } else {
+    alert('quest.py 已经是最新版了！下一步：git add → git commit；或者直接「回到第一次提交」体验读档。');
+  }
+}
+function labAdd(){
+  G.staged = G.working.slice();
+  G.stagedMsg = versions[G.vi].msg;
+  term('cmd', 'git add quest.py');
+  term('cmt', '无输出——add 成功时，Git 沉默是金');
+  renderZones();
+  flashZone('z-stage');
+}
+function labCommit(){
+  if(G.staged === null){
+    term('cmd', 'git commit -m "..."');
+    if(G.commits.length === 0){
+      termOut('On branch main\n\nNo commits yet\n\nUntracked files:\n  (use "git add <file>..." to include in what will be committed)\n\tquest.py\n\nnothing added to commit but untracked files present (use "git add" to track)');
+    } else if(sameLines(G.working, headLines())){
+      termOut('On branch main\nnothing to commit, working tree clean');
+    } else {
+      termOut('On branch main\nChanges not staged for commit:\n  (use "git add <file>..." to update what will be committed)\n\tmodified:   quest.py\n\nno changes added to commit (create/copy files and use "git add" to track)');
+    }
+    return;
+  }
+  var prev = headLines();
+  var d = diffStat(prev, G.staged);
+  if(d.ins === 0 && d.del === 0){
+    term('cmd', 'git commit -m "..."');
+    termOut('On branch main\nnothing to commit, working tree clean');
+    G.staged = null;
+    renderZones();
+    return;
+  }
+  var h = hash7();
+  var msg = G.stagedMsg;
+  var isRoot = (G.commits.length === 0);
+  var stat = ' 1 file changed';
+  if(d.ins > 0){ stat += ', ' + d.ins + ' insertion' + (d.ins>1?'s':'') + '(+)'; }
+  if(d.del > 0){ stat += ', ' + d.del + ' deletion' + (d.del>1?'s':'') + '(-)'; }
+  term('cmd', 'git commit -m "' + msg + '"');
+  termOut((isRoot ? '[main (root-commit) ' + h + '] ' : '[main ' + h + '] ') + msg + '\n' + stat + (isRoot ? '\n create mode 100644 quest.py' : ''));
+  G.commits.push({hash:h, msg:msg, lines:G.staged.slice()});
+  G.staged = null;
+  renderZones();
+  flashZone('z-repo');
+}
+function labLog(){
+  term('cmd', 'git log --oneline');
+  if(!G.commits.length){
+    termOut("fatal: your current branch 'main' does not have any commits yet");
+    return;
+  }
+  var lines = [];
+  for(var i=G.commits.length-1;i>=0;i--){
+    var c = G.commits[i];
+    lines.push(c.hash + (i===G.commits.length-1 ? ' (HEAD -> main) ' : ' ') + c.msg);
+  }
+  termOut(lines.join('\n'));
+}
+function labCheckout(){
+  if(!G.commits.length){ return; }
+  var first = G.commits[0];
+  term('cmd', 'git checkout ' + first.hash + ' -- quest.py');
+  term('cmt', '无输出——但 quest.py 已被改回 ' + first.hash + ' 版本，暂存区也被同步覆盖');
+  G.working = first.lines.slice();
+  G.staged = first.lines.slice();
+  G.stagedMsg = versions[G.vi].msg;
+  G.vi = 0;
+  for(var i=0;i<versions.length;i++){
+    if(sameLines(versions[i].lines, first.lines)){ G.vi = i; }
+  }
+  G.stagedMsg = versions[G.vi].msg;
+  renderZones();
+  flashZone('z-work');
+  document.getElementById('checkout-warn').classList.add('show');
+}
+function labReset(){
+  G.vi = 0;
+  G.working = versions[0].lines.slice();
+  G.staged = null;
+  G.stagedMsg = versions[0].msg;
+  G.commits = [];
+  G.term = [];
+  term('cmd', 'git init');
+  termOut('Initialized empty Git repository in /Users/hero/quest/.git/');
+  term('cmt', '你重新写好了第一版 quest.py（实验重置）');
+  renderZones();
+  document.getElementById('checkout-warn').classList.remove('show');
+}
+/* 初始化 */
+G.working = versions[0].lines.slice();
+G.stagedMsg = versions[0].msg;
+term('cmd', 'git init');
+termOut('Initialized empty Git repository in /Users/hero/quest/.git/');
+term('cmt', '你刚写完第一版 quest.py，改动还在工作区，先 git add 吧');
+renderZones();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · add 之后 status 变了啥',
+    code:'$ git status --short\n?? quest.py\n$ git add quest.py\n$ git status --short\n（最后一行会输出什么？）',
+    opts:['A  quest.py','?? quest.py',' M quest.py','M  quest.py'],
+    ans:0,
+    exp:'add 之后新文件进入暂存区，--short 第一列的 A 就是 Added（已打包待存档）；?? 表示未跟踪， M 表示改动还没 add。'
+  },
+  {
+    title:'第 2 预言 · commit -m 到底存了什么',
+    code:'$ git add quest.py\n$ git commit -m "feat: 增加金币系统"',
+    opts:['暂存区的快照被永久存进仓库，说明是这句 message','quest.py 被上传到了 GitHub','quest.py 被恢复到上一个版本','Git 创建了新分支'],
+    ans:0,
+    exp:'add 打包 → commit 存档，-m 引号里是存档说明。上传远程要靠 git push——此刻云端什么都没发生。'
+  },
+  {
+    title:'第 3 预言 · 读档的代价',
+    code:'$ git log --oneline\nc4d5e6f (HEAD -> main) feat: 金币系统\na1b2c3d feat: 角色名片\n$ git checkout a1b2c3d -- quest.py',
+    opts:['quest.py 变回 a1b2c3d 版本；工作区未提交的新改动会丢','删除 c4d5e6f 这次提交','只是查看历史，文件不变','把 a1b2c3d 上传到远程仓库'],
+    ans:0,
+    exp:'checkout <哈希> -- <文件> 是读档：旧版本覆盖工作区（暂存区也同步）。未 commit 的新改动被覆盖后基本找不回——读档前先存档。'
+  },
+  {
+    title:'第 4 预言 · 忽略清单的真正含义',
+    code:'# .gitignore\nvenv/\n__pycache__/',
+    opts:['Git 不再追踪这些目录，它们不进仓库','删除电脑上的 venv 和缓存文件夹','把 venv 上传到 GitHub','只是一行注释，没有作用'],
+    ans:0,
+    exp:'.gitignore 是忽略清单：写在里面的路径不参与版本控制，文件本身安然无恙。venv 可一键重建、缓存每台机器自己生成，存它们纯属浪费仓库空间。'
+  },
+  {
+    title:'第 5 预言 · log 里能看到什么',
+    code:'$ git commit -m "feat: 通关大师之路"\n$ git log --oneline',
+    opts:['提交历史：短哈希 + 说明，最新在最上面','文件里每一行代码的内容','远程仓库的网址','一张时间报表格'],
+    ans:0,
+    exp:'git log 按时间倒序列存档记录；--oneline 一档一行 = 短哈希 + 说明。你刚提交的「feat: 通关大师之路」会排在第一行。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return esc(l)
+        .replace(/(&quot;[^&]*&quot;|"[^"]*")/g,'<span style="color:var(--pink)">$1</span>')
+        .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+        .replace(/(git|add|commit|checkout|status|log|branch|switch|merge|push|pull|ignore)/g,'<span style="color:var(--purple)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['为什么需要版本控制？','游戏存档思维：随时回档（checkout）、多开剧情线（分支）、云存档（push/pull）、存档有说明（commit message）'],
+  ['git init 做了什么','在当前文件夹创建隐藏的 .git 目录——把普通文件夹升级成 Git 仓库'],
+  ['三区模型的顺序','工作区（改文件）→ git add → 暂存区（打包清单）→ git commit → 仓库（永久快照）'],
+  ['add 与 commit 各管哪步','add 把工作区改动挑进暂存区；commit 把暂存区快照永久写入仓库'],
+  ['git log --oneline 看什么','提交历史：短哈希 + 说明，按时间倒序排列，最新（HEAD）在最上面'],
+  ['git diff 看什么','还没提交的改动对账单：+ 开头是新增行，- 开头是删除行'],
+  ['git checkout 哈希 -- 文件','读档：把该文件恢复到指定提交的版本；未提交的新改动会被覆盖，读档前先存档'],
+  ['分支三连怎么用','git branch dev 建支线 → git switch dev 上支线 → 回 main 后 git merge dev 并入主线'],
+  ['push 和 pull 的方向','push：本地提交上传到远程仓库；pull：把远程的新进度拉回本地'],
+  ['.gitignore 该写什么','__pycache__/、venv/、.env 秘钥等——可重建的和会泄密的，都不进仓库']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'git init 的作用是？',
+   opts:['在当前文件夹创建 .git 仓库，开启存档系统','把文件夹上传到 GitHub','安装 Python','创建虚拟环境'], ans:0,
+   exp:'init 只做一件事：生成隐藏的 .git 目录，从此这里每次改动都可被记录。上传远程是之后 git push 的事。'},
+  {q:'改完 quest.py 并执行了 git add quest.py，此时你的改动在哪个区？',
+   opts:['工作区','暂存区','仓库','远程仓库'], ans:1,
+   exp:'add 是「打包」：改动从工作区进入暂存区，等 commit 来存档。'},
+  {q:'git commit -m "fix: 修复背包溢出" 引号里的内容是？',
+   opts:['提交说明，写清这一档存了什么','要提交的文件名','分支名','Git 账号密码'], ans:0,
+   exp:'-m 后是 commit message（存档说明）。好说明 = 类型 + 干了什么，让你半年后翻 log 还能看懂每一档。'},
+  {q:'git log --oneline 的输出，排在最上面的是？',
+   opts:['最新的一次提交','最早的一次提交','改动最多的文件','随机一条提交'], ans:0,
+   exp:'log 按时间倒序，最新的在最上面，且带 HEAD 标记指示当前所在存档。'},
+  {q:'想看 quest.py 还没 add 的改动具体是哪几行，用哪条命令？',
+   opts:['git diff','git log','git push','git init'], ans:0,
+   exp:'diff 是改动对账单：+ 行是新增、- 行是删除。log 看历史，diff 看细节。'},
+  {q:'git checkout a1b2c3d -- quest.py 最大的风险是？',
+   opts:['工作区未提交的新改动会被旧版本覆盖，基本找不回','会删除整个 .git 仓库','会把项目上传到 GitHub','没有任何风险'], ans:0,
+   exp:'checkout 是读档，旧版本直接覆盖工作区。铁律：读档之前，先 commit 存档。'},
+  {q:'git switch -c dev 的意思是？',
+   opts:['创建 dev 分支并切换过去','删除 dev 分支','把 dev 合并进 main','查看 dev 的提交日志'], ans:0,
+   exp:'-c = create。等价于 git branch dev 加 git switch dev 两步。开支线试新功能，翻车不伤主线。'},
+  {q:'push 和 pull 的方向，哪句是对的？',
+   opts:['push 把本地提交上传远程，pull 把远程更新拉回本地','push 下载，pull 上传','两个都是下载','两个都是上传'], ans:0,
+   exp:'记法：push 推上去（本地→云端），pull 拉回来（云端→本地）。像云存档的「上传进度 / 同步进度」。'},
+  {q:'下面哪一项必须写进 .gitignore？',
+   opts:[' .env（存放 API 密钥的文件）','main.py（主程序）','README.md（项目说明）','tests/（测试代码）'], ans:0,
+   exp:'秘钥绝不进仓库——一旦 push 到公开平台全网可见，密钥立刻作废。主程序、说明、测试恰恰最该存档。'},
+  {q:'哪条 commit message 写得最好？',
+   opts:['fix: 修复登录按钮无响应','改了点东西','final_final_v2_真的最终版','（什么都不写）'], ans:0,
+   exp:'格式「类型: 干了什么」——未来的自己翻 log 时会感谢现在写清楚的你。'},
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！公会认证的规范大师，毕业设计已为你解锁 🔓' : '通关成功！♛ 毕业设计「个人自动化助手」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

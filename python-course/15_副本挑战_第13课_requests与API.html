@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第13课 · requests 与 API —— 情报网</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --amber:#fbbf24; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fbbf24 50%,#fb923c);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#ffe3a3;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out-note{font-size:12px;color:var(--muted);margin-top:-8px;margin-bottom:12px;}
+  /* 餐厅流程图 */
+  .flow{display:flex;align-items:center;justify-content:center;gap:8px;margin:22px 0;flex-wrap:wrap;}
+  .flow-node{
+    background:var(--card);border:2px solid var(--gold);border-radius:14px;
+    padding:12px 18px;text-align:center;min-width:130px;transition:all .3s;
+  }
+  .flow-node .f1{font-size:22px;}
+  .flow-node .f2{font-size:15px;font-weight:800;color:var(--gold);margin:2px 0;}
+  .flow-node .f3{font-size:11px;color:var(--muted);}
+  .flow-node.lit{box-shadow:0 0 22px rgba(245,197,66,.45);transform:translateY(-4px);}
+  .flow-arrow{color:var(--orange);font-size:20px;font-weight:800;}
+  .order-steps{
+    margin:14px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;min-height:58px;
+  }
+  .order-step{font-size:14px;color:var(--cyan);animation:fadeIn .4s;}
+  .order-step b{color:var(--gold);}
+  /* 状态码卡片 */
+  .status-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .scard{
+    flex:1;min-width:180px;background:var(--card);border-radius:14px;padding:16px;
+    text-align:center;border:2px solid var(--line);transition:all .3s;cursor:default;
+  }
+  .scard:hover{transform:translateY(-6px);}
+  .scard .code-num{font-size:34px;font-weight:800;font-family:ui-monospace,Menlo,monospace;}
+  .scard .code-name{font-size:14px;font-weight:700;margin:2px 0;}
+  .scard .code-desc{font-size:12px;color:var(--muted);}
+  .scard.ok{border-color:var(--cyan);} .scard.ok .code-num,.scard.ok .code-name{color:var(--cyan);}
+  .scard.miss{border-color:var(--orange);} .scard.miss .code-num,.scard.miss .code-name{color:var(--orange);}
+  .scard.err{border-color:var(--red);} .scard.err .code-num,.scard.err .code-name{color:var(--red);}
+  /* 对比卡 */
+  .vs-box{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0;}
+  .vs-col{flex:1;min-width:240px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .vs-col h4{font-size:14px;margin-bottom:6px;}
+  .vs-col p{font-size:13px;color:var(--muted);margin-bottom:6px;}
+  .vs-col .vs-code{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);background:#0a0d1e;border-radius:8px;padding:8px 10px;white-space:pre-wrap;}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input select{
+    flex:1;min-width:200px;background:#0a0d1e;border:1px solid var(--gold);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;font-family:inherit;
+  }
+  .lab-input select:focus{box-shadow:0 0 0 3px rgba(245,197,66,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  /* 请求-响应流程面板 */
+  .req-panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin-top:16px;}
+  .req-step{
+    display:none;padding:9px 12px;border-left:3px solid var(--line);margin-bottom:8px;
+    font-size:13px;color:var(--muted);border-radius:0 8px 8px 0;
+  }
+  .req-step.show{display:block;animation:fadeIn .35s;}
+  .req-step.active{border-left-color:var(--gold);color:var(--text);background:rgba(245,197,66,.06);}
+  .req-step .rs-title{font-weight:700;color:var(--purple);font-size:12px;display:block;}
+  .req-step .rs-body{font-family:ui-monospace,Menlo,monospace;font-size:13px;white-space:pre-wrap;}
+  .req-step .rs-ok{color:var(--cyan);}
+  .req-step .rs-404{color:var(--orange);}
+  .spinner{
+    display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--gold);
+    border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .field-panel{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
+  .field-box{
+    background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;padding:8px 14px;
+    text-align:center;min-width:86px;
+  }
+  .field-box .fb-k{font-size:11px;color:var(--muted);}
+  .field-box .fb-v{font-size:16px;font-weight:700;color:var(--cyan);font-family:ui-monospace,Menlo,monospace;}
+  .field-box.errbox{border-color:var(--red);}
+  .field-box.errbox .fb-v{color:var(--red);}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--gold);}
+  .opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);color:var(--gold);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--gold);color:var(--gold);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--cyan);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--gold);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(245,197,66,.1);color:var(--gold);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  footer b{color:var(--gold);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>第 13 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 3 · DUNGEON CHALLENGE</div>
+    <h1>requests 与 API —— 情报网</h1>
+    <div class="subtitle">今日目标：让你的程序连上世界，随时调取远方服务器的情报</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解什么是 <span class="hl">API</span>（餐厅点餐比喻：你=程序、服务员=API、厨房=服务器）</li>
+      <li>掌握 <span class="hl">requests.get()</span> 与 Response 对象、<span class="hl">status_code</span>（200/404/500）</li>
+      <li>分清 <span class="hl">r.text</span> 与 <span class="hl">r.json()</span>，会用 <span class="hl">params</span> 带参数请求</li>
+      <li>学会 <span class="hl">timeout + try/except</span> 兜底，建立 API Key 保密意识</li>
+      <li>通关实验室「情报站模拟器」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 什么是 API -->
+  <section>
+    <h2><span class="num">1</span>什么是 API：餐厅点餐的智慧</h2>
+    <p>你的程序想要的"情报"——天气、汇率、排行榜——都存放在别人的服务器上。程序怎么拿到手？靠 <span class="hl">API</span>（Application Programming Interface，应用程序接口）。</p>
+    <p>把整个过程想象成在餐厅点餐：</p>
+    <div class="flow" id="api-flow">
+      <div class="flow-node" id="fn-you">
+        <div class="f1">🧑</div>
+        <div class="f2">你 = 程序</div>
+        <div class="f3">客户端，负责点菜</div>
+      </div>
+      <div class="flow-arrow">— — ➤</div>
+      <div class="flow-node" id="fn-waiter">
+        <div class="f1">🤵</div>
+        <div class="f2">服务员 = API</div>
+        <div class="f3">接收需求、传达后厨、端回结果</div>
+      </div>
+      <div class="flow-arrow">— — ➤</div>
+      <div class="flow-node" id="fn-kitchen">
+        <div class="f1">👨‍🍳</div>
+        <div class="f2">厨房 = 服务器</div>
+        <div class="f3">真正做菜（处理数据）的地方</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-bottom:12px;">
+      <button class="btn" onclick="orderDish()">🍿 点一份今日情报（看流程动画）</button>
+    </div>
+    <div class="order-steps" id="order-steps">
+      <div class="order-step" style="color:var(--muted);">点击按钮，看一份情报是怎么被"端"回来的……</div>
+    </div>
+    <p>关键理解：<span class="hl">你不需要知道厨房怎么炒菜</span>，只要按菜单（API 文档）正确点菜，就能拿到做好的菜（数据）。翻译成 Python 只需要几行：</p>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>                          <span class="c"># 情报小哥模块（pip install requests 安装）</span>
+
+<span class="c"># api.example.com 是演示用地址，真实项目里要填接口文档给的完整地址</span>
+<span class="v">r</span> = requests.<span class="k">get</span>(<span class="s">"api.example.com/v1/weather"</span>, params={<span class="s">"city"</span>: <span class="s">"杭州"</span>})
+<span class="v">data</span> = <span class="v">r</span>.<span class="k">json</span>()                          <span class="c"># 把返回的 JSON 情报拆成字典</span></div>
+    <p>这一课的所有代码都围绕这四行展开。注意：<span class="hl-c">requests 不是内置模块</span>，第一次用要先在终端执行 <code class="hl-c">pip install requests</code>。</p>
+  </section>
+
+  <!-- 2 Response 与 status_code -->
+  <section>
+    <h2><span class="num">2</span>requests.get() 与 Response：情报回执单</h2>
+    <p><span class="hl">requests.get(地址)</span> 会向服务器发出 GET 请求，返回一个 <span class="hl">Response 对象</span>——一张"回执单"，上面记着状态码、返回内容等所有信息：</p>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>
+
+<span class="v">r</span> = requests.<span class="k">get</span>(<span class="s">"api.example.com/v1/weather"</span>, params={<span class="s">"city"</span>: <span class="s">"杭州"</span>})
+<span class="k">print</span>(<span class="k">type</span>(<span class="v">r</span>))
+<span class="k">print</span>(<span class="v">r</span>.status_code)</div>
+    <div class="out">&lt;class 'requests.models.Response'&gt;
+200</div>
+
+    <p>回执单上最重要的字段是 <span class="hl">r.status_code</span>（状态码），它告诉你这次点餐的结果。三个最常见的号码：</p>
+    <div class="status-row">
+      <div class="scard ok">
+        <div class="code-num">200</div>
+        <div class="code-name">OK · 成功</div>
+        <div class="code-desc">菜上齐了！服务器成功返回了数据</div>
+      </div>
+      <div class="scard miss">
+        <div class="code-num">404</div>
+        <div class="code-name">Not Found · 找不到</div>
+        <div class="code-desc">菜单上没这道菜：地址写错或资源不存在</div>
+      </div>
+      <div class="scard err">
+        <div class="code-num">500</div>
+        <div class="code-name">Server Error · 服务器错误</div>
+        <div class="code-desc">厨房着火了！问题出在服务器那边</div>
+      </div>
+    </div>
+    <p>🧠 记忆口诀：<span class="hl">2xx 成功、4xx 你的锅（地址/权限）、5xx 服务器的锅</span>。养成习惯：拿到 r 先看 status_code，不是 2xx 就别急着解析数据。</p>
+  </section>
+
+  <!-- 3 text 与 json -->
+  <section>
+    <h2><span class="num">3</span>r.text 与 r.json()：生肉与装盘</h2>
+    <p>服务器返回的原始内容是一整段字符串。你可以选择"生吃"（r.text），也可以让 requests 帮你"装盘"（r.json()）：</p>
+    <div class="vs-box">
+      <div class="vs-col">
+        <h4 style="color:var(--orange);">🥩 r.text —— 生肉（原始字符串）</h4>
+        <p>类型是 str，内容原封不动，想取某个字段得自己切字符串，非常痛苦：</p>
+        <div class="vs-code">data = r.text
+# '{"city": "杭州", "temp": 26.5, ...}'
+# 一整段文字，没法 data["temp"]</div>
+      </div>
+      <div class="vs-col">
+        <h4 style="color:var(--cyan);">🍽️ r.json() —— 装盘（解析好了）</h4>
+        <p>把 JSON 自动解析成 Python 的 dict / list，直接用方括号取字段：</p>
+        <div class="vs-code">data = r.json()
+data["temp"]   # 26.5
+data["city"]   # '杭州'</div>
+      </div>
+    </div>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>
+
+<span class="v">r</span> = requests.<span class="k">get</span>(<span class="s">"api.example.com/v1/weather"</span>, params={<span class="s">"city"</span>: <span class="s">"杭州"</span>})
+<span class="k">print</span>(<span class="k">type</span>(<span class="v">r</span>.text))     <span class="c"># 原始内容：一整段字符串</span>
+<span class="k">print</span>(<span class="k">type</span>(<span class="v">r</span>.<span class="k">json</span>()))   <span class="c"># 解析后：字典（若接口返回数组则是列表）</span></div>
+    <div class="out">&lt;class 'str'&gt;
+&lt;class 'dict'&gt;</div>
+    <p>假设接口返回的 JSON 原文长这样（注意：JSON 里的键和字符串都用双引号）：</p>
+    <div class="code">{
+    <span class="s">"city"</span>: <span class="s">"杭州"</span>,
+    <span class="s">"temp"</span>: <span class="n">26.5</span>,
+    <span class="s">"weather"</span>: <span class="s">"多云"</span>
+}</div>
+    <p>用 r.json() 解析后，就像操作普通字典一样取字段：</p>
+    <div class="code"><span class="v">data</span> = <span class="v">r</span>.<span class="k">json</span>()
+<span class="k">print</span>(<span class="v">data</span>[<span class="s">"city"</span>])
+<span class="k">print</span>(<span class="v">data</span>[<span class="s">"temp"</span>])
+<span class="k">print</span>(<span class="v">data</span>[<span class="s">"weather"</span>])</div>
+    <div class="out">杭州
+26.5
+多云</div>
+    <p>⚠️ 想取的键不存在会抛 <span class="hl-c">KeyError</span>——不确定有没有时，用 <code class="hl-c">data.get("键")</code> 兜底，取不到返回 None 而不是报错。</p>
+  </section>
+
+  <!-- 4 params -->
+  <section>
+    <h2><span class="num">4</span>params：把需求写在订单上</h2>
+    <p>查杭州天气、查北京天气，接口地址只有 city 这一处不同。把变化的部分交给 <span class="hl">params</span> 参数（一个字典），不用自己手动拼地址：</p>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>
+
+<span class="v">url</span> = <span class="s">"api.example.com/v1/weather"</span>
+<span class="v">r</span> = requests.<span class="k">get</span>(<span class="v">url</span>, params={<span class="s">"city"</span>: <span class="s">"北京"</span>, <span class="s">"lang"</span>: <span class="s">"zh"</span>})
+<span class="k">print</span>(<span class="v">r</span>.status_code)
+<span class="c"># params 会被自动拼接到地址问号后面，相当于：</span>
+<span class="c">#   .../v1/weather?city=北京&amp;lang=zh（中文会被自动转码，无需操心）</span></div>
+    <div class="out">200</div>
+    <p>问号后面的 <span class="hl-c">?city=北京&lang=zh</span> 叫<span class="hl">查询字符串</span>。手拼字符串容易漏转义、写错符号，交给 params 既安全又省事——这也是"服务员帮你传话"的意义。</p>
+  </section>
+
+  <!-- 5 timeout try except API Key -->
+  <section>
+    <h2><span class="num">5</span>超时、异常与 API Key：情报员的自我修养</h2>
+    <p>网络会断、服务器会卡。一个不设防的请求可能让程序干等几十秒甚至直接崩溃。专业做法是三件套：<span class="hl">timeout + try/except + raise_for_status</span>：</p>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>
+
+<span class="k">try</span>:
+    <span class="v">r</span> = requests.<span class="k">get</span>(<span class="s">"api.example.com/v1/weather"</span>,
+                     params={<span class="s">"city"</span>: <span class="s">"杭州"</span>}, timeout=<span class="n">5</span>)
+    <span class="v">r</span>.<span class="k">raise_for_status</span>()      <span class="c"># 状态码不是 2xx 就主动抛异常</span>
+    <span class="v">data</span> = <span class="v">r</span>.<span class="k">json</span>()
+    <span class="k">print</span>(<span class="v">data</span>[<span class="s">"weather"</span>])
+<span class="k">except</span> requests.Timeout:
+    <span class="k">print</span>(<span class="s">"请求超时，请稍后再试"</span>)
+<span class="k">except</span> requests.RequestException:
+    <span class="k">print</span>(<span class="s">"请求失败：网络异常或地址有误"</span>)</div>
+    <p>三个要点：<span class="hl">timeout=5</span> 表示最多等 5 秒；超时会抛 <span class="hl-c">requests.Timeout</span> 异常；<span class="hl-c">except</span> 的顺序要把更具体的 Timeout 放在更宽泛的 RequestException 前面（子类在前）。</p>
+
+    <p>最后一条红线：<span class="hl">API Key 的保密意识</span>。很多 API 需要"通行证"（API Key）才能调用，而 key 一旦泄露，别人就能冒充你刷你的额度：</p>
+    <div class="code"><span class="k">import</span> <span class="v">os</span>
+<span class="k">import</span> <span class="v">requests</span>
+
+<span class="c"># ❌ 危险写法：key 写死在代码里，一旦提交到代码仓库就等于公开</span>
+<span class="c"># api_key = "sk-1234567890abcdef"</span>
+
+<span class="c"># ✅ 安全写法：从环境变量读取，代码里根本见不到 key 本体</span>
+<span class="v">api_key</span> = os.environ.<span class="k">get</span>(<span class="s">"WEATHER_API_KEY"</span>)
+
+<span class="v">r</span> = requests.<span class="k">get</span>(<span class="s">"api.example.com/v1/weather"</span>,
+                 params={<span class="s">"city"</span>: <span class="s">"杭州"</span>},
+                 headers={<span class="s">"Authorization"</span>: <span class="s">"Bearer "</span> + <span class="k">str</span>(<span class="v">api_key</span>)})</div>
+    <p>🧠 记住三不要：<span class="hl">不写死在代码里、不提交到仓库、不截图发群里</span>。key 泄露了要立刻去平台重置。</p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 情报站模拟器</h2>
+    <p>页面里内置了一份"迷你天气 API"的模拟数据。选择城市、点击发起请求，观察完整的请求-响应流程：请求行 → 传输等待 → 状态码 → JSON 原文 → 解析后的字段面板。选择「亚特兰蒂斯」可以体验 404 分支。下方的等价 Python 代码会跟着你的选择变化。</p>
+    <div class="lab-input">
+      <select id="city-select">
+        <option value="hangzhou">杭州（正常演示 · 200）</option>
+        <option value="beijing">北京（正常演示 · 200）</option>
+        <option value="chengdu">成都（正常演示 · 200）</option>
+        <option value="lasa">拉萨（正常演示 · 200）</option>
+        <option value="atlantis">亚特兰蒂斯（演示 404 · 不存在的城市）</option>
+      </select>
+      <button class="btn" id="req-btn" onclick="sendRequest()">📡 发起请求</button>
+    </div>
+    <div class="req-panel" id="req-panel">
+      <div class="req-step" id="rs-1"><span class="rs-title">① 请求行 · requests.get() 已发出</span><span class="rs-body" id="rs-1-body">—</span></div>
+      <div class="req-step" id="rs-2"><span class="rs-title">② 传输中 · 等待服务器响应</span><span class="rs-body"><span class="spinner"></span>正在跨越网线……</span></div>
+      <div class="req-step" id="rs-3"><span class="rs-title">③ 状态码 · r.status_code</span><span class="rs-body" id="rs-3-body">—</span></div>
+      <div class="req-step" id="rs-4"><span class="rs-title">④ 响应原文 · r.text（JSON 字符串）</span><span class="rs-body" id="rs-4-body">—</span></div>
+      <div class="req-step" id="rs-5"><span class="rs-title">⑤ 解析结果 · r.json() 取字段</span><span class="rs-body"><div class="field-panel" id="field-panel"></div></span></div>
+    </div>
+    <div class="code" id="lab-code" style="display:none"></div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 在终端执行 <code>pip install requests</code>，然后把本课代码块<b>亲手逐行敲一遍</b>（api.example.com 是演示地址，连不上很正常——正好练习读异常信息）</li>
+    <li>② 上网搜索「免费公开 API」或「免费天气 API 开发者接口」，挑一个无需付费的接口，用 <code>requests.get()</code> 先 <code>print(r.status_code)</code>，再 <code>print(r.json())</code> 观察返回的数据结构</li>
+    <li>③ 给你的请求加上 <code>timeout=5</code>，并用 <code>try/except</code> 捕获 <code>requests.Timeout</code> 和 <code>requests.RequestException</code>；然后关掉 Wi-Fi 再运行一次，看看你的提示语有没有优雅地出现</li>
+    <li>④ 思考题：为什么 API Key 不能写死在代码里提交到仓库？正确做法是什么？（答案就在第 5 节）</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>第 14 课 · os 与 shutil —— 文件管家</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用：HTML 转义 + Python 高亮 ============ */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hlPy(code){
+  return code.split('\n').map(function(l){
+    var e = esc(l);
+    e = e.replace(/("[^"]*")/g,'<span style="color:var(--gold)">$1</span>');
+    e = e.replace(/(#.*$)/,'<span style="color:#5b648f">$1</span>');
+    e = e.replace(/(\b)(raise_for_status|RequestException|requests|strftime|datetime|randint|shuffle|import|except|Timeout|params|status_code|print|float|raise|headers|environ|json|get|str|try|os)(\b)/g,
+      '$1<span style="color:var(--pink)">$2</span>$3');
+    return e;
+  }).join('\n');
+}
+
+/* ============ 餐厅点餐流程动画 ============ */
+var orderStepsData = [
+  {node:'fn-you',    text:'🧑 <b>你（程序）</b>：「来一份杭州实时天气！」'},
+  {node:'fn-waiter', text:'🤵 <b>服务员（API）</b>：收到需求，转交给厨房……'},
+  {node:'fn-kitchen',text:'👨‍🍳 <b>厨房（服务器）</b>：查库、烹炒、装盘 JSON……'},
+  {node:'fn-waiter', text:'🤵 <b>服务员（API）</b>：您的情报好了——{"city": "杭州", "temp": 26.5}'},
+  {node:'fn-you',    text:'🧑 <b>你（程序）</b>：data = r.json()，情报到手！'}
+];
+var orderTimer = null;
+function orderDish(){
+  var box = document.getElementById('order-steps');
+  var nodes = document.querySelectorAll('.flow-node');
+  if(orderTimer) return;
+  for(var i=0;i<nodes.length;i++){ nodes[i].classList.remove('lit'); }
+  box.innerHTML = '';
+  var idx = 0;
+  orderTimer = setInterval(function(){
+    if(idx >= orderStepsData.length){
+      clearInterval(orderTimer); orderTimer = null;
+      return;
+    }
+    var st = orderStepsData[idx];
+    for(var j=0;j<nodes.length;j++){ nodes[j].classList.remove('lit'); }
+    var target = document.getElementById(st.node);
+    if(target){ target.classList.add('lit'); }
+    var div = document.createElement('div');
+    div.className = 'order-step';
+    div.innerHTML = st.text;
+    box.appendChild(div);
+    idx++;
+  }, 850);
+}
+
+/* ============ 实验室：情报站模拟器 ============ */
+var weatherDB = {
+  "hangzhou": {"city":"杭州","temp":"26.5","weather":"多云","wind":"东南风 3 级","humidity":"62%","updated":"2026-08-14 15:00"},
+  "beijing":  {"city":"北京","temp":"31.0","weather":"晴","wind":"北风 2 级","humidity":"41%","updated":"2026-08-14 15:00"},
+  "chengdu":  {"city":"成都","temp":"28.3","weather":"小雨","wind":"微风","humidity":"78%","updated":"2026-08-14 15:00"},
+  "lasa":     {"city":"拉萨","temp":"18.9","weather":"晴","wind":"西风 4 级","humidity":"35%","updated":"2026-08-14 15:00"}
+};
+var CITY_CODE_NAME = {
+  "hangzhou":"杭州","beijing":"北京","chengdu":"成都","lasa":"拉萨","atlantis":"亚特兰蒂斯"
+};
+function showStep(id, active){
+  var el = document.getElementById(id);
+  el.classList.add('show');
+  if(active){ el.classList.add('active'); }
+}
+function sendRequest(){
+  var btn = document.getElementById('req-btn');
+  btn.disabled = true;
+  var code = document.getElementById('city-select').value;
+  var steps = ['rs-1','rs-2','rs-3','rs-4','rs-5'];
+  for(var i=0;i<steps.length;i++){
+    var el = document.getElementById(steps[i]);
+    el.classList.remove('show','active');
+  }
+  document.getElementById('field-panel').innerHTML = '';
+
+  /* ① 请求行 */
+  showStep('rs-1', true);
+  document.getElementById('rs-1-body').textContent =
+    'GET  api.example.com/v1/weather?city=' + code + '   params={"city": "' + CITY_CODE_NAME[code] + '"}';
+
+  /* ② 等待（模拟网络延迟） */
+  setTimeout(function(){ showStep('rs-2', true); }, 500);
+  /* ③ 状态码 */
+  setTimeout(function(){
+    showStep('rs-3', true);
+    var ok = (weatherDB[code] !== undefined);
+    var body3 = document.getElementById('rs-3-body');
+    if(ok){
+      body3.innerHTML = '<span class="rs-ok">200 OK —— 请求成功，服务器返回了数据（2xx = 成功）</span>';
+    }else{
+      body3.innerHTML = '<span class="rs-404">404 Not Found —— 查无此城：请求的资源不存在（4xx = 你的锅）</span>';
+    }
+  }, 1400);
+  /* ④ JSON 原文 */
+  setTimeout(function(){
+    showStep('rs-4', true);
+    var raw;
+    if(weatherDB[code] !== undefined){
+      var w = weatherDB[code];
+      raw = '{\n    "city": "' + w.city + '",\n    "temp": ' + w.temp + ',' +
+            '\n    "weather": "' + w.weather + '",\n    "wind": "' + w.wind + '",' +
+            '\n    "humidity": "' + w.humidity + '",\n    "updated": "' + w.updated + '"\n}';
+    }else{
+      raw = '{\n    "error": "city_not_found",\n    "message": "查无此城：' + CITY_CODE_NAME[code] + '"\n}';
+    }
+    document.getElementById('rs-4-body').textContent = raw;
+  }, 2100);
+  /* ⑤ 解析字段面板 + 等价代码 */
+  setTimeout(function(){
+    showStep('rs-5', true);
+    var panel = document.getElementById('field-panel');
+    if(weatherDB[code] !== undefined){
+      var w = weatherDB[code];
+      var fields = [
+        ['city 城市', w.city], ['temp 气温', w.temp + '°C'], ['weather 天气', w.weather],
+        ['wind 风力', w.wind], ['humidity 湿度', w.humidity], ['updated 更新', w.updated]
+      ];
+      var html = '';
+      for(var i=0;i<fields.length;i++){
+        html += '<div class="field-box"><div class="fb-k">'+fields[i][0]+'</div><div class="fb-v">'+esc(fields[i][1])+'</div></div>';
+      }
+      panel.innerHTML = html;
+    }else{
+      panel.innerHTML =
+        '<div class="field-box errbox"><div class="fb-k">error</div><div class="fb-v">city_not_found</div></div>'+
+        '<div class="field-box errbox"><div class="fb-k">message</div><div class="fb-v">查无此城</div></div>';
+    }
+    /* 等价 Python 代码 */
+    var py;
+    if(weatherDB[code] !== undefined){
+      py =
+        'import requests\n' +
+        '\n' +
+        'resp = requests.get("api.example.com/v1/weather",\n' +
+        '                    params={"city": "' + code + '"}, timeout=5)\n' +
+        'print(resp.status_code)          # 200\n' +
+        '\n' +
+        'data = resp.json()               # 解析 JSON → 字典\n' +
+        'print(data["city"])              # ' + CITY_CODE_NAME[code] + '\n' +
+        'print(data["temp"], data["weather"])';
+    }else{
+      py =
+        'import requests\n' +
+        '\n' +
+        'resp = requests.get("api.example.com/v1/weather",\n' +
+        '                    params={"city": "' + code + '"}, timeout=5)\n' +
+        'print(resp.status_code)          # 404：资源不存在\n' +
+        '\n' +
+        '# 先看状态码，再决定要不要解析数据\n' +
+        'if resp.status_code == 200:\n' +
+        '    data = resp.json()\n' +
+        '    print(data["city"])\n' +
+        'else:\n' +
+        '    print("请求失败，状态码：", resp.status_code)';
+    }
+    var codeEl = document.getElementById('lab-code');
+    codeEl.innerHTML = '<span class="c"># 你刚刚发起的请求，等价 Python 代码 ↓</span>\n' + hlPy(py);
+    codeEl.style.display = 'block';
+    btn.disabled = false;
+  }, 2800);
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 200 的含义',
+    code:'import requests\nr = requests.get("api.example.com/v1/hero")\nprint(r.status_code)      # 输出 200',
+    opts:['请求成功，服务器返回了数据','找不到这个页面','服务器内部出错了','请求超时了'],
+    ans:0,
+    exp:'2 开头的状态码都表示成功，200 是最常见的"OK"。看到 200 才可以放心地 r.json() 解析数据。'
+  },
+  {
+    title:'第 2 预言 · r.json() 的类型',
+    code:'import requests\nr = requests.get("api.example.com/v1/hero")\ndata = r.json()\nprint(type(data))\n# 接口返回的原文是：{"name": "阿呆", "level": 10}',
+    opts:["<class 'str'>","<class 'dict'>","<class 'list'>","<class 'Response'>"],
+    ans:1,
+    exp:'JSON 对象（大括号包起来的）解析成 dict；JSON 数组（中括号）解析成 list。原文是大括号对象，所以是 dict。'
+  },
+  {
+    title:'第 3 预言 · 404 的含义',
+    code:'import requests\nr = requests.get("api.example.com/v1/no_such_hero")\nprint(r.status_code)      # 输出 404',
+    opts:['服务器内部错误','我的代码有语法错误','请求的资源不存在（地址错了或没有这个资源）','网络断了，根本没发出去'],
+    ans:2,
+    exp:'404 Not Found 表示服务器收到了请求，但你要的东西不存在——通常是地址拼错、资源下线。4xx 开头一般是客户端这边的锅。'
+  },
+  {
+    title:'第 4 预言 · params 怎么传',
+    code:'import requests\nr = requests.get("api.example.com/v1/weather",\n                    params={"city": "杭州"})',
+    opts:['参数会自动拼接到地址的问号后面（查询字符串）','params 只能传一个字符串','效果等于把 city 写进请求头','会把杭州放进请求体里发出去'],
+    ans:0,
+    exp:'params 传字典，requests 自动把键值对拼成 ?city=杭州（中文自动转码），比手动拼地址字符串安全得多。'
+  },
+  {
+    title:'第 5 预言 · 为什么要 try/except',
+    code:'import requests\n\ntry:\n    r = requests.get("api.example.com/v1/weather", timeout=5)\n    data = r.json()\nexcept requests.RequestException:\n    print("网络出问题了")',
+    opts:['为了让请求发得更快','Python 语法规定必须这么写','为了让 status_code 变成 200','网络可能断/超时，requests 会抛异常，捕获后程序才不会崩溃'],
+    ans:3,
+    exp:'断网、超时、域名解析失败时 requests 会抛异常；不捕获的话程序直接崩掉。捕获后可以打印友好提示、重试或降级。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+esc(q.title)+'</div>'+
+      '<div class="code" style="margin:6px 0">'+hlPy(q.code)+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+esc(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.getAttribute('data-i');
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['API 是什么？','程序之间交换数据的接口——餐厅比喻里的"服务员"，你点菜（发请求），它端菜（返回数据）'],
+  ['requests.get() 返回什么？','一个 Response 对象，包含状态码、响应内容等信息'],
+  ['status_code 200 表示？','请求成功，服务器正常返回了数据（2xx 都是成功）'],
+  ['status_code 404 表示？','请求的资源不存在——地址写错或没有这个资源（4xx 是客户端的锅）'],
+  ['status_code 500 表示？','服务器内部错误——问题出在服务端（5xx 是服务器的锅）'],
+  ['r.json() 的作用','把 JSON 响应解析成 Python 的 dict（对象）或 list（数组）'],
+  ['r.text 和 r.json() 的区别','text 是原始字符串（str）；json() 解析后可直接用方括号取字段'],
+  ['params={"city": "北京"} 的效果','键值对自动拼接到 URL 问号后面，成为查询字符串'],
+  ['timeout=5 是干嘛的？','最多等服务器 5 秒，超时抛 requests.Timeout 异常，别让程序干等'],
+  ['API Key 的保管原则','不写死在代码里、不提交到仓库——放环境变量（os.environ.get）里读取']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+esc(c[0])+'</div>'+
+      '<div class="mface mback">'+esc(c[1])+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'餐厅比喻里，"服务员"对应的是？',
+   opts:['API','你的 Python 程序','远程服务器','数据库'], ans:0,
+   exp:'你=程序（客户端），服务员=API（传话窗口），厨房=服务器（真正处理数据）。'},
+  {q:'r = requests.get(url) 之后，r 是什么？',
+   opts:['一个字典','一个字符串','一个 Response 对象','一个列表'], ans:2,
+   exp:'get() 返回 Response 对象，上面有 status_code、text、json() 等属性和方法。'},
+  {q:'print(r.status_code) 输出 200，说明？',
+   opts:['请求成功，可以解析数据了','资源不存在','服务器崩了','请求超时'], ans:0,
+   exp:'2xx 都是成功；200 OK 最常见。看到它才能放心 r.json()。'},
+  {q:'print(r.status_code) 输出 404，最可能的原因是？',
+   opts:['你的网络断了','请求的资源不存在（地址错了）','服务器内部错误','代码语法有错'], ans:1,
+   exp:'404 Not Found = 服务器没找到你要的资源。断网会抛异常，服务器错误是 500，语法错误在运行前就报了。'},
+  {q:'status_code 500 表示？',
+   opts:['请求成功','资源不存在','服务器内部错误，锅在服务端','请求被拒绝，需要 API Key'], ans:2,
+   exp:'5xx 系列都是服务器端错误，你的代码多半没问题，等对方修好或换个接口。'},
+  {q:'接口返回 {"temp": 26.5}，data = r.json() 后怎么取出 26.5？',
+   opts:['data("temp")','data["temp"]','data.temp','r.get("temp")'], ans:1,
+   exp:'JSON 对象解析成 dict，用方括号加引号取键：data["temp"]。'},
+  {q:'r.text 的数据类型是？',
+   opts:['dict','list','str（原始字符串）','Response'], ans:2,
+   exp:'text 是服务器返回的原始内容，一整段字符串；解析要用 r.json()。'},
+  {q:'requests.get(url, params={"city": "北京"}) 中 params 的作用是？',
+   opts:['把参数自动拼接到 URL 问号后面','给请求加超时限制','设置请求头','把参数加密'], ans:0,
+   exp:'params 接收字典，键值对自动变成查询字符串 ?city=北京，中文还会自动转码。'},
+  {q:'requests.get(url, timeout=5) 超过 5 秒没响应会怎样？',
+   opts:['返回 None','自动重试 5 次','抛出 requests.Timeout 异常','一直等下去'], ans:2,
+   exp:'timeout 限制最长等待时间，超时会抛 Timeout 异常；不捕获的话程序会崩溃，所以要配 try/except。'},
+  {q:'关于 API Key，下面哪种做法是对的？',
+   opts:['直接写在代码里，方便下次用','提交到公开代码仓库，方便团队下载','放在环境变量里，用 os.environ.get() 读取','截图发到群里问大家怎么用'], ans:2,
+   exp:'key 一旦泄露就会被冒用刷额度。正确姿势：环境变量/配置文件 + 不进代码仓库。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+esc(q.q)+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+esc(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.getAttribute('data-i');
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！情报大师本师，下一课已为你解锁 🔓' : '通关成功！第 14 课「os 与 shutil」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+esc(msg);
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

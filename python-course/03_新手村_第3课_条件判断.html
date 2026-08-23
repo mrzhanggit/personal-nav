@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3课 · 条件判断 —— 命运岔路口</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(74,222,128,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4ade80,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--green),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#9fe8b8;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 命运岔路口示意图 */
+  .roads{display:flex;flex-direction:column;gap:10px;margin:16px 0;}
+  .road{
+    display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:12px;
+    background:var(--card);border:1px solid var(--line);font-size:14px;flex-wrap:wrap;
+    transition:all .25s;
+  }
+  .road:hover{transform:translateX(6px);}
+  .road .cond{
+    font-family:ui-monospace,Menlo,monospace;font-weight:700;padding:2px 10px;border-radius:8px;
+  }
+  .road.r-yes{border-color:var(--green);}
+  .road.r-yes .cond{background:rgba(74,222,128,.15);color:var(--green);}
+  .road.r-no{border-color:var(--muted);opacity:.85;}
+  .road.r-no .cond{background:rgba(139,147,184,.15);color:var(--muted);}
+  /* 比较运算符卡片 */
+  .op-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin:16px 0;}
+  .op-chip{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;
+    font-family:ui-monospace,Menlo,monospace;font-size:14px;transition:all .25s;
+  }
+  .op-chip:hover{border-color:var(--cyan);transform:translateY(-3px);}
+  .op-chip b{color:var(--gold);font-size:16px;}
+  .op-chip .ex{color:var(--muted);font-size:12px;}
+  .op-chip .res{color:var(--green);font-weight:700;}
+  /* 逻辑门演示 */
+  .logic-demo{
+    background:var(--card);border:1px solid var(--purple);border-radius:14px;
+    padding:18px 22px;margin:16px 0;
+  }
+  .logic-demo .lg-title{color:var(--purple);font-weight:700;font-size:14px;margin-bottom:10px;}
+  .lg-row{display:flex;align-items:center;gap:10px;margin:8px 0;font-family:ui-monospace,Menlo,monospace;font-size:15px;}
+  .lg-btn{
+    background:#0a0d1e;border:1px solid var(--cyan);color:var(--cyan);border-radius:9px;
+    padding:5px 22px;font-family:ui-monospace,Menlo,monospace;font-size:15px;font-weight:700;
+    cursor:pointer;transition:all .2s;min-width:86px;
+  }
+  .lg-btn:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(77,214,255,.25);}
+  .lg-btn.t{border-color:var(--green);color:var(--green);background:rgba(74,222,128,.12);}
+  .lg-btn.f{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.10);}
+  .lg-outs{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+    font-family:ui-monospace,Menlo,monospace;font-size:14px;}
+  .lg-outs div{margin:4px 0;}
+  .lg-outs b{font-size:16px;}
+  .lg-true{color:var(--green);}
+  .lg-false{color:var(--red);}
+  /* 规则提示盒 */
+  .rulebox{
+    background:linear-gradient(140deg,#1d2448,#141833);border:1px solid var(--gold);
+    border-radius:14px;padding:14px 20px;margin:14px 0;font-size:14px;
+  }
+  .rulebox b{color:var(--gold);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;
+  }
+  .btn{
+    background:linear-gradient(135deg,var(--green),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,222,128,.3);}
+  /* 文字冒险 */
+  .adv-panel{
+    background:linear-gradient(140deg,#1d2448,#141833);border:1px solid var(--purple);
+    border-radius:16px;padding:20px 24px;margin:14px 0;animation:popIn .45s both;
+  }
+  .adv-panel h3{color:var(--purple);font-size:17px;letter-spacing:1px;margin-bottom:8px;}
+  .adv-panel .adv-text{font-size:15px;margin-bottom:6px;}
+  .adv-panel .adv-stat{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;}
+  .adv-choices{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .adv-opt{
+    background:#0a0d1e;border:1px solid var(--cyan);border-radius:11px;color:var(--text);
+    padding:11px 18px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;
+    font-family:inherit;flex:1;min-width:200px;
+  }
+  .adv-opt:hover{border-color:var(--green);background:rgba(74,222,128,.10);transform:translateY(-2px);}
+  .adv-ending{
+    background:linear-gradient(140deg,#2a2148,#141833);border:2px solid var(--gold);
+    border-radius:16px;padding:22px 26px;margin:14px 0;animation:popIn .5s both;
+  }
+  .adv-ending h3{color:var(--gold);font-size:19px;letter-spacing:2px;margin-bottom:8px;}
+  .adv-ending .path{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6;}
+  .adv-code-label{font-size:12px;color:var(--muted);margin:8px 0 -6px;font-family:ui-monospace,Menlo,monospace;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(74,222,128,.15);color:var(--green);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(74,222,128,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 新手村 · <b>第 3 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 1 · NEWBIE VILLAGE</div>
+    <h1>条件判断 —— 命运岔路口</h1>
+    <div class="subtitle">今日目标：让程序学会自己做选择，而不是一条道走到黑</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握 <span class="hl">if / elif / else</span> 三岔路口的走法</li>
+      <li>理解 Python 最独特的设计：<span class="hl">缩进就是语法</span>（与 JS 最大的区别）</li>
+      <li>熟练使用 6 个比较运算符：<span class="hl">== != &gt; &lt; &gt;= &lt;=</span></li>
+      <li>熟练使用 3 个逻辑运算符：<span class="hl">and / or / not</span></li>
+      <li>识破新手第一大坑：<span class="hl">== 是比较，= 是赋值</span>，天壤之别</li>
+      <li>通关实验室「多结局文字冒险」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 if 基本结构 -->
+  <section>
+    <h2><span class="num">1</span>if：世界上最简单的岔路口</h2>
+    <p>前面的程序都是「一条道走到黑」——从第一行跑到最后一行。但游戏需要判断：血量低要不要报警？钱够不够买装备？这就要 <span class="hl">if（如果）</span>登场：</p>
+    <div class="code"><span class="v">hp</span> = <span class="n">30</span>
+<span class="k">if</span> <span class="v">hp</span> &lt; <span class="n">50</span>:
+    <span class="k">print</span>(<span class="s">"警告！血量过低，快撤退！"</span>)   <span class="c"># 这行属于 if，条件成立才会执行</span>
+<span class="k">print</span>(<span class="s">"战斗继续..."</span>)                      <span class="c"># 这行顶格，永远会执行</span></div>
+    <div class="out">警告！血量过低，快撤退！
+战斗继续...</div>
+
+    <p>岔路口示意图（把鼠标移上去感受两条路的命运）：</p>
+    <div class="roads">
+      <div class="road r-yes"><span class="cond">hp &lt; 50 成立（30 &lt; 50 ✅）</span> → 走进 if 块 → ⚠️ 打印「警告！血量过低」</div>
+      <div class="road r-no"><span class="cond">hp &lt; 50 不成立</span> → 跳过整个 if 块 → 直接去执行顶格的下一行</div>
+    </div>
+
+    <div class="rulebox">🧠 if 结构三要素：<b>① if 后面跟条件 ② 条件后面必须有英文冒号 : ③ 下一行缩进 4 个空格</b>，缩进的行才是 if 的「地盘」。</div>
+  </section>
+
+  <!-- 2 elif / else -->
+  <section>
+    <h2><span class="num">2</span>elif 链与 else 兜底：多岔路口</h2>
+    <p>只有两条路不够用？<span class="hl-c">elif</span>（否则如果）可以接出一连串岔路，<span class="hl-c">else</span>（否则）负责兜底——所有条件都不成立时走它：</p>
+    <div class="code"><span class="v">score</span> = <span class="n">75</span>
+<span class="k">if</span> <span class="v">score</span> &gt;= <span class="n">90</span>:
+    <span class="k">print</span>(<span class="s">"S 级 · 传说"</span>)
+<span class="k">elif</span> <span class="v">score</span> &gt;= <span class="n">75</span>:
+    <span class="k">print</span>(<span class="s">"A 级 · 优秀"</span>)        <span class="c"># ← 75 命中这条</span>
+<span class="k">elif</span> <span class="v">score</span> &gt;= <span class="n">60</span>:
+    <span class="k">print</span>(<span class="s">"B 级 · 及格"</span>)
+<span class="k">else</span>:
+    <span class="k">print</span>(<span class="s">"C 级 · 勇者加油"</span>)</div>
+    <div class="out">A 级 · 优秀</div>
+
+    <p>走法铁律：<span class="hl">从上往下逐个检查，命中第一条就走它，走完立刻离开整个岔路口</span>——后面的分支看都不看一眼。所以 75 命中 <code class="hl-c">score &gt;= 75</code> 后，就算它也满足 <code class="hl-c">score &gt;= 60</code>，也轮不到那条了。</p>
+    <p>else 永远放最后、<span class="hl">不带条件、直接冒号</span>，是「以上全不中」的保底出口，最多只能有一个。</p>
+  </section>
+
+  <!-- 3 缩进即语法 -->
+  <section>
+    <h2><span class="num">3</span>缩进即语法：Python 的地盘规则</h2>
+    <p>这是 Python 和 JavaScript <span class="hl">最大的区别</span>。JS 用花括号 <code>{ }</code> 圈地盘，缩进只是好看；Python 直接用缩进当地盘边界，<span class="hl">缩进错了 = 语法错了</span>：</p>
+    <div class="code"><span class="c"># JavaScript 世界：花括号说了算，缩进只是化妆</span>
+<span class="k">if</span> (hp &lt; <span class="n">50</span>) {
+    <span class="k">print</span>(<span class="s">"警告"</span>);
+}
+
+<span class="c"># Python 世界：缩进说了算，没有花括号</span>
+<span class="k">if</span> <span class="v">hp</span> &lt; <span class="n">50</span>:
+    <span class="k">print</span>(<span class="s">"警告"</span>)          <span class="c"># 缩进了 → 属于 if</span></div>
+
+    <p>忘了缩进，Python 当场翻脸：</p>
+    <div class="code"><span class="v">level</span> = <span class="n">5</span>
+<span class="k">if</span> <span class="v">level</span> &gt; <span class="n">3</span>:
+<span class="k">print</span>(<span class="s">"解锁进阶区"</span>)   <span class="c"># 💥 IndentationError！print 忘了缩进</span></div>
+    <div class="out">IndentationError: expected an indented block</div>
+
+    <div class="rulebox">📐 缩进三规矩：<b>① 同一个代码块必须对齐</b>（都缩 4 个空格，这是官方惯例）；<b>② 同一块里时缩时不错</b>（忽 4 格忽 2 格 → IndentationError）；<b>③ 别混用 Tab 和空格</b>，编辑器里统一设置成「Tab 键 = 4 空格」一劳永逸。</div>
+  </section>
+
+  <!-- 4 比较运算符 -->
+  <section>
+    <h2><span class="num">4</span>比较运算符：六把命运之尺</h2>
+    <p>if 后面的条件，大多由比较运算符构成。比较的结果是布尔值——非 True 即 False：</p>
+    <div class="op-grid">
+      <div class="op-chip"><b>==</b> 等于<br><span class="ex">5 == 5 → </span><span class="res">True</span></div>
+      <div class="op-chip"><b>!=</b> 不等于<br><span class="ex">5 != 3 → </span><span class="res">True</span></div>
+      <div class="op-chip"><b>&gt;</b> 大于<br><span class="ex">3 &gt; 10 → </span><span class="res">False</span></div>
+      <div class="op-chip"><b>&lt;</b> 小于<br><span class="ex">3 &lt; 10 → </span><span class="res">True</span></div>
+      <div class="op-chip"><b>&gt;=</b> 大于等于<br><span class="ex">5 &gt;= 5 → </span><span class="res">True</span></div>
+      <div class="op-chip"><b>&lt;=</b> 小于等于<br><span class="ex">4 &lt;= 3 → </span><span class="res">False</span></div>
+    </div>
+    <p>顺便复习上一课：<code class="hl-c">"18" == 18</code> 是 <span class="hl">False</span>——一个是文字一个是数字，种族不同不相等。</p>
+  </section>
+
+  <!-- 5 逻辑运算符 -->
+  <section>
+    <h2><span class="num">5</span>逻辑运算符：and / or / not</h2>
+    <p>多个条件怎么组合？三个逻辑运算符登场：</p>
+    <div class="code"><span class="k">if</span> <span class="v">hp</span> &gt; <span class="n">0</span> <span class="k">and</span> <span class="v">mp</span> &gt; <span class="n">10</span>:      <span class="c"># and：两边都成立才算成立</span>
+    <span class="k">print</span>(<span class="s">"技能就绪"</span>)
+<span class="k">if</span> <span class="v">hp</span> &lt; <span class="n">30</span> <span class="k">or</span> <span class="v">mp</span> &lt; <span class="n">5</span>:       <span class="c"># or：任意一边成立就成立</span>
+    <span class="k">print</span>(<span class="s">"状态危险"</span>)
+<span class="k">if</span> <span class="k">not</span> <span class="v">is_dead</span>:              <span class="c"># not：把真假反过来</span>
+    <span class="k">print</span>(<span class="s">"还能抢救"</span>)</div>
+
+    <p>动手玩一下逻辑门——点击 A、B 切换真假，右边实时显示 Python 的判定结果：</p>
+    <div class="logic-demo">
+      <div class="lg-title">⚡ 逻辑门实验室</div>
+      <div class="lg-row">A = <button class="lg-btn" id="lg-a" onclick="toggleLG('a')">True</button></div>
+      <div class="lg-row">B = <button class="lg-btn" id="lg-b" onclick="toggleLG('b')">False</button></div>
+      <div class="lg-outs">
+        <div>print(A <span style="color:var(--pink)">and</span> B) → <b id="lg-and" class="lg-false">False</b>　<span style="color:var(--muted)">（两边都 True 才 True）</span></div>
+        <div>print(A <span style="color:var(--pink)">or</span> B) → <b id="lg-or" class="lg-true">True</b>　<span style="color:var(--muted)">（有一边 True 就 True）</span></div>
+        <div>print(<span style="color:var(--pink)">not</span> A) → <b id="lg-not" class="lg-false">False</b>　<span style="color:var(--muted)">（把 A 反过来）</span></div>
+      </div>
+    </div>
+
+    <p>两条进阶规则（先混个脸熟）：</p>
+    <p>① <span class="hl">优先级：not &gt; and &gt; or</span>。拿不准就加括号，括号永远最优先：</p>
+    <div class="code"><span class="k">print</span>(<span class="k">True</span> <span class="k">or</span> <span class="k">False</span> <span class="k">and</span> <span class="k">False</span>)   <span class="c"># True —— 先算 False and False = False，再 True or False = True</span></div>
+    <p>② <span class="hl">短路</span>：and 左边是 False 就直接得 False，右边看都不看；or 左边是 True 就直接得 True：</p>
+    <div class="code"><span class="v">hp</span> = <span class="n">0</span>
+<span class="k">if</span> <span class="v">hp</span> &gt; <span class="n">0</span> <span class="k">and</span> <span class="n">10</span> / <span class="v">hp</span> &gt; <span class="n">2</span>:   <span class="c"># hp > 0 是 False → 短路！10/hp 根本不会执行</span>
+    <span class="k">print</span>(<span class="s">"安全"</span>)
+<span class="c"># 输出：什么都没有（但也不会报除零错误，这就是短路的保护）</span></div>
+  </section>
+
+  <!-- 6 == vs = -->
+  <section>
+    <h2><span class="num">6</span>== 与 = ：一个符号的天壤之别</h2>
+    <p>新手报错排行榜常年前三名：<span class="hl">把 == 写成 =</span>。一个等号是「赋值」——把东西塞进盒子；两个等号才是「比较」——问一句「相等吗」：</p>
+    <div class="code"><span class="v">x</span> = <span class="n">10</span>
+<span class="k">if</span> <span class="v">x</span> = <span class="n">20</span>:          <span class="c"># 💥 SyntaxError！if 需要的是条件，不是赋值动作</span>
+    <span class="k">print</span>(<span class="s">"相等"</span>)
+
+<span class="k">if</span> <span class="v">x</span> == <span class="n">20</span>:         <span class="c"># ✅ 这才是「x 等于 20 吗？」——答案是 False，什么都不打印</span>
+    <span class="k">print</span>(<span class="s">"相等"</span>)</div>
+    <div class="rulebox">🧠 念咒防坑：写条件时把 <b>==</b> 念成「等于吗？」，把 <b>=</b> 念成「装进去」。嘴巴一念，手就不会滑。</div>
+  </section>
+
+  <!-- 7 嵌套 if -->
+  <section>
+    <h2><span class="num">7</span>嵌套 if：门里还有门</h2>
+    <p>if 里面还可以再放 if——像洋葱一样层层剥开，每层都有自己的缩进：</p>
+    <div class="code"><span class="v">hp</span> = <span class="n">80</span>
+<span class="v">mp</span> = <span class="n">10</span>
+<span class="k">if</span> <span class="v">hp</span> &gt; <span class="n">50</span>:              <span class="c"># 外层大门：血量够吗？80 &gt; 50 ✅ 进</span>
+    <span class="k">if</span> <span class="v">mp</span> &gt; <span class="n">50</span>:          <span class="c"># 内层小门：蓝量够吗？10 &gt; 50 ❌ 不进</span>
+        <span class="k">print</span>(<span class="s">"大招释放！"</span>)
+    <span class="k">else</span>:                   <span class="c"># 走内层的 else</span>
+        <span class="k">print</span>(<span class="s">"蓝量不足，普攻"</span>)
+<span class="k">else</span>:
+    <span class="k">print</span>(<span class="s">"血量危险，先保命"</span>)</div>
+    <div class="out">蓝量不足，普攻</div>
+    <p>读嵌套代码的诀窍：<span class="hl">从外往里一层层问</span>。外层不成立，里面整层直接跳过。注意内层 if 整体比外层又缩进了一级（4 格变 8 格）——缩进层级就是嵌套深度。</p>
+  </section>
+
+  <!-- 8 实验室 -->
+  <section>
+    <h2><span class="num">8</span>🎮 实验室 · 多结局文字冒险</h2>
+    <p>命运岔路口实战！下面是一个多结局地牢冒险，<span class="hl">你的每次点击就相当于一行 <code class="hl-c">input()</code></span>。右侧/下方的代码会实时显示「如果用 Python 写，你此刻正在执行哪一行 if / elif」——命中分支会高亮。一共有 <b>5 种结局</b>，全找到算你赢。</p>
+    <div class="adv-panel" id="adv-panel"></div>
+    <div class="adv-choices" id="adv-choices"></div>
+    <div id="adv-ending-box"></div>
+    <div class="adv-code-label" id="adv-code-label">▸ 当前剧情对应的 Python 代码（高亮行 = 你刚刚走的分支）：</div>
+    <div class="code" id="adv-code"></div>
+  </section>
+
+  <!-- 9 预言机 -->
+  <section>
+    <h2><span class="num">9</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 10 记忆卡片 -->
+  <section>
+    <h2><span class="num">10</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 11 Quiz -->
+  <section>
+    <h2><span class="num">11</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 12 课后 -->
+  <section class="homework">
+    <h2><span class="num">12</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开 IDLE 或终端输入 <code>python</code>，把上面每个代码块<b>亲手敲一遍</b>验证输出，尤其要敲一遍嵌套 if 那段</li>
+    <li>② 小挑战：写一个等级鉴定器——<code>input()</code> 输入分数并用 <code>int()</code> 转换（复习上一课！），然后 if / elif / else 输出 S / A / B / C 四档评价</li>
+    <li>③ 故意写一次 <code>if x = 10:</code> 看 SyntaxError，再改回 <code>==</code>；再故意漏一次缩进看 IndentationError——两种报错的脸都要认得</li>
+    <li>④ 在纸上画一张「多结局冒险」的分支图（至少 3 个节点 3 个结局），明天试着把它写成真的 Python 代码</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>循环 —— 无限回廊</b> —— for 与 while，打破一层层重复的咒语
+  </footer>
+</div>
+
+<script>
+/* ============ 工具：HTML 转义 & Python 高亮 ============ */
+function escT(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function pyHi(code, hlIndex){
+  return code.split('\n').map(function(l, i){
+    var hash = l.indexOf('#');
+    var cl, cm;
+    if(hash >= 0){ cl = l.slice(0, hash); cm = l.slice(hash); }
+    else{ cl = l; cm = ''; }
+    cl = cl.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/("[^"]*")/g,'<span style="color:var(--green)">$1</span>')
+      .replace(/\b(if|elif|else|print|type|input|and|or|not|True|False|float|bool|str|int|len)\b/g,'<span style="color:var(--pink)">$1</span>');
+    var line = cm ? cl + '<span style="color:#5b648f">' + cm + '</span>' : cl;
+    if(i === hlIndex){
+      return '<span style="display:block;background:rgba(74,222,128,.16);border-left:3px solid var(--green);border-radius:4px;padding-left:6px;margin-left:-6px;">' + line + '  ← 当前命中</span>';
+    }
+    return line;
+  }).join('\n');
+}
+
+/* ============ 逻辑门实验室 ============ */
+var lgA = true, lgB = false;
+function toggleLG(w){
+  if(w === 'a'){ lgA = !lgA; } else { lgB = !lgB; }
+  renderLG();
+}
+function renderLG(){
+  var ba = document.getElementById('lg-a');
+  var bb = document.getElementById('lg-b');
+  ba.textContent = lgA ? 'True' : 'False';
+  ba.className = 'lg-btn ' + (lgA ? 't' : 'f');
+  bb.textContent = lgB ? 'True' : 'False';
+  bb.className = 'lg-btn ' + (lgB ? 't' : 'f');
+  var andR = (lgA && lgB), orR = (lgA || lgB), notR = !lgA;
+  var eAnd = document.getElementById('lg-and');
+  var eOr = document.getElementById('lg-or');
+  var eNot = document.getElementById('lg-not');
+  eAnd.textContent = andR ? 'True' : 'False';
+  eAnd.className = andR ? 'lg-true' : 'lg-false';
+  eOr.textContent = orR ? 'True' : 'False';
+  eOr.className = orR ? 'lg-true' : 'lg-false';
+  eNot.textContent = notR ? 'True' : 'False';
+  eNot.className = notR ? 'lg-true' : 'lg-false';
+}
+renderLG();
+
+/* ============ 实验室：多结局文字冒险 ============ */
+var story = {
+  start: {
+    title:'第一章 · 命运岔路口',
+    text:'你推开地牢厚重的石门，面前出现两条路：左边是火炬长廊，尽头隐约透着金光；右边是漆黑洞窟，深处传来黏糊糊的脚步声。你握紧了手中的木剑。',
+    stat:'HP 100 · MP 100 · 木剑 x1',
+    code:'choice = input("左火炬长廊 还是 右漆黑洞窟? (L/R)")\nif choice == "L":\n    print("你走进了藏宝室")\nelif choice == "R":\n    print("史莱姆挡住了去路!")\nelse:\n    print("你原地犹豫到石门在午夜关闭...")',
+    choices:[
+      {label:'🔦 走左边的火炬长廊', next:'treasure', hl:2},
+      {label:'🕳 走右边的漆黑洞窟', next:'monster', hl:4}
+    ]
+  },
+  treasure: {
+    title:'第二章 · 藏宝室',
+    text:'长廊尽头是一间密室。石台上放着一只黄金盒子，墙上刻着一行古老的铭文：「答案在盒中，亦在铭文中」。选哪个？',
+    stat:'HP 100 · MP 100 · 木剑 x1',
+    code:'act = input("打开黄金盒子 还是 研读铭文? (box/word)")\nif act == "box":\n    print("盒子打开,金币倾泻而出!")\nelif act == "word":\n    print("铭文发出幽幽蓝光...")\nelse:\n    print("你乱摸机关触发了警报陷阱!")',
+    choices:[
+      {label:'💰 打开黄金盒子', next:'e_gold', hl:2},
+      {label:'📜 研读墙上铭文', next:'e_wisdom', hl:4}
+    ]
+  },
+  monster: {
+    title:'第二章 · 漆黑洞窟',
+    text:'洞窟深处，一只巨大的史莱姆缓缓转过身，发出「啵噜啵噜」的声音。你握紧木剑——是战、是逃，还是……先冷静观察一下？',
+    stat:'HP 100 · MP 100 · 木剑 x1',
+    code:'act = input("迎战 / 逃跑 / 观察? (fight/flee/look)")\nif act == "fight":\n    print("你举起木剑冲锋!")\nelif act == "flee":\n    print("你用超越极限的速度狂奔")\nelif act == "look":\n    print("你蹲下来仔细观察它")\nelse:\n    print("你被吓得原地石化")',
+    choices:[
+      {label:'⚔️ 迎战史莱姆', next:'e_hero', hl:2},
+      {label:'🏃 转身逃跑', next:'e_escape', hl:4},
+      {label:'🔍 先冷静观察', next:'e_secret', hl:6}
+    ]
+  },
+  e_gold: {
+    title:'结局 A · 财神转世',
+    text:'盒子打开，金币如瀑布般倾泻——足足 999999 金币！你被金光淹没。可惜铭文上写着：「真正的宝藏留给读铭文的人」。你永远不知道自己错过了什么。',
+    color:'var(--gold)',
+    code:'if act == "box":\n    gold = 999999\n    print("结局 A · 财神转世: 你拿走了金币, 却错过了真相")'
+  },
+  e_wisdom: {
+    title:'真结局 · 智者传人',
+    text:'蓝光汇聚成一行 Python 圣经：「Simple is better than complex.（简洁胜于复杂）」。你读完最后一个字母，被一道光柱托起——贤者收你为关门弟子。',
+    color:'var(--purple)',
+    code:'elif act == "word":\n    print("真结局 · 智者传人: 贤者的知识才是真正的宝藏")'
+  },
+  e_hero: {
+    title:'结局 B · 光荣负伤',
+    text:'三百回合大战！史莱姆化作一滩清水，掉落一颗「勇气红宝石」。你拖着只剩 15 点 HP 的身体走出地牢，胸前红宝石闪闪发光。',
+    color:'var(--cyan)',
+    code:'if act == "fight":\n    hp = 100 - 85                 # hp = 15\n    print("结局 B · 光荣负伤 · 剩余HP: " + str(hp))'
+  },
+  e_escape: {
+    title:'结局 C · 逃跑不可耻',
+    text:'你头也不回地冲出地牢，速度打破新手村纪录。逃跑并不可耻——攒够等级和装备，下次再回来收拾它。',
+    color:'var(--green)',
+    code:'elif act == "flee":\n    print("结局 C · 逃跑不可耻, 这叫战略性撤退")'
+  },
+  e_secret: {
+    title:'隐藏结局 · 打扫大叔的朋友',
+    text:'你蹲下来仔细看——史莱姆身上居然挂着一块工牌：「地牢保洁员 · 史莱姆先生」。原来它是退休的保洁员，只想把地牢擦得亮亮的。它开心地送你一张全地牢地图。',
+    color:'var(--pink)',
+    code:'elif act == "look":\n    print("隐藏结局 · 打扫大叔的朋友: 冷静观察解锁了地图!")'
+  }
+};
+var advNode = 'start';
+var advPath = [];
+function renderAdv(hl){
+  var n = story[advNode];
+  var panel = document.getElementById('adv-panel');
+  var choicesBox = document.getElementById('adv-choices');
+  var endingBox = document.getElementById('adv-ending-box');
+  panel.innerHTML = '<h3>' + escT(n.title) + '</h3>' +
+    '<div class="adv-text">' + escT(n.text) + '</div>' +
+    '<div class="adv-stat">' + escT(n.stat) + '</div>';
+  endingBox.innerHTML = '';
+  if(n.choices){
+    choicesBox.innerHTML = '';
+    n.choices.forEach(function(c){
+      var b = document.createElement('button');
+      b.className = 'adv-opt';
+      b.textContent = c.label;
+      b.onclick = function(){ advGo(c.next, c.hl, c.label); };
+      choicesBox.appendChild(b);
+    });
+  } else {
+    choicesBox.innerHTML = '';
+    var end = document.createElement('div');
+    end.className = 'adv-ending';
+    end.innerHTML = '<h3>🏆 ' + escT(n.title) + '</h3>' +
+      '<div class="adv-text">' + escT(n.text) + '</div>' +
+      '<div class="path">你的足迹：' + (advPath.length ? advPath.map(escT).join(' → ') : '') +
+      '<br>已解锁结局请自行记录～ 共 5 种结局，找齐它们！</div>';
+    endingBox.appendChild(end);
+    var rb = document.createElement('button');
+    rb.className = 'btn';
+    rb.textContent = '🔄 重新冒险';
+    rb.onclick = function(){ advGo('start', 0, '重新开始'); advPath = []; renderAdv(0); };
+    choicesBox.appendChild(rb);
+  }
+  document.getElementById('adv-code').innerHTML = pyHi(n.code, (typeof hl === 'number') ? hl : -1);
+}
+function advGo(nextId, hl, label){
+  advNode = nextId;
+  if(label !== '重新开始'){ advPath.push(label); }
+  renderAdv(hl);
+}
+renderAdv(0);
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 只走第一个命中的分支',
+    code:'score = 75\nif score >= 60:\n    print("及格")\nelif score >= 90:\n    print("优秀")\nelse:\n    print("不及格")',
+    opts:['及格','优秀','不及格','及格 和 优秀 都输出'],
+    ans:0,
+    exp:'if/elif/else 从上往下检查，命中一条就离开整个岔路口。75 >= 60 成立 → 输出「及格」，后面的 elif 和 else 全部被跳过（哪怕 75 不满足 >=90 也轮不到它）。'
+  },
+  {
+    title:'第 2 预言 · 缩进即语法',
+    code:'level = 5\nif level > 3:\nprint("解锁进阶区")',
+    opts:['解锁进阶区','没有任何输出','IndentationError','SyntaxError: invalid syntax'],
+    ans:2,
+    exp:'if 下面的 print 必须缩进才属于 if 块。顶格写 Python 直接报 IndentationError: expected an indented block——在 Python 里缩进不是美观问题，是语法问题。'
+  },
+  {
+    title:'第 3 预言 · and 和 or 的优先级',
+    code:'print(True or False and False)',
+    opts:['True','False','报错','先输出 True 再输出 False'],
+    ans:0,
+    exp:'and 优先级高于 or：先算 False and False = False，再算 True or False = True。拿不准优先级就加括号：True or (False and False)。'
+  },
+  {
+    title:'第 4 预言 · 把 == 写成 = 的下场',
+    code:'x = 10\nif x = 20:\n    print("相等")',
+    opts:['输出 相等','什么都不输出','SyntaxError','输出 20'],
+    ans:2,
+    exp:'单个 = 是赋值，if 需要的是「条件」而不是「赋值动作」，Python 当场 SyntaxError。比较相等必须写 ==（两个等号）。'
+  },
+  {
+    title:'第 5 预言 · 嵌套门的求值',
+    code:'hp = 80\nmp = 10\nif hp > 50:\n    if mp > 50:\n        print("大招释放!")\n    else:\n        print("蓝量不足,普攻")',
+    opts:['大招释放!','蓝量不足,普攻','没有任何输出','IndentationError'],
+    ans:1,
+    exp:'外层门 hp=80 > 50 成立，进入内层；内层门 mp=10 > 50 不成立，走内层 else → 输出「蓝量不足,普攻」。读嵌套要像剥洋葱，一层一层从外往里问。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = pyHi(q.code, -1);
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+escT(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+escT(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['Python 用什么标记代码块？','缩进（惯例 4 个空格），不是花括号'],
+  ['if 条件行末尾必须写什么？','英文冒号 :'],
+  ['elif 后面的条件还会被检查吗？','不会——一旦某分支命中，整条链直接跳过'],
+  ['else 的作用？','前面条件全不成立时的兜底分支，不带条件、最多一个'],
+  ['== 和 = 的区别？','== 是比较相等（问一句），= 是赋值（装进去）'],
+  ['5 != 5 的结果是？','False（!= 判断不相等，5 当然等于 5）'],
+  ['not True 的结果是？','False（not 把真假反过来）'],
+  ['True and False 的结果是？','False（and 两边都 True 才 True）'],
+  ['True or False 的结果是？','True（or 有一边 True 就 True）'],
+  ['if x = 10: 会怎样？','SyntaxError！if 里要用 ==，单等号是赋值'],
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+escT(c[0])+'</div>'+
+      '<div class="mface mback">'+escT(c[1])+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'Python 中，if 的「地盘」（代码块）靠什么标记？',
+   opts:['花括号 { }','缩进','括号 ( )','end 关键字'], ans:1,
+   exp:'Python 用缩进标记代码块（惯例 4 空格），这是它和 JS 等语言最大的区别之一。'},
+  {q:'if 条件行的末尾，必不可少的标点是？',
+   opts:['分号 ;','冒号 :','句号 .','感叹号 !'], ans:1,
+   exp:'if 条件后面必须跟英文冒号 :，下一行开始缩进。'},
+  {q:'一条 if / elif / else 链，最多会执行几个分支？',
+   opts:['所有条件成立的分支','恰好一个','最多两个','取决于缩进深度'], ans:1,
+   exp:'从上往下检查，命中第一条就走它并离开整条链——永远最多执行一个分支。'},
+  {q:'下面哪种写法会触发 IndentationError？',
+   opts:['if 后下一行缩进 4 格','if 后下一行顶格不缩进','if 后下一行缩进 8 格（块内只有一行）','if 条件写成 x > 0'], ans:1,
+   exp:'if 的内容必须缩进；顶格写 Python 认为 print 不属于 if 块且 if 块为空，报 IndentationError。'},
+  {q:'print(5 != 5) 输出什么？',
+   opts:['True','False','5','报错'], ans:1,
+   exp:'!= 判断不相等。5 等于 5，所以「不相等」是 False。'},
+  {q:'print(True and False) 输出什么？',
+   opts:['True','False','报错','None'], ans:1,
+   exp:'and 要求两边都为 True 结果才是 True，一边 False 整体就是 False。'},
+  {q:'print(True or False) 输出什么？',
+   opts:['True','False','报错','None'], ans:0,
+   exp:'or 只要有一边为 True 结果就是 True。'},
+  {q:'print(not True and False) 输出什么？',
+   opts:['True','False','报错','None'], ans:1,
+   exp:'not 优先级最高：先算 not True = False，再算 False and False = False。'},
+  {q:'x = 5 时，执行 if x = 5: print("中") 会怎样？',
+   opts:['输出 中','SyntaxError','什么都不输出','输出 True'], ans:1,
+   exp:'if 里需要条件（比较），单个 = 是赋值 → SyntaxError。正确写法是 if x == 5:。'},
+  {q:'hp = 30、mp = 100，运行：if hp > 50: 内层嵌 if mp > 50: print("大招") 内层 else: print("没蓝")，最外层 else: print("先撤退")。输出是？',
+   opts:['大招','没蓝','先撤退','没有任何输出'], ans:2,
+   exp:'外层条件 hp=30 > 50 不成立，内层整块被跳过，直接走最外层 else → 输出「先撤退」。读嵌套要从外往里一层层判断。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+escT(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+escT(q.q)+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+escT(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！岔路口之王，下一课已为你解锁 🔓' : '通关成功！第 4 课「无限回廊」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

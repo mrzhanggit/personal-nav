@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6课 · 列表与元组 —— 背包系统</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.11), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(167,139,250,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--cyan);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--cyan);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4dd6ff,#a78bfa 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .code .e{color:var(--red);}   /* 报错 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#9fe8b8;margin-top:-4px;margin-bottom:12px;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out.err{color:var(--red);}
+  .out.err::before{content:"💥 报错：";color:var(--red);}
+  /* 背包格子示意 */
+  .slot-row{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0;}
+  .slot{
+    min-width:74px;background:var(--card);border:2px solid var(--purple);border-radius:10px;
+    padding:8px 10px;text-align:center;font-size:13px;position:relative;
+  }
+  .slot .idx{
+    position:absolute;top:-9px;left:-6px;background:var(--cyan);color:#0d1021;border-radius:6px;
+    font-size:10px;font-weight:800;padding:0 5px;font-family:ui-monospace,Menlo,monospace;
+  }
+  .slot .it{font-weight:700;}
+  .slot .rt{font-size:10px;color:var(--muted);}
+  /* 实验室 */
+  .lab-input{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .btn{
+    background:linear-gradient(135deg,var(--cyan),var(--purple));color:#0d1021;border:none;
+    padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  .btn.warn{background:linear-gradient(135deg,var(--orange),var(--red));color:#0d1021;}
+  .bag-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin:18px 0;
+  }
+  .bag-cell{
+    background:linear-gradient(140deg,#1d2448,#141833);border:2px solid var(--line);border-radius:12px;
+    padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;position:relative;
+  }
+  .bag-cell:hover{transform:translateY(-3px);border-color:var(--cyan);}
+  .bag-cell.selected{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,197,66,.25);}
+  .bag-cell .bidx{
+    position:absolute;top:-9px;left:6px;font-family:ui-monospace,Menlo,monospace;font-size:10px;
+    background:#0a0d1e;border:1px solid var(--line);color:var(--cyan);border-radius:5px;padding:0 5px;
+  }
+  .bag-cell .bname{font-size:13px;font-weight:700;margin-top:6px;}
+  .bag-cell .brare{font-size:10px;margin-top:2px;}
+  .bag-cell.empty{border-style:dashed;opacity:.45;cursor:default;}
+  .bag-cell.empty:hover{transform:none;border-color:var(--line);}
+  #bag-log{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;padding:12px 16px;
+    font-size:13px;color:var(--muted);margin-top:6px;font-family:ui-monospace,Menlo,monospace;
+  }
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--cyan);background:rgba(77,214,255,.15);color:var(--cyan);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--cyan);background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>第 6 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY</div>
+    <h1>列表与元组 —— 背包系统</h1>
+    <div class="subtitle">今日目标：让程序一口气管理一大堆数据</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握<b>列表</b>：创建、索引（从 0 开始！负索引）、增删改查</li>
+      <li>学会统计四兄弟 <span class="hl">len / max / min / sum</span> 与切片 <span class="hl">[1:3]</span></li>
+      <li>分清 <span class="hl">sort() 与 sorted()</span>，理解<b>元组</b>的不可变与适用场景</li>
+      <li>通关实验室「RPG 背包管理器」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 列表创建与索引 -->
+  <section>
+    <h2><span class="num">1</span>列表：一整排储物柜</h2>
+    <p>前 5 课的变量一次只能装<b>一个</b>数据——但 RPG 背包里明明有血药、短剑、火把……总不能写 20 个变量？<span class="hl">列表（list）</span>就是一整排编了号的储物柜：</p>
+    <div class="code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>, <span class="s">"干粮"</span>]   <span class="c"># 方括号 + 逗号分隔</span></div>
+
+    <div class="slot-row">
+      <div class="slot"><span class="idx">[0]</span><div class="it">血药</div><div class="rt">0 号柜</div></div>
+      <div class="slot"><span class="idx">[1]</span><div class="it">短剑</div><div class="rt">1 号柜</div></div>
+      <div class="slot"><span class="idx">[2]</span><div class="it">火把</div><div class="rt">2 号柜</div></div>
+      <div class="slot"><span class="idx">[3]</span><div class="it">干粮</div><div class="rt">3 号柜</div></div>
+    </div>
+
+    <p>⚠️ 程序员数数<span class="hl">从 0 开始</span>：第一个物品是 [0]，不是 [1]！这是本课第一大坑。取物品用中括号 + 编号：</p>
+    <div class="code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>, <span class="s">"干粮"</span>]
+<span class="k">print</span>(<span class="v">backpack</span>[<span class="n">0</span>])    <span class="c"># 索引从 0 开始：取第 1 个</span>
+<span class="k">print</span>(<span class="v">backpack</span>[<span class="n">3</span>])    <span class="c"># 4 个物品，最大索引是 3</span>
+<span class="k">print</span>(<span class="v">backpack</span>[-<span class="n">1</span>])   <span class="c"># 负索引：从末尾往前数，-1 是最后一个</span>
+<span class="k">print</span>(<span class="v">backpack</span>[-<span class="n">2</span>])   <span class="c"># 倒数第二个</span></div>
+    <div class="out">血药
+干粮
+干粮
+火把</div>
+
+    <p>索引超界会怎样？——BOSS 战教过你"防御性思维"，看好了：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">backpack</span>[<span class="n">4</span>])   <span class="c"># 只有 4 个物品，索引最大是 3，没有 4 号柜！</span></div>
+    <div class="out err">IndexError: list index out of range</div>
+    <p>记住公式：<span class="hl">最大索引 = 元素个数 - 1</span>。想要"最后一个"，用 [len(backpack) - 1] 或者干脆 [-1]。</p>
+  </section>
+
+  <!-- 2 增删改查 -->
+  <section>
+    <h2><span class="num">2</span>背包四绝技：append / insert / remove / pop</h2>
+    <p>列表是<span class="hl">可变</span>的——柜子里的东西随时能换。四大绝技对应"放入、插入、按名扔、按位扔"：</p>
+    <div class="code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>]
+<span class="v">backpack</span>.<span class="k">append</span>(<span class="s">"月光石"</span>)      <span class="c"># append：放到背包末尾</span>
+<span class="v">backpack</span>.<span class="k">insert</span>(<span class="n">1</span>, <span class="s">"盾牌"</span>)     <span class="c"># insert：插到 1 号位，后面的自动往后挪</span>
+<span class="k">print</span>(<span class="v">backpack</span>)
+<span class="v">backpack</span>.<span class="k">remove</span>(<span class="s">"火把"</span>)        <span class="c"># remove：按名字删除（只删找到的第一个）</span>
+<span class="v">lost</span> = <span class="v">backpack</span>.<span class="k">pop</span>()          <span class="c"># pop()：弹出最后一个，并返回它</span>
+<span class="k">print</span>(<span class="v">backpack</span>)
+<span class="k">print</span>(<span class="s">"弹出的是："</span>, <span class="v">lost</span>)</div>
+    <div class="out">['血药', '盾牌', '短剑', '火把', '月光石']
+['血药', '盾牌', '短剑']
+弹出的是： 月光石</div>
+    <p>注意 <span class="hl-c">pop()</span> 最特别：<span class="hl">删掉的同时把值还给你</span>，所以能用变量接住。pop 还能带索引：<span class="hl-c">backpack.pop(0)</span> 表示弹出 0 号位。remove 找不到物品时会报 ValueError，删之前最好先判断一下。</p>
+    <p>判断背包里有没有某件装备？用 <span class="hl">in</span>——它返回 True / False：</p>
+    <div class="code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>]
+<span class="k">print</span>(<span class="s">"血药"</span> <span class="k">in</span> <span class="v">backpack</span>)
+<span class="k">print</span>(<span class="s">"魔杖"</span> <span class="k">in</span> <span class="v">backpack</span>)
+<span class="k">if</span> <span class="s">"血药"</span> <span class="k">in</span> <span class="v">backpack</span>:
+    <span class="k">print</span>(<span class="s">"血药充足，可以放心进副本！"</span>)</div>
+    <div class="out">True
+False
+血药充足，可以放心进副本！</div>
+  </section>
+
+  <!-- 3 统计与切片 -->
+  <section>
+    <h2><span class="num">3</span>鉴定术：统计四兄弟与切片</h2>
+    <p>拿到一排装备价格，统计需求一个函数搞定：</p>
+    <div class="code"><span class="v">prices</span> = [<span class="n">10</span>, <span class="n">25</span>, <span class="n">5</span>, <span class="n">99</span>, <span class="n">30</span>]
+<span class="k">print</span>(<span class="s">"共"</span>, <span class="k">len</span>(<span class="v">prices</span>), <span class="s">"件"</span>)      <span class="c"># len：数个数</span>
+<span class="k">print</span>(<span class="s">"最贵"</span>, <span class="k">max</span>(<span class="v">prices</span>))          <span class="c"># max：最大值</span>
+<span class="k">print</span>(<span class="s">"最便宜"</span>, <span class="k">min</span>(<span class="v">prices</span>))       <span class="c"># min：最小值</span>
+<span class="k">print</span>(<span class="s">"总价"</span>, <span class="k">sum</span>(<span class="v">prices</span>))          <span class="c"># sum：求和</span></div>
+    <div class="out">共 5 件
+最贵 99
+最便宜 5
+总价 169</div>
+
+    <p><span class="hl">切片（slicing）</span>是一次取出一段物品，格式 <span class="hl-c">列表[开始:结束]</span>，铁律是<span class="hl">含头不含尾</span>——取得到"开始"编号，取不到"结束"编号：</p>
+    <div class="code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>, <span class="s">"干粮"</span>, <span class="s">"金币袋"</span>]
+<span class="k">print</span>(<span class="v">backpack</span>[<span class="n">1</span>:<span class="n">3</span>])    <span class="c"># 取 1、2 号（3 号不含）</span>
+<span class="k">print</span>(<span class="v">backpack</span>[:<span class="n">2</span>])     <span class="c"># 省略开头 = 从 0 开始</span>
+<span class="k">print</span>(<span class="v">backpack</span>[<span class="n">2</span>:])     <span class="c"># 省略结尾 = 一直取到末尾</span></div>
+    <div class="out">['短剑', '火把']
+['血药', '短剑']
+['火把', '干粮', '金币袋']</div>
+    <p>记忆口诀：<span class="hl">[1:3] 就是"1 号起，3 号止"——含头不含尾</span>。切片切多了也不报错：[1:100] 会安静地取到最后。</p>
+
+    <p>排序有两位法师，别搞混：</p>
+    <div class="code"><span class="v">prices</span> = [<span class="n">30</span>, <span class="n">5</span>, <span class="n">99</span>, <span class="n">10</span>]
+<span class="k">print</span>(<span class="k">sorted</span>(<span class="v">prices</span>))   <span class="c"># sorted：变出一个新列表（从小到大），原列表不动</span>
+<span class="k">print</span>(<span class="v">prices</span>)          <span class="c"># 果然还是原顺序</span>
+<span class="v">prices</span>.<span class="k">sort</span>()           <span class="c"># sort：就地重排，直接改原列表，没有返回值</span>
+<span class="k">print</span>(<span class="v">prices</span>)</div>
+    <div class="out">[5, 10, 30, 99]
+[30, 5, 99, 10]
+[5, 10, 30, 99]</div>
+    <p>经典陷阱：<span class="hl-c">print(prices.sort())</span> 输出 <span class="hl">None</span>！因为 sort() 只负责重排、不返回任何东西。想"打印排序结果"用 sorted()，想"永久排序"用 sort()。另外 <span class="hl-c">sort(reverse=True)</span> 可以从大到小排。</p>
+  </section>
+
+  <!-- 4 元组与解包 -->
+  <section>
+    <h2><span class="num">4</span>元组：一次封印，终生不变</h2>
+    <p>有些数据天生不该被改动——比如角色的出生坐标、一年四季的名字。<span class="hl">元组（tuple）</span>就是<span class="hl">不可变</span>的列表：圆括号创建，一旦封印，谁也改不了：</p>
+    <div class="code"><span class="v">position</span> = (<span class="n">3</span>, <span class="n">5</span>)        <span class="c"># 元组用圆括号</span>
+<span class="k">print</span>(<span class="v">position</span>[<span class="n">0</span>])     <span class="c"># 索引、切片、len、in……查询操作和列表一样</span>
+<span class="v">x</span>, <span class="v">y</span> = <span class="v">position</span>        <span class="c"># 解包：一次把元组里的值分给多个变量</span>
+<span class="k">print</span>(<span class="s">"角色坐标："</span>, <span class="v">x</span>, <span class="v">y</span>)</div>
+    <div class="out">3
+角色坐标： 3 5</div>
+    <p>但只要想改它，立刻翻脸：</p>
+    <div class="code"><span class="v">position</span> = (<span class="n">3</span>, <span class="n">5</span>)
+<span class="v">position</span>[<span class="n">0</span>] = <span class="n">10</span>   <span class="c"># 💥 元组不可变！没有 append、没有 remove、没有排序</span></div>
+    <div class="out err">TypeError: 'tuple' object does not support item assignment</div>
+    <p>什么时候用元组？<span class="hl">数据定了就不该变</span>的时候：坐标、RGB 颜色、(年, 月, 日)。它还比列表省内存、防手滑——想改都改不了，就不会出 bug。</p>
+    <p><span class="hl">解包（unpacking）</span>是个神技，左边变量个数要和右边对齐：</p>
+    <div class="code"><span class="v">hp</span>, <span class="v">mp</span> = <span class="n">100</span>, <span class="n">50</span>        <span class="c"># 右边其实是元组 (100, 50)，可省括号</span>
+<span class="v">hp</span>, <span class="v">mp</span> = <span class="v">mp</span>, <span class="v">hp</span>          <span class="c"># 一行交换两个变量！右边先打包，再解包给左边</span>
+<span class="k">print</span>(<span class="v">hp</span>, <span class="v">mp</span>)</div>
+    <div class="out">50 100</div>
+    <p>冷知识：只有一个元素的元组必须带逗号 <span class="hl-c">("血药",)</span>——只写 ("血药") 只是一个带括号的字符串。</p>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · RPG 背包管理器</h2>
+    <p>每个格子左上角的蓝色编号就是<span class="hl">列表索引（从 0 开始）</span>。<b>点击格子选中物品</b>，再点"丢弃"体验 pop；点"拾取"体验 append；两种"整理"体验 sort。每次操作下方都会同步显示等价的 Python 代码。</p>
+    <div class="lab-input">
+      <button class="btn" onclick="lootItem()">🎁 拾取随机物品（append）</button>
+      <button class="btn warn" onclick="dropItem()">🗑 丢弃选中（pop）</button>
+      <button class="btn" onclick="sortBag('name')">🔤 按名字整理（sort）</button>
+      <button class="btn" onclick="sortBag('rarity')">💎 按稀有度整理</button>
+    </div>
+    <div class="bag-grid" id="bag-grid"></div>
+    <div class="code" id="lab-code"><span class="v">backpack</span> = [<span class="s">"血药"</span>, <span class="s">"短剑"</span>, <span class="s">"火把"</span>, <span class="s">"干粮"</span>, <span class="s">"金币袋"</span>]
+<span class="k">print</span>(<span class="v">backpack</span>)</div>
+    <div class="out" id="lab-out">['血药', '短剑', '火把', '干粮', '金币袋']</div>
+    <div id="bag-log">点击上方按钮开始管理你的背包。背包上限 12 格。</div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 在电脑上逐行敲一遍本页所有代码块，<b>亲手打字，不要复制粘贴</b>——手指记忆也是记忆</li>
+    <li>② 亲手触发一次 <code>IndexError</code> 和一次元组的 <code>TypeError</code>，把报错信息读三遍——认脸不慌</li>
+    <li>③ 小挑战：创建 <code>backpack</code> 列表，练习 <code>append</code> 加 3 件装备、<code>pop</code> 扔 1 件、用切片取出第 2～3 件并打印</li>
+    <li>④ 给 BOSS 战的游戏加一个新功能：把玩家本局的选择存进列表 <code>history</code>，结算时打印整局的冒险足迹</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>字典与集合 —— 图鉴系统</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：RPG 背包管理器（内存变量模拟） ============ */
+var backpack = ["血药", "短剑", "火把", "干粮", "金币袋"];
+var selected = -1;
+var BAG_MAX = 12;
+var pool = [
+  {name:"血药",    rare:"普通", star:1},
+  {name:"干粮",    rare:"普通", star:1},
+  {name:"火把",    rare:"普通", star:1},
+  {name:"绳索",    rare:"普通", star:1},
+  {name:"盾牌",    rare:"精良", star:2},
+  {name:"治疗药膏", rare:"精良", star:2},
+  {name:"铁头盔",  rare:"精良", star:2},
+  {name:"月光石",  rare:"稀有", star:3},
+  {name:"精灵之尘", rare:"稀有", star:3},
+  {name:"秘银箭",  rare:"稀有", star:3},
+  {name:"屠龙匕首", rare:"史诗", star:4},
+  {name:"星陨剑",  rare:"史诗", star:4}
+];
+var rareColor = {"普通":"#8b93b8", "精良":"#4ade80", "稀有":"#4dd6ff", "史诗":"#f5c542"};
+
+function pyList(arr){
+  var parts = [];
+  for(var i=0;i<arr.length;i++){ parts.push("'" + arr[i] + "'"); }
+  return "[" + parts.join(", ") + "]";
+}
+function log(msg){
+  document.getElementById('bag-log').textContent = msg;
+}
+function renderBag(){
+  var grid = document.getElementById('bag-grid');
+  grid.innerHTML = '';
+  for(var i=0;i<BAG_MAX;i++){
+    var cell = document.createElement('div');
+    if(i < backpack.length){
+      cell.className = 'bag-cell' + (i === selected ? ' selected' : '');
+      var item = getItem(backpack[i]);
+      cell.innerHTML = '<span class="bidx">[' + i + ']</span>' +
+        '<div class="bname">' + backpack[i] + '</div>' +
+        '<div class="brare" style="color:' + rareColor[item.rare] + '">' + item.star + '★ ' + item.rare + '</div>';
+      (function(idx){
+        cell.addEventListener('click', function(){
+          selected = (selected === idx) ? -1 : idx;
+          renderBag();
+          log('已选中 [' + idx + '] "' + backpack[idx] + '"，点「丢弃」体验 pop(' + idx + ')');
+        });
+      })(i);
+    } else {
+      cell.className = 'bag-cell empty';
+      cell.innerHTML = '<span class="bidx">[' + i + ']</span><div class="bname" style="color:#5b648f">空</div>';
+    }
+    grid.appendChild(cell);
+  }
+}
+function getItem(name){
+  for(var i=0;i<pool.length;i++){
+    if(pool[i].name === name) return pool[i];
+  }
+  return {name:name, rare:"普通", star:1};
+}
+function showCode(code, outText){
+  document.getElementById('lab-code').innerHTML = code;
+  document.getElementById('lab-out').textContent = outText;
+}
+function lootItem(){
+  if(backpack.length >= BAG_MAX){
+    showCode('<span class="k">if</span> <span class="k">len</span>(<span class="v">backpack</span>) &gt;= <span class="n">12</span>:   <span class="c"># 背包已满，装不下了</span>\n    <span class="k">print</span>(<span class="s">"背包已满！"</span>)',
+             '背包已满！');
+    log('背包已满（len(backpack) >= 12），先丢弃一些物品吧！');
+    return;
+  }
+  var it = pool[Math.floor(Math.random() * pool.length)];
+  backpack.push(it.name);
+  selected = -1;
+  renderBag();
+  showCode('<span class="v">backpack</span>.<span class="k">append</span>(<span class="s">"' + it.name + '"</span>)   <span class="c"># 拾取：加到背包末尾</span>\n<span class="k">print</span>(<span class="v">backpack</span>)',
+           pyList(backpack));
+  log('拾到了 ' + it.star + '★ ' + it.rare + '「' + it.name + '」！append 把它放进了背包末尾。');
+}
+function dropItem(){
+  if(selected < 0 || selected >= backpack.length){
+    log('先点击一个背包格子选中物品，再丢弃！');
+    return;
+  }
+  var idx = selected;
+  var name = backpack[idx];
+  backpack.splice(idx, 1);
+  selected = -1;
+  renderBag();
+  showCode('<span class="v">item</span> = <span class="v">backpack</span>.<span class="k">pop</span>(<span class="n">' + idx + '</span>)   <span class="c"># 弹出 ' + idx + ' 号位 "' + name + '"，后面物品自动前移</span>\n<span class="k">print</span>(<span class="v">item</span>, <span class="k">len</span>(<span class="v">backpack</span>))',
+           name + ' ' + backpack.length);
+  log('丢弃了「' + name + '」。注意：pop 之后，后面的物品索引会自动减 1 补位！');
+}
+function sortBag(mode){
+  if(backpack.length === 0){
+    log('背包空空如也，没什么可整理的。');
+    return;
+  }
+  if(mode === 'name'){
+    backpack.sort();
+    showCode('<span class="v">backpack</span>.<span class="k">sort</span>()   <span class="c"># 就地按名字（编码顺序）整理，永久生效</span>\n<span class="k">print</span>(<span class="v">backpack</span>)',
+             pyList(backpack));
+    log('已按名字整理。sort() 是就地排序：直接改变 backpack 本身，返回 None。');
+  } else {
+    var order = {"史诗":0, "稀有":1, "精良":2, "普通":3};
+    backpack.sort(function(a, b){ return order[getItem(a).rare] - order[getItem(b).rare]; });
+    showCode('<span class="c"># 按稀有度（史诗→普通）整理，思路是"按稀有度排序"：</span>\n<span class="c"># backpack.sort(key=lambda 物品: 稀有度顺序[物品])</span>\n<span class="c"># lambda 和字典是第 7 课的内容，先睹为快～</span>\n<span class="k">print</span>(<span class="v">backpack</span>)',
+             pyList(backpack));
+    log('已按稀有度从高到低整理（本页用内存数据模拟；Python 写法是第 7 课的 key= 参数）。');
+  }
+  selected = -1;
+  renderBag();
+}
+renderBag();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 越界的代价',
+    code:'bag = ["血药", "短剑", "火把"]\nprint(bag[3])',
+    opts:['火把','None','报错 IndexError','空字符串'],
+    ans:2,
+    exp:'3 个物品的索引是 0、1、2，没有 3 号柜！最大索引 = 个数 - 1。想取最后一个可以用 bag[-1] 或 bag[len(bag)-1]。'
+  },
+  {
+    title:'第 2 预言 · 负索引侦查',
+    code:'bag = ["血药", "短剑", "火把"]\nprint(bag[-1])',
+    opts:['血药','报错 IndexError','短剑','火把'],
+    ans:3,
+    exp:'负索引从末尾往前数：-1 是最后一个（火把），-2 是倒数第二个（短剑），-3 是血药。再往前（-4）就越界了。'
+  },
+  {
+    title:'第 3 预言 · 切片含头不含尾',
+    code:'bag = ["血药", "短剑", "火把", "干粮"]\nprint(bag[1:3])',
+    opts:["['短剑', '火把']", "['短剑', '火把', '干粮']", "['血药', '短剑']", "['火把', '干粮']"],
+    ans:0,
+    exp:'[1:3] = 从 1 号开始、3 号之前停下（不含 3 号），所以取到 1 号「短剑」和 2 号「火把」。口诀：含头不含尾。'
+  },
+  {
+    title:'第 4 预言 · pop 带索引',
+    code:'bag = ["血药", "短剑", "火把"]\nitem = bag.pop(0)\nprint(item, len(bag))',
+    opts:['血药 2','血药 3','短剑 2','报错'],
+    ans:0,
+    exp:'pop(0) 弹出 0 号位「血药」并返回它；列表从 3 个变 2 个。不带索引的 pop() 弹出最后一个。'
+  },
+  {
+    title:'第 5 预言 · 元组的封印',
+    code:'pos = (3, 5)\npos[0] = 10',
+    opts:['成功，pos 变成 (10, 5)','报错 SyntaxError','什么也不做，静默通过','报错 TypeError'],
+    ans:3,
+    exp:'元组不可变！语法完全合法，但运行时抛出 TypeError: tuple object does not support item assignment。想改内容只能换成列表。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+              .replace(/("[^"]*")/g,'<span style="color:var(--green)">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|len|pop|append|insert|remove|sort|sorted)/g,'<span style="color:var(--pink)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['列表怎么创建？','方括号 + 逗号：backpack = ["血药", "短剑", "火把"]'],
+  ['第 1 个元素的索引是？','0！最大索引 = 元素个数 - 1，越界报 IndexError'],
+  ['backpack[-1] 是什么？','最后一个元素。负索引从末尾往前数：-1 倒数第一、-2 倒数第二'],
+  ['append 和 insert 区别','append 永远加到末尾；insert(位置, 物品) 插到指定位置'],
+  ['remove 和 pop 区别','remove("名字") 按值删、不返回；pop(索引) 按位删并返回被删的值'],
+  ['统计四兄弟','len 数个数 / max 最大 / min 最小 / sum 求和'],
+  ['backpack[1:3] 取几个？','2 个：1 号和 2 号。切片含头不含尾，[开始:结束]'],
+  ['sort() 和 sorted() 区别','sort() 就地改原列表、返回 None；sorted() 返回新列表、原列表不变'],
+  ['元组和列表的区别','元组圆括号、不可变（不能增删改排序）；列表方括号、可变'],
+  ['单元素元组怎么写？','("血药",) 必须带逗号！("血药") 只是字符串。a, b = (1, 2) 叫解包']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'backpack = ["血药", "短剑", "火把"]，backpack[0] 是？',
+   opts:['血药','短剑','火把','报错'], ans:0,
+   exp:'索引从 0 开始，[0] 就是第一个元素。'},
+  {q:'同一个列表，backpack[-2] 是？',
+   opts:['血药','短剑','火把','报错'], ans:1,
+   exp:'负索引从末尾数：-1 是火把（最后），-2 是短剑（倒数第二）。'},
+  {q:'哪个方法能把"月光石"加到列表末尾？',
+   opts:['backpack.insert("月光石")','backpack.append("月光石")','backpack.pop("月光石")','backpack.add("月光石")'], ans:1,
+   exp:'append(值) 追加到末尾；insert(位置, 值) 是插到指定位置。列表没有 add 方法（那是第 7 课集合的）。'},
+  {q:'backpack.pop(1) 会发生什么？',
+   opts:['删除 1 号位元素并返回它','删除值为 1 的元素','在 1 号位插入空位','报错，pop 不能带参数'], ans:0,
+   exp:'pop(索引) 弹出该位置的元素并返回；不带索引的 pop() 弹出最后一个。按值删除用的是 remove。'},
+  {q:'"魔杖" in backpack 的结果是？',
+   opts:['字符串"魔杖"','True 或 False','1 或 0','报错'], ans:1,
+   exp:'in 是成员运算符，返回布尔值：在包里是 True，不在是 False。常和 if 搭配做检查。'},
+  {q:'sum([10, 25, 5, 99]) 的结果是？',
+   opts:['4','139','99','[5, 10, 25, 99]'], ans:1,
+   exp:'sum 把所有数字加起来：10+25+5+99 = 139。数个数用 len，结果是 4。'},
+  {q:'bag = ["a", "b", "c", "d", "e"]，bag[1:3] 是？',
+   opts:["['a', 'b', 'c']","['b', 'c']","['b', 'c', 'd']","['c', 'd']"], ans:1,
+   exp:'切片含头不含尾：从 1 号（b）开始，到 3 号（d）之前停下。'},
+  {q:'nums = [30, 5, 99, 10]，执行 print(nums.sort()) 输出？',
+   opts:['[5, 10, 30, 99]','[30, 5, 99, 10]','None','报错'], ans:2,
+   exp:'sort() 就地排序、没有返回值，所以 print 出来是 None。想打印排序结果应该用 print(sorted(nums))。'},
+  {q:'t = (3, 5)，下面哪个操作会成功？',
+   opts:['t.append(7)','t[0] = 10','print(t[0])','t.remove(3)'], ans:2,
+   exp:'元组不可变：append、按位赋值、remove 全都会报 TypeError。但查询类操作（索引、切片、len、in）都正常。'},
+  {q:'执行 x, y = (3, 5) 之后，x 和 y 分别是？',
+   opts:['x=3, y=5','x=5, y=3','x=(3,5), y=None','报错'], ans:0,
+   exp:'这是元组解包：按位置一一对应，x 拿到第 1 个值 3，y 拿到第 2 个值 5。变量个数必须和元素个数相等。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！背包管理大师，下一课已为你解锁 🔓' : '通关成功！第 7 课「图鉴系统」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

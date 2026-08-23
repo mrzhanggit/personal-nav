@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第12课 · 时间与随机 —— 命运骰子</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --amber:#fbbf24; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fbbf24 50%,#fb923c);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#ffe3a3;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out-note{font-size:12px;color:var(--muted);margin-top:-8px;margin-bottom:12px;}
+  /* 时间零件盒子动画 */
+  .boxes{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    min-width:96px;background:var(--card);border:2px solid var(--gold);border-radius:14px;
+    padding:12px 10px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(245,197,66,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--gold);
+    background:rgba(245,197,66,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:24px;font-weight:800;margin:8px 0 4px;color:var(--cyan);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 格式符速查 */
+  .fm-table{margin:14px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .fm-row{display:flex;gap:0;border-bottom:1px solid var(--line);}
+  .fm-row:last-child{border-bottom:none;}
+  .fm-row div{padding:8px 14px;font-size:13px;}
+  .fm-row .fm-tok{width:70px;font-family:ui-monospace,Menlo,monospace;color:var(--gold);font-weight:700;background:rgba(245,197,66,.06);}
+  .fm-row .fm-name{flex:1;color:var(--text);}
+  .fm-row .fm-eg{width:110px;color:var(--cyan);font-family:ui-monospace,Menlo,monospace;text-align:right;}
+  /* strftime 拼装器 */
+  .fm-lab{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:16px 0;}
+  .fm-lab h4{color:var(--gold);font-size:14px;margin-bottom:10px;}
+  .fm-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .fm-btn{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--gold);
+    padding:6px 14px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;transition:all .2s;
+  }
+  .fm-btn:hover{border-color:var(--gold);background:rgba(245,197,66,.1);}
+  .fm-btn.clear{color:var(--red);border-color:rgba(248,113,113,.4);}
+  #fm-str{font-family:ui-monospace,Menlo,monospace;color:var(--cyan);font-size:14px;min-height:22px;}
+  #fm-out{font-family:ui-monospace,Menlo,monospace;color:#ffe3a3;font-size:14px;margin-top:6px;white-space:pre-wrap;}
+  /* 倒计时卷轴 */
+  .timeline{display:flex;align-items:center;justify-content:center;gap:0;margin:22px 0;flex-wrap:wrap;}
+  .tl-node{
+    background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:10px 18px;text-align:center;
+  }
+  .tl-node .t1{font-size:13px;color:var(--muted);}
+  .tl-node .t2{font-size:18px;font-weight:800;color:var(--gold);font-family:ui-monospace,Menlo,monospace;}
+  .tl-bar{
+    display:flex;flex-direction:column;align-items:center;padding:0 12px;min-width:130px;
+  }
+  .tl-days{font-size:20px;font-weight:800;color:var(--orange);font-family:ui-monospace,Menlo,monospace;}
+  .tl-line{width:100%;height:3px;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:2px;position:relative;margin:4px 0;}
+  .tl-line::after{content:"▶";position:absolute;right:-4px;top:-9px;color:var(--orange);font-size:12px;}
+  .tl-label{font-size:11px;color:var(--muted);}
+  /* 骰子 */
+  .dice-zone{display:flex;align-items:center;gap:26px;justify-content:center;flex-wrap:wrap;margin:18px 0;}
+  .dice{
+    width:96px;height:96px;border-radius:18px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;
+    font-size:44px;font-weight:800;color:var(--gold);font-family:ui-monospace,Menlo,monospace;
+    box-shadow:0 6px 24px rgba(245,197,66,.2);transition:transform .1s;
+  }
+  .dice.rolling{animation:shake .35s infinite;}
+  @keyframes shake{
+    0%{transform:rotate(-6deg) scale(1.02);}
+    50%{transform:rotate(6deg) scale(.97);}
+    100%{transform:rotate(-6deg) scale(1.02);}
+  }
+  .dice-cap{font-size:13px;color:var(--muted);max-width:240px;text-align:center;}
+  .dice-cap b{color:var(--gold);font-family:ui-monospace,Menlo,monospace;}
+  /* 抽签筹码 */
+  .chips{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:18px 0;}
+  .chip{
+    background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px 20px;
+    font-size:15px;font-weight:700;color:var(--text);transition:all .25s;cursor:default;
+  }
+  .chip.hit{border-color:var(--gold);color:var(--gold);background:rgba(245,197,66,.12);transform:translateY(-6px) scale(1.06);box-shadow:0 8px 24px rgba(245,197,66,.25);}
+  .draw-cap{text-align:center;font-size:13px;color:var(--muted);margin-bottom:12px;}
+  /* 种子对照 */
+  .seed-demo{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:14px 0;}
+  .seed-demo .sd-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .seed-demo .sd-title{font-size:13px;color:var(--purple);font-weight:600;margin-bottom:8px;}
+  .seed-demo .sd-seq{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--cyan);margin-bottom:4px;}
+  .seed-demo .sd-note{font-size:12px;color:var(--muted);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input .seedbox{
+    display:flex;align-items:center;gap:6px;background:#0a0d1e;border:1px solid var(--line);
+    border-radius:10px;padding:10px 14px;font-size:13px;color:var(--muted);cursor:pointer;user-select:none;
+  }
+  .lab-input .seedbox input{accent-color:var(--gold);cursor:pointer;}
+  .lab-input .seedbox b{color:var(--gold);font-family:ui-monospace,Menlo,monospace;}
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+  .fortune-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .fortune-card.show{display:block;}
+  .fortune-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:4px;}
+  .fortune-card .f-date{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;margin-bottom:10px;}
+  .fortune-card .f-level{font-size:34px;font-weight:800;letter-spacing:6px;margin:4px 0 10px;}
+  .fortune-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .fortune-card .attr div{text-align:center;}
+  .fortune-card .attr b{font-size:24px;display:block;color:var(--cyan);}
+  .fortune-card .attr span{font-size:12px;color:var(--muted);}
+  .fortune-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:10px;border-top:1px dashed var(--line);padding-top:10px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--gold);}
+  .opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);color:var(--gold);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--gold);color:var(--gold);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--cyan);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--gold);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(245,197,66,.1);color:var(--gold);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  footer b{color:var(--gold);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>第 12 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 3 · DUNGEON CHALLENGE</div>
+    <h1>时间与随机 —— 命运骰子</h1>
+    <div class="subtitle">今日目标：让程序读懂时间，掷出不可捉摸的命运</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握 <span class="hl">datetime.now()</span> 与时间戳概念</li>
+      <li>会用 <span class="hl">strftime</span> 把时间格式化成任何模样（%Y %m %d %H %M %S）</li>
+      <li>会用 <span class="hl">date</span> 与 <span class="hl">timedelta</span> 计算日期差</li>
+      <li>玩转 random 家族：randint / choice / shuffle / random / seed，认识 time.sleep</li>
+      <li>通关实验室「每日运势播报台」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 datetime.now 与时间戳 -->
+  <section>
+    <h2><span class="num">1</span>datetime.now()：读取游戏世界的时钟</h2>
+    <p>每个游戏世界都有自己的时钟，Python 也有。想拿到"现在这一刻"，用 <span class="hl">datetime.now()</span>：</p>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> datetime
+
+<span class="v">now</span> = datetime.<span class="k">now</span>()          <span class="c"># 拿到"现在"这个时刻</span>
+<span class="k">print</span>(<span class="v">now</span>)
+<span class="k">print</span>(<span class="k">type</span>(<span class="v">now</span>))</div>
+    <div class="out">2026-08-14 15:30:07.128394
+&lt;class 'datetime.datetime'&gt;</div>
+    <div class="out-note">以 2026 年 8 月 14 日 15:30:07 运行为例；最后一段微秒每次运行都不同。</div>
+
+    <p>datetime 对象像一个六格收纳盒，年、月、日、时、分、秒各占一格。把鼠标移到下面看看：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">now.year</div><div class="val">2026</div><div class="tip">年 · 格式符 %Y</div></div>
+      <div class="mbox"><div class="tag">now.month</div><div class="val">08</div><div class="tip">月 01~12 · %m</div></div>
+      <div class="mbox"><div class="tag">now.day</div><div class="val">14</div><div class="tip">日 01~31 · %d</div></div>
+      <div class="mbox"><div class="tag">now.hour</div><div class="val">15</div><div class="tip">时 00~23 · %H</div></div>
+      <div class="mbox"><div class="tag">now.minute</div><div class="val">30</div><div class="tip">分 00~59 · %M</div></div>
+      <div class="mbox"><div class="tag">now.second</div><div class="val">07</div><div class="tip">秒 00~59 · %S</div></div>
+    </div>
+
+    <p>每个零件都能单独取出来用：</p>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> datetime
+
+<span class="v">now</span> = datetime.<span class="k">now</span>()          <span class="c"># 以 2026-08-14 15:30:07 为例</span>
+<span class="k">print</span>(<span class="v">now</span>.year, <span class="v">now</span>.month, <span class="v">now</span>.day)
+<span class="k">print</span>(<span class="v">now</span>.hour, <span class="v">now</span>.minute, <span class="v">now</span>.second)</div>
+    <div class="out">2026 8 14
+15 30 7</div>
+
+    <p>还有一种更"原始"的计时方式——<span class="hl">时间戳</span>：从 <span class="hl-c">1970-01-01 00:00:00（UTC）</span>到现在总共经过的秒数，用 <span class="hl">time.time()</span> 获取：</p>
+    <div class="code"><span class="k">import</span> <span class="v">time</span>
+
+<span class="k">print</span>(time.<span class="k">time</span>())</div>
+    <div class="out">1786692607.842</div>
+    <div class="out-note">以 2026-08-14 15:30:07（北京时间）为例，每次运行都不同。</div>
+    <p>时间戳是 float，最大的用处是<span class="hl">做差算耗时</span>：程序开头记一次、结尾记一次，两个时间戳相减就是运行了多少秒。</p>
+  </section>
+
+  <!-- 2 strftime -->
+  <section>
+    <h2><span class="num">2</span>strftime：时间的格式化妆术</h2>
+    <p>直接 print(now) 出来的格式不一定合心意。<span class="hl">strftime</span>（string format time）能把时刻变成你想要的任何文字形状——把格式符写进一个字符串交给它就行：</p>
+    <div class="fm-table">
+      <div class="fm-row"><div class="fm-tok">%Y</div><div class="fm-name">四位年份</div><div class="fm-eg">2026</div></div>
+      <div class="fm-row"><div class="fm-tok">%m</div><div class="fm-name">两位月份（补零）</div><div class="fm-eg">08</div></div>
+      <div class="fm-row"><div class="fm-tok">%d</div><div class="fm-name">两位日期（补零）</div><div class="fm-eg">14</div></div>
+      <div class="fm-row"><div class="fm-tok">%H</div><div class="fm-name">小时（24 小时制，补零）</div><div class="fm-eg">15</div></div>
+      <div class="fm-row"><div class="fm-tok">%M</div><div class="fm-name">分钟（补零）</div><div class="fm-eg">30</div></div>
+      <div class="fm-row"><div class="fm-tok">%S</div><div class="fm-name">秒钟（补零）</div><div class="fm-eg">07</div></div>
+    </div>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> datetime
+
+<span class="v">now</span> = datetime.<span class="k">now</span>()                              <span class="c"># 以 2026-08-14 15:30:07 为例</span>
+<span class="k">print</span>(<span class="v">now</span>.<span class="k">strftime</span>(<span class="s">"%Y-%m-%d"</span>))
+<span class="k">print</span>(<span class="v">now</span>.<span class="k">strftime</span>(<span class="s">"%H:%M:%S"</span>))
+<span class="k">print</span>(<span class="v">now</span>.<span class="k">strftime</span>(<span class="s">"%Y年%m月%d日 %H点%M分%S秒"</span>))</div>
+    <div class="out">2026-08-14
+15:30:07
+2026年08月14日 15点30分07秒</div>
+    <p>格式串里除了 % 开头的格式符，其他字符（横杠、冒号、汉字）都原样保留。<span class="hl">% 和字母之间不能有空格</span>，写 % Y 会原样输出 "% Y"。</p>
+
+    <div class="fm-lab">
+      <h4>🧪 动手拼一拼：点击按钮把格式符拼进字符串，看即时效果（示例时间 2026-08-14 15:30:07）</h4>
+      <div class="fm-btns">
+        <button class="fm-btn" onclick="fmAdd('%Y')">%Y 年</button>
+        <button class="fm-btn" onclick="fmAdd('%m')">%m 月</button>
+        <button class="fm-btn" onclick="fmAdd('%d')">%d 日</button>
+        <button class="fm-btn" onclick="fmAdd('%H')">%H 时</button>
+        <button class="fm-btn" onclick="fmAdd('%M')">%M 分</button>
+        <button class="fm-btn" onclick="fmAdd('%S')">%S 秒</button>
+        <button class="fm-btn" onclick="fmAdd('-')">-</button>
+        <button class="fm-btn" onclick="fmAdd(':')">:</button>
+        <button class="fm-btn" onclick="fmAdd(' ')">空格</button>
+        <button class="fm-btn" onclick="fmAdd('年')">年</button>
+        <button class="fm-btn clear" onclick="fmClear()">清空</button>
+      </div>
+      <div id="fm-str">（点击上方按钮开始拼接）</div>
+      <div id="fm-out"></div>
+    </div>
+  </section>
+
+  <!-- 3 date 与 timedelta -->
+  <section>
+    <h2><span class="num">3</span>date 与 timedelta：倒计时卷轴</h2>
+    <p>只关心"哪一天"、不关心几点几秒？用 <span class="hl">date</span> 对象。两个 date 相减，得到 <span class="hl">timedelta</span>（时间差）——这正是写"距 XX 还有 N 天"倒计时的核心公式：</p>
+    <div class="timeline">
+      <div class="tl-node"><div class="t1">今天</div><div class="t2">2026-08-14</div></div>
+      <div class="tl-bar">
+        <div class="tl-days">127 天</div>
+        <div class="tl-line"></div>
+        <div class="tl-label">final - today</div>
+      </div>
+      <div class="tl-node"><div class="t1">期末考</div><div class="t2">2026-12-19</div></div>
+    </div>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> date
+
+<span class="v">today</span> = date(<span class="n">2026</span>, <span class="n">8</span>, <span class="n">14</span>)
+<span class="v">final</span> = date(<span class="n">2026</span>, <span class="n">12</span>, <span class="n">19</span>)
+<span class="v">delta</span> = <span class="v">final</span> - <span class="v">today</span>        <span class="c"># date 相减得到 timedelta</span>
+<span class="k">print</span>(<span class="s">"距期末考还有"</span>, <span class="v">delta</span>.days, <span class="s">"天"</span>)</div>
+    <div class="out">距期末考还有 127 天</div>
+    <p>timedelta 不只能量差，还能加在日期上做"时间穿越"：</p>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> date, timedelta
+
+<span class="v">today</span> = date(<span class="n">2026</span>, <span class="n">8</span>, <span class="n">14</span>)
+<span class="k">print</span>(<span class="v">today</span> + timedelta(days=<span class="n">10</span>))    <span class="c"># 10 天后</span>
+<span class="k">print</span>(<span class="v">today</span> - timedelta(days=<span class="n">7</span>))     <span class="c"># 7 天前</span></div>
+    <div class="out">2026-08-24
+2026-08-07</div>
+    <p>⚠️ 注意 <span class="hl-c">today - final 和 final - today 符号相反</span>：过去的日子相减是负数，做倒计时前先想清楚谁减谁。</p>
+  </section>
+
+  <!-- 4 randint 与 choice -->
+  <section>
+    <h2><span class="num">4</span>random.randint 与 random.choice：命运骰子</h2>
+    <p>上半课管时间，下半课管命运。<span class="hl">random</span> 模块就是 Python 的命运骰子。先掷一把——点下面的骰子试试：</p>
+    <div class="dice-zone">
+      <div class="dice" id="dice">?</div>
+      <div class="dice-cap">每掷一次，等价于执行一次<br><b>random.randint(1, 6)</b><br>1~6 每个点数都可能出现</div>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <button class="btn" id="dice-btn" onclick="rollDice()">🎲 掷骰子</button>
+    </div>
+    <p>最重要的规矩：<span class="hl">randint(a, b) 是双闭区间 [a, b]</span>——两端都能取到。这和 range(a, b) 的"左闭右开"正好相反：</p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+
+<span class="k">print</span>(random.<span class="k">randint</span>(<span class="n">1</span>, <span class="n">6</span>))    <span class="c"># 1、2、3、4、5、6 都可能出现（含两端）</span>
+<span class="k">print</span>(<span class="k">list</span>(range(<span class="n">1</span>, <span class="n">6</span>)))       <span class="c"># range 左闭右开：不含 6</span></div>
+    <div class="out">4
+[1, 2, 3, 4, 5]</div>
+    <div class="out-note">第一行是某次运行的结果（随机数每次可能不同）；第二行是确定的。</div>
+
+    <p>如果选项不是连续数字，而是一堆"签"，用 <span class="hl">random.choice</span> 从序列里抽一个：</p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+
+<span class="v">pets</span> = [<span class="s">"火龙"</span>, <span class="s">"冰凤"</span>, <span class="s">"雷鹰"</span>]
+<span class="v">pet</span> = random.<span class="k">choice</span>(<span class="v">pets</span>)     <span class="c"># 从列表里随机抽一个元素</span>
+<span class="k">print</span>(<span class="s">"本次召唤："</span>, <span class="v">pet</span>)</div>
+    <div class="out">本次召唤： 火龙</div>
+    <div class="out-note">某次运行的结果；choice 每次可能抽出三个中的任意一个。</div>
+    <div class="chips" id="pet-chips">
+      <div class="chip">🔥 火龙</div>
+      <div class="chip">❄️ 冰凤</div>
+      <div class="chip">⚡ 雷鹰</div>
+    </div>
+    <div class="draw-cap">
+      <button class="btn" onclick="drawPet()">🥚 抽一只神兽（体验 random.choice）</button>
+    </div>
+  </section>
+
+  <!-- 5 shuffle random seed sleep -->
+  <section>
+    <h2><span class="num">5</span>shuffle · random() · seed · sleep：命运工具箱</h2>
+    <p><b>① shuffle</b>：原地打乱列表顺序。⚠️ 全课最大坑：<span class="hl">它返回 None，不返回新列表！</span></p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+
+<span class="v">cards</span> = [<span class="s">"火球术"</span>, <span class="s">"冰霜箭"</span>, <span class="s">"治疗术"</span>, <span class="s">"闪电链"</span>]
+<span class="v">result</span> = random.<span class="k">shuffle</span>(<span class="v">cards</span>)     <span class="c"># 原地打乱，返回值是 None</span>
+<span class="k">print</span>(<span class="v">result</span>)
+<span class="k">print</span>(<span class="v">cards</span>)</div>
+    <div class="out">None
+['闪电链', '冰霜箭', '火球术', '治疗术']</div>
+    <div class="out-note">第二行是某次运行的结果，顺序随机；但第一行永远是 None。</div>
+    <div class="chips" id="skill-chips"></div>
+    <div class="draw-cap">
+      <button class="btn" onclick="doShuffle()">🔀 洗牌（体验 random.shuffle，打乱后直接用原列表）</button>
+    </div>
+
+    <p><b>② random.random()</b>：不带参数，返回 <span class="hl">[0.0, 1.0)</span> 之间的随机小数（能取到 0.0，取不到 1.0），常用来做概率判断：</p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+
+<span class="v">r</span> = random.<span class="k">random</span>()
+<span class="k">print</span>(<span class="v">r</span>)                          <span class="c"># 例如 0.6394267984578837</span>
+<span class="k">if</span> <span class="v">r</span> &lt; <span class="n">0.5</span>:
+    <span class="k">print</span>(<span class="s">"掉落稀有装备！"</span>)
+<span class="k">else</span>:
+    <span class="k">print</span>(<span class="s">"谢谢惠顾"</span>)</div>
+    <div class="out">0.6394267984578837
+谢谢惠顾</div>
+    <div class="out-note">0.639… 不小于 0.5，所以走 else 分支。</div>
+
+    <p><b>③ random.seed()</b>：命运可以固定！设置随机种子后，每次运行的"随机"结果完全一样——调试和测试的救命技能：</p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+
+random.<span class="k">seed</span>(<span class="n">42</span>)
+<span class="k">print</span>(random.<span class="k">randint</span>(<span class="n">1</span>, <span class="n">100</span>))
+random.<span class="k">seed</span>(<span class="n">42</span>)
+<span class="k">print</span>(random.<span class="k">randint</span>(<span class="n">1</span>, <span class="n">100</span>))</div>
+    <div class="out">82
+82</div>
+    <p>两次输出一模一样！<span class="hl">相同种子 = 相同命运轨迹</span>。下面的对照实验可以亲手做：</p>
+    <div class="seed-demo">
+      <div class="sd-title">🔬 对照实验：连续取 3 个随机数，跑两轮</div>
+      <div class="sd-row">
+        <button class="btn" onclick="seedRun(true)">带 seed(42) 跑两轮</button>
+        <button class="btn" onclick="seedRun(false)">不带 seed 跑两轮</button>
+      </div>
+      <div class="sd-seq" id="sd-a">第一轮：— — —</div>
+      <div class="sd-seq" id="sd-b">第二轮：— — —</div>
+      <div class="sd-note" id="sd-note">带种子：两轮数字完全相同（可复现）；不带种子：两轮基本不同（真随机）。</div>
+    </div>
+
+    <p><b>④ time.sleep(秒)</b>：让程序暂停一会儿再做下一步，做倒计时、控制节奏全靠它：</p>
+    <div class="code"><span class="k">import</span> <span class="v">time</span>
+
+<span class="k">print</span>(<span class="s">"3"</span>)
+time.<span class="k">sleep</span>(<span class="n">1</span>)      <span class="c"># 暂停 1 秒（单位是秒，也可以写小数如 0.5）</span>
+<span class="k">print</span>(<span class="s">"2"</span>)
+time.<span class="k">sleep</span>(<span class="n">1</span>)
+<span class="k">print</span>(<span class="s">"1"</span>)
+time.<span class="k">sleep</span>(<span class="n">1</span>)
+<span class="k">print</span>(<span class="s">"掷骰子！"</span>)</div>
+    <div class="out">3
+2
+1
+掷骰子！</div>
+    <div class="out-note">运行时每行之间会真的停顿 1 秒才出现下一行。</div>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 每日运势播报台</h2>
+    <p>综合运用本课技能做一个"每日运势播报台"：随机抽取运势等级、幸运数字、幸运色和一句签文。打开"固定种子"开关，再连抽几次——你会发现命运被 seed 锁死了（这就是可复现性）。右侧/下方的等价 Python 代码会跟着开关变化。</p>
+    <div class="lab-input">
+      <button class="btn" onclick="drawFortune()">⚡ 抽取今日运势</button>
+      <label class="seedbox"><input type="checkbox" id="seed-toggle"> 固定种子 <b>random.seed(2026)</b>（结果可复现）</label>
+    </div>
+    <div class="fortune-card" id="fortune-card">
+      <h3 id="f-date-title">—</h3>
+      <div class="f-date" id="f-date">—</div>
+      <div class="f-level" id="f-level">—</div>
+      <div class="attr">
+        <div><b id="f-num">—</b><span>幸运数字 · randint(1,9)</span></div>
+        <div><b id="f-color">—</b><span>幸运色 · choice</span></div>
+      </div>
+      <div class="quote" id="f-quote">—</div>
+    </div>
+    <div class="code" id="lab-code" style="display:none"></div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开电脑上的 Python（IDLE 或终端输入 <code>python</code>），把本课所有代码块<b>亲手逐行敲一遍</b>，观察 <code>datetime.now()</code> 的微秒部分每次都不同</li>
+    <li>② 写「考试倒计时」：用 <code>date</code> 算出今天到你某个考试日的天数（提示：<code>(final - today).days</code>）</li>
+    <li>③ 写「每日运势 1.0」：用 <code>random.choice</code> 抽运势、<code>random.randint</code> 抽幸运数字，连续运行 5 次观察变化；再在最前面加 <code>random.seed(2026)</code>，运行两次观察结果是否相同</li>
+    <li>④ 用 <code>time.sleep(1)</code> + <code>print</code> 做一个 3-2-1 倒计时，最后输出「掷骰子！」</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>第 13 课 · requests 与 API —— 情报网</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用：HTML 转义 + Python 高亮 ============ */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hlPy(code){
+  return code.split('\n').map(function(l){
+    var e = esc(l);
+    e = e.replace(/("[^"]*")/g,'<span style="color:var(--gold)">$1</span>');
+    e = e.replace(/(#.*$)/,'<span style="color:#5b648f">$1</span>');
+    e = e.replace(/(\b)(strftime|timedelta|datetime|randint|shuffle|choice|random|import|print|input|float|from|seed|sleep|type|list|range|time|date|now|str|int|len|if|else)(\b)/g,
+      '$1<span style="color:var(--pink)">$2</span>$3');
+    return e;
+  }).join('\n');
+}
+
+/* ============ strftime 拼装器 ============ */
+var fmStr = '';
+var fmMap = {'%Y':'2026','%m':'08','%d':'14','%H':'15','%M':'30','%S':'07'};
+function fmAdd(tok){ fmStr += tok; fmRender(); }
+function fmClear(){ fmStr = ''; fmRender(); }
+function fmRender(){
+  var strEl = document.getElementById('fm-str');
+  var outEl = document.getElementById('fm-out');
+  if(fmStr === ''){
+    strEl.textContent = '（点击上方按钮开始拼接）';
+    outEl.textContent = '';
+    return;
+  }
+  strEl.textContent = 'now.strftime("' + fmStr + '")';
+  var res = '';
+  for(var i=0;i<fmStr.length;i++){
+    var two = fmStr.substr(i,2);
+    if(fmStr.charAt(i)==='%' && fmMap[two] !== undefined){
+      res += fmMap[two]; i++;
+    }else{
+      res += fmStr.charAt(i);
+    }
+  }
+  outEl.textContent = '→ ' + res;
+}
+
+/* ============ 骰子（randint 演示） ============ */
+var diceTimer = null;
+function rollDice(){
+  var dice = document.getElementById('dice');
+  var btn = document.getElementById('dice-btn');
+  if(diceTimer) return;
+  btn.disabled = true;
+  dice.classList.add('rolling');
+  var count = 0;
+  diceTimer = setInterval(function(){
+    dice.textContent = 1 + Math.floor(Math.random()*6);
+    count++;
+    if(count >= 14){
+      clearInterval(diceTimer); diceTimer = null;
+      dice.classList.remove('rolling');
+      btn.disabled = false;
+      btn.textContent = '🎲 再掷一次';
+    }
+  }, 70);
+}
+
+/* ============ 抽神兽（choice 演示） ============ */
+function drawPet(){
+  var chips = document.getElementById('pet-chips').querySelectorAll('.chip');
+  for(var i=0;i<chips.length;i++){ chips[i].classList.remove('hit'); }
+  var hit = Math.floor(Math.random()*chips.length);
+  var step = 0;
+  var timer = setInterval(function(){
+    for(var j=0;j<chips.length;j++){ chips[j].classList.remove('hit'); }
+    chips[(hit+step)%chips.length].classList.add('hit');
+    step++;
+    if(step > 8){
+      clearInterval(timer);
+      for(var k=0;k<chips.length;k++){ chips[k].classList.remove('hit'); }
+      chips[hit].classList.add('hit');
+    }
+  }, 90);
+}
+
+/* ============ 洗牌（shuffle 演示） ============ */
+var skillCards = ['🔥 火球术','❄️ 冰霜箭','➕ 治疗术','⚡ 闪电链'];
+function renderShuffle(){
+  var box = document.getElementById('skill-chips');
+  var html = '';
+  for(var i=0;i<skillCards.length;i++){
+    html += '<div class="chip">' + esc(skillCards[i]) + '</div>';
+  }
+  box.innerHTML = html;
+}
+function doShuffle(){
+  for(var i=skillCards.length-1;i>0;i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t = skillCards[i]; skillCards[i] = skillCards[j]; skillCards[j] = t;
+  }
+  renderShuffle();
+}
+renderShuffle();
+
+/* ============ 可复现随机数（mulberry32，模拟种子） ============ */
+function mulberry32(seedNum){
+  var s = seedNum >>> 0;
+  return function(){
+    s = (s + 0x6D2B79F5) >>> 0;
+    var t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function seedRun(withSeed){
+  var a = [], b = [];
+  var r1 = mulberry32(withSeed ? 42 : (Date.now() % 2147483647));
+  var r2 = mulberry32(withSeed ? 42 : ((Date.now() * 7919 + 13) % 2147483647));
+  for(var i=0;i<3;i++){ a.push(1 + Math.floor(r1()*100)); b.push(1 + Math.floor(r2()*100)); }
+  document.getElementById('sd-a').textContent = '第一轮：' + a.join('  ');
+  document.getElementById('sd-b').textContent = '第二轮：' + b.join('  ');
+  var same = (a.join(',') === b.join(','));
+  document.getElementById('sd-note').textContent = withSeed
+    ? (same ? '两轮数字完全相同——seed(42) 把命运锁死了，这就是可复现性。'
+            : '两轮数字相同（浏览器用简化算法模拟，真实 Python 中 seed 相同结果必相同）。')
+    : '两轮数字不同——不设 seed 时才是真·随机。';
+}
+
+/* ============ 实验室：每日运势播报台 ============ */
+var F_LEVELS = ['大吉','中吉','小吉','平','小凶','大凶'];
+var F_COLORS = ['金色','天蓝','紫色','翠绿','绯红','银白'];
+var F_QUOTES = [
+  '「今天写下的每一行代码，都是未来系统的地基。」',
+  '「bug 不是敌人，是还没被理解的需求。」',
+  '「慢即是快：先跑通，再优化。」',
+  '「读报错三遍，胜过盲改代码十遍。」',
+  '「命名即文档，好名字省一半注释。」',
+  '「删掉的代码，才是最好的代码。」',
+  '「先写测试的人，睡觉最香。」',
+  '「键盘敲烂，offer 拿到手软。」'
+];
+var F_LEVEL_COLOR = {'大吉':'var(--gold)','中吉':'var(--orange)','小吉':'var(--cyan)','平':'var(--muted)','小凶':'var(--pink)','大凶':'var(--red)'};
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function drawFortune(){
+  var useSeed = document.getElementById('seed-toggle').checked;
+  var seedVal = useSeed ? 2026 : (Date.now() % 2147483647);
+  var rnd = mulberry32(seedVal);
+  var level = F_LEVELS[Math.floor(rnd()*F_LEVELS.length)];
+  var luckyNum = 1 + Math.floor(rnd()*9);
+  var color = F_COLORS[Math.floor(rnd()*F_COLORS.length)];
+  var quote = F_QUOTES[Math.floor(rnd()*F_QUOTES.length)];
+
+  var d = new Date();
+  var dateStr = d.getFullYear() + '-' + pad2(d.getMonth()+1) + '-' + pad2(d.getDate());
+
+  document.getElementById('f-date-title').textContent = '🔔 ' + dateStr + ' · 每日运势';
+  document.getElementById('f-date').textContent = 'datetime.now().strftime("%Y-%m-%d") → ' + dateStr;
+  var lvEl = document.getElementById('f-level');
+  lvEl.textContent = level;
+  lvEl.style.color = F_LEVEL_COLOR[level] || 'var(--gold)';
+  document.getElementById('f-num').textContent = luckyNum;
+  document.getElementById('f-color').textContent = color;
+  document.getElementById('f-quote').textContent = '今日签文：' + quote;
+
+  var card = document.getElementById('fortune-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+
+  var seedLine = useSeed
+    ? 'random.seed(2026)                 # 固定种子：再抽一次结果完全一样\n'
+    : '# 未设种子：每次抽取结果都不同\n';
+  var py =
+    'import random\n' +
+    'from datetime import datetime\n' +
+    '\n' +
+    seedLine +
+    'today = datetime.now().strftime("%Y-%m-%d")\n' +
+    'levels = ["大吉", "中吉", "小吉", "平", "小凶", "大凶"]\n' +
+    'colors = ["金色", "天蓝", "紫色", "翠绿", "绯红", "银白"]\n' +
+    'quotes = ["今天写下的每一行代码，都是未来系统的地基。", ...]\n' +
+    '\n' +
+    'level = random.choice(levels)      # 抽运势等级\n' +
+    'lucky_number = random.randint(1, 9)  # 抽幸运数字（双闭区间）\n' +
+    'lucky_color = random.choice(colors)  # 抽幸运色\n' +
+    'quote = random.choice(quotes)        # 抽签文\n' +
+    '\n' +
+    'print(today, "运势：", level)\n' +
+    'print("幸运数字：", lucky_number)\n' +
+    'print("幸运色：", lucky_color)\n' +
+    'print("签文：", quote)';
+  var codeEl = document.getElementById('lab-code');
+  codeEl.innerHTML = '<span class="c"># 你刚刚运行的等价 Python 代码 ↓</span>\n' + hlPy(py);
+  codeEl.style.display = 'block';
+}
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 骰子的边界',
+    code:'import random\nprint(random.randint(1, 6))',
+    opts:['可能输出 6，randint 是双闭区间 [1, 6]','不可能输出 6，最大是 5','只会输出 1 或 6','报错'],
+    ans:0,
+    exp:'randint(a, b) 两端都能取到：1、2、3、4、5、6 共 6 种可能。误以为"含头不含尾"是新手最常见的坑。'
+  },
+  {
+    title:'第 2 预言 · range 与 randint 的边界差异',
+    code:'print(list(range(1, 6)))',
+    opts:['[1, 2, 3, 4, 5, 6]','[1, 2, 3, 4, 5]','[2, 3, 4, 5, 6]','[0, 1, 2, 3, 4, 5]'],
+    ans:1,
+    exp:'range(1, 6) 左闭右开：从 1 到 5，不含 6。所以 range(1, 6) 只有 5 个数，而 randint(1, 6) 有 6 个数。'
+  },
+  {
+    title:'第 3 预言 · choice 抽签',
+    code:'import random\npets = ["火龙", "冰凤", "雷鹰"]\nprint(random.choice(pets))',
+    opts:['["火龙", "冰凤", "雷鹰"]','火龙、冰凤或雷鹰中的一个（每次可能不同）','("火龙", "冰凤", "雷鹰")','报错'],
+    ans:1,
+    exp:'choice 从序列中随机抽取一个元素返回。这里输出的是三个字符串中的一个，每次运行可能不同——但一定是其中之一。'
+  },
+  {
+    title:'第 4 预言 · shuffle 的返回值',
+    code:'import random\ncards = ["A", "B", "C"]\nresult = random.shuffle(cards)\nprint(result)',
+    opts:['["A", "B", "C"]','打乱后的列表，如 ["C", "A", "B"]','None','报错'],
+    ans:2,
+    exp:'shuffle 原地打乱列表、没有返回值，print 出来就是 None。想看打乱结果要直接 print(cards)。'
+  },
+  {
+    title:'第 5 预言 · seed 的可复现性',
+    code:'import random\nrandom.seed(42)\na = random.randint(1, 100)\nrandom.seed(42)\nb = random.randint(1, 100)\nprint(a == b)',
+    opts:['True','False','报错','每次运行结果不确定'],
+    ans:0,
+    exp:'相同种子产生相同的随机序列：两次都重置为 seed(42)，a 和 b 必然相等（本例都等于 82）。这就是"随机结果可复现"。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+esc(q.title)+'</div>'+
+      '<div class="code" style="margin:6px 0">'+hlPy(q.code)+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+esc(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.getAttribute('data-i');
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['datetime.now() 返回什么？','当前本地时间的 datetime 对象，含年月日时分秒微秒'],
+  ['strftime 的 %Y %m %d','四位年份 2026、两位月份 01~12、两位日期 01~31'],
+  ['strftime 的 %H %M %S','时 00~23（24 小时制）、分 00~59、秒 00~59'],
+  ['两个 date 相减得到什么？','timedelta 对象，取 .days 得到相差的天数'],
+  ['时间戳是什么？','从 1970-01-01 00:00:00 UTC 至今经过的秒数，time.time() 返回它'],
+  ['random.randint(1, 6) 的范围','双闭区间 [1, 6]：1~6 共 6 个值都可能出现'],
+  ['random.choice(seq) 干嘛的','从序列（列表/字符串等）中随机抽取一个元素返回'],
+  ['random.shuffle(列表) 的返回值','None！它原地打乱列表，打乱结果直接看原列表'],
+  ['random.random() 的范围','返回 0.0 ≤ x < 1.0 的随机小数，取不到 1.0'],
+  ['random.seed(42) 的作用','固定随机种子，让每次运行的随机结果完全相同（可复现），调试神器']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+esc(c[0])+'</div>'+
+      '<div class="mface mback">'+esc(c[1])+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'datetime.now() 拿到的是什么？',
+   opts:['当前日期和时间组成的 datetime 对象','只有日期没有时间','一个字符串','1970 年至今的秒数'], ans:0,
+   exp:'datetime.now() 返回"现在"的 datetime 对象，年月日时分秒微秒都齐。要秒数（时间戳）得用 time.time()。'},
+  {q:'以 2026-08-14 为例，now.strftime("%Y-%m-%d") 输出？',
+   opts:['2026/08/14','2026-8-14','2026-08-14','08-14-2026'], ans:2,
+   exp:'%Y 补四位年、%m %d 补零两位，中间的短杠原样保留。'},
+  {q:'strftime 中 %H 表示？',
+   opts:['12 小时制的时','24 小时制的时（00~23）','分钟','毫秒'], ans:1,
+   exp:'%H 是 24 小时制的小时（00~23）。%M 是分、%S 是秒，注意都是大写。'},
+  {q:'date(2026, 12, 19) - date(2026, 8, 14) 的 .days 是？',
+   opts:['127','137','5','报错，date 不能相减'], ans:0,
+   exp:'date 相减得到 timedelta，.days 就是相差天数：8 月剩 17 天 + 9/10/11 月 91 天 + 12 月 19 天 = 127。'},
+  {q:'random.randint(3, 5) 可能输出哪些数？',
+   opts:['3 和 5 两个','3、4、5 三个','3、4 两个','0 到 5'], ans:1,
+   exp:'randint(a, b) 是双闭区间 [a, b]，两端都含：3、4、5 共 3 个可能。'},
+  {q:'random.choice([1, 2, 3]) 返回什么？',
+   opts:['1、2、3 中的一个数字','[1, 2, 3] 整个列表','一个新的乱序列表','None'], ans:0,
+   exp:'choice 从序列中随机抽一个元素，这里返回 1、2 或 3 中的一个。'},
+  {q:'执行 x = random.shuffle(a)（a 是列表）后，x 是？',
+   opts:['打乱后的新列表','原列表 a','None','报错'], ans:2,
+   exp:'shuffle 原地打乱、返回 None。x 拿到的是 None，打乱结果要看 a 本身。'},
+  {q:'random.random() 返回的小数范围是？',
+   opts:['0.0 到 1.0，两端都能取到','0.0 到 1.0，能取到 0.0 取不到 1.0','1 到 100','任意小数'], ans:1,
+   exp:'random.random() 返回 [0.0, 1.0) 的随机小数：含 0.0 不含 1.0。'},
+  {q:'程序开头 random.seed(42)，运行两次，两次的随机数会？',
+   opts:['完全相同','完全不同','一半相同','报错'], ans:0,
+   exp:'相同种子产生相同的随机序列，这是让随机结果可复现的方法，测试时特别有用。'},
+  {q:'time.sleep(2) 的意思是？',
+   opts:['程序暂停 2 秒','程序加速 2 倍','等待用户输入 2 个字符','设置 2 秒超时'], ans:0,
+   exp:'sleep 的参数单位是秒，程序会原地暂停 2 秒再执行下一行；也可写小数如 sleep(0.5)。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+esc(q.q)+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+esc(q.exp)+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.getAttribute('data-i');
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！命运大师本师，下一课已为你解锁 🔓' : '通关成功！第 13 课「requests 与 API」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+esc(msg);
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

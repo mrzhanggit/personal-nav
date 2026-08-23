@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第19课 · 装饰器与闭包 —— 附魔系统</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#a78bfa; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167,139,250,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--purple);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#a78bfa,#4dd6ff 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--purple);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--purple);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#d6c9ff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 魔法盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:170px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(167,139,250,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:20px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 三步进化 */
+  .evo-track{display:flex;gap:8px;margin:14px 0;}
+  .evo-node{
+    flex:1;text-align:center;padding:8px 6px;border-radius:10px;background:#0a0d1e;
+    border:1px solid var(--line);font-size:11px;color:var(--muted);transition:all .3s;letter-spacing:1px;
+  }
+  .evo-node b{display:block;font-size:13px;}
+  .evo-node.on{border-color:var(--purple);color:var(--purple);background:rgba(167,139,250,.12);box-shadow:0 0 14px rgba(167,139,250,.25);}
+  .evo-note{font-size:13px;color:var(--muted);border-left:3px solid var(--purple);padding-left:12px;margin-top:10px;}
+  .sbtn{
+    background:#0a0d1e;border:1px solid var(--cyan);color:var(--cyan);padding:9px 18px;
+    border-radius:9px;cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s;font-weight:600;
+  }
+  .sbtn:hover{background:rgba(77,214,255,.12);}
+  /* 实验室 */
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(167,139,250,.3);}
+  .weapon-core{
+    background:linear-gradient(140deg,#1d2448,#141833);border:2px solid var(--gold);border-radius:14px;
+    padding:14px;text-align:center;margin-bottom:12px;
+  }
+  .weapon-core .wname{font-size:20px;font-weight:800;color:var(--gold);margin:4px 0;}
+  .weapon-core .wcode{font-size:13px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;}
+  .enchants{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:6px 0 14px;}
+  .ench{
+    display:flex;gap:10px;align-items:flex-start;background:#0a0d1e;border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;font-size:14px;
+  }
+  .ench:hover{border-color:var(--cyan);}
+  .ench.on{border-color:var(--purple);background:rgba(167,139,250,.10);box-shadow:0 0 10px rgba(167,139,250,.15);}
+  .ench input{margin-top:5px;accent-color:#a78bfa;width:16px;height:16px;flex-shrink:0;}
+  .ench b{color:var(--gold);}
+  .ench .edesc{color:var(--muted);font-size:12px;display:block;}
+  .forge-result{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--purple);border-radius:16px;padding:20px 24px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .forge-result.show{display:block;}
+  .forge-result h3{color:var(--gold);font-size:18px;letter-spacing:2px;margin-bottom:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);color:var(--purple);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(167,139,250,.1);color:var(--purple);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 进阶秘境 · <b>第 19 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 4 · ADVANCED MYSTIC REALM</div>
+    <h1>装饰器与闭包 —— 附魔系统</h1>
+    <div class="subtitle">今日目标：不改武器一行代码，给它套上强力附魔</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解「函数是一等公民」：函数能装进变量、当参数、当返回值</li>
+      <li>掌握<span class="hl">闭包</span>：内层函数能记住外层变量</li>
+      <li>一步步手写装饰器，看穿 <span class="hl">@ 语法糖</span> 的真相</li>
+      <li>学会用 <span class="hl-c">@wraps</span> 保留函数真名，认识计时 / 日志 / 缓存三大附魔</li>
+      <li>通关实验室「附魔工坊」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 一等公民 -->
+  <section>
+    <h2><span class="num">1</span>函数是一等公民 —— 装饰器的第一块基石</h2>
+    <p>在 Python 王国里，函数和整数、字符串一样，是<span class="hl">普普通通的值</span>：它可以装进变量、可以当礼物送给别的函数、也可以被打包返回。这叫「函数是一等公民」。</p>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">spell = attack</div><div class="val">装进变量</div><div class="tip">函数可以赋值给名字</div></div>
+      <div class="mbox"><div class="tag">cast(attack)</div><div class="val">当作参数</div><div class="tip">传给另一个函数</div></div>
+      <div class="mbox"><div class="tag">return weapon</div><div class="val">当作返回值</div><div class="tip">从函数里发回来</div></div>
+    </div>
+
+    <p>先看「装进变量」。注意一个关键细节——<span class="hl">括号</span>：</p>
+    <div class="code py">def attack():
+    return "⚔ 铁剑斩击"
+
+spell = attack      # 不加括号：把函数本身装进变量
+print(spell())      # 加括号：通过新名字调用它</div>
+    <div class="out">⚔ 铁剑斩击</div>
+
+    <p>再看「当作参数」。把武器交给附魔师，附魔师想怎么用就怎么用：</p>
+    <div class="code py">def cast_twice(func):    # 函数当参数：收到一把武器
+    func()
+    func()
+
+def attack():
+    print("⚔ 铁剑斩击")
+
+cast_twice(attack)      # 不加括号：传的是函数本身</div>
+    <div class="out">⚔ 铁剑斩击
+⚔ 铁剑斩击</div>
+
+    <p>🧠 记忆口诀：<span class="hl">attack 是武器本身，attack() 是挥出这一剑。</span>分不清这对括号，装饰器永远学不会。</p>
+  </section>
+
+  <!-- 2 闭包 -->
+  <section>
+    <h2><span class="num">2</span>闭包 —— 会记住炉温的附魔炉</h2>
+    <p>闭包 = <span class="hl">内层函数 + 它记住的外层变量</span>。外层函数执行完返回后，它的局部变量本该消失，但只要内层函数还握着它，这个变量就一直活着。</p>
+
+    <div class="code py">def forge(enchant):                # 附魔炉：登记一种附魔
+    def weapon():                    # 内层函数
+        return f"武器附带【{enchant}】效果"
+    return weapon                    # 把内层函数发出去
+
+fire_sword = forge("火焰")           # forge 早已执行完毕……
+ice_sword  = forge("寒冰")
+print(fire_sword())
+print(ice_sword())</div>
+    <div class="out">武器附带【火焰】效果
+武器附带【寒冰】效果</div>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">fire_sword</div><div class="val">【火焰】</div><div class="tip">记住了 enchant = "火焰"</div></div>
+      <div class="mbox"><div class="tag">ice_sword</div><div class="val">【寒冰】</div><div class="tip">记住了 enchant = "寒冰"</div></div>
+    </div>
+
+    <p>闭包不仅能「记住」，还能持续修改记住的变量——这正是装饰器能反复生效的秘密：</p>
+    <div class="code py">def make_counter():
+    count = 0                # 外层变量
+    def hit():
+        nonlocal count       # 声明：我要改的是外层的 count
+        count += 1
+        return count
+    return hit
+
+combo = make_counter()
+print(combo(), combo(), combo())</div>
+    <div class="out">1 2 3</div>
+
+    <p>没有 <span class="hl-c">nonlocal</span> 的话，内层函数只能「读」外层变量，一旦 <code>count += 1</code> 就会被当成新局部变量而报错。闭包 + nonlocal，让状态穿越了函数的生死。</p>
+  </section>
+
+  <!-- 3 三步进化 -->
+  <section>
+    <h2><span class="num">3</span>三步进化 —— 亲手写一个装饰器</h2>
+    <p>需求来了：<span class="hl">不给 attack 改一行代码</span>，却要它每次出招前后自动打日志。装饰器就是干这个的：<span class="hl-p">接收一个函数，返回一个包了新功能的新函数</span>。点下面的按钮，看它如何一步步进化：</p>
+
+    <div class="evo-track">
+      <div class="evo-node" id="evo-n0"><b>形态一</b>手动包裹版</div>
+      <div class="evo-node" id="evo-n1"><b>形态二</b>手动赋值版</div>
+      <div class="evo-node" id="evo-n2"><b>形态三</b>@ 语法糖版</div>
+    </div>
+    <div class="code" id="evo-code"></div>
+    <div class="out" id="evo-out"></div>
+    <div class="evo-note" id="evo-note"></div>
+    <p style="margin-top:12px"><button class="btn" onclick="evoNext()">⚡ 进化到下一形态</button></p>
+  </section>
+
+  <!-- 4 wraps -->
+  <section>
+    <h2><span class="num">4</span>@wraps —— 给附魔武器刻上真名</h2>
+    <p>装饰器用 <code>wrapper</code> 顶替了原函数的名字，于是原函数的「身份证」也跟着丢了——<code>__name__</code>（函数名）和 <code>__doc__</code>（文档）全变成 wrapper 的：</p>
+    <div class="code py">def deco(func):
+    def wrapper():
+        pass
+    return wrapper
+
+@deco
+def heal():
+    return "HP +50"
+
+print(heal.__name__)      # 身份证被顶替了！</div>
+    <div class="out">wrapper</div>
+
+    <p>调试、写文档、看日志时全是 wrapper，你会分不清谁是谁。解药只有一行——<span class="hl">functools.wraps</span>，把原函数的名字、文档等元信息复制给 wrapper：</p>
+    <div class="code py">from functools import wraps
+
+def deco(func):
+    @wraps(func)                  # 一行解药：刻上真名
+    def wrapper():
+        pass
+    return wrapper
+
+@deco
+def heal():
+    """治疗术：回复 50 HP"""
+
+print(heal.__name__)
+print(heal.__doc__)</div>
+    <div class="out">heal
+治疗术：回复 50 HP</div>
+
+    <p>🧠 口诀：<span class="hl">写 wrapper，必配 @wraps</span>。这是老手和新手的分水岭。</p>
+  </section>
+
+  <!-- 5 万能参数 + 三大附魔 -->
+  <section>
+    <h2><span class="num">5</span>万能口袋与三大神级附魔</h2>
+    <p>真实的武器签名千奇百怪：<code>attack(dmg)</code>、<code>attack(dmg, crit=True)</code>……想让一个装饰器通吃所有函数，wrapper 要背<span class="hl">万能参数口袋</span>：</p>
+    <div class="code py">from functools import wraps
+
+def buff(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):       # 万能口袋：接住任意参数
+        print("✨ 增益光环启动")
+        return func(*args, **kwargs)    # 原样转交给原函数
+    return wrapper
+
+@buff
+def attack(dmg, crit=False):
+    return f"造成{dmg}点伤害，暴击：{crit}"
+
+print(attack(20, crit=True))</div>
+    <div class="out">✨ 增益光环启动
+造成20点伤害，暴击：True</div>
+
+    <p>学会这三招，你在任何项目里都用得上：</p>
+    <p>⏱ <span class="hl">计时附魔</span>——自动报告函数跑了多久：</p>
+    <div class="code py">import time
+from functools import wraps
+
+def timer(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()      # 出手前掐表
+        result = func(*args, **kwargs)
+        cost = time.perf_counter() - start
+        print(f"[计时] {func.__name__} 耗时 {cost:.4f} 秒")
+        return result
+    return wrapper
+
+@timer
+def grind():
+    total = 0
+    for i in range(1000000):
+        total += i
+
+grind()</div>
+    <div class="out">[计时] grind 耗时 0.0512 秒</div>
+
+    <p>📦 <span class="hl">缓存附魔</span>——标准库自带的 <code>lru_cache</code>，算过的直接查表，是「重复计算炸弹」的克星（下一课你会在斐波那契身上亲眼见识它的威力）：</p>
+    <div class="code py">from functools import lru_cache
+
+@lru_cache(maxsize=None)        # 算过的参数直接返回缓存
+def fib(n):
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+print(fib(35))                  # 不加缓存要调用约 2986 万次，加了只要 36 次</div>
+    <div class="out">9227465</div>
+
+    <p>🕯 <span class="hl">日志附魔</span>——谁在什么时刻调了什么函数，全自动播报，排查问题的天眼。三者的骨架完全一样：wrapper 里加料，再把结果原样奉还。</p>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 附魔工坊</h2>
+    <p>中间是把<span class="hl">基础武器</span>函数 <code>attack</code>。勾选你想附的魔，点击「锻造」，工坊会现场拼出等价的 Python 装饰器代码，并模拟附魔后的调用效果：</p>
+
+    <div class="weapon-core">
+      <div style="font-size:12px;color:var(--muted);letter-spacing:3px;">基 础 武 器</div>
+      <div class="wname">⚔ 铁之剑 · attack()</div>
+      <div class="wcode">print("⚔ 铁剑斩击！造成10点伤害")</div>
+    </div>
+
+    <div class="enchants">
+      <label class="ench" id="lab-log">
+        <input type="checkbox" id="ench-log">
+        <span><b>🕯 日志附魔 logger</b><span class="edesc">出手前后自动播报，谁在放什么技能一目了然</span></span>
+      </label>
+      <label class="ench" id="lab-time">
+        <input type="checkbox" id="ench-time">
+        <span><b>⏱ 计时附魔 timer</b><span class="edesc">自动掐表，报告每次出招耗时</span></span>
+      </label>
+      <label class="ench" id="lab-dbl">
+        <input type="checkbox" id="ench-dbl">
+        <span><b>💥 双重附魔 double</b><span class="edesc">斩击后自动追击一剑</span></span>
+      </label>
+    </div>
+
+    <p><button class="btn" onclick="forge()">🔨 锻造！</button></p>
+
+    <div class="forge-result" id="forge-result">
+      <h3 id="forge-title"></h3>
+      <div class="code" id="forge-code"></div>
+      <div class="out" id="forge-out"></div>
+      <div class="evo-note" id="forge-note"></div>
+    </div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开终端输入 <code>python3</code> 进入交互模式，亲手敲一遍 <code>make_counter</code> 闭包计数器，连续调用 <code>combo()</code> 五次，观察输出</li>
+    <li>② 在 <code>.py</code> 文件里手写 <code>timer</code> 装饰器（<code>@wraps</code> + <code>time.perf_counter()</code>），装饰一个循环一百万次的求和函数，看看它跑多久</li>
+    <li>③ 写一个朴素递归的 <code>fib(30)</code> 掐表计时，再加上 <code>@lru_cache</code> 对比——感受缓存附魔的降维打击</li>
+    <li>④ 小挑战：写一个 <code>shout</code> 装饰器，让被装饰函数的返回值变成全大写并在前后各加一个感叹号（提示：wrapper 里 <code>return "!" + func(*args, **kwargs).upper() + "!"</code>）</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>递归与算法 —— 迷宫求解</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用语法高亮 ============ */
+function esc(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hlCode(src){
+  return src.split('\n').map(function(l){
+    l = esc(l);
+    l = l.replace(/(#.*)$/, "<span class='c'>$1</span>");
+    l = l.replace(/("[^"]*")/g, "<span class='s'>$1</span>");
+    l = l.replace(/(^|\s)(\d+)(?=\s|$)/g, "$1<span class='n'>$2</span>");
+    l = l.replace(/\b(print|input|nonlocal|global|return|import|range|float|while|elif|else|True|False|None|pass|type|str|int|len|def|from|for|and|not|if|in)\b/g, "<span class='k'>$1</span>");
+    return l;
+  }).join('\n');
+}
+/* 页面里所有 .code.py 静态代码块自动高亮 */
+(function(){
+  var pys = document.querySelectorAll('.code.py');
+  for(var i=0;i<pys.length;i++){
+    pys[i].innerHTML = hlCode(pys[i].textContent);
+  }
+})();
+
+/* ============ 三步进化动画 ============ */
+var evoData = [
+  {
+    tag:'形态一 · 手动包裹版',
+    code:'def add_log(func):            # 附魔师：接收一把武器\n    def wrapper():            # 锻造中的新武器\n        print("[日志] 出招前")\n        func()                # 原武器本体嵌在里面\n        print("[日志] 出招后")\n    return wrapper            # 交出附魔后的新武器\n\ndef attack():\n    print("⚔ 铁剑斩击！")\n\nenchanted = add_log(attack)   # 手动送进附魔炉\nenchanted()                   # 调用的是新武器',
+    out:'[日志] 出招前\n⚔ 铁剑斩击！\n[日志] 出招后',
+    note:'形态一：add_log(attack) 返回一把「新武器」enchanted——闭包里包着原 attack。原函数还在，但已经没人用它了。'
+  },
+  {
+    tag:'形态二 · 手动赋值版',
+    code:'# 沿用形态一的 add_log\ndef attack():\n    print("⚔ 铁剑斩击！")\n\nattack = add_log(attack)      # 用附魔武器顶替原名！\nattack()                      # 调用方式毫无变化',
+    out:'[日志] 出招前\n⚔ 铁剑斩击！\n[日志] 出招后',
+    note:'形态二：让新武器直接顶替 attack 这个名字。从此所有 attack() 都自带日志——但每次都要手写一行赋值，繁琐又容易忘。'
+  },
+  {
+    tag:'形态三 · @ 语法糖版',
+    code:'def add_log(func):\n    def wrapper():\n        print("[日志] 出招前")\n        func()\n        print("[日志] 出招后")\n    return wrapper\n\n@add_log                       # 等价于 attack = add_log(attack)\ndef attack():\n    print("⚔ 铁剑斩击！")\n\nattack()                       # 优雅！这就是装饰器',
+    out:'[日志] 出招前\n⚔ 铁剑斩击！\n[日志] 出招后',
+    note:'形态三：@add_log 写在 def 正上方，Python 在定义的瞬间自动完成「包装 + 顶名」。@ 只是让形态二更好读的语法糖——装饰器的全部真相就这些。'
+  }
+];
+var evoIdx = 0;
+function renderEvo(){
+  for(var i=0;i<3;i++){
+    document.getElementById('evo-n'+i).classList.toggle('on', i===evoIdx);
+  }
+  var d = evoData[evoIdx];
+  var codeBox = document.getElementById('evo-code');
+  codeBox.innerHTML = hlCode(d.code);
+  codeBox.classList.remove('show');
+  void codeBox.offsetWidth;
+  codeBox.style.animation = 'none';
+  void codeBox.offsetWidth;
+  codeBox.style.animation = 'popIn .4s both';
+  document.getElementById('evo-out').textContent = d.out;
+  document.getElementById('evo-note').textContent = d.note;
+}
+function evoNext(){
+  evoIdx = (evoIdx + 1) % evoData.length;
+  renderEvo();
+}
+renderEvo();
+
+/* ============ 实验室：附魔工坊 ============ */
+document.querySelectorAll('.ench input').forEach(function(cb){
+  cb.addEventListener('change', function(){
+    cb.parentElement.classList.toggle('on', cb.checked);
+  });
+});
+function forge(){
+  var useLog = document.getElementById('ench-log').checked;
+  var useTimer = document.getElementById('ench-time').checked;
+  var useDouble = document.getElementById('ench-dbl').checked;
+  var lines = [];
+  if(useLog || useTimer || useDouble){
+    lines.push('# 附魔工坊 · 锻造单（' + ((useLog?1:0)+(useTimer?1:0)+(useDouble?1:0)) + ' 重附魔）');
+    lines.push('import time');
+    lines.push('from functools import wraps');
+    lines.push('');
+  }
+  if(useDouble){
+    lines.push('def double(func):                  # 双重附魔：斩完追击一剑');
+    lines.push('    @wraps(func)');
+    lines.push('    def wrapper(*args, **kwargs):');
+    lines.push('        func(*args, **kwargs)');
+    lines.push('        print("💥 双重附魔：追击再斩一剑！")');
+    lines.push('    return wrapper');
+    lines.push('');
+  }
+  if(useLog){
+    lines.push('def logger(func):                  # 日志附魔：出手前后自动播报');
+    lines.push('    @wraps(func)');
+    lines.push('    def wrapper(*args, **kwargs):');
+    lines.push('        print("[日志]", func.__name__, "开始释放")');
+    lines.push('        result = func(*args, **kwargs)');
+    lines.push('        print("[日志]", func.__name__, "释放完毕")');
+    lines.push('        return result');
+    lines.push('    return wrapper');
+    lines.push('');
+  }
+  if(useTimer){
+    lines.push('def timer(func):                   # 计时附魔：自动掐表');
+    lines.push('    @wraps(func)');
+    lines.push('    def wrapper(*args, **kwargs):');
+    lines.push('        start = time.perf_counter()');
+    lines.push('        result = func(*args, **kwargs)');
+    lines.push('        cost = time.perf_counter() - start');
+    lines.push('        print(f"[计时] {func.__name__} 耗时 {cost:.6f} 秒")');
+    lines.push('        return result');
+    lines.push('    return wrapper');
+    lines.push('');
+  }
+  var stack = [];
+  if(useTimer) stack.push('@timer');
+  if(useLog) stack.push('@logger');
+  if(useDouble) stack.push('@double');
+  if(stack.length > 0){
+    for(var i=0;i<stack.length;i++){
+      var cmt = '';
+      if(stack.length > 1){
+        if(i === 0){ cmt = '   # 最外层，最后套上'; }
+        if(i === stack.length-1){ cmt = '   # 最贴近武器，最先生效'; }
+      }
+      lines.push(stack[i] + cmt);
+    }
+  }
+  lines.push('def attack():');
+  lines.push('    print("⚔ 铁剑斩击！造成10点伤害")');
+  lines.push('');
+  lines.push('attack()');
+
+  document.getElementById('forge-code').innerHTML = hlCode(lines.join('\n'));
+
+  var outLines = [];
+  if(useLog) outLines.push('[日志] attack 开始释放');
+  outLines.push('⚔ 铁剑斩击！造成10点伤害');
+  if(useDouble) outLines.push('💥 双重附魔：追击再斩一剑！');
+  if(useLog) outLines.push('[日志] attack 释放完毕');
+  if(useTimer) outLines.push('[计时] attack 耗时 ' + (0.00008 + Math.random()*0.0003).toFixed(6) + ' 秒');
+  document.getElementById('forge-out').textContent = outLines.join('\n');
+
+  var names = [];
+  if(useDouble) names.push('💥 双重附魔');
+  if(useLog) names.push('🕯 日志附魔');
+  if(useTimer) names.push('⏱ 计时附魔');
+  var title, note;
+  if(names.length === 0){
+    title = '🔨 未附魔 · 原样出货';
+    note = '提示：勾选至少一种附魔再点锻造，就能看到动态生成的装饰器代码。试试把三种全勾上，看多重附魔如何一层包一层！';
+  } else {
+    title = '🔨 锻造完成 · ' + names.join(' + ');
+    var order = [];
+    if(useDouble) order.push('double');
+    if(useLog) order.push('logger');
+    if(useTimer) order.push('timer');
+    note = '装饰器从下往上包装：' + order[0] + ' 最先裹住 attack';
+    for(var j=1;j<order.length;j++){
+      note += '，' + order[j] + ' 再在外面裹一层';
+    }
+    note += '。调用 attack() 时从最外层的 ' + order[order.length-1] + ' 进入，一层层穿到原函数——所以输出顺序和 @ 的书写顺序正好相反。';
+  }
+  document.getElementById('forge-title').textContent = title;
+  document.getElementById('forge-note').textContent = note;
+  var res = document.getElementById('forge-result');
+  res.classList.remove('show'); void res.offsetWidth; res.classList.add('show');
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 括号的秘密',
+    code:'def fireball():\n    return "火球术发射！"\n\nspell = fireball\nprint(spell())',
+    opts:['火球术发射！','None','报错 TypeError','fireball'],
+    ans:0,
+    exp:'spell = fireball 不加括号，拿到的是函数本身；spell() 才是调用。函数赋给变量后，变量名就是这件武器的「新名字」，用法完全一样。'
+  },
+  {
+    title:'第 2 预言 · 会记数的闭包',
+    code:'def make_counter():\n    count = 0\n    def hit():\n        nonlocal count\n        count += 1\n        return count\n    return hit\n\ncombo = make_counter()\nprint(combo(), combo(), combo())',
+    opts:['1 1 1','0 1 2','1 2 3','报错 NameError'],
+    ans:2,
+    exp:'闭包记住了外层的 count：make_counter 返回后 count 依然活着，每次调用都在上次基础上 +1。print 的三个值从左到右依次求值，所以是 1 2 3。'
+  },
+  {
+    title:'第 3 预言 · 被调包的武器',
+    code:'def deco(func):\n    def wrapper():\n        print("前")\n        func()\n    return wrapper\n\n@deco\ndef attack():\n    print("斩！")\n\nattack()',
+    opts:['只输出「斩！」','先输出「前」再输出「斩！」','只输出「前」','报错'],
+    ans:1,
+    exp:'@deco 把 attack 悄悄换成了 wrapper。调用 attack() 实际执行 wrapper：先打印「前」，再调用藏在闭包里的原函数输出「斩！」。'
+  },
+  {
+    title:'第 4 预言 · 武器的真名',
+    code:'def deco(func):\n    def wrapper():\n        pass\n    return wrapper\n\n@deco\ndef heal():\n    return "HP +50"\n\nprint(heal.__name__)',
+    opts:['heal','wrapper','deco','报错'],
+    ans:1,
+    exp:'装饰器返回的新函数名叫 wrapper，没加 @wraps 时，heal 这个名字已经指向 wrapper——所以 __name__ 是 wrapper。'
+  },
+  {
+    title:'第 5 预言 · 语法糖的等价式',
+    code:'def deco(func):\n    def wrapper(x):\n        return func(x) * 2\n    return wrapper\n\ndef attack(dmg):\n    return dmg\n\nattack = deco(attack)\nprint(attack(10))',
+    opts:['10','20','100','报错'],
+    ans:1,
+    exp:'@ 语法糖只是把 attack = deco(attack) 写得更优雅。wrapper 把原返回值乘 2：10 × 2 = 20。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hlCode(q.code);
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['函数是一等公民','函数可以赋值给变量、当参数传递、当返回值——和普通数据平起平坐'],
+  ['f = attack 和 f = attack() 区别','前者拿到函数本身（不加括号），后者拿到调用后的返回值'],
+  ['闭包是什么','内层函数 + 它记住的外层变量；外层函数返回后变量依然活着'],
+  ['@deco 等价于哪行代码','func = deco(func)——定义完立刻用新函数顶替原名'],
+  ['装饰器函数必须返回什么','一个新函数（通常是 wrapper），否则被装饰后就调用不了'],
+  ['不加 @wraps 时 __name__ 是','wrapper——原函数的名字被 wrapper 顶掉了'],
+  ['@wraps(func) 的作用','把原函数的 __name__、__doc__ 等复制给 wrapper，保留真名'],
+  ['wrapper 为何写 *args, **kwargs','万能参数口袋：不管原函数什么签名都能接住，再原样转交'],
+  ['@lru_cache 是干嘛的','自带缓存：相同参数的结果直接查表，fib 从 2986 万次调用变 36 次'],
+  ['装饰器什么时候执行','函数定义那一刻（@ 语句运行时），不是每次调用时']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'下面哪一项不属于「函数是一等公民」的能力？',
+   opts:['把函数赋值给一个变量','把函数当参数传给另一个函数','把函数当返回值 return 出去','让函数自动记住所有历史调用结果'], ans:3,
+   exp:'前三个都是：函数和整数、字符串一样是普通值，能装盒子、能传递、能发回。第四个不存在——那是缓存装饰器干的事。'},
+  {q:'f = attack 和 f = attack() 的区别是？',
+   opts:['没有区别','f = attack 拿到函数本身，f = attack() 拿到调用后的返回值','前者会报错','后者会报错'], ans:1,
+   exp:'括号代表「调用」。不加括号传的是武器本身，加了括号是挥出这一剑的结果。'},
+  {q:'@deco 写在 def attack() 上方，完全等价于哪行代码？',
+   opts:['attack = deco(attack)','deco = attack(deco)','attack = deco','attack.deco()'], ans:0,
+   exp:'@ 只是语法糖：定义完 attack 后立刻执行 attack = deco(attack)，用新函数顶替原名。'},
+  {q:'装饰器函数的返回值通常是？',
+   opts:['原函数本身，不做任何修改','一个新的 wrapper 函数','必须返回 None','必须返回字符串'], ans:1,
+   exp:'装饰器用返回的新函数顶替原名字。如果返回 None，被装饰后的「函数」就根本调用不了了。'},
+  {q:'不加 @wraps 时，被 @deco 装饰后 print(heal.__name__) 输出？',
+   opts:['heal','wrapper','deco','报错'], ans:1,
+   exp:'heal 已经指向 wrapper 函数，所以函数名变成 wrapper。加 @wraps(func) 才能保住真名。'},
+  {q:'@wraps(func) 一般写在哪里？',
+   opts:['wrapper 函数定义的上一行','装饰器函数 def 的上一行','原函数 def 的上一行','import 语句里面'], ans:0,
+   exp:'标准姿势：在 wrapper 的 def 上一行写 @wraps(func)，把原函数的元信息复制给 wrapper。'},
+  {q:'想让装饰器能装饰「任意参数」的函数，wrapper 的形参应该写？',
+   opts:['*args, **kwargs','只能写固定个数的参数','什么都不写','只写 **kwargs 就够了'], ans:0,
+   exp:'*args 接住所有位置参数，**kwargs 接住所有关键字参数，再原样转交给原函数——万能口袋。'},
+  {q:'装饰器在什么时候完成包装？',
+   opts:['函数定义的那一刻（@ 语句运行时）','每次调用函数时都重新包装','程序退出时','第一次调用时'], ans:0,
+   exp:'@deco 在 def 出现时立刻执行 deco(attack) 并完成替换，之后每次调用都直接用同一个 wrapper。'},
+  {q:'from functools import lru_cache 后，@lru_cache 的作用是？',
+   opts:['缓存相同参数的计算结果，避免重复计算','自动把函数变成异步','自动捕获所有异常','自动给函数生成文档'], ans:0,
+   exp:'lru_cache 是标准库自带的缓存装饰器：相同参数第二次调用直接查表返回，是重复计算炸弹的克星。'},
+  {q:'堆叠多个装饰器 @A @B def f(): ...，谁先包住 f？',
+   opts:['A','B（离 def 近的先包装）','同时包','随机顺序'], ans:1,
+   exp:'装饰器从下往上、由内向外包装：B 先裹住 f，A 再裹住 B 的结果。调用时先穿 A 再穿 B。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！附魔宗师，下一课已为你解锁 🔓' : '通关成功！第 20 课「递归与算法」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

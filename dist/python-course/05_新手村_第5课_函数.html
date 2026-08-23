@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第5课 · 函数 —— 技能封装</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(74,222,128,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4ade80,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--green),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#9fe8b8;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .warn-box{
+    background:rgba(245,197,66,.08);border:1px solid rgba(245,197,66,.4);border-radius:12px;
+    padding:12px 16px;font-size:13px;margin:12px 0;color:var(--gold);
+  }
+  /* 技能卡 */
+  .skillcard{
+    max-width:380px;margin:18px auto;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--purple);border-radius:16px;padding:16px 20px;
+    transition:all .3s;
+  }
+  .skillcard:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 8px 28px rgba(167,139,250,.25);}
+  .skillcard .sk-head{font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--pink);font-weight:700;}
+  .skillcard .sk-head b{color:var(--gold);}
+  .skillcard .sk-body{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:#0a0d1e;border-radius:9px;padding:7px 12px;margin:8px 0;
+  }
+  .skillcard .sk-io{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);}
+  .skillcard .sk-io b{color:var(--green);}
+  .skillcard .sk-io .arrow{color:var(--gold);font-size:16px;animation:nudge 1.2s ease-in-out infinite;}
+  @keyframes nudge{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
+  /* 对比卡 */
+  .versus{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0;}
+  .vs-card{
+    flex:1;min-width:240px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px 18px;transition:all .3s;
+  }
+  .vs-card:hover{transform:translateY(-5px);}
+  .vs-card h4{font-size:14px;margin-bottom:6px;}
+  .vs-card.print h4{color:var(--cyan);}
+  .vs-card.ret h4{color:var(--green);}
+  .vs-card p{font-size:13px;color:var(--muted);margin:0;}
+  .vs-card b{color:var(--gold);}
+  /* 房间（作用域） */
+  .rooms{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0;}
+  .room{
+    flex:1;min-width:240px;border-radius:14px;padding:14px 18px;font-size:13px;
+  }
+  .room.g{background:rgba(74,222,128,.08);border:2px solid var(--green);}
+  .room.l{background:rgba(167,139,250,.08);border:2px solid var(--purple);}
+  .room h4{font-size:14px;margin-bottom:4px;}
+  .room.g h4{color:var(--green);}
+  .room.l h4{color:var(--purple);}
+  .room code{font-family:ui-monospace,Menlo,monospace;color:var(--gold);}
+  /* 元组盒子 */
+  .tuple-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin:18px 0;font-family:ui-monospace,Menlo,monospace;}
+  .tuple-box{display:flex;border:2px dashed var(--gold);border-radius:12px;overflow:hidden;}
+  .tuple-box div{padding:10px 18px;font-size:20px;font-weight:800;color:var(--gold);background:rgba(245,197,66,.08);}
+  .tuple-box div + div{border-left:2px dashed var(--gold);}
+  .tuple-arrow{color:var(--cyan);font-size:18px;}
+  .tuple-var{font-size:18px;font-weight:800;color:var(--cyan);background:var(--card);border:2px solid var(--cyan);border-radius:10px;padding:8px 16px;}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--green),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,222,128,.3);}
+  .btn.alt{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;}
+  .btn.final{background:linear-gradient(135deg,var(--gold),var(--orange));}
+  .combo-state{
+    display:flex;gap:20px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:14px 20px;margin:10px 0;
+  }
+  .combo-state div{text-align:center;}
+  .combo-state b{font-size:26px;display:block;color:var(--gold);}
+  .combo-state span{font-size:12px;color:var(--muted);}
+  .combo-log{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;padding:12px 16px;
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;min-height:56px;margin:8px 0 12px;
+    color:var(--text);white-space:pre-line;
+  }
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;color:var(--gold);}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  .hero-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(74,222,128,.15);color:var(--green);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(74,222,128,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 新手村 · <b>第 5 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 1 · NEWBIE VILLAGE</div>
+    <h1>函数 —— 技能封装</h1>
+    <div class="subtitle">今日目标：把重复的招式打包成技能，一键施放，随时复用</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>学会 <span class="hl">def</span> 定义技能、函数名() 释放技能</li>
+      <li>掌握三种传参方式：<span class="hl">位置参数、默认参数、关键字参数</span></li>
+      <li>理解 <span class="hl">return</span> 返回值，搞清 return 与 print 的本质区别（高频误区！）</li>
+      <li>看懂<b>局部 / 全局作用域</b>，学会用 global 修改全局变量</li>
+      <li>通关实验室「技能合成台」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 def 定义与调用 -->
+  <section>
+    <h2><span class="num">1</span>def：把招式封装成技能卡</h2>
+    <p>战士每次攻击都要重喊一遍三行咒语？太累了。把一套动作<b>打包命名</b>，以后喊名字就能用——这就是<span class="hl">函数</span>。一张技能卡长这样：</p>
+
+    <div class="skillcard">
+      <div class="sk-head">def <b>heal</b>(hp):</div>
+      <div class="sk-body">return hp + 50</div>
+      <div class="sk-io">输入 hp=100 <span class="arrow">➜</span> 交回 <b>150</b></div>
+    </div>
+
+    <p>定义一个函数只需 <span class="hl-c">def 函数名(参数):</span>，缩进的代码就是技能的动作：</p>
+    <div class="code"><span class="k">def</span> <span class="v">fireball</span>():                <span class="c"># 定义：录入技能（此时不会执行！）</span>
+    <span class="k">print</span>(<span class="s">"🔥 释放火球术！"</span>)
+
+<span class="v">fireball</span>()                     <span class="c"># 调用：技能名 + 括号，这才真正施放</span></div>
+    <div class="out">🔥 释放火球术！</div>
+
+    <div class="warn-box">💡 关键认知：<b>def 只是"录入技能"，不会执行</b>；只有写下 <code>fireball()</code>（带括号的调用）技能才会发动。定义一次，可以调用无限次——这就是封装的意义。</div>
+  </section>
+
+  <!-- 2 参数 -->
+  <section>
+    <h2><span class="num">2</span>参数：技能的输入槽</h2>
+    <p>技能可以带「输入槽」（参数），每次施放塞进去不同的数值，同一个技能产生不同效果。传参有三种姿势，点按钮体验：</p>
+
+    <div class="lab-input">
+      <button class="btn" onclick="demoCall('pos')">① attack(10, 3)</button>
+      <button class="btn" onclick="demoCall('def')">② attack(10)</button>
+      <button class="btn" onclick="demoCall('kw')">③ attack(times=5, atk=10)</button>
+    </div>
+    <div class="out" id="param-out" style="color:var(--text);">点击上方按钮，观察同一个技能三种传参方式的结果……</div>
+
+    <p>对应的函数定义与三种调用：</p>
+    <div class="code"><span class="k">def</span> <span class="v">attack</span>(<span class="v">atk</span>, <span class="v">times</span>=<span class="n">2</span>):        <span class="c"># times 有默认值 2</span>
+    <span class="k">print</span>(<span class="s">"造成伤害："</span>, <span class="v">atk</span> * <span class="v">times</span>)
+
+<span class="v">attack</span>(<span class="n">10</span>, <span class="n">3</span>)              <span class="c"># ① 位置参数：按顺序 10→atk，3→times</span>
+<span class="v">attack</span>(<span class="n">10</span>)                  <span class="c"># ② 默认参数：times 不传，用默认的 2</span>
+<span class="v">attack</span>(<span class="v">times</span>=<span class="n">5</span>, <span class="v">atk</span>=<span class="n">10</span>)       <span class="c"># ③ 关键字参数：指名道姓，顺序随意</span></div>
+    <div class="out">造成伤害： 30
+造成伤害： 20
+造成伤害： 50</div>
+
+    <p>🧠 记忆口诀：<span class="hl">位置参数看座次，默认参数可偷懒，关键字参数指名道姓。</span></p>
+  </section>
+
+  <!-- 3 return -->
+  <section>
+    <h2><span class="num">3</span>return：技能的产出</h2>
+    <p>很多技能不只是"喊一嗓子"，还要<b>交回一个结果</b>给调用它的人——这就是 <span class="hl">return 返回值</span>。</p>
+    <div class="code"><span class="k">def</span> <span class="v">heal</span>(<span class="v">hp</span>):
+    <span class="k">return</span> <span class="v">hp</span> + <span class="n">50</span>          <span class="c"># 把算好的新血量交回去</span>
+
+<span class="v">hp</span> = <span class="v">heal</span>(<span class="n">100</span>)           <span class="c"># 接住返回值，放进变量 hp</span>
+<span class="k">print</span>(<span class="v">hp</span>)                 <span class="c"># 150</span></div>
+    <div class="out">150</div>
+
+    <p>两条铁律，新手必背：</p>
+    <p>① <span class="hl">没写 return 的函数返回 None</span>（空值）：</p>
+    <div class="code"><span class="k">def</span> <span class="v">shout</span>():
+    <span class="k">print</span>(<span class="s">"啊——！"</span>)        <span class="c"># 只有 print，没有 return</span>
+
+<span class="v">result</span> = <span class="v">shout</span>()
+<span class="k">print</span>(<span class="v">result</span>)             <span class="c"># shout 没有 return，result 是 None</span></div>
+    <div class="out">啊——！
+None</div>
+
+    <p>② <span class="hl">return 一执行，函数立刻下班</span>，后面的代码永远不会跑：</p>
+    <div class="code"><span class="k">def</span> <span class="v">ready</span>():
+    <span class="k">return</span> <span class="s">"技能就绪"</span>
+    <span class="k">print</span>(<span class="s">"永远到不了这里"</span>)   <span class="c"># return 之后，此行不会执行</span>
+
+<span class="k">print</span>(<span class="v">ready</span>())</div>
+    <div class="out">技能就绪</div>
+  </section>
+
+  <!-- 4 return vs print -->
+  <section>
+    <h2><span class="num">4</span>return ≠ print：本课头号误区</h2>
+    <p>很多人以为 print 就是"返回结果"。错！<span class="hl">print 只是喊给你听，return 才是真正交货</span>。</p>
+
+    <div class="versus">
+      <div class="vs-card print">
+        <h4>📢 print 版：只喊不做</h4>
+        <p>屏幕上出现结果，但函数本身<b>返回 None</b>，没法继续参与计算。像直播喊话：观众听到了，你手里没拿到东西。</p>
+      </div>
+      <div class="vs-card ret">
+        <h4>📦 return 版：真正交货</h4>
+        <p>函数把值交回调用处，可以<b>存进变量、继续加减乘除</b>。像快递签收：货真到了你手上。</p>
+      </div>
+    </div>
+
+    <div class="code"><span class="k">def</span> <span class="v">add_print</span>(<span class="v">a</span>, <span class="v">b</span>):
+    <span class="k">print</span>(<span class="v">a</span> + <span class="v">b</span>)            <span class="c"># 只是喊出结果</span>
+
+<span class="k">def</span> <span class="v">add_return</span>(<span class="v">a</span>, <span class="v">b</span>):
+    <span class="k">return</span> <span class="v">a</span> + <span class="v">b</span>            <span class="c"># 真正交回结果</span>
+
+<span class="v">x</span> = <span class="v">add_print</span>(<span class="n">1</span>, <span class="n">2</span>)        <span class="c"># 屏幕出现 3，但 x 是 None</span>
+<span class="v">y</span> = <span class="v">add_return</span>(<span class="n">1</span>, <span class="n">2</span>)       <span class="c"># 屏幕没动静，但 y 是 3</span>
+<span class="k">print</span>(<span class="v">x</span>, <span class="v">y</span>)</div>
+    <div class="out">3
+None 3</div>
+
+    <div class="warn-box">⚠️ 想继续用这个结果做计算 → 用 return；只是想给玩家看一眼 → print。把这条写进你的新手笔记第一条。</div>
+  </section>
+
+  <!-- 5 作用域 -->
+  <section>
+    <h2><span class="num">5</span>作用域：大厅与房间</h2>
+    <p>程序世界分两个空间：<span class="hl">全局大厅</span>（函数外面，人人可见）和<span class="hl">函数房间</span>（函数里面，出门即消失）。</p>
+
+    <div class="rooms">
+      <div class="room g">
+        <h4>🌍 全局大厅（函数外）</h4>
+        <p>这里创建的变量是<b>全局变量</b>，比如 <code>gold = 100</code>，程序里到处都能看到它。</p>
+      </div>
+      <div class="room l">
+        <h4>🔒 函数房间（def 内部）</h4>
+        <p>函数里创建的变量是<b>局部变量</b>，比如 <code>gold = 500</code>，只在房间内有效，函数一结束就消失。</p>
+      </div>
+    </div>
+
+    <div class="code"><span class="v">gold</span> = <span class="n">100</span>              <span class="c"># 全局变量：大厅里的 gold</span>
+
+<span class="k">def</span> <span class="v">earn</span>():
+    <span class="v">gold</span> = <span class="n">500</span>          <span class="c"># 局部变量：房间里另开了一个同名盒子</span>
+    <span class="k">print</span>(<span class="s">"房间里 gold ="</span>, <span class="v">gold</span>)
+
+<span class="v">earn</span>()
+<span class="k">print</span>(<span class="s">"大厅里 gold ="</span>, <span class="v">gold</span>)  <span class="c"># 大厅的 gold 毫发无损</span></div>
+    <div class="out">房间里 gold = 500
+大厅里 gold = 100</div>
+
+    <p>函数里那个 <code>gold = 500</code> 只是在房间里<b>新建了一个同名盒子</b>，并不会碰到大厅里的 gold。如果真的想修改全局变量，必须先声明 <span class="hl">global</span>：</p>
+    <div class="code"><span class="v">gold</span> = <span class="n">100</span>
+
+<span class="k">def</span> <span class="v">earn</span>():
+    <span class="k">global</span> <span class="v">gold</span>          <span class="c"># 声明：我要改的是大厅里那个 gold</span>
+    <span class="v">gold</span> = <span class="v">gold</span> + <span class="n">50</span>
+
+<span class="v">earn</span>()
+<span class="k">print</span>(<span class="v">gold</span>)               <span class="c"># 150，大厅的 gold 真的被改了</span></div>
+    <div class="out">150</div>
+
+    <p>🧠 记忆口诀：<span class="hl">不声明 global，函数里赋值 = 开新盒；声明了才是改旧盒。</span></p>
+  </section>
+
+  <!-- 6 多返回值 -->
+  <section>
+    <h2><span class="num">6</span>多返回值：一招双响</h2>
+    <p>一个技能想同时交回攻击力和血量？<span class="hl">return a, b</span> 写法直接支持，用两个变量接住即可：</p>
+
+    <div class="tuple-row">
+      <div class="tuple-box"><div>18</div><div>88</div></div>
+      <span class="tuple-arrow">➜ return 18, 88 ➜</span>
+      <div class="tuple-box" style="border-color:var(--cyan);"><div style="color:var(--cyan);background:rgba(77,214,255,.08);">atk = 18</div><div style="color:var(--cyan);background:rgba(77,214,255,.08);">hp = 88</div></div>
+    </div>
+
+    <div class="code"><span class="k">def</span> <span class="v">stats</span>():
+    <span class="k">return</span> <span class="n">18</span>, <span class="n">88</span>         <span class="c"># 其实返回的是一个元组 (18, 88)</span>
+
+<span class="v">atk</span>, <span class="v">hp</span> = <span class="v">stats</span>()       <span class="c"># 解包：18 给 atk，88 给 hp</span>
+<span class="k">print</span>(<span class="v">atk</span>, <span class="v">hp</span>)</div>
+    <div class="out">18 88</div>
+
+    <p>真相：<span class="hl">return a, b 本质上是返回一个元组 (a, b)</span>，而 <code>a, b = ...</code> 是把元组「解包」进两个变量。直接用一个变量接，拿到的就是整个元组：</p>
+    <div class="code"><span class="v">data</span> = <span class="v">stats</span>()
+<span class="k">print</span>(<span class="v">data</span>)              <span class="c"># (18, 88) —— 一个装着两个值的元组</span>
+<span class="k">print</span>(<span class="v">data</span>[<span class="n">0</span>])            <span class="c"># 18 —— 用下标也能取出第一个</span></div>
+    <div class="out">(18, 88)
+18</div>
+  </section>
+
+  <!-- 7 实验室 -->
+  <section>
+    <h2><span class="num">7</span>🎮 实验室 · 技能合成台</h2>
+    <p>合成台上有 4 个基础技能小函数。点选技能组合成<b>连招</b>（最多 6 招），页面会按顺序"执行"，展示每一步<b>返回值</b>带来的数值变化；最后释放终极一击，看你的连招能打出多少伤害。下方代码区<span class="hl">实时生成等价的 Python 函数定义与调用代码</span>。</p>
+    <div class="lab-input">
+      <button class="btn" onclick="addSkill('power_up')">💪 power_up（攻击翻倍）</button>
+      <button class="btn" onclick="addSkill('buff')">📣 buff（攻击 +30）</button>
+      <button class="btn" onclick="addSkill('heal')">🧪 heal（回血 +50）</button>
+      <button class="btn" onclick="addSkill('second_wind')">🌬 second_wind（生命翻倍）</button>
+    </div>
+    <div class="lab-input">
+      <button class="btn alt" onclick="resetCombo()">♻️ 重新开始</button>
+      <button class="btn final" onclick="finishCombo()">💥 释放终极连招</button>
+    </div>
+    <div class="combo-state">
+      <div><b id="c-atk">10</b><span>攻击 ATK</span></div>
+      <div><b id="c-hp">100</b><span>生命 HP</span></div>
+      <div><b id="c-steps" style="font-size:20px;">0</b><span>已连招数</span></div>
+    </div>
+    <div class="combo-log" id="combo-log">初始状态：atk = 10，hp = 100。点上方技能开始连招！</div>
+    <div class="code" id="combo-code"></div>
+    <div class="hero-card" id="combo-final">
+      <h3 id="cf-title">💥 终极一击！</h3>
+      <div class="rarity" id="cf-combo">—</div>
+      <div class="attr">
+        <div><b id="cf-damage">—</b><span>最终伤害</span></div>
+        <div><b id="cf-atk">—</b><span>最终攻击</span></div>
+        <div><b id="cf-hp">—</b><span>最终生命</span></div>
+      </div>
+      <div class="quote" id="cf-quote">—</div>
+    </div>
+  </section>
+
+  <!-- 8 预言机 -->
+  <section>
+    <h2><span class="num">8</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 9 记忆卡片 -->
+  <section>
+    <h2><span class="num">9</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 10 Quiz -->
+  <section>
+    <h2><span class="num">10</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 11 课后 -->
+  <section class="homework">
+    <h2><span class="num">11</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开电脑上的 Python（IDLE 或终端输入 <code>python</code>），逐行敲一遍上面所有代码块，<b>亲手打字，不要复制粘贴</b></li>
+    <li>② 做 return / print 对照实验：写一个只有 print 的函数和一个有 return 的函数，分别用变量接住返回值并打印，亲眼看到 <code>None</code> 和数字的区别</li>
+    <li>③ 小挑战：写函数 <code>max_hp(con, level)</code>，返回 <code>con * level</code>；再改成 <code>max_hp(con, level=1)</code>，分别用「位置参数」「默认参数」「关键字参数」三种方式各调用一次</li>
+    <li>④ 写一个函数 <code>roll_dice()</code> 用 <code>import random</code> 后的 <code>random.randint(1, 6)</code> 模拟掷骰子并 return 结果，调用 10 次打印结果</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / BOSS 战前想补啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>★ BOSS 战「文字冒险游戏」</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具：代码高亮 ============ */
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hl(code){
+  var t = escHtml(code);
+  var strs = [];
+  t = t.replace(/("[^"\n]*")|('[^'\n]*')/g, function(m){
+    strs.push('<span style="color:var(--green)">'+m+'</span>');
+    return '\u0000' + String.fromCharCode(65 + strs.length - 1) + '\u0000';
+  });
+  t = t.replace(/\b(for|in|while|break|continue|if|elif|else|def|return|and|or|not|True|False|None|import|global|pass)\b/g,
+    '<span style="color:var(--pink)">$1</span>');
+  t = t.replace(/\b(print|range|len|type|input|int|str|float|random|randint)\b/g,
+    '<span style="color:var(--cyan)">$1</span>');
+  t = t.replace(/\u0000([A-Z])\u0000/g, function(m, ch){
+    return strs[ch.charCodeAt(0) - 65];
+  });
+  t = t.replace(/\b(\d+)\b/g, '<span style="color:var(--orange)">$1</span>');
+  return t;
+}
+
+/* ============ 知识点小演示：三种传参 ============ */
+function demoCall(kind){
+  var out = document.getElementById('param-out');
+  if(kind === 'pos'){
+    out.textContent = '造成伤害： 30    ← 位置参数：10 按座次传给 atk，3 传给 times';
+  }else if(kind === 'def'){
+    out.textContent = '造成伤害： 20    ← times 没传，自动使用默认值 2（10 × 2）';
+  }else{
+    out.textContent = '造成伤害： 50    ← 关键字参数：times=5、atk=10 指名道姓，顺序随意';
+  }
+}
+
+/* ============ 实验室：技能合成台 ============ */
+var comboAtk = 10;
+var comboHp = 100;
+var comboSteps = [];
+var comboFinished = false;
+
+function buildComboCode(){
+  var lines = [];
+  lines.push('def power_up(atk):');
+  lines.push('    return atk * 2        # 力量觉醒：攻击翻倍');
+  lines.push('');
+  lines.push('def buff(atk):');
+  lines.push('    return atk + 30       # 战斗怒吼：攻击 +30');
+  lines.push('');
+  lines.push('def heal(hp):');
+  lines.push('    return hp + 50        # 生命之泉：回血 +50');
+  lines.push('');
+  lines.push('def second_wind(hp):');
+  lines.push('    return hp * 2         # 第二呼吸：生命翻倍');
+  lines.push('');
+  lines.push('atk, hp = 10, 100');
+  if(comboSteps.length === 0){
+    lines.push('# 点上方技能，这里会实时生成你的连招调用代码');
+  }else{
+    for(var i = 0; i < comboSteps.length; i++){
+      var s = comboSteps[i];
+      lines.push(s.call + '        # 第 ' + (i + 1) + ' 招 → 返回 ' + s.ret);
+    }
+    if(!comboFinished){
+      lines.push('# 点击「释放终极连招」查看最终一击');
+    }
+  }
+  if(comboFinished){
+    lines.push('damage = atk + hp // 10');
+    lines.push('print("终极一击伤害：", damage)');
+  }
+  return lines.join('\n');
+}
+function renderCombo(){
+  document.getElementById('c-atk').textContent = comboAtk;
+  document.getElementById('c-hp').textContent = comboHp;
+  document.getElementById('c-steps').textContent = comboSteps.length;
+  document.getElementById('combo-code').innerHTML = hl(buildComboCode());
+}
+function comboLogLine(text){
+  var log = document.getElementById('combo-log');
+  if(comboSteps.length === 0 && !comboFinished){
+    log.textContent = text;
+  }else{
+    log.textContent = log.textContent + '\n' + text;
+  }
+}
+function resetCombo(){
+  comboAtk = 10;
+  comboHp = 100;
+  comboSteps = [];
+  comboFinished = false;
+  document.getElementById('combo-log').textContent = '初始状态：atk = 10，hp = 100。点上方技能开始连招！';
+  document.getElementById('combo-final').classList.remove('show');
+  renderCombo();
+}
+function addSkill(name){
+  if(comboFinished){
+    alert('本套连招已释放，点「重新开始」再拼一套！');
+    return;
+  }
+  if(comboSteps.length >= 6){
+    alert('连招最多 6 招，快去「释放终极连招」吧！');
+    return;
+  }
+  var ret;
+  var call;
+  if(name === 'power_up'){
+    ret = comboAtk * 2;
+    call = 'atk = power_up(atk)';
+    comboAtk = ret;
+  }else if(name === 'buff'){
+    ret = comboAtk + 30;
+    call = 'atk = buff(atk)';
+    comboAtk = ret;
+  }else if(name === 'heal'){
+    ret = comboHp + 50;
+    call = 'hp = heal(hp)';
+    comboHp = ret;
+  }else{
+    ret = comboHp * 2;
+    call = 'hp = second_wind(hp)';
+    comboHp = ret;
+  }
+  comboSteps.push({call: call, ret: ret, label: name});
+  comboLogLine('第 ' + comboSteps.length + ' 招 · ' + call + '  →  ' + name + ' 交回 ' + ret + '，'
+    + (name === 'power_up' || name === 'buff' ? 'atk' : 'hp') + ' 更新完毕');
+  renderCombo();
+}
+function finishCombo(){
+  if(comboFinished){
+    alert('已经释放过了，点「重新开始」再来一套！');
+    return;
+  }
+  if(comboSteps.length === 0){
+    alert('至少先点一个技能组成连招！');
+    return;
+  }
+  comboFinished = true;
+  var damage = comboAtk + Math.floor(comboHp / 10);
+  comboLogLine('终极一击：damage = atk + hp // 10 = ' + comboAtk + ' + ' + Math.floor(comboHp / 10) + ' = ' + damage + ' 💥');
+  renderCombo();
+  var names = [];
+  comboSteps.forEach(function(s){ names.push(s.label); });
+  var title, quote;
+  if(damage >= 200){ title = '💥 传说级终极连招！'; quote = '「连招设计大师：技能叠加的顺序，决定了伤害的天花板。」'; }
+  else if(damage >= 100){ title = '💥 精英级终极连招！'; quote = '「不错的套路！试试先 buff 再 power_up，攻击翻倍更划算。」'; }
+  else{ title = '💥 入门级终极连招！'; quote = '「伤害还能更高——想想哪些技能该先放，哪些该后放。」'; }
+  document.getElementById('cf-title').textContent = title;
+  document.getElementById('cf-combo').textContent = '连招顺序：' + names.join(' → ');
+  document.getElementById('cf-damage').textContent = damage;
+  document.getElementById('cf-atk').textContent = comboAtk;
+  document.getElementById('cf-hp').textContent = comboHp;
+  document.getElementById('cf-quote').textContent = quote;
+  var card = document.getElementById('combo-final');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+}
+renderCombo();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 没有 return 的函数',
+    code:'def say_hi():\n    print("hi")\n\nresult = say_hi()\nprint(result)',
+    opts:['先输出 hi，再输出 None','输出 hi 和 hi','输出 None 和 None','报错'],
+    ans:0,
+    exp:'say_hi() 被调用时先打印 hi（函数内部的 print），但它没有 return，所以返回值是 None，result 接住的是 None。屏幕共两行：hi、None。'
+  },
+  {
+    title:'第 2 预言 · return 之后的世界',
+    code:'def f():\n    return 1\n    print("到不了")\n\nprint(f())',
+    opts:['只输出 1','先输出 1，再输出 到不了','只输出 到不了','报错'],
+    ans:0,
+    exp:'return 一执行函数立刻结束，后面那行 print("到不了") 永远没有机会运行。所以只输出 1。'
+  },
+  {
+    title:'第 3 预言 · 默认参数被覆盖',
+    code:'def attack(atk, times=2):\n    return atk * times\n\nprint(attack(10, 3))',
+    opts:['20','30','23','报错'],
+    ans:1,
+    exp:'times 的默认值是 2，但调用时传了 3，默认值被覆盖：10 × 3 = 30。默认参数只在"不传"时才生效。'
+  },
+  {
+    title:'第 4 预言 · 房间里的变量',
+    code:'x = 10\ndef change():\n    x = 99\n\nchange()\nprint(x)',
+    opts:['10','99','None','报错'],
+    ans:0,
+    exp:'函数里的 x = 99 是在函数房间内新建的局部变量，函数结束就消失，完全影响不到外面的 x。大厅里的 x 依然是 10。'
+  },
+  {
+    title:'第 5 预言 · 多返回值解包',
+    code:'def stats():\n    return 3, 4\n\na, b = stats()\nprint(a + b)',
+    opts:['7','(3, 4)','34','报错'],
+    ans:0,
+    exp:'return 3, 4 实际返回元组 (3, 4)，a, b = stats() 把它解包成 a=3、b=4，所以 a + b = 7。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hl(q.code);
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="'+i+'">'+escHtml(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0;white-space:pre-wrap">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['定义函数的语法','def 函数名(参数): 换行后缩进写函数体'],
+  ['定义和调用的区别','def 只是录入技能不执行；函数名() 带括号才是真正调用'],
+  ['位置参数','按顺序一一对应：attack(10, 3) 中 10 给 atk、3 给 times'],
+  ['默认参数','def f(a, b=2)：调用时不传 b 就用 2，传了就被覆盖'],
+  ['关键字参数','调用时指名道姓 f(b=5, a=1)，参数顺序可以随意'],
+  ['没写 return 的函数返回什么？','None（空值）'],
+  ['return 和 print 的区别','return 把值交回调用处可继续计算；print 只是显示，函数仍返回 None'],
+  ['局部变量','函数内创建的变量只在函数内有效，函数外不存在'],
+  ['函数里想修改全局变量','先写 global 变量名，再赋值；否则只是新建同名局部变量'],
+  ['return a, b 实际返回','一个元组 (a, b)，可用 x, y = f() 解包']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'定义函数用哪个关键字？',
+   opts:['def','function','func','define'], ans:0,
+   exp:'Python 用 def 定义函数：def 函数名(参数):'},
+  {q:'def fireball(): print("火球") 定义之后，怎么执行它？',
+   opts:['fireball()','fireball','call fireball()','def fireball'], ans:0,
+   exp:'调用必须带括号：fireball()。只写函数名不带括号不会执行。'},
+  {q:'def attack(atk, times): 中调用 attack(10, 3)，3 传给了谁？',
+   opts:['atk','times','两个都传','报错'], ans:1,
+   exp:'位置参数按顺序对应：第 1 个值 10 给第 1 个参数 atk，第 2 个值 3 给 times。'},
+  {q:'def f(a, b=5): ... 调用 f(3) 时，b 的值是？',
+   opts:['3','5','0','None'], ans:1,
+   exp:'b 是默认参数，调用时没传就用默认值 5。'},
+  {q:'调用 f(times=5, atk=10) 属于哪种传参方式？',
+   opts:['关键字参数','位置参数','默认参数','全局参数'], ans:0,
+   exp:'形如 参数名=值 的传参是关键字参数，指名道姓、顺序随意。'},
+  {q:'一个函数里没有写 return，调用它得到什么？',
+   opts:['0','空字符串','None','报错'], ans:2,
+   exp:'没有 return（或 return 后面没跟值）的函数一律返回 None。'},
+  {q:'def f():\n    return 10\n    return 99\nprint(f()) 输出？',
+   opts:['10','99','10 99','报错'], ans:0,
+   exp:'第一个 return 执行后函数立刻结束，第二个 return 永远不会执行。'},
+  {q:'关于 return 和 print，下面哪句是对的？',
+   opts:['return 把值交回调用处，可以继续参与计算','print 会把值交回给调用处','两者完全等价','return 只能在循环里用'], ans:0,
+   exp:'print 只是显示，函数返回值仍是 None；return 才真正交货，返回值能存变量、能继续运算。'},
+  {q:'n = 3\ndef up():\n    n = 10\nup()\nprint(n) 输出？',
+   opts:['3','10','None','报错'], ans:0,
+   exp:'函数里的 n = 10 是新建的局部变量，函数结束就消失，外面的全局 n 还是 3。想改全局要先 global n。'},
+  {q:'def get():\n    return 5, 6\n执行 a, b = get() 后 a + b 是？',
+   opts:['11','"56"','(5, 6)','报错'], ans:0,
+   exp:'return 5, 6 返回元组 (5, 6)，解包后 a=5、b=6，相加得 11。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+escHtml(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+escHtml(q.q).replace(/\n/g,'<br>')+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！技能封装大师，BOSS 战已为你解锁 🔓' : '通关成功！★ BOSS 战「文字冒险游戏」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第10课 · 异常处理 —— 防崩护盾</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4dd6ff; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(167,139,250,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--cyan);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--cyan);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4dd6ff,#a78bfa 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:#8be9fd;} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#a9ecff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 魔法盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+    word-break:break-all;
+  }
+  .mbox .val{
+    font-size:19px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  .mbox.danger{border-color:var(--red);}
+  .mbox.danger .tag{color:var(--red);background:rgba(248,113,113,.1);}
+  /* 流程图 */
+  .flow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;font-size:13px;}
+  .fnode{background:var(--card);border:1px solid var(--cyan);border-radius:10px;padding:7px 13px;}
+  .fnode.bad{border-color:var(--red);}
+  .fnode.auto{border-color:var(--gold);}
+  .farrow{color:var(--muted);}
+  .flow-label{font-size:12px;color:var(--cyan);margin-top:8px;font-weight:600;}
+  /* 守则框 */
+  .rule-box{border-radius:12px;padding:14px 18px;margin:12px 0;font-size:14px;}
+  .rule-ok{background:rgba(77,214,255,.08);border:1px solid rgba(77,214,255,.4);}
+  .rule-no{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);}
+  .rule-box b{font-size:15px;}
+  .rule-ok b{color:var(--cyan);}
+  .rule-no b{color:var(--red);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--cyan),var(--purple));color:#0d1021;border:none;
+    padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  .chaos-tip{font-size:12.5px;color:var(--muted);margin:4px 0 8px;}
+  .chaos-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .cbtn{
+    background:#1a1f3d;border:1px solid var(--orange);color:var(--orange);
+    padding:8px 14px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s;
+  }
+  .cbtn:hover{background:rgba(251,146,60,.15);transform:translateY(-2px);}
+  .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media(max-width:720px){.lab-grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .panel-title{font-size:13px;font-weight:700;margin-bottom:8px;letter-spacing:1px;font-family:ui-monospace,Menlo,monospace;}
+  .panel-title.danger{color:var(--red);}
+  .panel-title.shield{color:var(--cyan);}
+  .run-box{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:10px;
+    padding:10px 14px;font-family:ui-monospace,Menlo,monospace;font-size:13px;
+    color:#a9ecff;margin-top:8px;min-height:56px;white-space:pre-wrap;
+  }
+  .run-box::before{content:"▶ 运行结果：";color:var(--muted);font-size:12px;display:block;margin-bottom:4px;}
+  .run-box.crash{border-color:var(--red);color:var(--red);animation:shake .4s;}
+  .run-box.safe{border-color:var(--cyan);}
+  .run-box .c{color:#5b648f;}
+  .lab-tip{font-size:12px;color:var(--muted);margin:10px 0 0;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(77,214,255,.15);color:var(--cyan);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>第 10 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY</div>
+    <h1>异常处理 —— 防崩护盾</h1>
+    <div class="subtitle">今日目标：让程序被用户捣乱也不崩溃</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>学会<span class="hl">从下往上</span>看懂报错信息（错误类型 + 行号）</li>
+      <li>掌握 <span class="hl">try / except</span> 防崩护盾的基本结构</li>
+      <li>认领五大通缉犯：ValueError / ZeroDivisionError / KeyError / IndexError / TypeError</li>
+      <li>学会多 except 分支、<span class="hl">else / finally</span>、except ... as e</li>
+      <li>分清「该防护的用户输入」和「该修掉的逻辑 bug」</li>
+      <li>通关实验室「打不死的年龄计算器」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 看懂报错 -->
+  <section>
+    <h2><span class="num">1</span>崩溃现场调查：从下往上看报错</h2>
+    <p>程序崩溃时 Python 会甩出一大坨红色文字（Traceback），新手第一反应是「完蛋了」。错！<span class="hl">报错不是审判书，是藏宝图</span>——它把出错的位置和原因全告诉你了。</p>
+    <p>正确的阅读姿势是<span class="hl">从下往上</span>看：</p>
+    <div class="code"><span class="c">Traceback (most recent call last):          # ④ 报错回溯开始了</span>
+  File <span class="s">"shop.py"</span>, line <span class="n">3</span>, in &lt;module&gt;   <span class="c"># ③ 出错地点：哪个文件第几行</span>
+    price = <span class="k">int</span>(<span class="s">"abc"</span>)                    <span class="c"># ② 出错的那一行代码</span>
+<span class="k">ValueError</span>: invalid literal for int() with base 10: 'abc'  <span class="c"># ① 先看这里！错误类型 + 原因</span></div>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">第 ① 步</div><div class="val">错误类型</div><div class="tip">最后一行开头，如 ValueError</div></div>
+      <div class="mbox"><div class="tag">第 ② 步</div><div class="val">定位行号</div><div class="tip">往上找 line 3，锁定现场</div></div>
+      <div class="mbox"><div class="tag">第 ③ 步</div><div class="val">读原因</div><div class="tip">invalid literal = 转不了这个值</div></div>
+    </div>
+    <p>翻译成人话：shop.py 第 3 行，<code class="hl-c">int("abc")</code> 试图把 "abc" 转成整数，失败，抛出 <span class="hl">ValueError</span>。看懂了报错，bug 就修好了一半。</p>
+  </section>
+
+  <!-- 2 try/except -->
+  <section>
+    <h2><span class="num">2</span>try / except：给代码穿上护盾</h2>
+    <p>用户是不受控的：你让他输数字，他偏输「abc」；你做除法，他偏填 0。程序一崩，游戏进度、聊天记录全没了。<span class="hl">try/except</span> 就是防崩护盾：</p>
+    <div class="code"><span class="k">try</span>:
+    <span class="v">age</span> = <span class="k">int</span>(<span class="k">input</span>(<span class="s">"年龄："</span>))     <span class="c"># 把可能有危险的代码放进 try</span>
+    <span class="k">print</span>(<span class="s">"明年你"</span>, <span class="v">age</span> + <span class="n">1</span>, <span class="s">"岁"</span>)
+<span class="k">except</span>:
+    <span class="k">print</span>(<span class="s">"这输入我看不懂……"</span>)  <span class="c"># 真出错了，就执行这里的补救</span>
+<span class="k">print</span>(<span class="s">"程序还活着！"</span>)          <span class="c"># 捕获后程序继续往下跑</span></div>
+    <p>用户输入 abc 时：</p>
+    <div class="out">这输入我看不懂……
+程序还活着！</div>
+
+    <p>两条执行路线记牢（鼠标移上去看看）：</p>
+    <div class="flow-label">💥 路线一：try 里出错了</div>
+    <div class="flow">
+      <div class="fnode bad">try 里的代码 💥 出错</div><span class="farrow">→</span>
+      <div class="fnode">立刻跳到 except 执行补救</div><span class="farrow">→</span>
+      <div class="fnode auto">继续跑后面的代码 ✅</div>
+    </div>
+    <div class="flow-label">✅ 路线二：try 里没出错</div>
+    <div class="flow">
+      <div class="fnode">try 里的代码正常跑完</div><span class="farrow">→</span>
+      <div class="fnode">整个 except 被跳过</div><span class="farrow">→</span>
+      <div class="fnode auto">继续跑后面的代码 ✅</div>
+    </div>
+  </section>
+
+  <!-- 3 五大异常 -->
+  <section>
+    <h2><span class="num">3</span>五大通缉犯：捕获指定异常</h2>
+    <p>裸写 except 会把<b>所有</b>错误都吞掉——包括你没想到的 bug，这很危险。职业做法是<span class="hl">点名捕获</span>。先认识五个最常见的通缉犯：</p>
+    <div class="boxes">
+      <div class="mbox danger"><div class="tag">ValueError</div><div class="val">int("abc")</div><div class="tip">值转换失败</div></div>
+      <div class="mbox danger"><div class="tag">ZeroDivisionError</div><div class="val">10 / 0</div><div class="tip">除数为零</div></div>
+      <div class="mbox danger"><div class="tag">IndexError</div><div class="val">[1,2,3][5]</div><div class="tip">下标越界</div></div>
+      <div class="mbox danger"><div class="tag">KeyError</div><div class="val">hero["mp"]</div><div class="tip">字典没这个键</div></div>
+      <div class="mbox danger"><div class="tag">TypeError</div><div class="val">"a" + 1</div><div class="tip">类型不兼容</div></div>
+    </div>
+
+    <p>一个 try 后面可以跟<span class="hl">多个 except 分支</span>，Python 从上到下找第一个匹配的：</p>
+    <div class="code"><span class="k">try</span>:
+    <span class="v">nums</span> = [<span class="n">1</span>, <span class="n">2</span>, <span class="n">3</span>]
+    <span class="v">i</span> = <span class="k">int</span>(<span class="k">input</span>(<span class="s">"输入下标："</span>))
+    <span class="k">print</span>(<span class="v">nums</span>[<span class="v">i</span>])
+<span class="k">except</span> <span class="k">ValueError</span>:
+    <span class="k">print</span>(<span class="s">"下标必须是整数！"</span>)
+<span class="k">except</span> <span class="k">IndexError</span>:
+    <span class="k">print</span>(<span class="s">"下标越界了，列表只有 3 个元素"</span>)
+<span class="k">print</span>(<span class="s">"程序还活着"</span>)</div>
+    <p>输入 abc → 「下标必须是整数！」；输入 5 → 「下标越界了……」。两种意外各有各的处理，<span class="hl">互不干扰，程序都不崩</span>。</p>
+  </section>
+
+  <!-- 4 else finally -->
+  <section>
+    <h2><span class="num">4</span>else、finally 与 as e：护盾完全体</h2>
+    <p>护盾还有两个高级部件：<span class="hl-c">else</span>（没出错才执行）和 <span class="hl-c">finally</span>（无论如何都执行，适合收尾，比如关文件）：</p>
+    <div class="code"><span class="k">try</span>:
+    <span class="v">n</span> = <span class="k">int</span>(<span class="k">input</span>(<span class="s">"输入一个数字："</span>))   <span class="c"># 假设输入 8</span>
+<span class="k">except</span> <span class="k">ValueError</span> <span class="k">as</span> <span class="v">e</span>:
+    <span class="k">print</span>(<span class="s">"出错了："</span>, <span class="v">e</span>)
+<span class="k">else</span>:
+    <span class="k">print</span>(<span class="s">"输入合法："</span>, <span class="v">n</span>)      <span class="c"># 只有 try 没出错才执行</span>
+<span class="k">finally</span>:
+    <span class="k">print</span>(<span class="s">"收工！"</span>)             <span class="c"># 无论出不出错都执行</span></div>
+    <div class="out">输入合法： 8
+收工！</div>
+    <p>如果输入的是 abc，就会走 except 分支，输出「出错了： invalid literal for int() with base 10: 'abc'」——<span class="hl-c">as e</span> 把错误信息装进变量 e，打印出来方便排查，最后照样打印「收工！」。</p>
+
+    <p>最重要的一课：<span class="hl">护盾不是万能药</span>，分清两种错误：</p>
+    <div class="rule-box rule-ok">✅ <b>该上护盾的：不可控的意外</b>——用户乱输、文件不存在、网络断了。这些不是你的错，但程序要稳住，给用户友好提示。</div>
+    <div class="rule-box rule-no">❌ <b>该修代码的：逻辑 bug</b>——变量名拼错、算法写错、下标算错。拿 try 把报错藏起来，bug 还在，只是变成了更诡异的问题。<b>不要用 try 包住一切来假装程序没毛病。</b></div>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · 打不死的年龄计算器</h2>
+    <p>下面这个年龄计算器有两个版本：<b style="color:var(--red)">无防护版</b>和<b style="color:var(--cyan)">防护版</b>。正常输入时两者表现一样；但请大胆点击下面的「捣乱按钮」，看看无防护版当场崩溃（红色报错动画），而防护版优雅提示、继续运行。每次运行，两版的等价 Python 代码同步更新。</p>
+    <div class="lab-input">
+      <input id="birth-year" maxlength="10" placeholder="输入出生年份，如 2008" value="2008">
+      <button class="btn" onclick="runAge()">🎂 计算年龄</button>
+    </div>
+    <div class="chaos-tip">👇 亲手把程序搞崩（然后看防护版如何稳住）：</div>
+    <div class="chaos-row">
+      <button class="cbtn" onclick="chaos('abc')">捣乱① 输入 abc</button>
+      <button class="cbtn" onclick="chaos('')">捣乱② 什么都不输</button>
+      <button class="cbtn" onclick="chaos('3000')">捣乱③ 未来年份 3000</button>
+      <button class="cbtn" onclick="chaos('-5')">捣乱④ 负数 -5</button>
+    </div>
+    <div class="lab-grid">
+      <div class="panel">
+        <div class="panel-title danger">🔴 无防护版 age.py</div>
+        <div class="code" id="bad-code" style="margin:0;min-height:140px"></div>
+        <div class="run-box" id="bad-run"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title shield">🛡 防护版 age_safe.py</div>
+        <div class="code" id="safe-code" style="margin:0;min-height:140px"></div>
+        <div class="run-box safe" id="safe-run"></div>
+      </div>
+    </div>
+    <div class="lab-tip">💡 观察要点：①② 触发 ValueError（崩溃 vs 提示）；③④ 连异常都不抛——但结果离谱，所以要靠 if 校验。护盾 + 校验，双保险。</div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 亲手制造三大异常：分别写 <code>int("abc")</code>、<code>print(10 / 0)</code>、<code>print([1, 2, 3][5])</code>，运行后抄下每条报错的<b>最后一行</b>（错误类型）</li>
+    <li>② 写 <code>safe_divide.py</code>：输入两个数相除，除数为 0 时提示「除数不能为 0」而不崩溃（捕获 <code>ZeroDivisionError</code>）</li>
+    <li>③ 写 <code>guess_guard.py</code>：用 <code>while True</code> + <code>try/except ValueError</code> 让用户反复输入，直到给出合法数字才 <code>break</code></li>
+    <li>④ 给第 9 课的读档代码加上 <code>try/except FileNotFoundError</code>：文件不存在时提示「请先存档」</li>
+    <li>⑤ 思考题：写下 3 个「应该修代码」而不是「应该 try」的错误例子</li>
+    <li>⑥ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：★ BOSS 战「命令行待办清单」
+  </footer>
+</div>
+
+<script>
+/* ============ 迷你 Python 语法高亮（供实验室/预言机动态代码使用） ============ */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var KW = /^(with|open|as|for|in|if|elif|else|try|except|finally|raise|while|break|continue|pass|print|input|int|str|float|len|read|readline|readlines|write|writelines|close|split|strip|append|ValueError|ZeroDivisionError|KeyError|IndexError|TypeError|FileNotFoundError|Exception|True|False|None|and|or|not)$/;
+function hl(code){
+  var out = '', i = 0;
+  while(i < code.length){
+    var ch = code[i];
+    if(ch === '"' || ch === "'"){
+      var j = i + 1;
+      while(j < code.length && code[j] !== ch){ j++; }
+      var end = Math.min(j + 1, code.length);
+      out += '<span class="s">' + esc(code.slice(i, end)) + '</span>';
+      i = end;
+    } else if(ch === '#'){
+      var j2 = i;
+      while(j2 < code.length && code[j2] !== '\n'){ j2++; }
+      out += '<span class="c">' + esc(code.slice(i, j2)) + '</span>';
+      i = j2;
+    } else if(ch >= '0' && ch <= '9'){
+      var j3 = i;
+      while(j3 < code.length && code[j3] >= '0' && code[j3] <= '9'){ j3++; }
+      out += '<span class="n">' + code.slice(i, j3) + '</span>';
+      i = j3;
+    } else if(/[A-Za-z_]/.test(ch)){
+      var j4 = i;
+      while(j4 < code.length && /[A-Za-z0-9_]/.test(code[j4])){ j4++; }
+      var w = code.slice(i, j4);
+      out += KW.test(w) ? '<span class="k">' + w + '</span>' : '<span class="v">' + w + '</span>';
+      i = j4;
+    } else {
+      out += esc(ch);
+      i++;
+    }
+  }
+  return out;
+}
+
+/* ============ 实验室：打不死的年龄计算器 ============ */
+var NOW = new Date().getFullYear();
+
+/* 模拟 Python 的 int()：只有长得像整数的字符串才能转换，否则抛 ValueError（这里返回 null） */
+function pyInt(s){
+  if(/^\s*[+-]?\d+\s*$/.test(s)){ return parseInt(s, 10); }
+  return null;
+}
+/* 模拟 Python 的 repr()，用于还原真实报错信息 */
+function pyRepr(s){
+  return "'" + String(s).replace(/['"\\]/g, '') + "'";
+}
+
+function chaos(v){
+  document.getElementById('birth-year').value = v;
+  runAge();
+}
+
+function runAge(){
+  var raw = document.getElementById('birth-year').value;
+  var dispRaw = raw === '' ? '（空）' : raw.replace(/["'\\]/g, '');
+  var n = pyInt(raw);
+
+  /* ---------- 无防护版 ---------- */
+  var badCode = 'year = input("出生年份：")   # 你输入了：' + dispRaw + '\n' +
+    'age = ' + NOW + ' - int(year)\n' +
+    'print("你的年龄：", age)';
+  document.getElementById('bad-code').innerHTML = hl(badCode);
+  var badRun = document.getElementById('bad-run');
+  badRun.classList.remove('crash'); void badRun.offsetWidth;
+  if(n === null){
+    var tb = '💥 程序崩溃了！\n' +
+      'Traceback (most recent call last):\n' +
+      '  File "age.py", line 2, in <module>\n' +
+      '    age = ' + NOW + ' - int(year)\n' +
+      'ValueError: invalid literal for int() with base 10: ' + pyRepr(raw);
+    badRun.classList.add('crash');
+    badRun.innerHTML = esc(tb);
+  } else {
+    var age = NOW - n;
+    var badOut = '你的年龄： ' + age;
+    if(n < 0 || age < 0){
+      badOut += '\n<span class="c">…没崩，但结果已经很离谱了（输入 ' + esc(dispRaw) + '）</span>';
+    }
+    badRun.innerHTML = badOut;
+  }
+
+  /* ---------- 防护版 ---------- */
+  var safeCode = 'try:\n' +
+    '    year = int(input("出生年份："))   # 你输入了：' + dispRaw + '\n' +
+    '    if year < 0:\n' +
+    '        print("年份不能是负数哦")\n' +
+    '    elif year > ' + NOW + ':\n' +
+    '        print("穿越者？这一年还没到呢")\n' +
+    '    else:\n' +
+    '        print("你的年龄：", ' + NOW + ' - year)\n' +
+    'except ValueError:\n' +
+    '    print("这不是数字！请输入如 2008")';
+  document.getElementById('safe-code').innerHTML = hl(safeCode);
+  var safeRun = document.getElementById('safe-run');
+  safeRun.classList.remove('safe'); void safeRun.offsetWidth; safeRun.classList.add('safe');
+  var msg, note;
+  if(n === null){
+    msg = '这不是数字！请输入如 2008';
+    note = '🛡 ValueError 被拦下，程序优雅提示';
+  } else if(n < 0){
+    msg = '年份不能是负数哦';
+    note = '🛡 if 校验拦住了负数（这可不抛异常，靠的是校验）';
+  } else if(n > NOW){
+    msg = '穿越者？这一年还没到呢';
+    note = '🛡 逻辑校验稳稳接住未来年份';
+  } else {
+    msg = '你的年龄： ' + (NOW - n);
+    note = '✅ 输入合法，正常计算';
+  }
+  safeRun.innerHTML = esc(msg) + '\n<span class="c">' + note + '，程序继续运行 ✅</span>';
+}
+
+/* 初始演示一次 */
+runAge();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 变形失败',
+    code:'n = int("abc")\nprint(n)',
+    opts:['输出 abc','输出 0','抛出 ValueError','抛出 TypeError'],
+    ans:2,
+    exp:'int() 只能转换长得像整数的字符串。"abc" 不行，当场抛出 ValueError——这就是用户输入防护要抓的头号通缉犯。'
+  },
+  {
+    title:'第 2 预言 · 除零禁区',
+    code:'print(10 / 0)',
+    opts:['输出 0','输出 inf','抛出 ZeroDivisionError','抛出 ValueError'],
+    ans:2,
+    exp:'任何数除以 0 在数学上没有定义，Python 直接抛出 ZeroDivisionError。做除法前要么检查除数，要么 try 住它。'
+  },
+  {
+    title:'第 3 预言 · finally 的承诺',
+    code:'try:\n    print("A")\n    x = 10 / 0\n    print("B")\nexcept ZeroDivisionError:\n    print("C")\nfinally:\n    print("D")\nprint("E")',
+    opts:['A B C D E','A C D E','A C E','程序卡死在报错处'],
+    ans:1,
+    exp:'先打印 A；10/0 出错，B 被跳过；跳到 except 打印 C；finally 的 D 无论如何都会执行；最后 E 正常打印。记住：B 永远没机会运行。'
+  },
+  {
+    title:'第 4 预言 · except 谁来接锅',
+    code:'try:\n    nums = [1, 2, 3]\n    print(nums[5])\nexcept KeyError:\n    print("键不存在")\nexcept IndexError:\n    print("下标越界了")',
+    opts:['键不存在','下标越界了','报错：5','输出 3'],
+    ans:1,
+    exp:'nums[5] 触发的是 IndexError。多个 except 从上到下依次匹配，KeyError 不匹配就跳过，命中第二个分支。'
+  },
+  {
+    title:'第 5 预言 · 崩不了的循环',
+    code:'for s in ["10", "abc", "30"]:\n    try:\n        print(int(s))\n    except ValueError:\n        print("跳过")',
+    opts:['10 和 30（abc 直接没了）','10、跳过、30 各占一行','只输出 跳过','直接崩溃，一行都不输出'],
+    ans:1,
+    exp:'int("10") 正常输出 10；int("abc") 抛 ValueError 被捕获，输出「跳过」；循环继续，输出 30。捕获后程序接着跑，这就是护盾的意义。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hl(q.code);
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="' + i + '">' + esc(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">' + q.title + '</div>' +
+      '<div class="code" style="margin:6px 0">' + codeHtml + '</div>' +
+      '<div class="oracle-opts">' + optsHtml + '</div>' +
+      '<div class="explain">' + esc(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['报错信息从哪看起？', '从下往上看：最后一行是错误类型和原因，再往上找 line N 定位代码'],
+  ['try/except 各放什么？', 'try 放可能出错的代码，except 放出错后的补救代码'],
+  ['捕获异常后程序会？', '不崩溃：执行完 except 就继续往下运行'],
+  ['int("abc") 抛什么？', 'ValueError（值转换失败）'],
+  ['10 / 0 抛什么？', 'ZeroDivisionError（除数为零）'],
+  ['[1,2,3][5] 抛什么？', 'IndexError（下标越界）'],
+  ['d["名字"] 键不存在抛什么？', 'KeyError（字典里没有这个键）'],
+  ['"a" + 1 抛什么？', 'TypeError（类型不兼容，字符串不能加整数）'],
+  ['finally 的特点？', '无论是否出错都会执行，适合放收尾工作（如关文件）'],
+  ['什么时候不该用 try？', '逻辑 bug（拼错变量名、算错下标）应该修代码，不要用 try 把报错藏起来']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[1] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'int("abc") 的结果是？',
+   opts:['正常得到 0','抛出 ValueError','抛出 TypeError','输出字符串 "abc"'], ans:1,
+   exp:'int() 遇到不能转成整数的字符串，抛 ValueError。这是处理用户输入时最常见的异常。'},
+  {q:'print(10 / 0) 的结果是？',
+   opts:['输出 0','输出 inf','抛出 ZeroDivisionError','抛出 ValueError'], ans:2,
+   exp:'除数为零在数学上无定义，Python 抛出 ZeroDivisionError。'},
+  {q:'try 里的代码没出错，except 里的代码会执行吗？',
+   opts:['会执行','不会执行，整个被跳过','执行一半','报错'], ans:1,
+   exp:'except 只在 try 里真的出错时才执行；没出错就整个跳过（如果有 else 块，则执行 else）。'},
+  {q:'finally 块什么时候执行？',
+   opts:['只在出错时执行','只在不出错时执行','无论是否出错都会执行','永远不执行'], ans:2,
+   exp:'finally 是收尾区：出错、不出错、甚至 except 里又出错，它都会执行。'},
+  {q:'print([1, 2, 3][10]) 的结果是？',
+   opts:['输出 10','抛出 IndexError','抛出 KeyError','输出 None'], ans:1,
+   exp:'列表只有 3 个元素（下标 0~2），访问下标 10 越界，抛 IndexError。'},
+  {q:'阅读报错信息（Traceback）的正确姿势是？',
+   opts:['从下往上看：先看最后一行的错误类型，再找行号','从上往下逐字朗读','直接截图发到群里问','把报错删掉假装没看见'], ans:0,
+   exp:'最后一行是错误类型和原因（最重要），往上的 File "xx.py", line N 告诉你出错位置。'},
+  {q:'except ValueError as e 中的 e 是什么？',
+   opts:['一个错误编号','捕获到的异常对象，里面装着错误信息','一个必须背下来的固定写法','程序退出码'], ans:1,
+   exp:'as e 把捕获的异常对象存进变量 e，print(e) 就能打印出错原因，方便调试。'},
+  {q:'一个 try 后面跟多个 except 分支时，Python 怎么处理？',
+   opts:['从上到下依次匹配，命中第一个就执行那个分支','所有分支都会执行','只执行最后一个','随机挑一个执行'], ans:0,
+   exp:'像通缉令核对一样从上往下匹配，命中第一个类型相符的分支就执行它，其余跳过。'},
+  {q:'try 的 else 块什么时候执行？',
+   opts:['try 里出错时','try 里没出错时','任何时候都执行','永远不执行'], ans:1,
+   exp:'else 是「平安奖励」：try 里所有代码都平安跑完才执行。和 finally（永远执行）要分清。'},
+  {q:'age = int(input()) 让用户输入年龄，最稳妥的做法是？',
+   opts:['相信用户，直接用','用 try/except ValueError 捕获，输错就提示重新输入','把整个程序包进一个巨大的 try','输错了就重启电脑'], ans:1,
+   exp:'用户输入是不可控的意外，属于「该防护的」；而「包住一切」会把真正的 bug 也藏起来。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + esc(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + esc(q.q) + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + esc(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！防崩大师，BOSS 战已为你解锁 🔓' : '通关成功！BOSS 战「命令行待办清单」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第7课 · 字典与集合 —— 图鉴系统</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#9be8ff; --purple:#a78bfa;
+    --green:#4dd6ff; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--green);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4dd6ff,#9be8ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4dd6ff,#9be8ff);
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:#4dd6ff;font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:#4dd6ff;} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#a5ecff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 键值对卡片动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:pointer;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:#4dd6ff;
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:22px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 报错面板 */
+  .traceback{
+    background:#180f1d;border:1px solid var(--red);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:13px;
+    color:#f8a0b0;margin:12px 0;white-space:pre-wrap;animation:popIn .35s both;
+  }
+  /* 字典芯片 */
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;min-height:34px;}
+  .chip{
+    background:rgba(77,214,255,.1);border:1px solid var(--line);border-radius:8px;
+    padding:3px 10px;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    animation:popIn .3s both;
+  }
+  .chip b{color:var(--gold);}
+  /* 韦恩图 */
+  .venn{position:relative;height:180px;margin:18px 0;}
+  .circle{
+    position:absolute;top:8px;width:160px;height:160px;border-radius:50%;
+    display:flex;align-items:flex-start;justify-content:center;
+  }
+  .circle.ca{left:calc(50% - 170px);border:2px dashed #4dd6ff;background:rgba(77,214,255,.07);}
+  .circle.cb{left:calc(50% + 10px);border:2px dashed var(--purple);background:rgba(167,139,250,.07);}
+  .setlabel{font-family:ui-monospace,Menlo,monospace;font-size:12px;margin-top:12px;padding:0 6px;text-align:center;}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid #4dd6ff;border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,#4dd6ff,#9be8ff);color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  .btn.ghost{background:#0a0d1e;color:var(--muted);border:1px solid var(--line);}
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  .hero-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:8px;}
+  /* 进度条 */
+  .progress-wrap{background:#0a0d1e;border:1px solid var(--line);border-radius:999px;height:18px;overflow:hidden;margin:12px 0 4px;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#4dd6ff,#9be8ff);transition:width .5s ease;}
+  .progress-label{font-size:13px;color:var(--muted);margin-bottom:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:#4dd6ff;}
+  .opt.right{border-color:#4dd6ff;background:rgba(77,214,255,.15);color:#4dd6ff;}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:#4dd6ff;font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:#4dd6ff;}
+  .qq-opt.right{border-color:#4dd6ff;background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:#4dd6ff;padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>第 7 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY</div>
+    <h1>字典与集合 —— 图鉴系统</h1>
+    <div class="subtitle">今日目标：用「键值对」给万物建档，用集合一键去重</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>学会用 <span class="hl">{键: 值}</span> 创建字典，按「键」一击取值</li>
+      <li>掌握 <span class="hl">.get()</span> 护盾，从此告别 KeyError 爆炸</li>
+      <li>增删改、<span class="hl">keys()/values()/items()</span> 遍历、in 岗哨</li>
+      <li>玩转嵌套字典图鉴 + 集合去重、交并差</li>
+      <li>通关实验室「怪物图鉴收集系统」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 字典 -->
+  <section>
+    <h2><span class="num">1</span>字典：给数据贴上「名牌」</h2>
+    <p>列表取值靠<b>位置</b>（下标），但没人记得住第 3 格放的是什么。字典取值靠<b>名字</b>——每个数据都挂一块名牌：<span class="hl">键（key）→ 值（value）</span>。</p>
+    <p>就像游戏图鉴：喊「史莱姆」，立刻调出它的全部资料。</p>
+
+    <div class="boxes" id="bag-boxes">
+      <div class="mbox" onclick="pickCard(this)" data-k="金币" data-v="300"><div class="tag">"金币"</div><div class="val">300</div><div class="tip">键 → 值</div></div>
+      <div class="mbox" onclick="pickCard(this)" data-k="药水" data-v="3"><div class="tag">"药水"</div><div class="val">3</div><div class="tip">键 → 值</div></div>
+      <div class="mbox" onclick="pickCard(this)" data-k="地图" data-v="1"><div class="tag">"地图"</div><div class="val">1</div><div class="tip">键 → 值</div></div>
+    </div>
+
+    <p>👆 点击卡片试试「按键取值」，下方会同步显示等价 Python 代码：</p>
+    <div class="code" id="pick-code" style="display:none"></div>
+    <div class="out" id="pick-out" style="display:none"></div>
+
+    <p>创建字典用<span class="hl">大括号 {}</span>，键和值之间用<span class="hl-c">冒号</span>，一对一对写：</p>
+    <div class="code"><span class="v">bag</span> = {<span class="s">"金币"</span>: <span class="n">300</span>, <span class="s">"药水"</span>: <span class="n">3</span>, <span class="s">"地图"</span>: <span class="n">1</span>}
+<span class="k">print</span>(<span class="v">bag</span>[<span class="s">"金币"</span>])   <span class="c"># 中括号里放「键」，取出「值」</span></div>
+    <div class="out">300</div>
+
+    <p>⚠️ 键必须<b>唯一</b>，写重复了后者会覆盖前者：</p>
+    <div class="code"><span class="v">d</span> = {<span class="s">"a"</span>: <span class="n">1</span>, <span class="s">"a"</span>: <span class="n">2</span>}
+<span class="k">print</span>(<span class="v">d</span>)   <span class="c"># {'a': 2} —— 同名键，只留最后一个</span></div>
+    <div class="out">{'a': 2}</div>
+  </section>
+
+  <!-- 2 KeyError 与 get -->
+  <section>
+    <h2><span class="num">2</span>KeyError 陷阱 与 .get() 护盾</h2>
+    <p>用中括号取一个<span class="hl">不存在的键</span>，程序当场爆炸——这就是新手榜排行第二的报错 <span class="hl-c">KeyError</span>（第一名还是老朋友 TypeError）。</p>
+    <div class="code"><span class="v">dex</span> = {<span class="s">"史莱姆"</span>: <span class="n">30</span>, <span class="s">"哥布林"</span>: <span class="n">45</span>}
+<span class="k">print</span>(<span class="v">dex</span>[<span class="s">"火龙"</span>])   <span class="c"># 💥 图鉴里没有火龙 → KeyError: '火龙'</span></div>
+
+    <p>🛡 护盾咒语 <span class="hl">.get(键, 默认值)</span>：查得到返回值，查不到返回默认值，<b>绝不报错</b>。亲自试试两种取值方式的差别：</p>
+    <div class="lab-input">
+      <button class="btn" onclick="tryDirect()">☠ 裸取 dex[火龙]</button>
+      <button class="btn" onclick="tryGet()">🛡 安全取 dex.get(火龙)</button>
+    </div>
+    <div class="traceback" id="key-err" style="display:none"></div>
+    <div class="code" id="get-code" style="display:none"><span class="v">dex</span> = {<span class="s">"史莱姆"</span>: <span class="n">30</span>}
+<span class="k">print</span>(<span class="v">dex</span>.get(<span class="s">"火龙"</span>))       <span class="c"># 查不到 → 返回 None，不报错</span>
+<span class="k">print</span>(<span class="v">dex</span>.get(<span class="s">"火龙"</span>, <span class="n">99</span>))   <span class="c"># 查不到 → 返回默认值 99</span></div>
+    <div class="out" id="get-out" style="display:none">None
+99</div>
+    <p>🧠 记忆口诀：<span class="hl">中括号是赌命，.get() 是保命。</span>不确定键存不存在时，永远用 .get()。</p>
+  </section>
+
+  <!-- 3 增删改 + in -->
+  <section>
+    <h2><span class="num">3</span>增删改 与 in 岗哨</h2>
+    <p>字典是「活」的：同一句 <span class="hl-c">d[键] = 值</span>，键不存在就是<b>新增</b>，键已存在就是<b>修改</b>（覆盖旧值）。删除用 <span class="hl">del</span> 或 <span class="hl">.pop()</span>。</p>
+    <div class="code"><span class="v">bag</span> = {<span class="s">"金币"</span>: <span class="n">300</span>, <span class="s">"药水"</span>: <span class="n">3</span>}
+<span class="v">bag</span>[<span class="s">"卷轴"</span>] = <span class="n">2</span>        <span class="c"># 增：键不存在 → 新增</span>
+<span class="v">bag</span>[<span class="s">"金币"</span>] = <span class="n">500</span>      <span class="c"># 改：键已存在 → 覆盖</span>
+<span class="k">print</span>(<span class="v">bag</span>)             <span class="c"># {'金币': 500, '药水': 3, '卷轴': 2}</span>
+<span class="k">print</span>(<span class="v">bag</span>.pop(<span class="s">"药水"</span>))  <span class="c"># 删：pop 删除并返回被删的值</span>
+<span class="k">print</span>(<span class="v">bag</span>)             <span class="c"># {'金币': 500, '卷轴': 2}</span></div>
+    <div class="out">{'金币': 500, '药水': 3, '卷轴': 2}
+3
+{'金币': 500, '卷轴': 2}</div>
+
+    <p>👆 动手改造一个字典试试（芯片会实时变化，代码同步显示）：</p>
+    <div class="chips" id="bag-chips"></div>
+    <div class="lab-input">
+      <button class="btn" onclick="bagAdd()">➕ 加 卷轴</button>
+      <button class="btn" onclick="bagMod()">🔁 改 药水 ×5</button>
+      <button class="btn" onclick="bagDel()">❌ 删 地图</button>
+    </div>
+    <div class="code" id="bag-code" style="display:none"></div>
+
+    <p>动手前先问一句「键在不在」？<span class="hl">in 岗哨</span>帮你站岗——注意：<span class="hl">in 判断的是键，不是值</span>。</p>
+    <div class="code"><span class="v">bag</span> = {<span class="s">"金币"</span>: <span class="n">300</span>, <span class="s">"药水"</span>: <span class="n">3</span>}
+<span class="k">print</span>(<span class="s">"药水"</span> <span class="k">in</span> <span class="v">bag</span>)   <span class="c"># True —— "药水" 是键</span>
+<span class="k">print</span>(<span class="n">300</span> <span class="k">in</span> <span class="v">bag</span>)     <span class="c"># False —— 300 是值，in 不查值</span></div>
+    <div class="out">True
+False</div>
+  </section>
+
+  <!-- 4 遍历与嵌套 -->
+  <section>
+    <h2><span class="num">4</span>遍历 与 嵌套：真正的怪物图鉴</h2>
+    <p>字典有三大遍历姿势：<span class="hl">keys()</span> 只拿键、<span class="hl">values()</span> 只拿值、<span class="hl">items()</span> 键值对一起拿（最常用）。</p>
+    <div class="code"><span class="v">bag</span> = {<span class="s">"金币"</span>: <span class="n">300</span>, <span class="s">"药水"</span>: <span class="n">3</span>}
+<span class="k">for</span> <span class="v">k</span> <span class="k">in</span> <span class="v">bag</span>:                <span class="c"># 直接遍历字典 = 遍历键</span>
+    <span class="k">print</span>(<span class="v">k</span>)
+<span class="k">for</span> <span class="v">k</span>, <span class="v">v</span> <span class="k">in</span> <span class="v">bag</span>.items():    <span class="c"># 两个变量接住键值对（解包）</span>
+    <span class="k">print</span>(<span class="v">k</span>, <span class="s">"→"</span>, <span class="v">v</span>)</div>
+    <div class="out">金币
+药水
+金币 → 300
+药水 → 3</div>
+
+    <p>真正的图鉴当然不止一个数字——<span class="hl">值可以是另一个字典</span>！这就是<b>嵌套字典</b>：怪物名 → 属性字典，像俄罗斯套娃一层套一层。</p>
+    <div class="code"><span class="v">dex</span> = {
+    <span class="s">"史莱姆"</span>: {<span class="s">"hp"</span>: <span class="n">30</span>, <span class="s">"atk"</span>: <span class="n">5</span>},
+    <span class="s">"哥布林"</span>: {<span class="s">"hp"</span>: <span class="n">45</span>, <span class="s">"atk"</span>: <span class="n">9</span>},
+}
+<span class="k">print</span>(<span class="v">dex</span>[<span class="s">"史莱姆"</span>][<span class="s">"hp"</span>])   <span class="c"># 30 —— 两层中括号，一层一层往里取</span>
+<span class="k">for</span> <span class="v">name</span>, <span class="v">info</span> <span class="k">in</span> <span class="v">dex</span>.items():
+    <span class="k">print</span>(<span class="v">name</span>, <span class="s">"血量"</span>, <span class="v">info</span>[<span class="s">"hp"</span>])</div>
+    <div class="out">30
+史莱姆 血量 30
+哥布林 血量 45</div>
+    <p>🧠 记忆口诀：<span class="hl">嵌套取值，中括号排队</span>——先取外层键，再取内层键。</p>
+  </section>
+
+  <!-- 5 集合 -->
+  <section>
+    <h2><span class="num">5</span>集合 set：一键去重的百宝袋</h2>
+    <p>打完副本背包乱成一锅粥？把列表丢进 <span class="hl">set()</span>，重复元素自动消失——集合里<span class="hl">每个元素只能存在一份</span>。</p>
+    <div class="code"><span class="v">drops</span> = [<span class="s">"剑"</span>, <span class="s">"药"</span>, <span class="s">"剑"</span>, <span class="s">"盾"</span>, <span class="s">"药"</span>, <span class="s">"剑"</span>]
+<span class="v">unique</span> = <span class="k">set</span>(<span class="v">drops</span>)
+<span class="k">print</span>(<span class="v">unique</span>)        <span class="c"># {'剑', '药', '盾'} —— 集合无序，打印顺序可能不同</span>
+<span class="k">print</span>(<span class="k">len</span>(<span class="v">unique</span>))   <span class="c"># 3 —— 自动去重后只剩 3 种</span></div>
+    <div class="out">{'剑', '药', '盾'}
+3</div>
+
+    <p>两个集合之间还能做「关系运算」，下面 A、B 两个口袋，点点看三种运算的结果：</p>
+    <div class="venn">
+      <div class="circle ca"><span class="setlabel">A = {'剑','盾','药'}</span></div>
+      <div class="circle cb"><span class="setlabel">B = {'盾','药','弓'}</span></div>
+    </div>
+    <div class="lab-input">
+      <button class="btn" onclick="setOp('and')">A &amp; B 交集</button>
+      <button class="btn" onclick="setOp('or')">A | B 并集</button>
+      <button class="btn" onclick="setOp('sub')">A - B 差集</button>
+    </div>
+    <div class="code" id="set-code" style="display:none"></div>
+    <div class="out" id="set-out" style="display:none"></div>
+
+    <p>⚠️ 集合的两大戒律：①<span class="hl">无序</span>——元素没有先后；②<span class="hl">不可用下标取值</span>。</p>
+    <div class="code"><span class="v">s</span> = {<span class="n">10</span>, <span class="n">20</span>, <span class="n">30</span>}
+<span class="k">print</span>(<span class="v">s</span>[<span class="n">0</span>])   <span class="c"># 💥 TypeError: 'set' object is not subscriptable</span></div>
+    <p>另一个天坑：<span class="hl">空集合要写 set()</span>，因为 <code class="hl-c">{}</code> 是空字典！</p>
+    <div class="code"><span class="k">print</span>(<span class="k">type</span>({}))      <span class="c"># &lt;class 'dict'&gt; —— 大括号默认造字典</span>
+<span class="k">print</span>(<span class="k">type</span>(<span class="k">set</span>()))   <span class="c"># &lt;class 'set'&gt; —— 空集合得用 set()</span></div>
+  </section>
+
+  <!-- 6 实验室 -->
+  <section>
+    <h2><span class="num">6</span>🎮 实验室 · 怪物图鉴收集系统</h2>
+    <p>野外游荡着 <b>9 只怪物</b>。点击「探索」随机遭遇并收录图鉴；收录过的怪物可以按名字查询属性面板——所有操作都会同步显示等价的 Python 字典代码。</p>
+    <div class="progress-wrap"><div class="progress-fill" id="dex-fill"></div></div>
+    <div class="progress-label" id="dex-label">图鉴收集进度：0 / 9</div>
+    <div class="lab-input">
+      <button class="btn" onclick="explore()">🧭 探索野外</button>
+      <input id="query-name" maxlength="8" placeholder="输入怪物名查询，如：哥布林">
+      <button class="btn" onclick="queryMonster()">📖 查询图鉴</button>
+      <button class="btn ghost" onclick="resetDex()">🗑 重置图鉴</button>
+    </div>
+    <div class="hero-card" id="enc-card">
+      <h3 id="enc-name">—</h3>
+      <div class="rarity" id="enc-rarity">—</div>
+      <div class="attr">
+        <div><b id="enc-hp">—</b><span>血量 HP</span></div>
+        <div><b id="enc-atk">—</b><span>攻击 ATK</span></div>
+        <div><b id="enc-def">—</b><span>防御 DEF</span></div>
+      </div>
+      <div class="quote" id="enc-desc">—</div>
+    </div>
+    <div class="traceback" id="lab-error" style="display:none"></div>
+    <div class="code" id="lab-code"><span class="c"># 我的图鉴（空字典）</span>
+<span class="v">dex</span> = {}
+<span class="c"># 世界怪物数据库（嵌套字典）节选：</span>
+<span class="v">monsters</span> = {
+    <span class="s">"史莱姆"</span>: {<span class="s">"hp"</span>: <span class="n">30</span>, <span class="s">"atk"</span>: <span class="n">5</span>, <span class="s">"def"</span>: <span class="n">1</span>},
+    <span class="s">"哥布林"</span>: {<span class="s">"hp"</span>: <span class="n">45</span>, <span class="s">"atk"</span>: <span class="n">9</span>, <span class="s">"def"</span>: <span class="n">3</span>},
+    <span class="c"># ... 共 9 只，等你探索收录</span>
+}</div>
+  </section>
+
+  <!-- 7 预言机 -->
+  <section>
+    <h2><span class="num">7</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。（选项中的 ⏎ 表示换行）</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 8 记忆卡片 -->
+  <section>
+    <h2><span class="num">8</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 9 Quiz -->
+  <section>
+    <h2><span class="num">9</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 10 课后 -->
+  <section class="homework">
+    <h2><span class="num">10</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开终端输入 <code>python</code> 进入交互模式（没装的去 python.org 装，一路下一步）</li>
+    <li>② 逐行敲一遍上面所有代码块，<b>亲手打字，不要复制粘贴</b>——重点体会 KeyError 与 .get() 的差别</li>
+    <li>③ 小挑战：创建嵌套字典 <code>my_dex</code>，收录 3 只自创怪物（每只含 <code>hp</code> 和 <code>atk</code>），用 <code>for name, info in my_dex.items():</code> 打印每只的战报</li>
+    <li>④ 用 <code>set()</code> 统计掉落列表 <code>drops = ["剑", "药", "剑", "盾", "药", "剑", "宝石"]</code> 有几种不同物品，打印数量</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>字符串精通 —— 密文破译</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具 ============ */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ============ 板块1：按键取值卡片 ============ */
+function pickCard(el){
+  var k = el.getAttribute('data-k');
+  var v = el.getAttribute('data-v');
+  var c = document.getElementById('pick-code');
+  c.style.display = 'block';
+  c.innerHTML = '<span class="v">bag</span> = {<span class="s">"金币"</span>: <span class="n">300</span>, <span class="s">"药水"</span>: <span class="n">3</span>, <span class="s">"地图"</span>: <span class="n">1</span>}\n' +
+    '<span class="k">print</span>(<span class="v">bag</span>[<span class="s">"' + k + '"</span>])   <span class="c"># 按「键」取「值」</span>';
+  var o = document.getElementById('pick-out');
+  o.style.display = 'block';
+  o.textContent = v;
+}
+
+/* ============ 板块2：KeyError vs get ============ */
+function tryDirect(){
+  var t = document.getElementById('key-err');
+  t.style.display = 'block';
+  t.textContent = 'Traceback (most recent call last):\n  File "<stdin>", line 1, in <module>\nKeyError: \'火龙\'';
+  document.getElementById('get-code').style.display = 'none';
+  document.getElementById('get-out').style.display = 'none';
+}
+function tryGet(){
+  document.getElementById('key-err').style.display = 'none';
+  document.getElementById('get-code').style.display = 'block';
+  document.getElementById('get-out').style.display = 'block';
+}
+
+/* ============ 板块3：字典增删改演示 ============ */
+var bagDemo = {"金币": 300, "药水": 3, "地图": 1};
+function pyDictRepr(o){
+  var parts = [];
+  for(var k in o){ parts.push('"' + k + '": ' + o[k]); }
+  return '{' + parts.join(', ') + '}';
+}
+function renderChips(){
+  var box = document.getElementById('bag-chips');
+  box.innerHTML = '';
+  for(var k in bagDemo){
+    var c = document.createElement('div');
+    c.className = 'chip';
+    c.innerHTML = esc(k) + ' : <b>' + bagDemo[k] + '</b>';
+    box.appendChild(c);
+  }
+}
+function bagCode(line, comment){
+  document.getElementById('bag-code').style.display = 'block';
+  document.getElementById('bag-code').innerHTML =
+    line + '\n<span class="k">print</span>(<span class="v">bag</span>)   <span class="c"># ' + comment + ' bag = ' + esc(pyDictRepr(bagDemo)) + '</span>';
+}
+function bagAdd(){
+  if(!("卷轴" in bagDemo)) bagDemo["卷轴"] = 2;
+  renderChips();
+  bagCode('<span class="v">bag</span>[<span class="s">"卷轴"</span>] = <span class="n">2</span>   <span class="c"># 增：键不存在 → 新增</span>', '现在');
+}
+function bagMod(){
+  if("药水" in bagDemo) bagDemo["药水"] = 5;
+  renderChips();
+  bagCode('<span class="v">bag</span>[<span class="s">"药水"</span>] = <span class="n">5</span>   <span class="c"># 改：键已存在 → 覆盖旧值</span>', '现在');
+}
+function bagDel(){
+  delete bagDemo["地图"];
+  renderChips();
+  bagCode('<span class="k">del</span> <span class="v">bag</span>[<span class="s">"地图"</span>]   <span class="c"># 删：彻底移除这个键</span>', '现在');
+}
+renderChips();
+
+/* ============ 板块5：集合运算 ============ */
+var setA = ["剑", "盾", "药"], setB = ["盾", "药", "弓"];
+function setPy(list){
+  return '{' + list.map(function(x){ return "'" + x + "'"; }).join(', ') + '}';
+}
+function setOp(op){
+  var sym, res, tip;
+  if(op === 'and'){ sym = '&amp;'; res = setA.filter(function(x){ return setB.indexOf(x) >= 0; }); tip = '交集：两边都有'; }
+  else if(op === 'or'){
+    sym = '|'; res = setA.slice();
+    setB.forEach(function(x){ if(res.indexOf(x) < 0) res.push(x); });
+    tip = '并集：全部合起来再去重';
+  }
+  else{ sym = '-'; res = setA.filter(function(x){ return setB.indexOf(x) < 0; }); tip = '差集：A 有而 B 没有'; }
+  var py = setPy(res);
+  document.getElementById('set-code').style.display = 'block';
+  document.getElementById('set-code').innerHTML =
+    '<span class="v">a</span> = {<span class="s">"剑"</span>, <span class="s">"盾"</span>, <span class="s">"药"</span>}\n' +
+    '<span class="v">b</span> = {<span class="s">"盾"</span>, <span class="s">"药"</span>, <span class="s">"弓"</span>}\n' +
+    '<span class="k">print</span>(<span class="v">a</span> ' + sym + ' <span class="v">b</span>)   <span class="c"># ' + tip + '</span>';
+  var o = document.getElementById('set-out');
+  o.style.display = 'block';
+  o.textContent = py + '   （集合无序，打印顺序可能不同）';
+}
+
+/* ============ 实验室：怪物图鉴收集系统 ============ */
+var monsterDB = {
+  "史莱姆":     {hp:30,  atk:5,  df:1,  rar:"★ 普通",      desc:"新手村第一经验包"},
+  "哥布林":     {hp:45,  atk:9,  df:3,  rar:"★ 普通",      desc:"绿皮小偷，专抢背包"},
+  "野狼":       {hp:60,  atk:12, df:4,  rar:"★ 普通",      desc:"月圆之夜会召唤同伴"},
+  "宝藏史莱姆": {hp:50,  atk:2,  df:50, rar:"★ 普通",      desc:"打死后掉一堆金币"},
+  "骷髅兵":     {hp:80,  atk:15, df:8,  rar:"★★ 精英",     desc:"墓地常驻保安"},
+  "石魔像":     {hp:150, atk:18, df:20, rar:"★★ 精英",     desc:"物理攻击对它基本是挠痒"},
+  "寒冰巫师":   {hp:90,  atk:30, df:6,  rar:"★★★ 首领",    desc:"冻住你不商量"},
+  "双头食人魔": {hp:200, atk:35, df:10, rar:"★★★ 首领",    desc:"一个头吃饭一个头骂人"},
+  "暗影龙":     {hp:400, atk:60, df:25, rar:"★★★★ 传说",  desc:"装备库终极考核官"}
+};
+var rarityColors = ['#4dd6ff', '#a78bfa', '#f5c542', '#f472b6'];
+var dex = {};
+
+function setLabCode(html){
+  var el = document.getElementById('lab-code');
+  el.style.display = 'block';
+  el.innerHTML = html;
+}
+function updateProgress(){
+  var total = Object.keys(monsterDB).length;
+  var got = Object.keys(dex).length;
+  var pct = Math.round(got / total * 100);
+  document.getElementById('dex-fill').style.width = pct + '%';
+  document.getElementById('dex-label').textContent =
+    '图鉴收集进度：' + got + ' / ' + total + '（' + pct + '%）' +
+    (got === total ? ' 🎉 图鉴大师达成！装备库主管向你致敬！' : '');
+}
+function showEnc(name, m, repeat){
+  var card = document.getElementById('enc-card');
+  document.getElementById('enc-name').textContent = (repeat ? '🔁 再次遭遇 · ' : '⚔ 遭遇 · ') + name;
+  var rar = document.getElementById('enc-rarity');
+  rar.textContent = m.rar + (repeat ? '（已收录）' : '');
+  var stars = m.rar.split(' ')[0].length;
+  rar.style.color = rarityColors[Math.min(stars, 4) - 1];
+  document.getElementById('enc-hp').textContent = m.hp;
+  document.getElementById('enc-atk').textContent = m.atk;
+  document.getElementById('enc-def').textContent = m.df;
+  document.getElementById('enc-desc').textContent = repeat ? '「图鉴里已有它的记录，去查询框输入名字看看吧。」' : '「' + m.desc + '」';
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  document.getElementById('lab-error').style.display = 'none';
+}
+function explore(){
+  var names = Object.keys(monsterDB);
+  var name = names[Math.floor(Math.random() * names.length)];
+  var m = monsterDB[name];
+  if(dex[name]){
+    showEnc(name, m, true);
+    setLabCode('<span class="c"># 野外再次遇到 ' + esc(name) + ' —— 图鉴中已有记录</span>\n' +
+      '<span class="k">print</span>(<span class="s">"' + esc(name) + '"</span> <span class="k">in</span> <span class="v">dex</span>)   <span class="c"># True，用 in 检查键是否已收录</span>');
+  } else {
+    dex[name] = m;
+    updateProgress();
+    showEnc(name, m, false);
+    setLabCode('<span class="c"># 野外探索 → 遭遇 ' + esc(name) + '，收录图鉴！</span>\n' +
+      '<span class="v">dex</span>[<span class="s">"' + esc(name) + '"</span>] = {<span class="s">"hp"</span>: <span class="n">' + m.hp + '</span>, <span class="s">"atk"</span>: <span class="n">' + m.atk + '</span>, <span class="s">"def"</span>: <span class="n">' + m.df + '</span>}\n' +
+      '<span class="k">print</span>(<span class="k">len</span>(<span class="v">dex</span>), <span class="s">"/"</span>, <span class="n">' + Object.keys(monsterDB).length + '</span>)   <span class="c"># 图鉴收集进度</span>');
+  }
+}
+function queryMonster(){
+  var name = document.getElementById('query-name').value.trim();
+  if(!name){ alert('先输入要查询的怪物名，比如：哥布林'); return; }
+  if(dex[name]){
+    var m = dex[name];
+    showEnc(name, m, false);
+    document.getElementById('enc-name').textContent = '📖 图鉴查询 · ' + name;
+    setLabCode('<span class="c"># 查询图鉴：安全姿势</span>\n' +
+      '<span class="v">monster</span> = <span class="v">dex</span>.get(<span class="s">"' + esc(name) + '"</span>)   <span class="c"># 查不到返回 None，不报错</span>\n' +
+      '<span class="k">print</span>(<span class="v">monster</span>[<span class="s">"hp"</span>], <span class="v">monster</span>[<span class="s">"atk"</span>])   <span class="c"># ' + m.hp + ' ' + m.atk + '</span>');
+  } else if(monsterDB[name]){
+    showEnc(name, monsterDB[name], false);
+    document.getElementById('enc-name').textContent = '❓ 未收录 · ' + name;
+    var t = document.getElementById('lab-error');
+    t.style.display = 'block';
+    t.textContent = 'Traceback (most recent call last):\n  File "<stdin>", line 1, in <module>\nKeyError: \'' + name + '\'';
+    setLabCode('<span class="c"># 图鉴里还没有 ' + esc(name) + '，直接取值会爆炸：</span>\n' +
+      '<span class="k">print</span>(<span class="v">dex</span>[<span class="s">"' + esc(name) + '"</span>])        <span class="c"># 💥 KeyError —— 还没收录！</span>\n' +
+      '<span class="k">print</span>(<span class="v">dex</span>.get(<span class="s">"' + esc(name) + '"</span>, <span class="s">"未收录"</span>))   <span class="c"># ✅ 安全返回默认值</span>');
+  } else {
+    alert('野外没有叫「' + name + '」的怪物。提示：史莱姆、哥布林、野狼、宝藏史莱姆、骷髅兵、石魔像、寒冰巫师、双头食人魔、暗影龙');
+  }
+}
+function resetDex(){
+  dex = {};
+  updateProgress();
+  document.getElementById('enc-card').classList.remove('show');
+  document.getElementById('lab-error').style.display = 'none';
+  setLabCode('<span class="v">dex</span>.clear()   <span class="c"># 清空图鉴，重新出发</span>');
+}
+updateProgress();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 消失的火龙',
+    code:'dex = {"史莱姆": 30}\nprint(dex["火龙"])',
+    opts:['30','None','报错 KeyError','0'],
+    ans:2,
+    exp:'用中括号取不存在的键，Python 立刻抛出 KeyError。想要安全取值，必须用 .get()。'
+  },
+  {
+    title:'第 2 预言 · .get() 护盾',
+    code:'dex = {"史莱姆": 30}\nprint(dex.get("火龙"))\nprint(dex.get("火龙", 99))',
+    opts:['None⏎99','30⏎30','报错⏎99','None⏎None'],
+    ans:0,
+    exp:'.get() 查不到键时返回默认值：不给默认值就返回 None，给了就用你给的。第二行输出 99。⏎ 表示换行。'
+  },
+  {
+    title:'第 3 预言 · items() 解包',
+    code:'bag = {"金币": 300, "药水": 5}\nfor k, v in bag.items():\n    print(k, v)',
+    opts:['金币 300⏎药水 5','金币 药水⏎300 5','(金币, 300)⏎(药水, 5)','报错'],
+    ans:0,
+    exp:'items() 把每个键值对打包成 (键, 值) 元组，for 用两个变量接住就是「解包」，一行输出一对。⏎ 表示换行。'
+  },
+  {
+    title:'第 4 预言 · 去重魔法',
+    code:'drops = ["剑", "药", "剑", "盾", "药", "剑"]\nprint(len(set(drops)))',
+    opts:['6','3','2','报错'],
+    ans:1,
+    exp:'set() 一键去重：剑、药、盾只剩 3 个唯一元素。集合里每个元素只能出现一次，这是集合的铁律。'
+  },
+  {
+    title:'第 5 预言 · 别给集合排队',
+    code:'s = {10, 20, 30}\nprint(s[0])',
+    opts:['10','20','报错 TypeError','None'],
+    ans:2,
+    exp:'集合是无序的，元素没有下标，s[0] 直接 TypeError。想按下标取，得先转成列表：list(s)[0]。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      var e = esc(l);
+      return e.replace(/("[^"]*")/g,'<span style="color:#4dd6ff">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|type|len|set|get|del|pop|list|sorted|keys|values|items|for|in|KeyError|TypeError)/g,'<span style="color:var(--pink)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['字典是什么？','键值对容器 {键: 值}，按键存取，键必须唯一'],
+  ['d["键"] 查不到会怎样？','直接抛出 KeyError，程序爆炸'],
+  ['.get() 的作用','d.get("键", 默认值)：查不到返回默认值（不给就返回 None），绝不报错'],
+  ['添加 / 修改键值对','d["键"] = 值：键不存在是新增，键已存在是覆盖'],
+  ['删除键值对','del d["键"] 彻底删除；v = d.pop("键") 删除并返回被删的值'],
+  ['in 判断的是什么？','"键" in d 判断键是否存在；它不查值'],
+  ['三大遍历方法','keys() 所有键 / values() 所有值 / items() 所有 (键, 值) 对'],
+  ['嵌套字典怎么取值','一层一层取：dex["史莱姆"]["hp"]，两层中括号'],
+  ['set() 去重','set(列表) 自动去掉重复；集合无序，不能用 s[0] 取值'],
+  ['交集 / 并集 / 差集','&amp; 交集（都有）· | 并集（合并去重）· - 差集（前有后没有）']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'下面哪一行能正确创建字典？',
+   opts:['bag = {"金币": 300}','bag = ("金币": 300)','bag = ["金币": 300]','bag = {"金币" = 300}'], ans:0,
+   exp:'字典用大括号 {}，键和值之间用冒号，键值对之间用逗号。'},
+  {q:'dex = {"史莱姆": 30}，print(dex["史莱姆"]) 输出什么？',
+   opts:['30','"史莱姆"','报错','None'], ans:0,
+   exp:'中括号里放键，取出对应的值 30。'},
+  {q:'dex = {"史莱姆": 30}，print(dex["火龙"]) 会发生什么？',
+   opts:['返回 None','返回 0','抛出 KeyError','抛出 ValueError'], ans:2,
+   exp:'键不存在时用中括号取值，直接 KeyError。安全写法：dex.get("火龙")。'},
+  {q:'print(dex.get("火龙", "未知怪物")) 输出什么？',
+   opts:['None','未知怪物','报错 KeyError','火龙'], ans:1,
+   exp:'.get() 查不到键就返回第二个参数（默认值）"未知怪物"。'},
+  {q:'bag = {"金币": 300}，先执行 bag["金币"] = 500，再 print(bag["金币"]) 输出？',
+   opts:['300','500','报错','{"金币": 300}'], ans:1,
+   exp:'同一个语法：键已存在就是覆盖，500 顶掉了 300。'},
+  {q:'bag = {"金币": 300, "药水": 3}，print("药水" in bag) 输出？',
+   opts:['True','False','3','报错'], ans:0,
+   exp:'in 检查的是键。"药水" 是键所以 True；写 3 in bag 才是 False，因为 3 是值。'},
+  {q:'for k, v in bag.items(): 循环里，v 拿到的是？',
+   opts:['键','值','整个字典','键值对元组'], ans:1,
+   exp:'items() 产出 (键, 值) 对，两个变量 k、v 分别解包接住：k 是键，v 是值。'},
+  {q:'dex = {"史莱姆": {"hp": 30, "atk": 5}}，print(dex["史莱姆"]["atk"]) 输出？',
+   opts:['5','30','报错','"atk"'], ans:0,
+   exp:'嵌套字典一层一层取：先 dex["史莱姆"] 拿到内层字典，再 ["atk"] 取出 5。'},
+  {q:'print(len({2, 2, 5, 5, 5, 8})) 输出什么？',
+   opts:['6','4','3','2'], ans:2,
+   exp:'集合自动去重：{2, 5, 8} 只剩 3 个元素，len 是 3。'},
+  {q:'print({1, 2, 3} & {2, 3, 4}) 输出什么？',
+   opts:['{2, 3}','{1, 2, 3, 4}','{1}','{1, 4}'], ans:0,
+   exp:'&amp; 是交集：两边都有的元素，只有 2 和 3。（打印顺序可能不同）'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！图鉴大师本家，下一课已为你解锁 🔓' : '通关成功！第 8 课「字符串精通 —— 密文破译」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

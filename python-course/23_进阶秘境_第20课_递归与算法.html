@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第20课 · 递归与算法初步 —— 迷宫求解</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#a78bfa; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167,139,250,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--purple);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#a78bfa,#4dd6ff 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section h3.subt{color:var(--gold);font-size:16px;margin:18px 0 6px;letter-spacing:1px;}
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--purple);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--purple);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#d6c9ff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 三要素/复杂度盒子 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:170px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(167,139,250,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:20px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input{
+    flex:1;min-width:160px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(167,139,250,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(167,139,250,.3);}
+  .sbtn{
+    background:#0a0d1e;border:1px solid var(--cyan);color:var(--cyan);padding:9px 18px;
+    border-radius:9px;cursor:pointer;font-size:13px;font-family:inherit;transition:all .2s;font-weight:600;
+  }
+  .sbtn:hover{background:rgba(77,214,255,.12);}
+  .lab-two{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;align-items:start;}
+  @media(max-width:700px){.lab-two{grid-template-columns:1fr;}}
+  .lab-ctrl{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap;}
+  .step-count{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;}
+  /* 调用栈面板 */
+  .cline{padding:1px 8px;border-radius:6px;border-left:3px solid transparent;}
+  .cline.cur{background:rgba(167,139,250,.16);border-left-color:var(--purple);}
+  .stack-panel{background:#0a0d1e;border:1px solid var(--line);border-radius:12px;padding:14px;min-height:250px;}
+  .stack-title{font-size:13px;color:var(--gold);margin-bottom:10px;font-weight:600;letter-spacing:1px;}
+  .frame{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--card);
+    border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;color:var(--muted);
+    transition:all .3s;
+  }
+  .frame.top{border-color:var(--purple);color:var(--purple);background:rgba(167,139,250,.12);box-shadow:0 0 10px rgba(167,139,250,.2);}
+  .frame-empty{font-size:13px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;padding:6px 4px;}
+  .stack-msg{font-size:13px;color:var(--muted);margin-top:10px;border-left:3px solid var(--gold);padding-left:10px;min-height:44px;}
+  /* 二分查找面板 */
+  .bs-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:14px 0;}
+  .bcell{
+    height:30px;display:flex;align-items:center;justify-content:center;font-size:11px;
+    font-family:ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;transition:all .35s;
+  }
+  .bcell.dead{opacity:.15;}
+  .bcell.lo{border-color:var(--cyan);color:var(--cyan);}
+  .bcell.hi{border-color:var(--pink);color:var(--pink);}
+  .bcell.mid{background:rgba(245,197,66,.22);border-color:var(--gold);color:var(--gold);transform:scale(1.18);}
+  .bcell.found{background:rgba(167,139,250,.3);border-color:var(--purple);color:var(--purple);box-shadow:0 0 14px rgba(167,139,250,.55);transform:scale(1.18);}
+  .bs-legend{font-size:12px;color:var(--muted);margin-top:6px;}
+  .bs-log{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;max-height:180px;overflow-y:auto;
+    color:var(--muted);
+  }
+  .bs-line{margin-bottom:4px;}
+  .bs-line.bs-done{color:var(--purple);font-weight:700;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);color:var(--purple);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(167,139,250,.1);color:var(--purple);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 进阶秘境 · <b>第 20 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 4 · ADVANCED MYSTIC REALM</div>
+    <h1>递归与算法初步 —— 迷宫求解</h1>
+    <div class="subtitle">今日目标：让函数自己调用自己，再用「砍一半」的智慧驯服海量数据</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握递归三要素：<span class="hl">基线条件、递归条件、自我调用</span></li>
+      <li>手算阶乘与斐波那契，见识<span class="hl">重复计算的爆炸</span>并学会缓存</li>
+      <li>认识递归深度限制 <span class="hl-c">RecursionError</span>，学会在递归与循环之间做选择</li>
+      <li>掌握二分查找，建立 O(1) / O(log n) / O(n) / O(n²) 的复杂度直觉</li>
+      <li>通关实验室「递归可视化沙盘」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 递归三要素 -->
+  <section>
+    <h2><span class="num">1</span>递归三要素 —— 自己解决自己</h2>
+    <p><span class="hl">递归</span>就是函数在体内调用自己。听起来像套娃，其实像「走迷宫」：把大岔路丢给「下一个自己」，直到撞到出口。每个能活下来的递归函数，都缺不了三样东西：</p>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">① 基线条件</div><div class="val">出口</div><div class="tip">到这一步直接返回，不再调用自己</div></div>
+      <div class="mbox"><div class="tag">② 递归条件</div><div class="val">缩小问题</div><div class="tip">每次调用都离出口更近一步</div></div>
+      <div class="mbox"><div class="tag">③ 自我调用</div><div class="val">调用自己</div><div class="tip">函数体内出现自己的名字</div></div>
+    </div>
+
+    <p>经典入门例子——火箭倒数：</p>
+    <div class="code py">def countdown(n):
+    if n == 0:              # ① 基线条件：到 0 就发射
+        print("🚀 发射！")
+    else:
+        countdown(n - 1)    # ②③ 问题缩小 + 自我调用
+
+countdown(3)</div>
+    <div class="out">🚀 发射！</div>
+
+    <p>调用链条是这样一层层「钻」进去的：</p>
+    <div class="code">countdown(3) → countdown(2) → countdown(1) → countdown(0) → 命中出口，打印「🚀 发射！」</div>
+    <p>⚠️ 最常见的灾难：<span class="hl">忘了写基线条件</span>（或者问题没在缩小），函数会无限调用自己，直到撞上递归深度限制当场爆炸——第 4 节带你亲眼看。</p>
+  </section>
+
+  <!-- 2 阶乘 -->
+  <section>
+    <h2><span class="num">2</span>阶乘 —— 把大问题敲碎</h2>
+    <p>阶乘：5! = 5×4×3×2×1 = 120。它天然适合递归，因为 <span class="hl">n! = n × (n-1)!</span>——大问题里藏着一个一模一样的小问题：</p>
+    <div class="code py">def factorial(n):
+    if n == 1:                    # ① 基线条件：1! 就是 1
+        return 1
+    return n * factorial(n - 1)   # ②③ 缩小问题 + 自我调用
+
+print(factorial(5))</div>
+    <div class="out">120</div>
+
+    <p>把递归「展开再收回」的过程画出来，一眼就懂：</p>
+    <div class="code">factorial(5)
+= 5 × factorial(4)
+= 5 × 4 × factorial(3)
+= 5 × 4 × 3 × factorial(2)
+= 5 × 4 × 3 × 2 × factorial(1)   ← 撞到基线，返回 1
+= 5 × 4 × 3 × 2 × 1
+= 120</div>
+    <p>先一层层<b>压进去</b>（等待），再一层层<b>弹回来</b>（计算）。实验室的沙盘 A 会把这个压栈 / 弹栈过程演给你看。</p>
+  </section>
+
+  <!-- 3 斐波那契 -->
+  <section>
+    <h2><span class="num">3</span>斐波那契 —— 重复计算的炸弹</h2>
+    <p>斐波那契数列：1, 1, 2, 3, 5, 8……规则是 <span class="hl">fib(n) = fib(n-1) + fib(n-2)</span>。递归写法优雅得像诗：</p>
+    <div class="code py">def fib(n):
+    if n &lt; 2:                       # 基线：fib(0)=0，fib(1)=1
+        return n
+    return fib(n - 1) + fib(n - 2)  # 一个问题裂成两个子问题
+
+print(fib(4))</div>
+    <div class="out">3</div>
+
+    <p>但优雅背后藏着炸弹——「裂成两个」意味着调用树疯狂分叉，同一个子问题被反复重算：</p>
+    <div class="code">fib(4)
+├─ fib(3)
+│  ├─ fib(2)
+│  │  ├─ fib(1) ✓
+│  │  └─ fib(0) ✓
+│  └─ fib(1) ✓
+└─ fib(2)
+   ├─ fib(1) ✓
+   └─ fib(0) ✓
+
+fib(2) 算了 2 次，fib(1) 算了 3 次，fib(0) 算了 2 次
+→ 仅仅算 fib(4) 就调用了 9 次！</div>
+
+    <p>规模一大就彻底失控：算 <code>fib(35)</code> 要调用 <span class="hl">2986 万次</span>函数，多数是纯浪费的重复劳动。解药是<span class="hl">缓存</span>——算过的存表，下次直接查（这正是上一课 @lru_cache 附魔的主场）：</p>
+    <div class="code py">from functools import lru_cache
+
+@lru_cache(maxsize=None)          # 缓存附魔：算过的直接查表
+def fib(n):
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+print(fib(35))                    # 2986 万次调用 → 36 次，瞬间出结果</div>
+    <div class="out">9227465</div>
+  </section>
+
+  <!-- 4 深度限制与循环 -->
+  <section>
+    <h2><span class="num">4</span>悬崖与护栏 —— 深度限制 &amp; 递归 vs 循环</h2>
+    <p>Python 不允许无限套娃。每递归一层就占用一帧调用栈，栈有上限，默认约 <span class="hl">1000 层</span>：</p>
+    <div class="code py">import sys
+
+print(sys.getrecursionlimit())    # 查看当前最大递归深度</div>
+    <div class="out">1000</div>
+
+    <p>如果递归没有出口，超限的瞬间就是这个名场面：</p>
+    <div class="code py">def boom(n):
+    return boom(n + 1)            # 没有基线条件：一路挖到地心
+
+boom(1)</div>
+    <div class="out">💥 RecursionError: maximum recursion depth exceeded</div>
+
+    <p>其实任何递归都能改写成循环（阶乘的循环版）：不占调用栈、没有深度限制、通常更快——</p>
+    <div class="code py">def factorial_loop(n):
+    result = 1
+    for i in range(2, n + 1):     # 从 2 一路乘到 n
+        result *= i
+    return result
+
+print(factorial_loop(5))</div>
+    <div class="out">120</div>
+
+    <p>那什么时候非递归不可？<span class="hl">问题天然分叉</span>的时候——迷宫回溯、汉诺塔、文件目录遍历这类「每条岔路都要试」的问题，递归写出来清清爽爽，硬用循环反而要手工维护一个栈。经验法则：<span class="hl-p">线性累加用循环，天然分叉用递归</span>。</p>
+  </section>
+
+  <!-- 5 二分查找 -->
+  <section>
+    <h2><span class="num">5</span>二分查找 —— 每次砍掉一半</h2>
+    <p>在 100 根武器里找「攻击力 73」的那根：挨个翻是笨办法；聪明的做法是站在<span class="hl">有序</span>队伍正中间问一句「你比 73 大还是小？」——一句话砍掉 50 人。这就是二分查找，前提只有一个：<span class="hl">序列必须有序</span>。</p>
+    <div class="code py">def binary_search(data, target):
+    low, high = 0, len(data) - 1       # 搜索区间的两端
+    while low &lt;= high:
+        mid = (low + high) // 2        # 站到正中间
+        if data[mid] == target:
+            return mid                 # 命中，返回下标
+        elif data[mid] &lt; target:
+            low = mid + 1              # 目标在右半，砍掉左半
+        else:
+            high = mid - 1             # 目标在左半，砍掉右半
+    return -1                          # 没找到
+
+nums = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]
+print(binary_search(nums, 23))         # 23 在下标 5
+print(binary_search(nums, 100))        # 不存在，返回 -1</div>
+    <div class="out">5
+-1</div>
+
+    <p>找 23 只用了 3 步：mid=4（16 偏小）→ mid=7（56 偏大）→ mid=5（命中）！挨个找最坏要翻 10 次。数据越大差距越夸张：100 万个有序数，二分查找<span class="hl">最多约 20 步</span>。</p>
+  </section>
+
+  <!-- 6 大O -->
+  <section>
+    <h2><span class="num">6</span>大 O 直觉 —— 四档速度，四个生活比喻</h2>
+    <p>大 O 记号描述「数据量翻倍时，工作量怎么涨」。不用背公式，记住四个生活画面就够用：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">跳到书第 P 页</div><div class="val">O(1)</div><div class="tip">常数：书多厚都一步到位 · data[3]</div></div>
+      <div class="mbox"><div class="tag">查字典</div><div class="val">O(log n)</div><div class="tip">对数：每次砍一半 · 二分查找</div></div>
+      <div class="mbox"><div class="tag">全班点名</div><div class="val">O(n)</div><div class="tip">线性：一个一个来 · 一重循环</div></div>
+      <div class="mbox"><div class="tag">两两握手</div><div class="val">O(n²)</div><div class="tip">平方：人人都要配对 · 嵌套双循环</div></div>
+    </div>
+    <p>感受一下 n = 1000 时的差距：</p>
+    <div class="code">O(1)     →        1 步        （跳页）
+O(log n) →       约 10 步      （查字典：2¹⁰ ≈ 1024）
+O(n)     →     1000 步        （点名）
+O(n²)    →  1000000 步        （握手：1000 × 1000）</div>
+    <p>看到嵌套双循环就条件反射想到「两两握手」，看到每次砍一半就想到「查字典」——这就是算法师的直觉。</p>
+  </section>
+
+  <!-- 7 实验室 -->
+  <section>
+    <h2><span class="num">7</span>🎮 实验室 · 递归可视化沙盘</h2>
+
+    <h3 class="subt">🧪 沙盘 A · factorial(5) 调用栈动画</h3>
+    <p>点击「开始求解」：左边代码会高亮当前执行行，右边的调用栈一层层压进去（factorial(5)→4→3→2→1），撞到基线条件后再一层层弹回来（1→2→6→24→120）：</p>
+    <div class="lab-two">
+      <div>
+        <div class="code" id="fact-code"></div>
+        <div class="lab-ctrl">
+          <button class="sbtn" onclick="factStart()">▶ 开始求解</button>
+          <button class="sbtn" onclick="factStep()">⏭ 单步执行</button>
+          <button class="sbtn" onclick="factReset()">↺ 重置</button>
+          <span class="step-count" id="fact-count"></span>
+        </div>
+        <div class="out" id="fact-out" style="display:none">120</div>
+      </div>
+      <div class="stack-panel">
+        <div class="stack-title">📚 调用栈（栈顶在上）</div>
+        <div id="fact-stack"></div>
+        <div class="stack-msg" id="fact-msg"></div>
+      </div>
+    </div>
+
+    <h3 class="subt">🧪 沙盘 B · 二分查找动画（1~100 找目标）</h3>
+    <p>输入一个 1~100 的目标数，看 low / high / mid 三个指针如何移动，被砍掉的一半当场灰化：</p>
+    <div class="lab-input">
+      <input id="bs-target" type="number" min="1" max="100" value="73" placeholder="目标数字（1~100）">
+      <button class="btn" onclick="bsStart()">🎯 开始查找</button>
+      <button class="sbtn" onclick="bsStep()">⏭ 单步</button>
+      <button class="sbtn" onclick="bsReset()">↺ 重置</button>
+    </div>
+    <div class="bs-legend">青色边框 = low 下界 ｜ 粉色边框 = high 上界 ｜ 金色高亮 = mid 中点 ｜ 灰暗 = 已被砍掉的区域</div>
+    <div class="bs-grid" id="bs-grid"></div>
+    <div class="bs-log" id="bs-log">等待开始……</div>
+  </section>
+
+  <!-- 8 预言机 -->
+  <section>
+    <h2><span class="num">8</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 9 记忆卡片 -->
+  <section>
+    <h2><span class="num">9</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 10 Quiz -->
+  <section>
+    <h2><span class="num">10</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 11 课后 -->
+  <section class="homework">
+    <h2><span class="num">11</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 在终端输入 <code>python3</code>，亲手敲一遍 <code>factorial</code>，验证 <code>print(factorial(5))</code> 输出 120，再把 5 改成 10 试试</li>
+    <li>② 敲一个没有基线条件的 <code>boom(n)</code>（先 print 一下 n），亲眼看一次 <code>RecursionError</code> 报错长什么样——见过的怪物就不可怕了</li>
+    <li>③ 用递归写 <code>sum_to(n)</code> 计算 1+2+…+100（提示：基线条件是 n == 1 时返回 1，否则返回 n + sum_to(n - 1)）</li>
+    <li>④ 敲一遍 <code>binary_search</code>，在 <code>list(range(1, 101))</code> 里找你的幸运数字，数一数 mid 试了几次（应该不超过 7 次）</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>★ BOSS 战「卡牌对战游戏」</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用语法高亮 ============ */
+function esc(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hlCode(src){
+  return src.split('\n').map(function(l){
+    l = esc(l);
+    l = l.replace(/(#.*)$/, "<span class='c'>$1</span>");
+    l = l.replace(/("[^"]*")/g, "<span class='s'>$1</span>");
+    l = l.replace(/(^|\s)(\d+)(?=\s|$)/g, "$1<span class='n'>$2</span>");
+    l = l.replace(/\b(print|input|nonlocal|global|return|import|range|float|while|elif|else|True|False|None|pass|type|str|int|len|def|from|for|and|not|if|in)\b/g, "<span class='k'>$1</span>");
+    return l;
+  }).join('\n');
+}
+/* 页面里所有 .code.py 静态代码块自动高亮 */
+(function(){
+  var pys = document.querySelectorAll('.code.py');
+  for(var i=0;i<pys.length;i++){
+    pys[i].innerHTML = hlCode(pys[i].textContent);
+  }
+})();
+
+/* ============ 沙盘 A：阶乘调用栈动画 ============ */
+var factLines = [
+  'def factorial(n):',
+  '    if n == 1:',
+  '        return 1',
+  '    return n * factorial(n - 1)',
+  '',
+  'print(factorial(5))'
+];
+var factSteps = [
+  {line:0, msg:'调用 factorial(5)，栈帧压入 📥', stack:[5]},
+  {line:1, msg:'n = 5 ≠ 1，不是基线条件', stack:[5]},
+  {line:3, msg:'return 5 * factorial(4) → 先调用 factorial(4)，压栈 📥', stack:[5,4]},
+  {line:1, msg:'n = 4 ≠ 1，不是基线条件', stack:[5,4]},
+  {line:3, msg:'return 4 * factorial(3) → 压栈 📥', stack:[5,4,3]},
+  {line:1, msg:'n = 3 ≠ 1，不是基线条件', stack:[5,4,3]},
+  {line:3, msg:'return 3 * factorial(2) → 压栈 📥', stack:[5,4,3,2]},
+  {line:1, msg:'n = 2 ≠ 1，不是基线条件', stack:[5,4,3,2]},
+  {line:3, msg:'return 2 * factorial(1) → 压栈 📥', stack:[5,4,3,2,1]},
+  {line:1, msg:'n = 1 == 1，命中基线条件！🎯', stack:[5,4,3,2,1]},
+  {line:2, msg:'factorial(1) 返回 1，栈帧弹出 📤', stack:[5,4,3,2]},
+  {line:3, msg:'factorial(2) 算出 2 × 1 = 2，返回并弹出 📤', stack:[5,4,3]},
+  {line:3, msg:'factorial(3) 算出 3 × 2 = 6，返回并弹出 📤', stack:[5,4]},
+  {line:3, msg:'factorial(4) 算出 4 × 6 = 24，返回并弹出 📤', stack:[5]},
+  {line:3, msg:'factorial(5) 算出 5 × 24 = 120，返回并弹出 📤', stack:[]},
+  {line:5, msg:'print(factorial(5)) 输出 120 🎉 递归完成！', stack:[]}
+];
+var factIdx = -1;
+var factTimer = null;
+(function(){
+  var box = document.getElementById('fact-code');
+  var html = '';
+  for(var i=0;i<factLines.length;i++){
+    html += '<div class="cline" id="fl-'+i+'">'+hlCode(factLines[i])+'</div>';
+  }
+  box.innerHTML = html;
+})();
+function renderFact(){
+  var st = factIdx >= 0 ? factSteps[factIdx] : null;
+  for(var i=0;i<factLines.length;i++){
+    document.getElementById('fl-'+i).classList.toggle('cur', !!st && st.line === i);
+  }
+  var html = '';
+  if(st){
+    for(var j=st.stack.length-1;j>=0;j--){
+      var nn = st.stack[j];
+      var isTop = (j === st.stack.length-1);
+      if(isTop){
+        html += '<div class="frame top">▶ factorial('+nn+') 正在执行</div>';
+      } else {
+        html += '<div class="frame">factorial('+nn+') · 等待 '+nn+' × ?</div>';
+      }
+    }
+  }
+  document.getElementById('fact-stack').innerHTML = html || '<div class="frame-empty">栈空</div>';
+  document.getElementById('fact-msg').textContent = st
+    ? st.msg
+    : '点击「开始求解」，看 factorial(5) 如何一层层压栈、再一层层弹栈。';
+  document.getElementById('fact-count').textContent = st
+    ? ('第 ' + (factIdx+1) + ' / ' + factSteps.length + ' 步')
+    : '';
+  document.getElementById('fact-out').style.display =
+    (st && factIdx === factSteps.length - 1) ? 'block' : 'none';
+}
+function factStart(){
+  factReset();
+  factIdx = 0;
+  renderFact();
+  factTimer = setInterval(function(){
+    if(factIdx >= factSteps.length - 1){
+      clearInterval(factTimer);
+      factTimer = null;
+      return;
+    }
+    factIdx++;
+    renderFact();
+  }, 1000);
+}
+function factStep(){
+  if(factTimer){ clearInterval(factTimer); factTimer = null; }
+  if(factIdx < factSteps.length - 1){
+    factIdx++;
+    renderFact();
+  }
+}
+function factReset(){
+  if(factTimer){ clearInterval(factTimer); factTimer = null; }
+  factIdx = -1;
+  renderFact();
+}
+renderFact();
+
+/* ============ 沙盘 B：二分查找动画 ============ */
+var bsStepsData = [];
+var bsIdx = -1;
+var bsAuto = null;
+(function(){
+  var g = document.getElementById('bs-grid');
+  for(var i=1;i<=100;i++){
+    var d = document.createElement('div');
+    d.className = 'bcell';
+    d.textContent = i;
+    g.appendChild(d);
+  }
+})();
+function inElim(elim, x){
+  for(var i=0;i<elim.length;i++){
+    if(x >= elim[i][0] && x <= elim[i][1]) return true;
+  }
+  return false;
+}
+function renderBS(){
+  var cells = document.getElementById('bs-grid').children;
+  var st = bsIdx >= 0 ? bsStepsData[bsIdx] : null;
+  for(var i=1;i<=100;i++){
+    var c = cells[i-1];
+    var cls = 'bcell';
+    if(st){
+      if(inElim(st.elim, i)) cls += ' dead';
+      if(i === st.mid){
+        cls += (st.done ? ' found' : ' mid');
+      } else {
+        if(i === st.low) cls += ' lo';
+        if(i === st.high) cls += ' hi';
+      }
+    }
+    c.className = cls;
+  }
+  var log = document.getElementById('bs-log');
+  var html = '';
+  if(bsIdx < 0){
+    html = '等待开始……';
+  } else {
+    for(var k=0;k<=bsIdx && k<bsStepsData.length;k++){
+      html += '<div class="bs-line'+(bsStepsData[k].done ? ' bs-done' : '')+'">'+bsStepsData[k].msg+'</div>';
+    }
+    if(st && st.done){
+      html += '<div class="bs-line bs-done">🎯 共 '+bsStepsData.length+' 步锁定目标（挨个找最坏要 '+st.mid+' 步）</div>';
+    }
+  }
+  log.innerHTML = html;
+  log.scrollTop = log.scrollHeight;
+}
+function bsStart(){
+  bsReset();
+  var t = parseInt(document.getElementById('bs-target').value, 10);
+  if(isNaN(t) || t < 1 || t > 100){
+    alert('请输入 1~100 之间的整数！');
+    return;
+  }
+  var low = 1, high = 100, elim = [];
+  while(low <= high){
+    var mid = Math.floor((low + high) / 2);
+    var stepNo = bsStepsData.length + 1;
+    if(mid === t){
+      bsStepsData.push({low:low, high:high, mid:mid, elim:elim.slice(),
+        msg:'第 '+stepNo+' 步：low='+low+' high='+high+' mid='+mid+' → '+mid+' == '+t+'，命中目标！', done:true});
+      break;
+    } else if(mid < t){
+      bsStepsData.push({low:low, high:high, mid:mid, elim:elim.slice(),
+        msg:'第 '+stepNo+' 步：low='+low+' high='+high+' mid='+mid+' → '+mid+' < '+t+'，砍掉左半（'+low+' ~ '+mid+'）'});
+      elim.push([low, mid]);
+      low = mid + 1;
+    } else {
+      bsStepsData.push({low:low, high:high, mid:mid, elim:elim.slice(),
+        msg:'第 '+stepNo+' 步：low='+low+' high='+high+' mid='+mid+' → '+mid+' > '+t+'，砍掉右半（'+mid+' ~ '+high+'）'});
+      elim.push([mid, high]);
+      high = mid - 1;
+    }
+  }
+  bsIdx = 0;
+  renderBS();
+  bsAuto = setInterval(function(){
+    if(bsIdx >= bsStepsData.length - 1){
+      clearInterval(bsAuto);
+      bsAuto = null;
+      return;
+    }
+    bsIdx++;
+    renderBS();
+  }, 1200);
+}
+function bsStep(){
+  if(bsAuto){ clearInterval(bsAuto); bsAuto = null; }
+  if(bsIdx < bsStepsData.length - 1){
+    bsIdx++;
+    renderBS();
+  }
+}
+function bsReset(){
+  if(bsAuto){ clearInterval(bsAuto); bsAuto = null; }
+  bsStepsData = [];
+  bsIdx = -1;
+  renderBS();
+}
+renderBS();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 没有出口的电梯',
+    code:'def boom(n):\n    print(n)\n    boom(n + 1)     # 忘了写基线条件\n\nboom(1)',
+    opts:['打印到 1000 左右后正常停止','打印一阵后抛出 RecursionError','无限打印、永不停止','报错 SyntaxError'],
+    ans:1,
+    exp:'没有基线条件，递归无限深入。但 Python 的调用栈有上限（默认约 1000 层），超限后抛出 RecursionError——不是无限循环，是当场爆炸。'
+  },
+  {
+    title:'第 2 预言 · 阶乘大师',
+    code:'def factorial(n):\n    if n == 1:\n        return 1\n    return n * factorial(n - 1)\n\nprint(factorial(4))',
+    opts:['24','10','12','4'],
+    ans:0,
+    exp:'factorial(4) = 4 × factorial(3) = 4 × 3 × 2 × 1 = 24。一层层压栈到基线 1，再一层层乘回来。'
+  },
+  {
+    title:'第 3 预言 · 迷路的二分查找',
+    code:'def search(nums, target):\n    low, high = 0, len(nums) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if nums[mid] == target:\n            return mid\n        if nums[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n\nprint(search([9, 3, 7, 1, 5], 1))',
+    opts:['-1','0','3','报错'],
+    ans:0,
+    exp:'列表无序，二分查找会迷路：mid=2 是 7，比 1 大 → high=1；mid=0 是 9，比 1 大 → high=-1，循环结束返回 -1。明明 1 就在列表里！有序是二分查找的命根子。'
+  },
+  {
+    title:'第 4 预言 · fib 的调用次数',
+    code:'count = 0\ndef fib(n):\n    global count\n    count += 1\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n\nfib(4)\nprint(count)',
+    opts:['5','7','9','15'],
+    ans:2,
+    exp:'fib(4) 裂成 fib(3)+fib(2)，fib(3) 又裂成 fib(2)+fib(1)……fib(2) 被算 2 次、fib(1) 被算 3 次、fib(0) 被算 2 次，加上 fib(3) 和 fib(4) 各 1 次，共 9 次调用。'
+  },
+  {
+    title:'第 5 预言 · 握手定律',
+    code:'n = 4\ntotal = 0\nfor i in range(n):\n    for j in range(n):\n        total += 1\nprint(total)',
+    opts:['8','12','16','4'],
+    ans:2,
+    exp:'外层 4 次 × 内层 4 次 = 16 次。嵌套双循环就是 O(n²) 的「两两握手」：数据量翻倍，工作量翻四倍。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hlCode(q.code);
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['递归三要素','基线条件（出口）、递归条件（问题缩小）、自我调用'],
+  ['基线条件的作用','递归的出口：到这一步直接返回，不再继续调用自己'],
+  ['缺基线条件会怎样','无限递归，超过最大深度后抛出 RecursionError'],
+  ['factorial(5) = ?','120（= 5×4×3×2×1）'],
+  ['朴素递归 fib 的问题','大量重复计算：算 fib(4) 时 fib(2) 被算 2 次，规模越大爆炸越狠'],
+  ['怎么给 fib 提速','加 @lru_cache 缓存（36 次搞定 fib(35)），或改写成循环'],
+  ['sys.getrecursionlimit()','查看最大递归深度，默认约 1000'],
+  ['二分查找的前提','序列必须有序，否则会迷路、找错甚至找不到'],
+  ['二分查找复杂度','O(log n)：每步砍掉一半，100 万个数约 20 步'],
+  ['O(n²) 的生活比喻','两两握手：n 个人每人都要和其余所有人各握一次手']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'递归三要素不包括下面哪一项？',
+   opts:['基线条件','递归条件（问题规模缩小）','自我调用','全局变量声明'], ans:3,
+   exp:'三要素：基线条件（出口）、递归条件（缩小问题）、自我调用。全局变量和递归没有必然关系。'},
+  {q:'递归函数缺少基线条件，最终会？',
+   opts:['正常返回 None','抛出 RecursionError','自动改用循环执行','抛出 SyntaxError'], ans:1,
+   exp:'没有出口就会无限深入，超过最大递归深度（默认约 1000 层）后抛出 RecursionError。'},
+  {q:'factorial(4) 的返回值是？',
+   opts:['24','10','12','4'], ans:0,
+   exp:'4 × 3 × 2 × 1 = 24。递归一层层压到基线 1，再一层层乘回来。'},
+  {q:'使用二分查找的前提是？',
+   opts:['序列必须有序','序列必须很长','元素必须各不相同','元素个数必须是偶数'], ans:0,
+   exp:'二分查找靠「中间值和目标比大小」决定砍哪半边，无序就会迷路——预言机第 3 题就是惨案现场。'},
+  {q:'朴素递归的 fib(30) 慢得离谱，根本原因是？',
+   opts:['Python 语言本身太慢','同一个子问题被反复重算','数字太大内存放不下','函数定义写错了'], ans:1,
+   exp:'调用树疯狂分叉，fib(28)、fib(27)……全都被算了成千上万次。加 @lru_cache 缓存立刻起死回生。'},
+  {q:'sys.getrecursionlimit() 默认大约返回多少？',
+   opts:['100','1000','10000','没有上限'], ans:1,
+   exp:'Python 默认最大递归深度约 1000 层，可用 sys.setrecursionlimit() 调整，但一般不建议调太大。'},
+  {q:'在 100 万个有序数字里二分查找一个数，最多大约需要几步？',
+   opts:['约 20 步','约 1000 步','约 50 万步','必须 100 万步'], ans:0,
+   exp:'每步砍一半：2 的 20 次方约等于 105 万，所以 100 万个数最多 20 步左右——O(log n) 的威力。'},
+  {q:'全班点名、每人答一次「到」，这个过程的复杂度是？',
+   opts:['O(1)','O(log n)','O(n)','O(n²)'], ans:2,
+   exp:'n 个人就要喊 n 次，工作量随人数线性增长——这就是 O(n)，最朴素的「点名」。'},
+  {q:'n 个人每两人握手一次，总握手次数的复杂度是？',
+   opts:['O(n)','O(n log n)','O(n²)','O(1)'], ans:2,
+   exp:'n(n-1)/2 次，数量级是 n²。人人都要和别人配对，正是嵌套双循环的形状。'},
+  {q:'关于递归和循环，说法正确的是？',
+   opts:['递归能做的事循环绝对做不了','二者可互相改写；循环更省内存、也没有深度限制','循环是递归的语法糖','递归一定比循环快'], ans:1,
+   exp:'理论上等价可互换。循环不占调用栈、不受深度限制；但迷宫回溯这类天然分叉的问题，递归写起来更清晰。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！迷宫大师，BOSS 战已为你解锁 🔓' : '通关成功！BOSS 战「卡牌对战游戏」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

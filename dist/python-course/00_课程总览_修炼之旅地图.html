@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python修炼之旅 · 课程总览</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text); line-height:1.7;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 90% 100%, rgba(167,139,250,.10), transparent);
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:40px 20px 80px;}
+  /* ===== 头部 ===== */
+  header{text-align:center;margin-bottom:36px;position:relative;}
+  .badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:13px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);
+    margin-bottom:14px;animation:fadeIn .8s ease;
+  }
+  h1{
+    font-size:38px;font-weight:800;letter-spacing:2px;
+    background:linear-gradient(120deg,#4dd6ff,#a78bfa 45%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:riseIn .7s ease both;
+  }
+  .subtitle{color:var(--muted);margin-top:10px;font-size:15px;animation:riseIn .7s .15s ease both;}
+  .stats{
+    display:flex;justify-content:center;gap:14px;margin-top:22px;flex-wrap:wrap;
+    animation:riseIn .7s .3s ease both;
+  }
+  .stat{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:10px 22px;text-align:center;min-width:110px;
+  }
+  .stat b{display:block;font-size:22px;color:var(--cyan);}
+  .stat span{font-size:12px;color:var(--muted);}
+  /* ===== 玩法说明 ===== */
+  .howto{
+    background:linear-gradient(135deg,rgba(77,214,255,.07),rgba(167,139,250,.07));
+    border:1px solid var(--line);border-radius:18px;padding:22px 26px;margin-bottom:40px;
+    animation:fadeIn 1s .4s ease both;
+  }
+  .howto h3{font-size:16px;color:var(--cyan);margin-bottom:12px;letter-spacing:1px;}
+  .loop{display:flex;gap:10px;flex-wrap:wrap;}
+  .loop-step{
+    flex:1;min-width:150px;background:var(--card);border-radius:12px;padding:14px 16px;
+    border-top:3px solid var(--cyan);font-size:13px;
+  }
+  .loop-step b{display:block;font-size:15px;margin-bottom:4px;}
+  .loop-step small{color:var(--muted);}
+  .loop-step:nth-child(2){border-top-color:var(--purple);}
+  .loop-step:nth-child(3){border-top-color:var(--gold);}
+  .loop-step:nth-child(4){border-top-color:var(--green);}
+  /* ===== 关卡地图 ===== */
+  .stage{position:relative;margin-bottom:26px;}
+  .stage-head{
+    display:flex;align-items:center;gap:14px;cursor:pointer;user-select:none;
+    padding:18px 20px;border-radius:16px;background:var(--bg2);
+    border:1px solid var(--line);transition:all .25s;
+  }
+  .stage-head:hover{border-color:var(--accent);transform:translateX(4px);}
+  .stage.open .stage-head{border-color:var(--accent);background:var(--card);}
+  .stage-num{
+    width:52px;height:52px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:800;color:#0d1021;
+    background:var(--accent);box-shadow:0 0 22px var(--accent);
+  }
+  .stage-title{flex:1;}
+  .stage-title h2{font-size:19px;letter-spacing:1px;}
+  .stage-title p{font-size:13px;color:var(--muted);}
+  .stage-meta{font-size:12px;color:var(--muted);text-align:right;}
+  .stage-meta b{color:var(--accent);font-size:15px;display:block;}
+  .arrow{color:var(--muted);transition:transform .3s;font-size:14px;}
+  .stage.open .arrow{transform:rotate(90deg);}
+  .lessons{
+    max-height:0;overflow:hidden;transition:max-height .5s ease;
+  }
+  .stage.open .lessons{max-height:2000px;}
+  .lessons-inner{padding:18px 8px 8px;position:relative;}
+  .lessons-inner::before{
+    content:"";position:absolute;left:32px;top:0;bottom:20px;width:2px;
+    background:linear-gradient(var(--accent),transparent);
+  }
+  .lesson{
+    position:relative;margin-left:64px;margin-bottom:12px;
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;transition:all .25s;cursor:pointer;
+  }
+  .lesson:hover{transform:translateX(4px);border-color:var(--accent);}
+  .lesson::before{
+    content:"";position:absolute;left:-41px;top:22px;width:12px;height:12px;
+    border-radius:50%;background:var(--bg);border:3px solid var(--accent);
+  }
+  .lesson-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .lesson-top h4{font-size:15px;}
+  .lesson-top h4 code{color:var(--gold);font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  .lesson-tag{
+    font-size:11px;padding:2px 10px;border-radius:999px;white-space:nowrap;
+    background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3);
+  }
+  .lesson-tag.boss{background:rgba(244,114,182,.12);color:var(--pink);border-color:rgba(244,114,182,.35);}
+  .lesson p{font-size:13px;color:var(--muted);margin-top:4px;}
+  .lesson .pts{font-size:12px;margin-top:6px;color:var(--cyan);}
+  .lesson .pts a{color:var(--gold);text-decoration:none;font-weight:700;border-bottom:1px dashed var(--gold);padding-bottom:1px;}
+  .lesson .pts a:hover{color:#fff;border-color:#fff;}
+  /* ===== 页脚 ===== */
+  footer{
+    text-align:center;color:var(--muted);font-size:13px;margin-top:50px;
+    padding-top:26px;border-top:1px dashed var(--line);
+  }
+  footer b{color:var(--gold);}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="badge">GAME-BASED LEARNING</div>
+    <h1>Python 修炼之旅</h1>
+    <div class="subtitle">五大关卡 · 29 关 · 每天 1 小时 · 12 周从入门到高阶</div>
+    <div class="stats">
+      <div class="stat"><b>29</b><span>课程关卡</span></div>
+      <div class="stat"><b>20+</b><span>可玩项目</span></div>
+      <div class="stat"><b>5</b><span>BOSS 战</span></div>
+      <div class="stat"><b>260</b><span>记忆卡片</span></div>
+    </div>
+  </header>
+
+  <div class="howto">
+    <h3>◈ 每日玩法循环（共 60 分钟）</h3>
+    <div class="loop">
+      <div class="loop-step"><b>📖 学 · 15min</b><small>交互网页学新知识点，记忆卡片即时巩固</small></div>
+      <div class="loop-step"><b>🎮 玩 · 20min</b><small>当天小游戏/小项目，代码立即产生反馈</small></div>
+      <div class="loop-step"><b>⚔️ 战 · 15min</b><small>预言机挑战 + 自测 Quiz，通关才能解锁下一课</small></div>
+      <div class="loop-step"><b>📝 盘 · 10min</b><small>写 3 行学习日志：学到啥 / 卡在哪 / 明天练啥</small></div>
+    </div>
+  </div>
+
+  <!-- 第一关 -->
+  <div class="stage" style="--accent:var(--green)">
+    <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="stage-num">壹</div>
+      <div class="stage-title">
+        <h2>新手村 · 基础语法</h2>
+        <p>召唤你的第一个程序，掌握变量、判断、循环、函数四大基础功法</p>
+      </div>
+      <div class="stage-meta"><b>第 1-2 周</b>5 课 + BOSS 战</div>
+      <div class="arrow">▶</div>
+    </div>
+    <div class="lessons"><div class="lessons-inner">
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 1 课 · <code>变量与print</code> —— 英雄召唤术</h4><span class="lesson-tag">游戏</span></div>
+        <p>把数据装进"魔法盒子"，用 print 让程序开口说话</p>
+        <div class="pts">🎮 互动：英雄名片生成器 ｜ 你将第一次看到自己代码的输出 ｜ <a href="01_新手村_第1课_变量与print.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 2 课 · <code>数据类型与input</code> —— 装备鉴定</h4><span class="lesson-tag">游戏</span></div>
+        <p>数字、文字、真假值三大种族；input 收集情报并做类型转换</p>
+        <div class="pts">🎮 项目：文字 RPG 角色属性计算器 ｜ <a href="02_新手村_第2课_数据类型与input.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 3 课 · <code>if/elif/else</code> —— 命运岔路口</h4><span class="lesson-tag">游戏</span></div>
+        <p>让程序学会"看情况办事"，比较运算与逻辑运算</p>
+        <div class="pts">🎮 项目：多结局文字冒险（你的选择改变剧情） ｜ <a href="03_新手村_第3课_条件判断.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 4 课 · <code>循环</code> —— 无限回廊</h4><span class="lesson-tag">游戏</span></div>
+        <p>while 与 for：让电脑替你重复一万次，break/continue 神走位</p>
+        <div class="pts">🎮 项目：猜数字 + 1A2B 破译大师 ｜ <a href="04_新手村_第4课_循环.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 5 课 · <code>函数</code> —— 技能封装</h4><span class="lesson-tag">游戏</span></div>
+        <p>把一段魔法封进函数，参数、返回值、作用域</p>
+        <div class="pts">🎮 项目：技能合成台（组合小函数造大招） ｜ <a href="05_新手村_第5课_函数.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>★ BOSS 战 · <code>文字冒险游戏</code></h4><span class="lesson-tag boss">BOSS</span></div>
+        <p>独立完成一个 5 分支、带数值系统的完整文字冒险游戏</p>
+        <div class="pts">通关认证：新手村毕业，获得「初级冒险者」称号 ｜ <a href="06_新手村_BOSS战_文字冒险游戏.html">进入本课 →</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 第二关 -->
+  <div class="stage" style="--accent:var(--cyan)">
+    <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="stage-num">贰</div>
+      <div class="stage-title">
+        <h2>装备库 · 数据结构与文件</h2>
+        <p>背包、图鉴、存档——程序员的三大随身法宝</p>
+      </div>
+      <div class="stage-meta"><b>第 3-4 周</b>5 课 + BOSS 战</div>
+      <div class="arrow">▶</div>
+    </div>
+    <div class="lessons"><div class="lessons-inner">
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 6 课 · <code>列表与元组</code> —— 背包系统</h4><span class="lesson-tag">游戏</span></div>
+        <p>增删改查、切片、排序，管理你的百宝箱</p>
+        <div class="pts">🎮 项目：RPG 背包管理器（拾取/丢弃/整理） ｜ <a href="07_装备库_第6课_列表与元组.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 7 课 · <code>字典与集合</code> —— 图鉴系统</h4><span class="lesson-tag">游戏</span></div>
+        <p>键值对查资料快如闪电，集合去重一步到位</p>
+        <div class="pts">🎮 项目：怪物图鉴收集系统 ｜ <a href="08_装备库_第7课_字典与集合.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 8 课 · <code>字符串精通</code> —— 密文破译</h4><span class="lesson-tag">挑战</span></div>
+        <p>格式化、常用方法、切片玄机</p>
+        <div class="pts">⚔️ 挑战：凯撒密码加密器 + 破译挑战 ｜ <a href="09_装备库_第8课_字符串精通.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 9 课 · <code>文件读写</code> —— 存档系统</h4><span class="lesson-tag">实用</span></div>
+        <p>with open 与编码问题，让数据在关机后依然存在</p>
+        <div class="pts">🎮 项目：给 BOSS 战的冒险游戏加存档功能 ｜ <a href="10_装备库_第9课_文件读写.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 10 课 · <code>异常处理</code> —— 防崩护盾</h4><span class="lesson-tag">实用</span></div>
+        <p>try/except 挡住报错攻击，程序再也不闪退</p>
+        <div class="pts">🎮 项目：打不死的年龄计算器（乱输也不怕） ｜ <a href="11_装备库_第10课_异常处理.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>★ BOSS 战 · <code>命令行待办清单</code></h4><span class="lesson-tag boss">BOSS</span></div>
+        <p>带数据持久化的待办事项工具：增删改查、存档读档一条龙</p>
+        <div class="pts">通关认证：获得「装备齐全的行者」称号，这是第一个真正每天能用的工具 ｜ <a href="12_装备库_BOSS战_命令行待办清单.html">进入本课 →</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 第三关 -->
+  <div class="stage" style="--accent:var(--gold)">
+    <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="stage-num">叁</div>
+      <div class="stage-title">
+        <h2>副本挑战 · 模块与自动化</h2>
+        <p>学会召唤外部力量，让 Python 替你干重复的活</p>
+      </div>
+      <div class="stage-meta"><b>第 5-6 周</b>5 课 + BOSS 战</div>
+      <div class="arrow">▶</div>
+    </div>
+    <div class="lessons"><div class="lessons-inner">
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 11 课 · <code>模块与pip</code> —— 召唤外援</h4><span class="lesson-tag">实用</span></div>
+        <p>import 的世界，pip 安装千军万马，虚拟环境初识</p>
+        <div class="pts">🎮 实验：一行代码画星辰、一句话生成二维码 ｜ <a href="13_副本挑战_第11课_模块与pip.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 12 课 · <code>时间与随机</code> —— 命运骰子</h4><span class="lesson-tag">游戏</span></div>
+        <p>datetime 管时间线，random 造不确定性</p>
+        <div class="pts">🎮 项目：每日运势播报 + 随机组队抽签器 ｜ <a href="14_副本挑战_第12课_时间与随机.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 13 课 · <code>requests 与 API</code> —— 情报网</h4><span class="lesson-tag">实用</span></div>
+        <p>向网络发起请求，解析 JSON 情报</p>
+        <div class="pts">🎮 项目：天气早报机器人（真实数据！） ｜ <a href="15_副本挑战_第13课_requests与API.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 14 课 · <code>os 与 shutil</code> —— 文件管家</h4><span class="lesson-tag">实用</span></div>
+        <p>遍历文件夹、移动重命名，批量操作的艺术</p>
+        <div class="pts">🎮 项目：一键把杂乱下载文件夹整理得明明白白 ｜ <a href="16_副本挑战_第14课_os与shutil.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 15 课 · <code>正则表达式</code> —— 密码猎人</h4><span class="lesson-tag">挑战</span></div>
+        <p>用一串神秘符号精准捕获文本目标</p>
+        <div class="pts">⚔️ 挑战：从聊天记录中挖出所有手机号和邮箱 ｜ <a href="17_副本挑战_第15课_正则表达式.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>★ BOSS 战 · <code>桌面自动整理器</code></h4><span class="lesson-tag boss">BOSS</span></div>
+        <p>定时监控文件夹 + 按规则归档 + 完成后弹通知</p>
+        <div class="pts">通关认证：获得「自动化法师」称号——从此你写的程序开始替你上班 ｜ <a href="18_副本挑战_BOSS战_桌面自动整理器.html">进入本课 →</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 第四关 -->
+  <div class="stage" style="--accent:var(--purple)">
+    <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="stage-num">肆</div>
+      <div class="stage-title">
+        <h2>进阶秘境 · 面向对象与高阶语法</h2>
+        <p>从"写脚本的人"进化为"设计系统的人"</p>
+      </div>
+      <div class="stage-meta"><b>第 7-9 周</b>5 课 + BOSS 战</div>
+      <div class="arrow">▶</div>
+    </div>
+    <div class="lessons"><div class="lessons-inner">
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 16 课 · <code>类与对象</code> —— 创建种族</h4><span class="lesson-tag">游戏</span></div>
+        <p>属性与行为，用类描述世界万物</p>
+        <div class="pts">🎮 项目：宠物养成系统（类的一生可视化） ｜ <a href="19_进阶秘境_第16课_类与对象.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 17 课 · <code>继承与魔法方法</code> —— 血脉传承</h4><span class="lesson-tag">游戏</span></div>
+        <p>子类继承父类，__init__/__str__ 等双下魔法</p>
+        <div class="pts">🎮 项目：RPG 职业树（战士/法师/盗贼同源不同命） ｜ <a href="20_进阶秘境_第17课_继承与魔法方法.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 18 课 · <code>推导式与生成器</code> —— 压缩魔法</h4><span class="lesson-tag">挑战</span></div>
+        <p>一行抵十行；惰性求值省内存的玄机</p>
+        <div class="pts">⚔️ 挑战：把十段循环代码全部压成一行 ｜ <a href="21_进阶秘境_第18课_推导式与生成器.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 19 课 · <code>装饰器与闭包</code> —— 附魔系统</h4><span class="lesson-tag">挑战</span></div>
+        <p>给函数加上计时、日志、缓存等附魔效果</p>
+        <div class="pts">⚔️ 挑战：手写一个会"计时"的装饰器并给全项目附魔 ｜ <a href="22_进阶秘境_第19课_装饰器与闭包.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 20 课 · <code>递归与算法初步</code> —— 迷宫求解</h4><span class="lesson-tag">挑战</span></div>
+        <p>递归思想 + 大O复杂度 + 二分查找</p>
+        <div class="pts">⚔️ 挑战：自动走迷宫程序 + 六道经典算法题 ｜ <a href="23_进阶秘境_第20课_递归与算法.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>★ BOSS 战 · <code>卡牌对战游戏</code></h4><span class="lesson-tag boss">BOSS</span></div>
+        <p>用面向对象设计完整卡牌游戏：职业、抽牌、战斗回合、伤害结算</p>
+        <div class="pts">通关认证：获得「系统设计师」称号——你的代码第一次有了"架构" ｜ <a href="24_进阶秘境_BOSS战_卡牌对战游戏.html">进入本课 →</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- 第五关 -->
+  <div class="stage" style="--accent:var(--pink)">
+    <div class="stage-head" onclick="this.parentElement.classList.toggle('open')">
+      <div class="stage-num">伍</div>
+      <div class="stage-title">
+        <h2>大师之路 · 并发、数据与工程化</h2>
+        <p>高阶玩家的三张王牌：并发、数据分析、工程规范</p>
+      </div>
+      <div class="stage-meta"><b>第 10-12 周</b>4 课 + 毕业设计</div>
+      <div class="arrow">▶</div>
+    </div>
+    <div class="lessons"><div class="lessons-inner">
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 21 课 · <code>多线程与并发</code> —— 分身术</h4><span class="lesson-tag">实用</span></div>
+        <p>线程、锁、GIL 初探，让程序同时干三件事</p>
+        <div class="pts">🎮 实验：多线程下载器（3 个文件同时下载的爽感） ｜ <a href="25_大师之路_第21课_多线程与并发.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 22 课 · <code>异步初步</code> —— 顺风耳</h4><span class="lesson-tag">挑战</span></div>
+        <p>asyncio：等待时绝不闲着的高手心法</p>
+        <div class="pts">⚔️ 挑战：异步并发抓取 20 个网页，对比速度差距 ｜ <a href="26_大师之路_第22课_异步初步.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 23 课 · <code>pandas 数据分析</code> —— 千里眼</h4><span class="lesson-tag">实用</span></div>
+        <p>读表格、清洗、汇总、画图，一气呵成</p>
+        <div class="pts">🎮 项目：分析自己的消费记录并生成可视化报告 ｜ <a href="27_大师之路_第23课_pandas数据分析.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>第 24 课 · <code>Git 与工程化</code> —— 公会规范</h4><span class="lesson-tag">实用</span></div>
+        <p>版本控制、项目结构、虚拟环境、写测试的意识</p>
+        <div class="pts">实用：把前四周所有项目收编进规范的 Git 仓库 ｜ <a href="28_大师之路_第24课_Git与工程化.html">进入本课 →</a></div>
+      </div>
+      <div class="lesson">
+        <div class="lesson-top"><h4>♛ 毕业设计 · <code>个人自动化助手</code></h4><span class="lesson-tag boss">最终</span></div>
+        <p>整合所学：定时任务 + 文件整理 + 数据抓取 + 分析报告 + 邮件/通知推送，做出一个每天真替你干活的系统</p>
+        <div class="pts">通关认证：「Python 高阶玩家」——从此遇到任何重复劳动，你的第一反应是：这个能写个脚本 ｜ <a href="29_大师之路_毕业设计_个人自动化助手.html">进入本课 →</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <footer>
+    每一课都是一张独立交互学习页（讲解 · 实验室 · 预言机挑战 · 记忆卡片 · Quiz）<br>
+    通关规则：<b>Quiz 得分 ≥ 80 分才解锁下一课</b>｜点击每课卡片里的「进入本课」开始修炼，学完记得回来在地图上打卡
+  </footer>
+</div>
+
+<script>
+  // 默认展开第一关
+  document.querySelector('.stage').classList.add('open');
+</script>
+</body>
+</html>

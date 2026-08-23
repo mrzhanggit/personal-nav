@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第17课 · 继承与魔法方法 —— 血脉传承</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#a78bfa; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(167,139,250,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--purple);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#a78bfa,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--purple),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字 */
+  .code .s{color:var(--purple);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .code .f{color:var(--cyan);}  /* 内置函数 */
+  .code .mg{color:var(--gold);} /* 魔法方法 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#cdb6ff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .term{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#cdb6ff;margin:12px 0;white-space:pre-wrap;
+  }
+  /* 血脉树 */
+  .tree{display:flex;flex-direction:column;align-items:center;margin:22px 0;}
+  .tree-branch{width:56%;height:22px;border-left:2px solid var(--line);border-right:2px solid var(--line);border-bottom:2px solid var(--line);border-radius:0 0 14px 14px;}
+  .tree-row{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .tnode{
+    background:var(--card);border:2px solid var(--purple);border-radius:14px;
+    padding:10px 18px;text-align:center;min-width:150px;
+  }
+  .tnode .tt{font-weight:700;color:var(--purple);font-size:15px;}
+  .tnode .td{font-size:12px;color:var(--muted);margin-top:2px;font-family:ui-monospace,Menlo,monospace;}
+  .tnode.click{cursor:pointer;transition:all .2s;}
+  .tnode.click:hover{transform:translateY(-5px);box-shadow:0 8px 24px rgba(167,139,250,.25);border-color:var(--gold);}
+  .tnode.sel{border-color:var(--gold);box-shadow:0 0 20px rgba(245,197,66,.22);}
+  .tnode.sel .tt{color:var(--gold);}
+  /* 覆盖对比 */
+  .vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0;}
+  @media (max-width:640px){.vs-grid{grid-template-columns:1fr;}}
+  .vs-card{position:relative;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:var(--card);}
+  .vs-card.dim{opacity:.65;}
+  .vs-card .vtag{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--cyan);}
+  .vs-card.win .vtag{color:var(--gold);}
+  .vs-card .code{margin:0;background:#0a0d1e;}
+  .stamp{
+    position:absolute;top:-10px;right:10px;background:var(--red);color:#fff;
+    font-size:11px;padding:2px 10px;border-radius:999px;transform:rotate(6deg);letter-spacing:1px;
+  }
+  /* 魔法方法图鉴 */
+  .mg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:16px 0;}
+  .mg-card{background:var(--card);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;text-align:center;transition:all .25s;}
+  .mg-card:hover{transform:translateY(-4px);box-shadow:0 6px 18px rgba(245,197,66,.18);}
+  .mg-card b{color:var(--gold);font-family:ui-monospace,Menlo,monospace;font-size:14px;display:block;}
+  .mg-card span{font-size:12px;color:var(--muted);}
+  /* 实验室 */
+  .lab-input{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;justify-content:center;}
+  .btn{
+    background:linear-gradient(135deg,var(--purple),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(167,139,250,.35);}
+  .btn.ghost{
+    background:transparent;color:var(--purple);border:1px solid var(--purple);
+  }
+  .btn.ghost:hover{background:rgba(167,139,250,.12);}
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  .hero-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:8px;}
+  /* 实验室代码行高亮 */
+  .cline{border-radius:6px;padding:0 6px;}
+  .cline.hlcur{background:rgba(245,197,66,.14);box-shadow:inset 3px 0 0 var(--gold);}
+  .str-demo{margin-top:16px;background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:14px 18px;}
+  .str-demo .sd-title{font-size:14px;color:var(--purple);font-weight:700;margin-bottom:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);color:var(--purple);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--purple);color:var(--purple);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--purple);background:rgba(167,139,250,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(167,139,250,.1);color:var(--purple);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 进阶秘境 · <b>第 17 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 3 · ADVANCED REALM</div>
+    <h1>继承与魔法方法 —— 血脉传承</h1>
+    <div class="subtitle">今日目标：让类拥有"家族血统"，并学会 Python 的隐藏咒文 __魔法方法__</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>掌握继承语法 <span class="hl">class 子类(父类)</span>，子类白嫖父类全部能力</li>
+      <li>学会 <span class="hl">方法重写 override</span> 与 <span class="hl">super().__init__()</span></li>
+      <li>用 <span class="hl">isinstance</span> 验明血统，初体验「多态」</li>
+      <li>解锁五大魔法方法：<span class="hl-c">__str__ / __repr__ / __eq__ / __len__ / __add__</span></li>
+      <li>通关实验室「RPG 职业树」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 继承 -->
+  <section>
+    <h2><span class="num">1</span>继承：class 子类(父类)</h2>
+    <p>RPG 里法师、战士、盗贼各有绝活，但他们都会走路、都有名字和血量——这些<b>公共能力</b>没必要写三遍。把它们抽到一个父类 <span class="hl">Hero</span>，三个职业类再用一行语法「认祖归宗」：</p>
+    <div class="code py">class Hero:
+    def __init__(self, name):
+        self.name = name
+    def attack(self):
+        return self.name + " 发动普通攻击"
+
+class Mage(Hero):      # 括号里写父类名 = 继承
+    pass               # 什么都不写也行
+
+m = Mage("梅林")
+print(m.name)          # name 是父类 __init__ 建的，直接能用
+print(m.attack())      # 父类的方法也能直接调用</div>
+    <div class="out">梅林
+梅林 发动普通攻击</div>
+    <p>记住这句话：<span class="hl">子类自动获得父类的全部属性和方法，一行都不用重写</span>。这就是"血脉传承"——你继承了英雄家族的血统，天生就会挥拳。</p>
+    <div class="tree">
+      <div class="tnode"><div class="tt">父类 Hero</div><div class="td">name · hp · attack()</div></div>
+      <div class="tree-branch"></div>
+      <div class="tree-row">
+        <div class="tnode"><div class="tt">Warrior 战士</div><div class="td">继承全部 + 新增怒气</div></div>
+        <div class="tnode"><div class="tt">Mage 法师</div><div class="td">继承全部 + 新增魔力</div></div>
+        <div class="tnode"><div class="tt">Rogue 盗贼</div><div class="td">继承全部 + 新增敏捷</div></div>
+      </div>
+    </div>
+    <p>把鼠标移到下面的职业节点上感受一下：每个子类都<b>完整拥有</b>父类的能力（上面的树在实验室里会变成可点击的交互版）。</p>
+  </section>
+
+  <!-- 2 重写与 super -->
+  <section>
+    <h2><span class="num">2</span>方法重写与 super().__init__()</h2>
+    <p>继承来的攻击是"挥拳"，战士表示不服：我要用巨剑！解决办法是<span class="hl">方法重写（override）</span>——子类里定义一个和父类<span class="hl">同名</span>的方法，调用时子类版本会<b>覆盖</b>父类版本：</p>
+    <div class="vs-grid">
+      <div class="vs-card dim">
+        <div class="vtag">父类 Hero 的 attack（被覆盖）</div>
+        <div class="code py">def attack(self):
+    return "挥拳攻击，5 点伤害"</div>
+        <div class="stamp">已被覆盖</div>
+      </div>
+      <div class="vs-card win">
+        <div class="vtag">⚡ 子类 Warrior 重写的 attack（生效）</div>
+        <div class="code py">def attack(self):
+    return "挥舞巨剑，20 点伤害"</div>
+      </div>
+    </div>
+    <p>那如果子类想<b>既保留父类的初始化，又加点自己的新属性</b>呢？用 <span class="hl-c">super().__init__()</span>——super 意思是"父类"，这行咒文表示「先请父类的 __init__ 干完它的活，我再接着干」：</p>
+    <div class="code py">class Hero:
+    def __init__(self, name, hp):
+        self.name = name
+        self.hp = hp
+    def attack(self):
+        return self.name + " 挥拳攻击"
+
+class Warrior(Hero):
+    def __init__(self, name, hp, rage):   # 新增怒气参数
+        super().__init__(name, hp)        # 第一步：父类负责 name 和 hp
+        self.rage = rage                  # 第二步：自己再添新属性
+    def attack(self):                     # 重写：覆盖父类攻击
+        return self.name + " 挥舞巨剑"
+
+w = Warrior("铁柱", 100, 50)
+print(w.attack())
+print(w.hp, w.rage)                       # 父类的、自己的属性全都有</div>
+    <div class="out">铁柱 挥舞巨剑
+100 50</div>
+    <p>🧠 记忆口诀：<span class="hl">super 打头阵，新属性随后。</span>惯例是把 super().__init__() 写在子类 __init__ 的第一行——先继承家业，再添新产业。</p>
+    <p>⚠️ 头号大坑：子类一旦写了 __init__ 却<b>忘记</b>调用 super().__init__()，父类那套属性就根本不会被创建，访问 <code class="hl-c">w.name</code> 直接 AttributeError 爆炸（预言机第 1 题就考这个）。</p>
+  </section>
+
+  <!-- 3 isinstance 与多态 -->
+  <section>
+    <h2><span class="num">3</span>isinstance 验血统 · 多态初体验</h2>
+    <p><span class="hl-c">isinstance(对象, 类)</span> 用来判断对象是不是某个类的实例。关键规则：<span class="hl">子类实例同时也是父类的实例</span>——法师当然也是英雄：</p>
+    <div class="code py">class Hero:
+    def attack(self):
+        return "普通攻击"
+
+class Warrior(Hero):
+    def attack(self):
+        return "重斩！"
+
+class Mage(Hero):
+    def attack(self):
+        return "火球术！"
+
+heroes = [Warrior(), Mage()]
+for h in heroes:
+    print(h.attack())                # 同一句代码，各显神通
+
+print(isinstance(heroes[0], Hero))   # 战士也是英雄 → True
+print(isinstance(heroes[0], Mage))   # 但战士不是法师 → False</div>
+    <div class="out">重斩！
+火球术！
+True
+False</div>
+    <p>上面最妙的是那段 for 循环：<span class="hl">同一个 h.attack() 调用，战士出重斩、法师放火球</span>——这就是<b>多态（polymorphism）</b>：同一个方法名，不同子类各自实现、各显神通。写代码时不用关心对象具体是什么职业，调用就完事。</p>
+    <div class="mg-grid">
+      <div class="mg-card"><b>Warrior()</b><span>attack() → 重斩！</span></div>
+      <div class="mg-card"><b>Mage()</b><span>attack() → 火球术！</span></div>
+      <div class="mg-card"><b>isinstance(x, Hero)</b><span>两个都验血通过 → True</span></div>
+    </div>
+  </section>
+
+  <!-- 4 魔法方法 -->
+  <section>
+    <h2><span class="num">4</span>魔法方法：双下划线的隐藏咒文</h2>
+    <p>print 一个对象时显示 <code class="hl-c">&lt;__main__.Pet object at 0x1024...&gt;</code> 这种天书？两个对象用 == 比较总是不相等？那是因为你还没念对咒文。<span class="hl">魔法方法</span>是 Python 预留的机关：<b>前后各两条下划线</b>的名字（如 __str__），在你执行 print、==、+、len() 时被自动触发。</p>
+    <div class="mg-grid">
+      <div class="mg-card"><b>__str__</b><span>print(对象) 时的门面</span></div>
+      <div class="mg-card"><b>__repr__</b><span>调试形态 / 容器里的样子</span></div>
+      <div class="mg-card"><b>__eq__</b><span>定义 == 怎么比</span></div>
+      <div class="mg-card"><b>__len__</b><span>让 len() 认识你</span></div>
+      <div class="mg-card"><b>__add__</b><span>让对象支持 + </span></div>
+    </div>
+
+    <p>① <span class="hl">__str__</span>——print 的门面担当：</p>
+    <div class="code py">class Pet:
+    def __init__(self, name):
+        self.name = name
+    def __str__(self):
+        return "宠物<" + self.name + ">"
+
+p = Pet("旺财")
+print(p)          # print 会自动调用 __str__</div>
+    <div class="out">宠物&lt;旺财&gt;</div>
+
+    <p>② <span class="hl">__repr__</span>——程序员看的"出厂标签"，放在列表等容器里时用它显示：</p>
+    <div class="code py">class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    def __repr__(self):
+        return "Point(" + str(self.x) + ", " + str(self.y) + ")"
+
+p = Point(3, 4)
+print([p])        # 容器里的元素用 __repr__ 显示
+print(repr(p))    # 主动调用 repr() 也是它</div>
+    <div class="out">[Point(3, 4)]
+Point(3, 4)</div>
+
+    <p>③ <span class="hl">__eq__</span>——自定义"相等"的标准（默认 == 比的是"是不是同一个对象"）：</p>
+    <div class="code py">class Coin:
+    def __init__(self, value):
+        self.value = value
+    def __eq__(self, other):
+        return self.value == other.value
+
+print(Coin(10) == Coin(10))   # 面值相同就算相等
+print(Coin(10) == Coin(50))</div>
+    <div class="out">True
+False</div>
+
+    <p>④ <span class="hl">__len__</span>——让 len() 读懂你的队伍有多少人：</p>
+    <div class="code py">class Team:
+    def __init__(self, members):
+        self.members = members
+    def __len__(self):
+        return len(self.members)
+
+t = Team(["阿呆", "铁柱", "梅林"])
+print(len(t))</div>
+    <div class="out">3</div>
+
+    <p>⑤ <span class="hl">__add__</span>——让对象之间也能用 + 合成：</p>
+    <div class="code py">class Gem:
+    def __init__(self, value):
+        self.value = value
+    def __add__(self, other):
+        return Gem(self.value + other.value)
+    def __repr__(self):
+        return "Gem(" + str(self.value) + ")"
+
+combo = Gem(30) + Gem(70)   # + 号触发 __add__
+print(combo)</div>
+    <div class="out">Gem(100)</div>
+
+    <p>🧠 一句话总结：<span class="hl">运算符和内置函数只是表象，魔法方法才是背后的机关。</span></p>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · RPG 职业树</h2>
+    <p>下面是一棵真实的职业树。点击一个职业「创建角色」，再点「释放技能」体验多态；下方会同步展示完整的 Python 类定义，并<span class="hl">高亮当前调用的方法</span>。最后拨动开关，对比有 / 没有 __str__ 时 print 的差异。</p>
+    <div class="tree">
+      <div class="tnode"><div class="tt">class Hero（父类）</div><div class="td">hp=100 · mp=50 · attack() · __str__</div></div>
+      <div class="tree-branch"></div>
+      <div class="tree-row" id="role-row">
+        <div class="tnode click" id="node-warrior"><div class="tt">⚔ 战士 Warrior</div><div class="td">重写 hp=150，新增 rage</div></div>
+        <div class="tnode click" id="node-mage"><div class="tt">🔮 法师 Mage</div><div class="td">重写 mp=200</div></div>
+        <div class="tnode click" id="node-rogue"><div class="tt">🗡 盗贼 Rogue</div><div class="td">只重写 hp=90</div></div>
+      </div>
+    </div>
+    <div class="lab-input">
+      <button class="btn" onclick="castSkill()">🔥 释放技能 attack()</button>
+    </div>
+    <div class="hero-card" id="role-card">
+      <h3 id="rc-title">—</h3>
+      <div class="rarity" id="rc-rarity">—</div>
+      <div class="attr">
+        <div><b id="rc-hp">—</b><span>HP 血量</span></div>
+        <div><b id="rc-mp">—</b><span>MP 魔力</span></div>
+        <div><b id="rc-extra">—</b><span id="rc-extra-label">新增属性</span></div>
+      </div>
+      <div class="quote" id="rc-quote">—</div>
+    </div>
+    <div class="term" id="lab-out" style="display:none"></div>
+    <div class="str-demo">
+      <div class="sd-title">👁 __str__ 效果对比</div>
+      <p style="font-size:13px;color:var(--muted)">先在上方创建一个角色，然后拨动开关：</p>
+      <div class="lab-input" style="justify-content:flex-start">
+        <button class="btn ghost" id="str-btn" onclick="toggleStr()">查看 __str__ 效果（当前：关）</button>
+      </div>
+      <div class="term" id="str-out">尚未创建角色……</div>
+    </div>
+    <div class="code" id="lab-code-wrap"><span class="c"># 完整等价 Python 代码（金色高亮 = 当前调用的方法）</span><div id="lab-code"></div></div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开电脑上的 Python（IDLE 或终端 <code>python</code>），定义父类 <code>Monster</code>（属性 <code>name</code>、<code>hp</code>，方法 <code>roar()</code> 返回 名字+" 咆哮！"）</li>
+    <li>② 写两个子类 <code>Dragon(Monster)</code> 和 <code>Goblin(Monster)</code>：都用 <code>super().__init__()</code> 初始化，再各加一个新属性（如 <code>fire</code>、<code>steal</code>），并重写 <code>roar()</code></li>
+    <li>③ 把两只怪物放进列表，用 for 循环调用 <code>roar()</code> 亲眼看多态；再用 <code>isinstance</code> 验证它们都是 Monster</li>
+    <li>④ 给 Monster 加上 <code>__str__</code>，print 前后各试一次，感受门面变化；写 3 行学习日志收工</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>第 18 课「推导式与生成器 —— 压缩魔法」</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具：Python 语法高亮（单遍分词） ============ */
+function escH(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function hiLine(line){
+  var re = /(#.*$)|("[^"]*"|'[^']*')|(__[A-Za-z]+__)|(\b\d+\b)|\b(class|def|return|super|self|for|in|if|else|elif|pass|import|from|True|False|None|and|or|not|is|while|break|continue)\b|\b(print|len|str|int|float|range|list|dict|set|next|zip|isinstance|type|input|repr)\b/g;
+  var out = '';
+  var last = 0;
+  var m;
+  while((m = re.exec(line)) !== null){
+    out += escH(line.slice(last, m.index));
+    if(m[1] !== undefined){ out += '<span class="c">'+escH(m[1])+'</span>'; }
+    else if(m[2] !== undefined){ out += '<span class="s">'+escH(m[2])+'</span>'; }
+    else if(m[3] !== undefined){ out += '<span class="mg">'+escH(m[3])+'</span>'; }
+    else if(m[4] !== undefined){ out += '<span class="n">'+escH(m[4])+'</span>'; }
+    else if(m[5] !== undefined){ out += '<span class="k">'+escH(m[5])+'</span>'; }
+    else { out += '<span class="f">'+escH(m[6])+'</span>'; }
+    last = m.index + m[0].length;
+  }
+  out += escH(line.slice(last));
+  return out;
+}
+function pyHi(code){
+  var lines = code.split('\n');
+  var res = [];
+  for(var i=0;i<lines.length;i++){ res.push(hiLine(lines[i])); }
+  return res.join('\n');
+}
+/* 页面加载时给静态代码块上色 */
+(function(){
+  var blocks = document.querySelectorAll('.code.py');
+  for(var i=0;i<blocks.length;i++){
+    blocks[i].innerHTML = pyHi(blocks[i].textContent);
+  }
+})();
+
+/* ============ 实验室：RPG 职业树 ============ */
+var ROLES = {
+  warrior:{
+    label:'⚔ 战士 Warrior', cls:'warrior', name:'铁柱', varName:'wa',
+    hp:150, mp:50, extra:'80', extraLabel:'怒气 rage',
+    rarity:'★★ 重装血脉 · 力量路线', initKey:'wi', atkKey:'wa',
+    atkText:'铁柱 释放【重斩】，造成 35 点伤害！',
+    quote:'「大剑所向，皆是坦途。」'
+  },
+  mage:{
+    label:'🔮 法师 Mage', cls:'mage', name:'梅林', varName:'ma',
+    hp:100, mp:200, extra:'200', extraLabel:'魔力 mp(重写)',
+    rarity:'★★★ 星辉血脉 · 智力路线', initKey:'mi', atkKey:'ma',
+    atkText:'梅林 释放【火球术】，造成 30 点伤害！',
+    quote:'「魔法即逻辑，咒文即代码。」'
+  },
+  rogue:{
+    label:'🗡 盗贼 Rogue', cls:'rogue', name:'夜刃', varName:'ro',
+    hp:90, mp:50, extra:'无', extraLabel:'新增属性',
+    rarity:'★ 影遁血脉 · 敏捷路线', initKey:'ri', atkKey:'ra',
+    atkText:'夜刃 释放【背刺】，造成 28 点伤害！',
+    quote:'「你看不见我，你已经倒下了。」'
+  }
+};
+var LAB_CODE = [
+  ['class Hero:', ''],
+  ['    def __init__(self, name):', 'hi'],
+  ['        self.name = name', 'hi'],
+  ['        self.hp = 100', 'hi'],
+  ['        self.mp = 50', 'hi'],
+  ['    def attack(self):', 'ha'],
+  ['        return self.name + " 挥拳攻击，造成 5 点伤害"', 'ha'],
+  ['    def __str__(self):', 'hs'],
+  ['        return "英雄<" + self.name + " | HP " + str(self.hp) + ">"', 'hs'],
+  ['', ''],
+  ['class Warrior(Hero):', ''],
+  ['    def __init__(self, name):', 'wi'],
+  ['        super().__init__(name)        # 血脉传承的第一步', 'wi'],
+  ['        self.hp = 150                 # 重写父类属性', 'wi'],
+  ['        self.rage = 80                # 新增自己的属性', 'wi'],
+  ['    def attack(self):                 # 重写：覆盖父类攻击', 'wa'],
+  ['        return self.name + " 释放【重斩】，造成 35 点伤害！"', 'wa'],
+  ['', ''],
+  ['class Mage(Hero):', ''],
+  ['    def __init__(self, name):', 'mi'],
+  ['        super().__init__(name)', 'mi'],
+  ['        self.mp = 200', 'mi'],
+  ['    def attack(self):', 'ma'],
+  ['        return self.name + " 释放【火球术】，造成 30 点伤害！"', 'ma'],
+  ['', ''],
+  ['class Rogue(Hero):', ''],
+  ['    def __init__(self, name):', 'ri'],
+  ['        super().__init__(name)', 'ri'],
+  ['        self.hp = 90', 'ri'],
+  ['    def attack(self):', 'ra'],
+  ['        return self.name + " 释放【背刺】，造成 28 点伤害！"', 'ra']
+];
+var curRole = null;
+var strOn = false;
+(function(){
+  var box = document.getElementById('lab-code');
+  var html = '';
+  for(var i=0;i<LAB_CODE.length;i++){
+    html += '<div class="cline" data-k="'+LAB_CODE[i][1]+'">'+hiLine(LAB_CODE[i][0])+'</div>';
+  }
+  box.innerHTML = html;
+})();
+function hlKey(key){
+  var lines = document.querySelectorAll('#lab-code .cline');
+  for(var i=0;i<lines.length;i++){
+    if(key !== '' && lines[i].getAttribute('data-k') === key){ lines[i].classList.add('hlcur'); }
+    else { lines[i].classList.remove('hlcur'); }
+  }
+}
+function pickRole(k){
+  var r = ROLES[k];
+  curRole = r;
+  strOn = false;
+  updateStrBtn();
+  var nodes = document.querySelectorAll('#role-row .tnode');
+  for(var i=0;i<nodes.length;i++){ nodes[i].classList.remove('sel'); }
+  document.getElementById('node-'+k).classList.add('sel');
+  document.getElementById('rc-title').textContent = r.label.split(' ')[0] + ' ' + r.name + ' · ' + r.label.split(' ').slice(1).join(' ');
+  document.getElementById('rc-rarity').textContent = r.rarity;
+  document.getElementById('rc-hp').textContent = r.hp;
+  document.getElementById('rc-mp').textContent = r.mp;
+  document.getElementById('rc-extra').textContent = r.extra;
+  document.getElementById('rc-extra-label').textContent = r.extraLabel;
+  document.getElementById('rc-quote').textContent = r.quote;
+  var card = document.getElementById('role-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  var out = document.getElementById('lab-out');
+  out.style.display = 'block';
+  out.textContent = '>>> ' + r.varName + ' = ' + capFirst(r.cls) + '("' + r.name + '")\n' +
+    '已创建角色：' + r.name + '（' + r.label + '）\n' +
+    '属性：hp=' + r.hp + ' · mp=' + r.mp + (r.extra !== '无' ? ' · ' + r.extraLabel + '=' + r.extra : ' · 无新增属性');
+  hlKey(r.initKey);
+  document.getElementById('str-out').textContent = '角色 ' + r.name + ' 已就绪，拨动开关对比 print(' + r.varName + ') 的两种形态……';
+}
+function capFirst(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+function castSkill(){
+  if(!curRole){ alert('先在职业树上点选一个职业，创建角色！'); return; }
+  var out = document.getElementById('lab-out');
+  out.style.display = 'block';
+  out.textContent = '>>> print(' + curRole.varName + '.attack())\n' + curRole.atkText +
+    '\n（注意：调的是同一个方法名 attack()，换职业就换招式 —— 多态）';
+  hlKey(curRole.atkKey);
+}
+function updateStrBtn(){
+  var b = document.getElementById('str-btn');
+  b.textContent = '查看 __str__ 效果（当前：' + (strOn ? '开' : '关') + '）';
+}
+function toggleStr(){
+  if(!curRole){ alert('先创建一个角色再对比 __str__ 效果！'); return; }
+  strOn = !strOn;
+  updateStrBtn();
+  var out = document.getElementById('str-out');
+  if(strOn){
+    out.textContent = '>>> print(' + curRole.varName + ')\n' + strResult() +
+      '\n（定义了 __str__：print 自动调用它，展示体面的门面）';
+    hlKey('hs');
+  } else {
+    out.textContent = '>>> print(' + curRole.varName + ')\n<' + '__main__.' + capFirst(curRole.cls) + ' object at 0x104a2b8d0>' +
+      '\n（没定义 __str__ 时：显示类名和内存地址，地址每次运行都不同）';
+    hlKey('');
+  }
+}
+function strResult(){
+  return '英雄<' + curRole.name + ' | HP ' + curRole.hp + '>';
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 忘记 super 的代价',
+    code:'class Hero:\n    def __init__(self, name):\n        self.name = name\n\nclass Mage(Hero):\n    def __init__(self, name):\n        self.mana = 100   # 忘了 super().__init__()\n\nm = Mage("梅林")\nprint(m.name)',
+    opts:['梅林','100','报错 AttributeError','None'],
+    ans:2,
+    exp:'子类自己写了 __init__ 就会覆盖父类的版本，父类那套初始化根本没执行，self.name 从未被创建——访问时抛出 AttributeError: \'Mage\' object has no attribute \'name\'。这是继承的头号大坑。'
+  },
+  {
+    title:'第 2 预言 · 重写覆盖',
+    code:'class Hero:\n    def attack(self):\n        return "普通攻击"\n\nclass Assassin(Hero):\n    def attack(self):\n        return "背刺！"\n\na = Assassin()\nprint(a.attack())',
+    opts:['普通攻击','背刺！','普通攻击 背刺！','报错'],
+    ans:1,
+    exp:'子类定义了与父类同名的方法就是重写（override）：实例调用时执行子类版本，父类版本被彻底盖住，不会被"顺带"执行。'
+  },
+  {
+    title:'第 3 预言 · 验血统',
+    code:'class Hero:\n    pass\n\nclass Mage(Hero):\n    pass\n\nm = Mage()\nprint(isinstance(m, Hero))',
+    opts:['True','False','报错','None'],
+    ans:0,
+    exp:'子类实例同时也是父类的实例——法师也是英雄。isinstance(m, Mage) 同样是 True，一个实例可以同时属于整条继承链。'
+  },
+  {
+    title:'第 4 预言 · print 的机关',
+    code:'class Sword:\n    def __str__(self):\n        return "神剑·赤霄"\n\ns = Sword()\nprint(s)',
+    opts:['<__main__.Sword object at 0x...>','神剑·赤霄','报错','None'],
+    ans:1,
+    exp:'print(对象) 会自动调用 __str__ 的返回值。如果没定义 __str__，才会退回到 <__main__.Sword object at 0x...> 这种天书。'
+  },
+  {
+    title:'第 5 预言 · 子类新增属性',
+    code:'class Hero:\n    def __init__(self, hp):\n        self.hp = hp\n\nclass Mage(Hero):\n    def __init__(self, hp, mana):\n        super().__init__(hp)\n        self.mana = mana\n\nm = Mage(100, 60)\nprint(m.hp + m.mana)',
+    opts:['160','10060','100','报错'],
+    ans:0,
+    exp:'super().__init__(hp) 建好了 self.hp = 100，子类再添 self.mana = 60。m.hp + m.mana = 100 + 60 = 160，父子属性全都在。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = pyHi(q.code);
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>';
+    var optsDiv = document.createElement('div');
+    optsDiv.className = 'oracle-opts';
+    q.opts.forEach(function(o,i){
+      var btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = o;
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          optsDiv.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        expEl.classList.add('show');
+      });
+      optsDiv.appendChild(btn);
+    });
+    div.appendChild(optsDiv);
+    var expEl = document.createElement('div');
+    expEl.className = 'explain';
+    expEl.textContent = q.exp;
+    div.appendChild(expEl);
+    box.appendChild(div);
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['继承的标准写法？','class 子类名(父类名):，例如 class Mage(Hero):'],
+  ['子类自动获得什么？','父类的全部属性和方法，一行都不用重写'],
+  ['什么是方法重写 override？','子类定义与父类同名的方法，调用时子类版本覆盖父类版本'],
+  ['super().__init__() 干嘛的？','调用父类的 __init__：先让父类把公共属性建好，子类再添新的'],
+  ['子类写了 __init__ 却忘了 super()？','父类属性没被创建，访问时报 AttributeError'],
+  ['isinstance(子类实例, 父类)？','True —— 子类实例同时也是父类实例（法师也是英雄）'],
+  ['多态是什么意思？','不同子类调用同一个方法名，各自执行自己的版本、各显神通'],
+  ['print(对象) 触发什么？','__str__；没定义时显示 &lt;模块.类 object at 0x地址&gt;'],
+  ['__eq__ 的作用？','定义 == 如何比较两个对象（默认比较"是不是同一个对象"）'],
+  ['__len__ 和 __add__？','让对象支持 len() 和 + 运算符——魔法方法是运算符背后的机关']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'下面哪一行能正确声明「Mage 类继承 Hero 类」？',
+   opts:['class Mage(Hero):','class Mage extends Hero:','class Mage -> Hero:','class Hero(Mage):'], ans:0,
+   exp:'Python 的继承语法是 class 子类(父类):，括号里写父类名。第四个选项方向反了，那是 Mage 当父类。'},
+  {q:'子类 Mage 中没有写 __init__，执行 m = Mage("梅林") 会怎样？',
+   opts:['报错，子类必须有 __init__','自动使用父类 Hero 的 __init__','创建出的对象没有名字属性','返回 None'], ans:1,
+   exp:'子类没写 __init__ 时，直接继承父类的用——这正是"血脉传承"的白嫖特性。'},
+  {q:'super().__init__() 的作用是？',
+   opts:['删除父类的属性','调用父类的 __init__，复用父类的初始化逻辑','创建一个新的父类对象','把子类永久变成父类'], ans:1,
+   exp:'super() 代表父类，super().__init__() 就是"请父类的初始化方法先干活"，通常写在子类 __init__ 的第一行。'},
+  {q:'子类定义了与父类同名的方法，这叫什么？效果是？',
+   opts:['重载：两个版本都会执行','重写 override：子类实例调用时执行子类版本','封装：外部从此无法调用','报错：方法名不能重复'], ans:1,
+   exp:'这叫方法重写（override）。父类版本被覆盖，只有子类版本生效——战士的巨剑换掉了挥拳。'},
+  {q:'class Hero: pass / class Mage(Hero): pass，则 isinstance(Mage(), Hero) 的结果是？',
+   opts:['True','False','报错','None'], ans:0,
+   exp:'子类实例同时也是父类的实例。Mage() 是 Mage，也是 Hero——法师也是英雄。'},
+  {q:'heroes = [Warrior(), Mage()]，执行 for h in heroes: h.attack()，结果是？',
+   opts:['都执行 Hero 的 attack','都执行排最后那个类的方法','各自执行自己重写的 attack（多态）','报错，不同类不能同名方法'], ans:2,
+   exp:'这就是多态：同一个方法名，不同子类各自调用自己重写的版本，各显神通。'},
+  {q:'执行 print(pet) 时，Python 会自动查找哪个魔法方法？',
+   opts:['__init__','__str__','__len__','__add__'], ans:1,
+   exp:'print(对象) 触发 __str__，用它的返回值作为显示内容；没定义就显示默认的类名+地址。'},
+  {q:'想让 Coin(10) == Coin(10) 按"面值相等"返回 True，应该重写哪个魔法方法？',
+   opts:['__eq__','__str__','__same__','__cmp2__'], ans:0,
+   exp:'__eq__ 定义 == 的比较规则。默认 == 比较两个对象是不是同一个（身份），不是内容相等。'},
+  {q:'给 Gem 类定义了 __add__ 之后，效果是？',
+   opts:['两个 Gem 对象可以用 + 相加了','对象可以自动相加无需运算符','对象可以被 print 输出','对象变成数字类型'], ans:0,
+   exp:'__add__ 是 + 运算符背后的机关：Gem(30) + Gem(70) 会触发它并返回结果。'},
+  {q:'执行 print([gem1, gem2])，列表里的对象按哪个魔法方法显示？',
+   opts:['__str__','__repr__','__add__','__len__'], ans:1,
+   exp:'单独 print 用 __str__；放进列表、字典等容器里显示时用 __repr__。所以 __repr__ 常被称为"调试形态"。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsDiv = document.createElement('div');
+    optsDiv.className = 'qq-opts';
+    q.opts.forEach(function(o,i){
+      var btn = document.createElement('button');
+      btn.className = 'qq-opt';
+      btn.textContent = String.fromCharCode(65+i) + '. ' + o;
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          optsDiv.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        expEl.classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+      optsDiv.appendChild(btn);
+    });
+    var head = document.createElement('div');
+    head.className = 'qq';
+    head.innerHTML = '<i>Q'+(idx+1)+'</i>' + escH(q.q);
+    var expEl = document.createElement('div');
+    expEl.className = 'qq-exp';
+    expEl.textContent = q.exp;
+    div.appendChild(head);
+    div.appendChild(optsDiv);
+    div.appendChild(expEl);
+    box.appendChild(div);
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！血脉纯度 100%，下一课已为你解锁 🔓' : '通关成功！第 18 课「推导式与生成器」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+escH(msg);
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

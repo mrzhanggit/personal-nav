@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第11课 · 模块与pip —— 召唤外援</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fb923c 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#ffe9a8;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out-note{font-size:12px;color:var(--muted);margin-top:-8px;margin-bottom:12px;}
+  /* 模块盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:170px;background:var(--card);border:2px solid var(--gold);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(245,197,66,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--gold);
+    background:rgba(245,197,66,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:18px;font-weight:800;margin:8px 0 4px;color:var(--cyan);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 标准库小标题 */
+  .lib-name{font-family:ui-monospace,Menlo,monospace;color:var(--gold);font-weight:700;font-size:15px;margin-top:18px;}
+  .lib-name small{color:var(--muted);font-weight:400;font-family:"PingFang SC","Microsoft YaHei",sans-serif;}
+  /* 场景对比盒 */
+  .scene{
+    flex:1;min-width:260px;background:var(--card);border:2px solid var(--line);border-radius:14px;
+    padding:16px;text-align:left;transition:all .3s;
+  }
+  .scene.hot{border-color:var(--gold);}
+  .scene .sc-title{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .scene.hot .sc-title{color:var(--gold);}
+  .scene .sc-line{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);}
+  .scene .sc-result{font-size:13px;color:var(--muted);margin-top:6px;}
+  /* 实验室 · 卡牌 */
+  .mod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px;}
+  .modcard{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    transition:all .25s;cursor:pointer;
+  }
+  .modcard:hover{border-color:var(--cyan);}
+  .modcard.open{border-color:var(--cyan);grid-column:1 / -1;cursor:default;}
+  .modcard.picked{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset, 0 6px 20px rgba(245,197,66,.18);}
+  .mod-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .mod-name{font-family:ui-monospace,Menlo,monospace;font-size:17px;font-weight:700;color:var(--gold);}
+  .mod-tag{
+    font-size:11px;padding:1px 9px;border-radius:999px;letter-spacing:1px;
+    border:1px solid rgba(245,197,66,.4);color:var(--gold);background:rgba(245,197,66,.08);
+  }
+  .mod-tag.third{border-color:rgba(167,139,250,.45);color:var(--purple);background:rgba(167,139,250,.08);}
+  .mod-desc{font-size:13px;color:var(--muted);margin-top:6px;}
+  .mod-detail{display:none;margin-top:12px;border-top:1px dashed var(--line);padding-top:12px;}
+  .modcard.open .mod-detail{display:block;animation:fadeIn .35s;}
+  .mod-imp{
+    display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 10px;margin-bottom:6px;
+  }
+  .mod-actions{margin-top:10px;}
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  .btn-sm{padding:7px 18px;font-size:13px;border-radius:9px;}
+  /* 卡组区 */
+  .deck-bar{
+    margin-top:20px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:16px 22px;
+  }
+  .deck-bar h3{color:var(--gold);font-size:16px;letter-spacing:1px;margin-bottom:8px;}
+  .deck-names{font-family:ui-monospace,Menlo,monospace;font-size:14px;color:var(--text);}
+  .deck-names .chip{
+    display:inline-block;background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.4);
+    color:var(--gold);border-radius:8px;padding:1px 10px;margin:2px 4px 2px 0;
+  }
+  .deck-hint{font-size:12px;color:var(--muted);margin-top:4px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);color:var(--gold);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--gold);color:var(--gold);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--cyan);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(245,197,66,.1);color:var(--gold);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  footer b{color:var(--gold);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>第 11 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">DUNGEON CHALLENGE · STAGE 2</div>
+    <h1>模块与 pip —— 召唤外援</h1>
+    <div class="subtitle">今日目标：不再裸装上阵，学会从装备库召唤现成的强大外援</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解「模块 = 现成的装备箱」，学会用 <span class="hl">import</span> 召唤</li>
+      <li>分清 <span class="hl">import xxx</span> 与 <span class="hl">from xxx import yyy</span>，会用 <span class="hl">as</span> 起别名</li>
+      <li>打开标准库百宝箱：math / random / time / datetime / os / json / sys</li>
+      <li>学会 <span class="hl">pip install</span> 安装第三方库，理解虚拟环境 venv</li>
+      <li>搞懂 <span class="hl">if __name__ == "__main__"</span> 的双重身份</li>
+      <li>通关实验室「外援召唤台」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 模块是什么 -->
+  <section>
+    <h2><span class="num">1</span>模块：现成的装备箱</h2>
+    <p>打副本最忌讳裸装上阵。你想要随机数？有人写好了。你想算平方根？有人写好了。这些<span class="hl">写好的代码被打包成一个个「模块」</span>，随时召唤。</p>
+    <p>一个模块，你可以理解为：<span class="hl">一个装满现成函数和变量的装备箱</span>。想用里面的东西，只需要念一句咒语——<span class="hl-c">import</span>。</p>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">math</div><div class="val">数学工具箱</div><div class="tip">平方根 · 取整 · π</div></div>
+      <div class="mbox"><div class="tag">random</div><div class="val">命运骰子</div><div class="tip">随机数 · 随机抽取</div></div>
+      <div class="mbox"><div class="tag">json</div><div class="val">存档转换器</div><div class="tip">字典 ⇄ 文字互转</div></div>
+    </div>
+
+    <p>把鼠标移到装备箱上看看。召唤它只要一行：</p>
+    <div class="code"><span class="k">import</span> <span class="v">math</span>        <span class="c"># 召唤 math 装备箱</span>
+<span class="k">print</span>(<span class="v">math</span>.sqrt(<span class="n">144</span>))  <span class="c"># 用箱子里名叫 sqrt 的工具算平方根</span></div>
+    <div class="out">12.0</div>
+
+    <p>其实你早就见过模块了：<span class="hl-c">print()</span>、<span class="hl-c">len()</span> 是 Python 开机自带的<b>内置函数</b>，不用 import；而 sqrt、randint 藏在模块里，<span class="hl">必须先 import 才能用</span>——不召唤就伸手拿，会直接报 <code>NameError</code>。</p>
+  </section>
+
+  <!-- 2 import 两种姿势 -->
+  <section>
+    <h2><span class="num">2</span>召唤的两种姿势：import 与 from...import</h2>
+    <p>方式一：<span class="hl">import xxx</span>——整箱搬进屋，用的时候喊全名「箱名.工具名」。</p>
+    <p>方式二：<span class="hl">from xxx import yyy</span>——只把一件工具拿出来，直接用名字。</p>
+    <div class="code"><span class="k">import</span> <span class="v">math</span>                 <span class="c"># 方式一：整箱搬进来</span>
+<span class="k">print</span>(<span class="v">math</span>.sqrt(<span class="n">9</span>))         <span class="c"># 必须喊全名 math.sqrt</span>
+
+<span class="k">from</span> <span class="v">math</span> <span class="k">import</span> sqrt       <span class="c"># 方式二：只拿 sqrt 这一件</span>
+<span class="k">print</span>(sqrt(<span class="n">9</span>))              <span class="c"># 直接喊 sqrt</span></div>
+    <div class="out">3.0
+3.0</div>
+
+    <p>两种姿势效果一样，怎么选？小口诀：<span class="hl">用得多就整箱搬（import math），只用一两件就单拿（from math import sqrt）</span>。</p>
+    <p>⚠️ 还有一种危险写法 <code class="hl-c">from math import *</code>——把整箱东西全部倒在地上不署名。工具一多就容易「撞名」：两个箱子都有 <code>sqrt</code>，后到的会覆盖先到的。<span class="hl">新手阶段不推荐</span>。</p>
+  </section>
+
+  <!-- 3 as 别名 -->
+  <section>
+    <h2><span class="num">3</span>as：给外援起个短名</h2>
+    <p>有些模块名字太长（比如 pandas），喊起来费劲。用 <span class="hl">as</span> 给它起个代号：</p>
+    <div class="code"><span class="k">import</span> <span class="v">random</span> <span class="k">as</span> <span class="v">rd</span>          <span class="c"># 从此 random 叫 rd</span>
+<span class="v">rd</span>.seed(<span class="n">42</span>)
+<span class="k">print</span>(<span class="v">rd</span>.randint(<span class="n">1</span>, <span class="n">6</span>))       <span class="c"># rd.randint，而不是 random.randint</span>
+
+<span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> date <span class="k">as</span> <span class="v">d</span>  <span class="c"># from-import 的工具也能起别名</span>
+<span class="k">print</span>(<span class="v">d</span>(<span class="n">2025</span>, <span class="n">10</span>, <span class="n">1</span>).isoformat())</div>
+    <div class="out">6
+2025-10-01</div>
+
+    <p>一个彩蛋惯例：<span class="hl-c">import pandas as pd</span>、<span class="hl-c">import numpy as np</span> 是全世界的程序员约好的代号，跟着写就对了。注意：起了别名之后<span class="hl">只能用别名</span>，再喊原名 random 反而会报错。</p>
+  </section>
+
+  <!-- 4 标准库百宝箱 -->
+  <section>
+    <h2><span class="num">4</span>标准库百宝箱：自带七件神装</h2>
+    <p>Python 安装好就自带一大批模块，统称<span class="hl">标准库</span>——不用安装、不用下载，import 就能用。先认识七件最常用的：</p>
+
+    <div class="lib-name">📦 math <small>—— 数学工具箱</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">math</span>
+<span class="k">print</span>(<span class="v">math</span>.sqrt(<span class="n">144</span>))   <span class="c"># 平方根</span>
+<span class="k">print</span>(<span class="v">math</span>.floor(<span class="n">3.9</span>))   <span class="c"># 向下取整</span>
+<span class="k">print</span>(<span class="v">math</span>.ceil(<span class="n">2.1</span>))    <span class="c"># 向上取整</span></div>
+    <div class="out">12.0
+3
+3</div>
+
+    <div class="lib-name">🎲 random <small>—— 命运骰子</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">random</span>
+<span class="v">random</span>.seed(<span class="n">42</span>)            <span class="c"># 固定骰子，让输出可复现（实战可省略）</span>
+<span class="k">print</span>(<span class="v">random</span>.randint(<span class="n">1</span>, <span class="n">6</span>))    <span class="c"># 掷一个 1~6 的骰子（两头都能掷到）</span>
+<span class="k">print</span>(<span class="v">random</span>.choice([<span class="s">"剑"</span>, <span class="s">"盾"</span>, <span class="s">"弓"</span>]))  <span class="c"># 从列表里随机抽一件</span></div>
+    <div class="out">6
+剑</div>
+
+    <div class="lib-name">⏰ time <small>—— 时间控制器</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">time</span>
+<span class="k">print</span>(<span class="s">"蓄力中..."</span>)
+<span class="v">time</span>.sleep(<span class="n">1</span>)             <span class="c"># 暂停 1 秒（回血动画全靠它）</span>
+<span class="k">print</span>(<span class="s">"攻击！"</span>)</div>
+    <div class="out">蓄力中...
+攻击！</div>
+    <div class="out-note">※ 两行输出之间真实暂停了约 1 秒。</div>
+
+    <div class="lib-name">📅 datetime <small>—— 日历师</small></div>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> date
+<span class="k">print</span>(<span class="v">date</span>(<span class="n">2025</span>, <span class="n">10</span>, <span class="n">1</span>).isoformat())          <span class="c"># 造一个日期并转成标准文字</span>
+<span class="k">print</span>(<span class="v">date</span>(<span class="n">2026</span>, <span class="n">1</span>, <span class="n">1</span>) - <span class="v">date</span>(<span class="n">2025</span>, <span class="n">1</span>, <span class="n">1</span>))     <span class="c"># 日期相减 = 距离开服多少天</span></div>
+    <div class="out">2025-10-01
+365 days, 0:00:00</div>
+
+    <div class="lib-name">🗂️ os <small>—— 和操作系统打交道</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">os</span>
+<span class="k">print</span>(<span class="v">os</span>.path.join(<span class="s">"bag"</span>, <span class="s">"sword.txt"</span>))  <span class="c"># 拼出一个跨系统的路径</span>
+<span class="k">print</span>(<span class="v">os</span>.getcwd())                          <span class="c"># 当前在哪个文件夹</span></div>
+    <div class="out">bag/sword.txt
+/Users/hero/adventure</div>
+    <div class="out-note">※ 第二行每台电脑都不同（此处为示例）；Windows 下第一行会输出 bag\sword.txt。</div>
+
+    <div class="lib-name">💾 json <small>—— 存档转换器</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">json</span>
+<span class="v">hero</span> = {<span class="s">"名字"</span>: <span class="s">"阿呆"</span>, <span class="s">"等级"</span>: <span class="n">10</span>}
+<span class="v">s</span> = <span class="v">json</span>.dumps(<span class="v">hero</span>, ensure_ascii=<span class="k">False</span>)  <span class="c"># 字典 → JSON 文字（可写进文件）</span>
+<span class="k">print</span>(<span class="v">s</span>)
+<span class="k">print</span>(<span class="v">json</span>.loads(<span class="v">s</span>)[<span class="s">"等级"</span>])               <span class="c"># JSON 文字 → 字典</span></div>
+    <div class="out">{"名字": "阿呆", "等级": 10}
+10</div>
+
+    <div class="lib-name">🖥️ sys <small>—— 系统信息台</small></div>
+    <div class="code"><span class="k">import</span> <span class="v">sys</span>
+<span class="k">print</span>(<span class="v">sys</span>.version_info[<span class="n">0</span>])   <span class="c"># Python 大版本号</span>
+<span class="k">print</span>(<span class="v">sys</span>.argv)              <span class="c"># 命令行参数列表</span></div>
+    <div class="out">3
+['hero.py', '阿呆']</div>
+    <div class="out-note">※ 第二行为示例：在终端输入 python hero.py 阿呆 时，argv 就是脚本名加你传的参数。</div>
+  </section>
+
+  <!-- 5 pip -->
+  <section>
+    <h2><span class="num">5</span>pip：给装备库进货</h2>
+    <p>标准库之外，全世界的程序员还发布了上百万件更强的装备（第三方库）：画图表的 pandas、发网络请求的 requests、做网站的 Django……它们要用 <span class="hl">pip</span> 安装。</p>
+    <p>⚠️ pip 命令是在<span class="hl">终端（命令行）</span>里输入的，不是在 Python 里：</p>
+    <div class="code"><span class="c"># —— 终端命令，不是 Python 代码 ——</span>
+pip install requests       <span class="c"># 进货：安装第三方库 requests</span>
+pip list                   <span class="c"># 盘点：列出已安装的所有库和版本号</span>
+pip uninstall requests     <span class="c"># 退货：卸载（会问 y/n 确认）</span></div>
+    <p>装好之后，用法和标准库<span class="hl">一模一样</span>：</p>
+    <div class="code"><span class="k">import</span> <span class="v">requests</span>   <span class="c"># 曾经 pip install 过，现在直接召唤</span></div>
+    <p>常见报错自查：终端里报 <code>'pip' 不是内部或外部命令</code> → Python 没装好或没加入 PATH，重装时勾选 "Add Python to PATH"；在 Python 交互模式里输入 pip 命令 → <span class="hl">pip 是终端命令</span>，先输入 <code>exit()</code> 退出 Python 再敲。</p>
+  </section>
+
+  <!-- 6 venv -->
+  <section>
+    <h2><span class="num">6</span>虚拟环境 venv：每人一个独立背包</h2>
+    <p>副本打到后期会遇到一个棘手问题——<span class="hl">版本冲突</span>：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">项目 A</div><div class="val">需要库 1.0</div><div class="tip">旧项目，锁定老版本</div></div>
+      <div class="mbox"><div class="tag">项目 B</div><div class="val">需要库 2.0</div><div class="tip">新项目，必须新版本</div></div>
+    </div>
+    <p>如果所有库都装在同一个「全局背包」里，1.0 和 2.0 只能活一个，两个项目必然有一个崩。<span class="hl">虚拟环境（venv）</span>就是给每个项目发一个独立背包：各自的库、各自的版本、互不打架。</p>
+    <div class="code"><span class="c"># —— 终端命令，不是 Python 代码 ——</span>
+python -m venv myenv              <span class="c"># 在当前文件夹创建名为 myenv 的独立背包</span>
+
+<span class="c"># 进入背包（激活）：</span>
+source myenv/bin/activate         <span class="c"># macOS / Linux</span>
+myenv\Scripts\activate            <span class="c"># Windows</span>
+
+pip install pandas                <span class="c"># 现在只装进这个背包，不影响别人</span>
+deactivate                        <span class="c"># 离开背包</span></div>
+    <p>判断自己是否在背包里的标志：终端提示符前面多了个 <code class="hl-c">(myenv)</code>。新手阶段可以先不建虚拟环境，但<span class="hl">从今天起你要知道这个概念</span>——它迟早会救你一命。</p>
+  </section>
+
+  <!-- 7 __name__ -->
+  <section>
+    <h2><span class="num">7</span>if __name__ == "__main__"：模块的双重身份</h2>
+    <p>每个 .py 文件都有一个隐藏变量 <span class="hl-c">__name__</span>，它的值由「你怎么运行」决定：</p>
+    <ul style="margin:0 0 10px 20px;">
+      <li><b>直接运行</b>（终端敲 <code class="hl-c">python hero.py</code>）→ <span class="hl">__name__ 等于 "__main__"</span></li>
+      <li><b>被别人导入</b>（别的文件里 <code class="hl-c">import hero</code>）→ <span class="hl">__name__ 等于 "hero"</span>（模块名）</li>
+    </ul>
+    <p>所以 <span class="hl">if __name__ == "__main__":</span> 的意思是：<span class="hl">「这段代码只在直接运行我时执行，被导入时别乱动」</span>。</p>
+    <div class="code"><span class="c"># 文件 hero.py</span>
+<span class="k">def</span> attack():
+    <span class="k">print</span>(<span class="s">"挥剑！"</span>)
+
+<span class="k">if</span> __name__ == <span class="s">"__main__"</span>:
+    attack()          <span class="c"># 只有直接运行 hero.py 时才会自动挥剑</span></div>
+
+    <div class="boxes">
+      <div class="scene hot">
+        <div class="sc-title">场景 A · 直接运行</div>
+        <div class="sc-line">$ python hero.py</div>
+        <div class="sc-line">__name__ == "__main__" → 条件成立</div>
+        <div class="sc-result">✅ 自动执行 attack()，屏幕输出「挥剑！」</div>
+      </div>
+      <div class="scene">
+        <div class="sc-title">场景 B · 被导入</div>
+        <div class="sc-line">main.py 里写：import hero</div>
+        <div class="sc-line">__name__ == "hero" → 条件不成立</div>
+        <div class="sc-result">❌ 什么也不输出，attack 只是被「借走」备用</div>
+      </div>
+    </div>
+
+    <div class="code"><span class="c"># 文件 main.py</span>
+<span class="k">import</span> <span class="v">hero</span>          <span class="c"># 导入时静悄悄，不会输出「挥剑！」</span>
+<span class="v">hero</span>.attack()      <span class="c"># 需要的时候手动调用</span></div>
+    <div class="out">挥剑！</div>
+    <p>为什么要这么设计？想象你写了满满一箱好用的函数，别的文件都想 import 来用——<span class="hl">如果一被导入就自动跑测试代码，别人会疯掉</span>。这行 if 就是把「给别人用的」和「自己测试用的」分开，是 Python 世界的礼貌 conventions（惯例）。</p>
+  </section>
+
+  <!-- 8 实验室 -->
+  <section>
+    <h2><span class="num">8</span>🎮 实验室 · 外援召唤台</h2>
+    <p>召唤台上摆着 10 张模块卡牌（金色 = 标准库自带，紫色 = 需要 pip 安装）。<span class="hl">点击卡牌展开详情</span>，看看每个外援的拿手好戏；勾选组建你的卡组（最多 3 张），下方会生成组合技代码。</p>
+    <div class="mod-grid" id="mod-grid"></div>
+
+    <div class="deck-bar">
+      <h3>🃏 我的卡组</h3>
+      <div class="deck-names" id="deck-names">（空）—— 点击卡牌详情里的按钮加入</div>
+      <div class="deck-hint">卡组 1 张 = 单人秀；2~3 张 = 组合技（最多 3 张）</div>
+      <div id="combo-area" style="display:none">
+        <div class="code" id="combo-code" style="margin-top:14px"></div>
+        <div class="out" id="combo-out" style="display:none"></div>
+        <div class="out-note" id="combo-note" style="display:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 预言机 -->
+  <section>
+    <h2><span class="num">9</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 10 记忆卡片 -->
+  <section>
+    <h2><span class="num">10</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 11 Quiz -->
+  <section>
+    <h2><span class="num">11</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 12 课后 -->
+  <section class="homework">
+    <h2><span class="num">12</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开终端（Windows 用 CMD/PowerShell，Mac 用终端），输入 <code>pip list</code>，看看你的装备库里已经有哪些库</li>
+    <li>② 进入 Python 交互模式，把「标准库百宝箱」里 7 个例子<b>逐个亲手敲一遍</b>，观察输出</li>
+    <li>③ 小挑战：写一个 <code>hero.py</code>（定义 attack 函数 + if __name__ == "__main__"），再写一个 <code>main.py</code> 去 import 它，分别用两种方式运行，亲眼验证「被导入时不执行」</li>
+    <li>④ 进阶：在终端用 <code>python -m venv myenv</code> 创建你的第一个虚拟环境并激活它，然后 pip list 对比全局有什么不同</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>时间与随机 —— 命运骰子</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 工具：简易 Python 代码高亮 ============ */
+function hl(src){
+  var esc = src.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var re = /("[^"\n]*"|'[^'\n]*')|(#[^\n]*)|\b(import|from|as|if|else|elif|for|in|def|return|with|not|and|or|while|True|False|None)\b|\b(print|open|range|len|str|int|float|exit)\b|\b(\d+\.?\d*)\b/g;
+  return esc.replace(re, function(m, str, com, kw, fn, num){
+    if(str) return '<span class="s">'+str+'</span>';
+    if(com) return '<span class="c">'+com+'</span>';
+    if(kw)  return '<span class="k">'+kw+'</span>';
+    if(fn)  return '<span class="k">'+fn+'</span>';
+    if(num) return '<span class="n">'+num+'</span>';
+    return m;
+  });
+}
+
+/* ============ 实验室：外援召唤台 ============ */
+var modules = [
+  {id:'math', name:'math', std:true, imp:'import math',
+   desc:'数学工具箱：平方根、取整、圆周率',
+   code:'import math\nprint(math.sqrt(144))\nprint(math.floor(3.9))',
+   out:'12.0\n3',
+   use:'print("math → π ≈", round(math.pi, 2))'},
+  {id:'random', name:'random', std:true, imp:'import random',
+   desc:'命运骰子：随机整数、随机抽取',
+   code:'import random\nrandom.seed(42)\nprint(random.randint(1, 6))\nprint(random.choice(["剑", "盾", "弓"]))',
+   out:'6\n剑',
+   use:'random.seed(42)  # 固定骰子，结果可复现\nprint("random → 掷骰子:", random.randint(1, 6))'},
+  {id:'datetime', name:'datetime', std:true, imp:'from datetime import date',
+   desc:'日历师：日期的创建、比较与运算',
+   code:'from datetime import date\nprint(date(2025, 10, 1).isoformat())\nprint(date(2026, 1, 1) - date(2025, 1, 1))',
+   out:'2025-10-01\n365 days, 0:00:00',
+   use:'print("datetime → 开服日:", date(2025, 10, 1).isoformat())'},
+  {id:'time', name:'time', std:true, imp:'import time',
+   desc:'时间控制器：暂停、计时',
+   code:'import time\nprint("蓄力中...")\ntime.sleep(1)   # 暂停 1 秒\nprint("攻击！")',
+   out:'蓄力中...\n攻击！',
+   outNote:'※ 两行之间真实暂停约 1 秒。',
+   use:'start = time.time()\ntime.sleep(1)\nprint("time → 暂停了约", round(time.time() - start), "秒")'},
+  {id:'os', name:'os', std:true, imp:'import os',
+   desc:'和操作系统打交道：路径、文件夹',
+   code:'import os\nprint(os.path.join("bag", "sword.txt"))\nprint(os.getcwd())',
+   out:'bag/sword.txt\n/Users/hero/adventure',
+   outNote:'※ 第二行为示例，每台电脑不同；Windows 下第一行是 bag\\sword.txt。',
+   use:'print("os → 存档路径:", os.path.join("save", "hero.json"))'},
+  {id:'json', name:'json', std:true, imp:'import json',
+   desc:'存档转换器：字典与 JSON 文字互转',
+   code:'import json\nhero = {"名字": "阿呆", "等级": 10}\ns = json.dumps(hero, ensure_ascii=False)\nprint(s)\nprint(json.loads(s)["等级"])',
+   out:'{"名字": "阿呆", "等级": 10}\n10',
+   use:'hero = {"名字": "阿呆", "等级": 10}\nprint("json →", json.dumps(hero, ensure_ascii=False))'},
+  {id:'sys', name:'sys', std:true, imp:'import sys',
+   desc:'系统信息台：版本号、命令行参数',
+   code:'import sys\nprint(sys.version_info[0])\nprint(sys.argv)',
+   out:"3\n['hero.py', '阿呆']",
+   outNote:'※ 第二行为示例：终端输入 python hero.py 阿呆 时的结果。',
+   use:'print("sys → Python 大版本:", sys.version_info[0])'},
+  {id:'turtle', name:'turtle', std:true, imp:'import turtle',
+   desc:'小海龟画笔：用代码画图（标准库自带）',
+   code:'import turtle\n\nt = turtle.Turtle()\nfor i in range(4):\n    t.forward(100)\n    t.left(90)\nturtle.done()',
+   out:'（弹出一个绘图窗口，小海龟画出一个边长 100 的正方形）',
+   outNote:'※ turtle 会打开图形窗口，适合在电脑上亲手运行体验。',
+   use:'t = turtle.Turtle()\nt.forward(100)\nprint("turtle → 前进了 100 步")'},
+  {id:'requests', name:'requests', std:false, imp:'import requests',
+   desc:'信使：向网站发请求、拿回数据（需 pip install）',
+   code:'import requests\n\nr = requests.get(url)   # url 是存着目标网址的变量\nprint(r.status_code)    # 200 表示请求成功\nprint(r.json())         # 服务器返回的 JSON 自动转成字典',
+   out:"200\n{'name': '阿呆', 'level': 10}",
+   outNote:'※ 示例：一次成功请求的结果；使用前要先在终端 pip install requests。',
+   use:'r = requests.get(url)  # url 是目标网址变量\nprint("requests → 状态码:", r.status_code)'},
+  {id:'pandas', name:'pandas', std:false, imp:'import pandas as pd',
+   desc:'数据大表：表格分析与统计（需 pip install）',
+   code:'import pandas as pd\n\ndf = pd.DataFrame({"name": ["Ada", "Bob"], "hp": [100, 85]})\nprint(df)\nprint("平均血量:", df["hp"].mean())',
+   out:'  name   hp\n0  Ada  100\n1  Bob   85\n平均血量: 92.5',
+   use:'df = pd.DataFrame({"name": ["Ada", "Bob"], "hp": [100, 85]})\nprint(df)'}
+];
+
+var deck = [];  /* 卡组，存模块 id（内存变量，页面刷新即重置） */
+
+function renderModules(){
+  var grid = document.getElementById('mod-grid');
+  modules.forEach(function(m){
+    var d = document.createElement('div');
+    d.className = 'modcard';
+    d.id = 'card-' + m.id;
+    d.innerHTML =
+      '<div class="mod-head"><span class="mod-name">'+m.name+'</span>'+
+      '<span class="mod-tag'+(m.std?'':' third')+'">'+(m.std?'标准库':'第三方库')+'</span></div>'+
+      '<div class="mod-desc">'+m.desc+'</div>'+
+      '<div class="mod-detail" id="det-'+m.id+'">'+
+        '<div class="mod-imp">'+m.imp+'</div>'+
+        '<div class="code" style="margin:8px 0">'+hl(m.code)+'</div>'+
+        '<div class="out">'+m.out.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div>'+
+        (m.outNote ? '<div class="out-note">'+m.outNote+'</div>' : '')+
+        '<div class="mod-actions"><button class="btn btn-sm" id="pick-'+m.id+'">＋ 加入卡组</button></div>'+
+      '</div>';
+    /* 点头部（卡片上半部）切换展开；点按钮加入卡组 */
+    d.addEventListener('click', function(ev){
+      if(ev.target && ev.target.tagName === 'BUTTON') return;
+      d.classList.toggle('open');
+    });
+    var pickBtn = null;
+    grid.appendChild(d);
+    pickBtn = document.getElementById('pick-'+m.id);
+    pickBtn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      toggleDeck(m.id);
+    });
+  });
+}
+
+function toggleDeck(id){
+  var idx = deck.indexOf(id);
+  if(idx >= 0){
+    deck.splice(idx, 1);
+  }else{
+    if(deck.length >= 3){ alert('卡组最多 3 张外援！先移出一张再换人。'); return; }
+    deck.push(id);
+  }
+  refreshDeck();
+}
+
+function findMod(id){
+  for(var i=0;i<modules.length;i++){ if(modules[i].id === id) return modules[i]; }
+  return null;
+}
+
+/* 特殊组合技（输出均已用真实 Python 实测核对） */
+var specialCombos = [
+  {need:['random','datetime'], title:'带时间戳的随机密码生成器',
+   code:"import random\nimport string\nfrom datetime import datetime\n\nrandom.seed(1)  # 固定随机种子，方便复现；实战可去掉\npart = ''.join(random.choices(string.ascii_lowercase + string.digits, k=8))\nts = datetime(2025, 10, 1, 8, 30).strftime('%Y%m%d_%H%M')\nprint(ts + \"_\" + part)",
+   out:'20251001_0830_e41jrqx2',
+   note:'※ random 负责生成随机部分，datetime 负责打上时间戳——两个外援的完美配合。'},
+  {need:['math','random'], title:'随机暴击伤害计算器',
+   code:"import math\nimport random\n\nrandom.seed(42)\nbase = random.uniform(10, 20)    # 随机基础伤害\ncrit = random.uniform(1.5, 2.0)  # 随机暴击倍率\nprint(\"造成伤害:\", math.floor(base * crit))",
+   out:'造成伤害: 24',
+   note:'※ random.uniform(a, b) 生成 a~b 之间的随机小数；math.floor 向下取整成整数伤害。'},
+  {need:['json','os'], title:'英雄存档系统',
+   code:'import json\nimport os\n\nhero = {"名字": "阿呆", "等级": 10}\npath = os.path.join("save", "hero.json")\nos.makedirs("save", exist_ok=True)\nwith open(path, "w", encoding="utf-8") as f:\n    json.dump(hero, f, ensure_ascii=False)\nprint("已存档到:", path)\nwith open(path, encoding="utf-8") as f:\n    print("读档成功:", json.load(f))',
+   out:"已存档到: save/hero.json\n读档成功: {'名字': '阿呆', '等级': 10}",
+   note:'※ os 负责建文件夹和拼路径，json 负责把字典写进文件再读回来。'}
+];
+
+function refreshDeck(){
+  /* 卡片选中态 + 按钮文字 */
+  modules.forEach(function(m){
+    var card = document.getElementById('card-'+m.id);
+    var btn = document.getElementById('pick-'+m.id);
+    if(!card || !btn) return;
+    if(deck.indexOf(m.id) >= 0){
+      card.classList.add('picked');
+      btn.textContent = '－ 移出卡组';
+    }else{
+      card.classList.remove('picked');
+      btn.textContent = '＋ 加入卡组';
+    }
+  });
+  /* 卡组名字 */
+  var namesBox = document.getElementById('deck-names');
+  if(deck.length === 0){
+    namesBox.innerHTML = '（空）—— 点击卡牌详情里的按钮加入';
+    document.getElementById('combo-area').style.display = 'none';
+    return;
+  }
+  namesBox.innerHTML = deck.map(function(id){
+    return '<span class="chip">'+id+'</span>';
+  }).join('') + '（'+deck.length+' / 3）';
+  buildCombo();
+}
+
+function buildCombo(){
+  var area = document.getElementById('combo-area');
+  var codeBox = document.getElementById('combo-code');
+  var outBox = document.getElementById('combo-out');
+  var noteBox = document.getElementById('combo-note');
+  area.style.display = 'block';
+  outBox.style.display = 'none';
+  noteBox.style.display = 'none';
+
+  /* 单张：直接展示该模块示例 */
+  if(deck.length === 1){
+    var m = findMod(deck[0]);
+    codeBox.innerHTML = hl('# 单人秀：' + m.name + '\n' + m.code);
+    outBox.innerHTML = m.out.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    outBox.style.display = 'block';
+    if(m.outNote){ noteBox.textContent = m.outNote; noteBox.style.display = 'block'; }
+    return;
+  }
+  /* 特殊组合技：卡组同时包含指定模块即触发 */
+  for(var i=0;i<specialCombos.length;i++){
+    var sp = specialCombos[i];
+    var ok = true;
+    for(var j=0;j<sp.need.length;j++){
+      if(deck.indexOf(sp.need[j]) < 0){ ok = false; break; }
+    }
+    if(ok){
+      codeBox.innerHTML = hl('# 组合技 · ' + sp.title + '\n' + sp.code);
+      outBox.innerHTML = sp.out.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      outBox.style.display = 'block';
+      noteBox.textContent = sp.note;
+      noteBox.style.display = 'block';
+      return;
+    }
+  }
+  /* 通用组合：每个外援露一手 */
+  var lines = ['# 组合技：' + deck.join(' + ') + ' —— 每个外援露一手'];
+  deck.forEach(function(id){ lines.push(findMod(id).imp); });
+  lines.push('', 'print("---- 组合技发动 ----")');
+  deck.forEach(function(id){ lines.push(findMod(id).use); });
+  codeBox.innerHTML = hl(lines.join('\n'));
+}
+
+renderModules();
+refreshDeck();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 单件工具',
+    code:'from math import sqrt\nprint(sqrt(9))',
+    opts:['3','3.0','报错 NameError','math.sqrt(9)'],
+    ans:1,
+    exp:'from math import sqrt 把 sqrt 这一件工具单独搬了出来，直接喊名字 sqrt(9) 即可。注意 sqrt 返回的是小数 3.0 而不是 3。'
+  },
+  {
+    title:'第 2 预言 · 忘了喊全名',
+    code:'import math\nprint(sqrt(9))',
+    opts:['3.0','9','报错 NameError','math.sqrt(9)'],
+    ans:2,
+    exp:'import math 是整箱搬进来，工具都登记在 math 名下，必须写 math.sqrt(9)。直接写 sqrt 相当于不召唤就伸手拿——NameError！'
+  },
+  {
+    title:'第 3 预言 · 代号外援',
+    code:'import math as m\nprint(m.ceil(2.1))',
+    opts:['2.1','3','4','报错'],
+    ans:1,
+    exp:'as 给 math 起了代号 m，用 m.ceil 即可；ceil 是向上取整，2.1 向上取整得 3。注意起别名后原名 math 不能再用。'
+  },
+  {
+    title:'第 4 预言 · 被导入的英雄',
+    code:'# 文件 hero.py\ndef attack():\n    print("挥剑！")\n\nif __name__ == "__main__":\n    attack()\n\n# 文件 main.py\nimport hero\nprint("组队完成")',
+    opts:['只输出「组队完成」','只输出「挥剑！」','两个都输出','报错 ImportError'],
+    ans:0,
+    exp:'运行 python main.py 时，hero 被 import，此刻 hero.py 里的 __name__ 是 "hero" 而不是 "__main__"，条件不成立，attack() 不会自动执行——所以只输出「组队完成」。'
+  },
+  {
+    title:'第 5 预言 · 进货咒语',
+    code:'# 想安装第三方库 requests，该念哪句？',
+    opts:['pip install requests','install requests','pip requests install','pip get requests'],
+    ans:0,
+    exp:'pip 的固定句式是「pip install 库名」，在终端里输入（不是在 Python 里）。卸载是 pip uninstall，盘点是 pip list。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+hl(q.code)+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['什么是模块？','一个装满现成函数和变量的装备箱（.py 文件），import 之后就能用'],
+  ['import math 后怎么用工具？','喊全名：math.sqrt(9)，工具都登记在 math 名下'],
+  ['from math import sqrt 后呢？','sqrt 已单独搬出，直接写 sqrt(9)'],
+  ['as 是干嘛的？','给模块起代号：import random as rd，之后只能用 rd.randint'],
+  ['标准库要 pip 安装吗？','不用！math、random、time 等 Python 自带，import 即用'],
+  ['安装第三方库的命令？','终端里输入：pip install 库名（注意不是在 Python 里输）'],
+  ['pip list 和 pip uninstall？','list 列出已装的所有库；uninstall 库名 卸载'],
+  ['虚拟环境 venv 为何存在？','项目A要库1.0、项目B要2.0，全局只能装一个；venv 给每个项目独立背包，互不打架'],
+  ['if __name__ == "__main__" ？','直接运行才为 True 并执行；被 import 时不执行——把「自己测试」和「给别人用」分开'],
+  ['json 的两板斧？','dumps 把字典转成 JSON 文字；loads 把 JSON 文字转回字典'],
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'import math 之后，调用平方根的正确写法是？',
+   opts:['sqrt(9)','math.sqrt(9)','import sqrt(9)','math->sqrt(9)'], ans:1,
+   exp:'import math 是整箱搬，工具在 math 名下，必须喊全名 math.sqrt(9)。'},
+  {q:'执行过 from math import sqrt 之后，下面哪个写法能算出 9 的平方根？',
+   opts:['math.sqrt(9)','sqrt(9)','两个都可以','两个都不行'], ans:1,
+   exp:'from math import sqrt 只把 sqrt 单独搬了进来，math 这个名字并没有登记在案——再写 math.sqrt 反而报 NameError。'},
+  {q:'import random as rd 之后，掷一个 1~6 骰子的写法是？',
+   opts:['random.randint(1, 6)','rd.randint(1, 6)','randint(1, 6)','rd.random(1, 6)'], ans:1,
+   exp:'起了代号 rd 之后只能用代号；randint 才是掷整数骰子的函数。'},
+  {q:'下面哪个库是 Python 标准库，不需要 pip 安装？',
+   opts:['requests','pandas','numpy','math'], ans:3,
+   exp:'math 是自带的标准库；requests、pandas、numpy 都是第三方库，要先 pip install。'},
+  {q:'安装第三方库 requests 的正确命令是？',
+   opts:['pip install requests','pip requests install','install requests','python requests'], ans:0,
+   exp:'固定句式「pip install 库名」，而且要在终端里输入。'},
+  {q:'想查看电脑上装了哪些库，用哪条命令？',
+   opts:['pip show','pip list','pip all','import pip'], ans:1,
+   exp:'pip list 会列出所有已安装的库和版本号，是盘点装备库的命令。'},
+  {q:'卸载 requests 库的命令是？',
+   opts:['pip delete requests','pip remove requests','pip uninstall requests','uninstall requests'], ans:2,
+   exp:'pip 的卸载子命令是 uninstall，执行后会询问 y/n 确认。'},
+  {q:'为什么需要虚拟环境 venv？',
+   opts:['让 Python 跑得更快','隔离各项目的库版本，避免「A 要 1.0、B 要 2.0」的冲突','让代码更短','不装 venv 无法 import'], ans:1,
+   exp:'venv 给每个项目一个独立背包，各自的库和版本互不干扰，解决版本冲突。'},
+  {q:'终端里直接运行 python hero.py 时，hero.py 中的 __name__ 等于？',
+   opts:['"hero"','"__main__"','"__self__"','报错'], ans:1,
+   exp:'直接运行时 __name__ 是 "__main__"；被别的文件 import 时才是模块名 "hero"。'},
+  {q:'hero = {"名字": "阿呆"}，执行 print(json.dumps(hero, ensure_ascii=False)) 会得到？',
+   opts:['把字典转成 JSON 文字','把文字转回字典','把字典存进文件','报错，字典不能转'], ans:0,
+   exp:'dumps = dump to string，把 Python 对象转成 JSON 文字；反过来 loads 才是转回对象；直接存文件用的是 json.dump（没有 s）。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！外援召唤大师，下一课已为你解锁 🔓' : '通关成功！第 12 课「时间与随机」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

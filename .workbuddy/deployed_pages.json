@@ -1,10 +1,310 @@
 {
   "version": 1,
-  "recorded_at": "2026-08-23T23:32:00+08:00",
+  "recorded_at": "2026-08-24T00:16:15+08:00",
   "note": "F:\\Shared 已部署网页记录表，作为监控自动化去重基线。source 为源文件绝对路径；size/modified 变化视为内容更新（重新部署覆盖，URL 不变）。",
   "pages": [
     {
-      "source": "F:/Shared/代码法师·ClaudeCode两周通关课程.html",
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\00_课程总览_修炼之旅地图.html",
+      "size": 23069,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/index.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/index.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\01_新手村_第1课_变量与print.html",
+      "size": 28488,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/01_新手村_第1课_变量与print.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/01_新手村_第1课_变量与print.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\02_新手村_第2课_数据类型与input.html",
+      "size": 36536,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/02_新手村_第2课_数据类型与input.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/02_新手村_第2课_数据类型与input.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\03_新手村_第3课_条件判断.html",
+      "size": 43923,
+      "modified": "2026-08-24T00:04:44",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/03_新手村_第3课_条件判断.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/03_新手村_第3课_条件判断.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\04_新手村_第4课_循环.html",
+      "size": 42276,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/04_新手村_第4课_循环.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/04_新手村_第4课_循环.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\05_新手村_第5课_函数.html",
+      "size": 43030,
+      "modified": "2026-08-24T00:04:49",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/05_新手村_第5课_函数.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/05_新手村_第5课_函数.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\06_新手村_BOSS战_文字冒险游戏.html",
+      "size": 55404,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/06_新手村_BOSS战_文字冒险游戏.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/06_新手村_BOSS战_文字冒险游戏.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\07_装备库_第6课_列表与元组.html",
+      "size": 39379,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/07_装备库_第6课_列表与元组.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/07_装备库_第6课_列表与元组.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\08_装备库_第7课_字典与集合.html",
+      "size": 46483,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/08_装备库_第7课_字典与集合.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/08_装备库_第7课_字典与集合.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\09_装备库_第8课_字符串精通.html",
+      "size": 41364,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/09_装备库_第8课_字符串精通.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/09_装备库_第8课_字符串精通.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\10_装备库_第9课_文件读写.html",
+      "size": 46646,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/10_装备库_第9课_文件读写.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/10_装备库_第9课_文件读写.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\11_装备库_第10课_异常处理.html",
+      "size": 38030,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/11_装备库_第10课_异常处理.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/11_装备库_第10课_异常处理.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\12_装备库_BOSS战_命令行待办清单.html",
+      "size": 49379,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/12_装备库_BOSS战_命令行待办清单.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/12_装备库_BOSS战_命令行待办清单.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\13_副本挑战_第11课_模块与pip.html",
+      "size": 50819,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/13_副本挑战_第11课_模块与pip.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/13_副本挑战_第11课_模块与pip.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\14_副本挑战_第12课_时间与随机.html",
+      "size": 50811,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/14_副本挑战_第12课_时间与随机.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/14_副本挑战_第12课_时间与随机.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\15_副本挑战_第13课_requests与API.html",
+      "size": 45616,
+      "modified": "2026-08-24T00:04:49",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/15_副本挑战_第13课_requests与API.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/15_副本挑战_第13课_requests与API.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\16_副本挑战_第14课_os与shutil.html",
+      "size": 44925,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/16_副本挑战_第14课_os与shutil.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/16_副本挑战_第14课_os与shutil.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\17_副本挑战_第15课_正则表达式.html",
+      "size": 41681,
+      "modified": "2026-08-24T00:04:49",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/17_副本挑战_第15课_正则表达式.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/17_副本挑战_第15课_正则表达式.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\18_副本挑战_BOSS战_桌面自动整理器.html",
+      "size": 61097,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/18_副本挑战_BOSS战_桌面自动整理器.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/18_副本挑战_BOSS战_桌面自动整理器.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\19_进阶秘境_第16课_类与对象.html",
+      "size": 44402,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/19_进阶秘境_第16课_类与对象.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/19_进阶秘境_第16课_类与对象.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\20_进阶秘境_第17课_继承与魔法方法.html",
+      "size": 43322,
+      "modified": "2026-08-24T00:04:44",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/20_进阶秘境_第17课_继承与魔法方法.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/20_进阶秘境_第17课_继承与魔法方法.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\21_进阶秘境_第18课_推导式与生成器.html",
+      "size": 37116,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/21_进阶秘境_第18课_推导式与生成器.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/21_进阶秘境_第18课_推导式与生成器.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\22_进阶秘境_第19课_装饰器与闭包.html",
+      "size": 41310,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/22_进阶秘境_第19课_装饰器与闭包.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/22_进阶秘境_第19课_装饰器与闭包.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\23_进阶秘境_第20课_递归与算法.html",
+      "size": 41733,
+      "modified": "2026-08-24T00:04:47",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/23_进阶秘境_第20课_递归与算法.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/23_进阶秘境_第20课_递归与算法.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\24_进阶秘境_BOSS战_卡牌对战游戏.html",
+      "size": 47793,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/24_进阶秘境_BOSS战_卡牌对战游戏.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/24_进阶秘境_BOSS战_卡牌对战游戏.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\25_大师之路_第21课_多线程与并发.html",
+      "size": 44127,
+      "modified": "2026-08-24T00:04:48",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/25_大师之路_第21课_多线程与并发.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/25_大师之路_第21课_多线程与并发.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\26_大师之路_第22课_异步初步.html",
+      "size": 45375,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/26_大师之路_第22课_异步初步.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/26_大师之路_第22课_异步初步.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\27_大师之路_第23课_pandas数据分析.html",
+      "size": 39113,
+      "modified": "2026-08-24T00:04:49",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/27_大师之路_第23课_pandas数据分析.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/27_大师之路_第23课_pandas数据分析.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\28_大师之路_第24课_Git与工程化.html",
+      "size": 45256,
+      "modified": "2026-08-24T00:04:45",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/28_大师之路_第24课_Git与工程化.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/28_大师之路_第24课_Git与工程化.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/01_临时交换/python-course-游戏化Python课程\\29_大师之路_毕业设计_个人自动化助手.html",
+      "size": 52787,
+      "modified": "2026-08-24T00:04:46",
+      "deployed_at": "2026-08-24T00:16:15+08:00",
+      "target": "python-course/29_大师之路_毕业设计_个人自动化助手.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/python-course/29_大师之路_毕业设计_个人自动化助手.html",
+      "nav_category": "编程学习",
+      "nav_title": "Python 游戏化课程"
+    },
+    {
+      "source": "F:/Shared/04_资料库/学习资料/代码法师·ClaudeCode两周通关课程.html",
       "size": 92576,
       "modified": "2026-08-21T10:48:00",
       "deployed_at": "2026-08-23T00:35:00+08:00",
@@ -14,7 +314,7 @@
       "nav_title": "代码法师 · Claude Code"
     },
     {
-      "source": "F:/Shared/终端骑士·CLI两周通关课程.html",
+      "source": "F:/Shared/04_资料库/学习资料/终端骑士·CLI两周通关课程.html",
       "size": 99943,
       "modified": "2026-08-21T10:21:00",
       "deployed_at": "2026-08-23T00:35:00+08:00",
