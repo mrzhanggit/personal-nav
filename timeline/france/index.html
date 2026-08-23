@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>法兰西 · 王冠与自由 — 选择展示风格</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#f6f3ee;color:#221d17;font-family:-apple-system,"Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.7;overflow-x:hidden}
+header{text-align:center;padding:96px 6vw 40px;position:relative}
+header .tag{display:inline-block;font-size:.72rem;letter-spacing:.34em;color:#1e3a8a;font-weight:700;margin-bottom:18px;border:1px solid rgba(30,58,138,.3);padding:6px 18px;border-radius:99px}
+header h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;letter-spacing:-.01em}
+header h1 span{color:#1e3a8a}
+header p{color:#6b675f;max-width:720px;margin:16px auto 0;font-size:.98rem}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 6vw 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;align-items:stretch}
+.card{border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 8px 34px rgba(34,29,23,.08);transition:.45s;display:flex;flex-direction:column;border:1px solid #e8e2d8}
+.card:hover{transform:translateY(-10px);box-shadow:0 26px 60px rgba(34,29,23,.16)}
+.preview{height:230px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* A 预览：法兰西蓝金 · 暗夜宫廷 */
+.pv-a{background:radial-gradient(ellipse at 50% 28%,rgba(212,175,55,.22),transparent 60%),#0d1224}
+.pv-a .fleur{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);font-size:9rem;line-height:1;color:rgba(212,175,55,.55);text-shadow:0 0 40px rgba(212,175,55,.4);z-index:1}
+.pv-a .t{font-family:Georgia,"Songti SC",serif;color:#f0d27c;font-size:1.4rem;letter-spacing:.3em;text-shadow:0 0 30px rgba(212,175,55,.5);z-index:2}
+.pv-a .s{position:absolute;top:14px;right:18px;font-size:.6rem;letter-spacing:.3em;color:#c9b98a;border:1px solid rgba(212,175,55,.4);padding:3px 10px}
+.pv-a .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(212,175,55,.4) 1px,transparent 1px);background-size:24px 24px;opacity:.3}
+/* B 预览：羊皮手稿 */
+.pv-b{background:
+  radial-gradient(circle at 15% 15%,rgba(154,90,36,.06),transparent 50%),
+  radial-gradient(circle at 85% 80%,rgba(154,90,36,.07),transparent 50%),
+  #f2e7d2}
+.pv-b::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(120,80,40,.08) 1px,transparent 1px);background-size:18px 18px}
+.pv-b .frame{position:absolute;inset:14px;border:1px solid rgba(120,80,40,.5);pointer-events:none}
+.pv-b .frame::after{content:"";position:absolute;inset:5px;border:1px solid rgba(120,80,40,.25)}
+.pv-b .t{font-family:"Kaiti SC","STKaiti",KaiTi,serif;color:#4a3218;font-size:1.5rem;letter-spacing:.3em;z-index:2;position:relative}
+.pv-b .drop{position:absolute;top:44px;left:38px;font-family:"Kaiti SC",serif;font-size:2.6rem;color:#9a5a24;line-height:1;z-index:2}
+.pv-b .en{position:absolute;bottom:40px;right:34px;font-size:.55rem;letter-spacing:.28em;color:#8a6a45;z-index:2}
+.pv-b .seal{position:absolute;top:-18px;right:-12px;width:52px;height:52px;border-radius:50%;border:3px double #9a5a24;display:flex;align-items:center;justify-content:center;color:#9a5a24;font-size:.46rem;letter-spacing:.12em;line-height:1.5;text-align:center;background:#ecd9b6;z-index:3}
+/* C 预览：极简现代 · 三色 */
+.pv-c{background:#fafafa;position:relative}
+.pv-c .t{font-weight:800;font-size:1.9rem;letter-spacing:-.02em;color:#221d17}
+.pv-c .t i{font-style:normal;color:#1e3a8a}
+.pv-c .yr{display:block;font-size:.6rem;font-weight:500;color:#9a958a;letter-spacing:.4em;margin-top:8px}
+.pv-c .bar{position:absolute;bottom:0;left:0;right:0;height:4px;display:flex}
+.pv-c .bar span{flex:1}
+.pv-c .bar .w{background:#f5f5f5}.pv-c .bar .b{background:#1e3a8a}.pv-c .bar .r{background:#b3243a}
+.pv-c::before{content:"";position:absolute;top:26px;left:26px;width:8px;height:8px;border-radius:50%;background:#b3243a}
+.pv-c::after{content:"";position:absolute;top:26px;left:42px;width:8px;height:8px;border-radius:50%;background:#1e3a8a}
+.card .body{padding:26px 26px 30px;display:flex;flex-direction:column;flex:1}
+.card .body h3{font-size:1.18rem;font-weight:800}
+.card .body .en{font-size:.72rem;color:#9a958a;letter-spacing:.2em;margin-top:4px;text-transform:uppercase}
+.card .body .desc{font-size:.88rem;color:#6b675f;margin-top:12px;flex:1}
+.card .body .feats{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.card .body .feats span{font-size:.66rem;color:#5c574e;background:#f1efe9;padding:3px 10px;border-radius:99px}
+.card .body a{margin-top:22px;display:inline-block;text-align:center;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:.88rem;font-weight:700;transition:.3s}
+.card.a a{background:#0d1224;color:#f0d27c}
+.card.a a:hover{background:#1a2240}
+.card.b a{background:#4a3218;color:#f2e7d2}
+.card.b a:hover{background:#33220e}
+.card.c a{background:#221d17;color:#fff}
+.card.c a:hover{background:#3a362f}
+.note{max-width:780px;margin:56px auto 0;text-align:center;font-size:.82rem;color:#9a958a;line-height:2}
+footer{text-align:center;padding:0 6vw 60px;color:#9a958a;font-size:.76rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">吴军来信 · 世界文明史 专题整理</div>
+  <h1>法兰西 · <span>王冠与自由</span></h1>
+  <p>基于《吴军来信·世界文明史》第 104–110 讲、112–120 讲（中古欧洲部分）、178–199 讲（近代部分）及周五专题 29、38、47、49、50 与加餐 4 等二十余篇相关信件的交叉梳理，从高卢时代的凯尔特人、克洛维的皈依、查理曼的帝国，写到黎塞留与太阳王、启蒙运动、法国大革命与拿破仑。同一套内容，三种展示风格——请选择你最喜欢的一款。</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card a">
+      <div class="preview pv-a">
+        <div class="dots"></div>
+        <div class="fleur">⚜</div>
+        <span class="s">前390 — 1815</span>
+        <div class="t">蓝金 · 宫廷</div>
+      </div>
+      <div class="body">
+        <h3>风格 A · 法兰西蓝金</h3>
+        <div class="en">Royal Noir — Dark Luxe</div>
+        <p class="desc">深蓝夜色之上，金箔勾勒百合花纹章的宫廷意象。金色粒子如尘埃飘落、菱形节点编年、拱券与纹章剪影——肃穆、华贵，致敬从克洛维的皈依到拿破仑加冕的千年王权之路。</p>
+        <div class="feats"><span>金色粒子动效</span><span>百合花纹章</span><span>暗夜玻璃拟态</span><span>双向时间轴</span></div>
+        <a href="style-a.html">进入风格 A →</a>
+      </div>
+    </div>
+
+    <div class="card b">
+      <div class="preview pv-b">
+        <div class="frame"></div>
+        <div class="drop">法</div>
+        <div class="t">兰西编年</div>
+        <div class="en">CHRONIQUE · MANUSCRIT</div>
+        <div class="seal">王冠<br>之路</div>
+      </div>
+      <div class="body">
+        <h3>风格 B · 羊皮手稿</h3>
+        <div class="en">Gallic Chronicle — Manuscript</div>
+        <p class="desc">米金羊皮纸底色与墨色楷体，仿古双线花框、火漆印章与首字下沉，如展开一部法兰西中世纪的宫廷编年史。展卷动效与衬线首字，讲述从"丕平献土"到"三色旗"的千年叙事。</p>
+        <div class="feats"><span>羊皮纸质感</span><span>火漆印章</span><span>卷轴展阅动效</span><span>首字下沉</span></div>
+        <a href="style-b.html">进入风格 B →</a>
+      </div>
+    </div>
+
+    <div class="card c">
+      <div class="preview pv-c">
+        <div class="t">法兰西<i>·</i>王冠与自由</div>
+        <div class="yr">FROM GAUL TO NAPOLEON</div>
+        <div class="bar"><span class="b"></span><span class="w"></span><span class="r"></span></div>
+      </div>
+      <div class="body">
+        <h3>风格 C · 极简现代</h3>
+        <div class="en">Modern Minimal — Data Story</div>
+        <p class="desc">大量留白与法国三色点缀（蓝·白·红），数据图表与计数动画直给信息。清爽克制、信息密度高，以"王权如何建立、又如何被自由取代"为线索，适合快速通读与展示汇报。</p>
+        <div class="feats"><span>留白美学</span><span>蓝白红三色</span><span>数据图表</span><span>轻量动效</span></div>
+        <a href="style-c.html">进入风格 C →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    三种风格内容完全一致，均含：1300 年时间线（21 个关键事件，逐条展开背景 / 原因 / 影响）· 12 位重要人物 · 高卢黎明（建国前夜）· 从三等级到三色旗 · 吴军的思考。<br>
+    建议使用 Chrome / Edge 浏览器打开以获得最佳动效体验。
+  </div>
+</div>
+
+<footer>法兰西 · 王冠与自由 — 基于《吴军来信·世界文明史》资料整理 · 内容据课程原文提炼</footer>
+
+<script>
+document.querySelectorAll('.card').forEach((c,i)=>{
+  c.style.opacity='0';c.style.transform='translateY(26px)';
+  c.style.transition='opacity .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, transform .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, box-shadow .45s, border-color .45s';
+  requestAnimationFrame(()=>{c.style.opacity='1';c.style.transform='none';});
+});
+</script>
+</body>
+</html>

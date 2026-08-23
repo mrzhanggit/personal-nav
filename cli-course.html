@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>终端骑士 · CLI 两周通关课程</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --bg2:#101627; --panel:#141c30; --panel2:#1a2440;
+    --line:#243050; --tx:#dbe4f5; --tx2:#8fa0c4; --mut:#5c6b8f;
+    --acc:#2ee6a8; --acc2:#7dd3fc; --gold:#fbbf24; --rose:#fb7185; --vio:#a78bfa;
+    --mono:'SF Mono','Menlo','Consolas',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:radial-gradient(1200px 800px at 70% -10%,#16203a 0%,var(--bg) 55%) fixed;color:var(--tx);font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh}
+  ::selection{background:rgba(46,230,168,.25)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 20px 80px}
+
+  /* ===== header ===== */
+  .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .crest{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#173053,#0e2b3d);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--acc);box-shadow:0 0 24px rgba(46,230,168,.18)}
+  .title{font-size:22px;font-weight:700;letter-spacing:.5px}
+  .title small{display:block;font-size:12px;color:var(--tx2);font-weight:400;margin-top:3px;letter-spacing:2px}
+  .hud{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:13px;color:var(--tx2);display:flex;gap:7px;align-items:center}
+  .pill b{color:var(--gold);font-family:var(--mono)}
+  .rankbar{margin:16px 0 26px}
+  .rankline{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:6px}
+  .rankline b{color:var(--acc)}
+  .track{height:10px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+  .fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .6s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 12px rgba(46,230,168,.5)}
+
+  .btn{background:linear-gradient(135deg,#1d7a5c,#155f49);color:#eafff7;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;transition:.2s;box-shadow:0 4px 14px rgba(46,230,168,.15)}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.15)}
+  .btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--tx2)}
+  .btn.ghost:hover{color:var(--tx)}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+  .btn.small{padding:6px 12px;font-size:12px;border-radius:8px}
+
+  /* ===== map ===== */
+  .weeks{display:grid;gap:26px}
+  .week{background:linear-gradient(180deg,rgba(20,28,48,.7),rgba(16,22,39,.5));border:1px solid var(--line);border-radius:18px;padding:20px 20px 8px}
+  .week h3{font-size:14px;color:var(--acc2);letter-spacing:1px;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+  .week h3 .wk-tag{font-size:11px;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.3);padding:2px 8px;border-radius:99px}
+  .nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+  .node{position:relative;border-radius:14px;padding:14px 10px 12px;text-align:center;border:1px solid var(--line);background:var(--panel);transition:.25s;overflow:hidden}
+  .node .dn{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:1px}
+  .node .nm{font-size:14px;font-weight:600;margin:5px 0 3px}
+  .node .st{font-size:11px;color:var(--mut)}
+  .node.open{border-color:rgba(46,230,168,.5);cursor:pointer;background:linear-gradient(160deg,var(--panel),rgba(46,230,168,.07))}
+  .node.open:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+  .node.done{border-color:rgba(46,230,168,.55);background:linear-gradient(160deg,var(--panel),rgba(46,230,168,.12))}
+  .node.done .st{color:var(--acc)}
+  .node.locked{opacity:.42;filter:grayscale(.6)}
+  .node.boss{border-color:rgba(251,191,36,.45);background:linear-gradient(160deg,var(--panel),rgba(251,191,36,.08))}
+  .node.boss .dn{color:var(--gold)}
+  .node .mark{position:absolute;top:8px;right:9px;font-size:12px}
+  .node.done .mark{color:var(--acc)}
+  .node.open .mark{color:var(--acc2)}
+
+  /* badges */
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .badge{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 13px;font-size:12.5px;color:var(--mut);background:var(--panel);transition:.3s}
+  .badge .bs{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;background:#0d1424;border:1px solid var(--line);color:#3a4666}
+  .badge.won{color:#ffe9b0;border-color:rgba(251,191,36,.45);background:linear-gradient(135deg,rgba(251,191,36,.1),var(--panel))}
+  .badge.won .bs{color:var(--gold);border-color:rgba(251,191,36,.5);box-shadow:0 0 10px rgba(251,191,36,.3)}
+
+  /* ===== level page ===== */
+  .lv-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .back{color:var(--tx2);font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:.2s}
+  .back:hover{color:var(--acc)}
+  .lv-tag{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:2px}
+  .lv-title{font-size:24px;font-weight:700;margin-top:2px}
+  .story{background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(125,211,252,.06));border:1px solid rgba(167,139,250,.28);border-radius:14px;padding:16px 18px;font-size:14.5px;line-height:1.85;color:#cfd9f2;margin-bottom:22px}
+  .story b{color:#d8c8ff}
+  .sect{margin-bottom:26px}
+  .sect>h4{font-size:15px;letter-spacing:1px;color:var(--acc2);margin-bottom:12px;display:flex;gap:8px;align-items:center}
+  .sect>h4::before{content:"◆";font-size:10px;color:var(--acc)}
+  .lesson{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:.2s}
+  .lesson:hover{border-color:#31416a}
+  .lesson h5{font-size:15px;margin-bottom:8px;color:#eaf4ff}
+  .lesson h5 code{color:var(--acc);font-family:var(--mono);background:rgba(46,230,168,.09);padding:2px 8px;border-radius:6px;margin-left:8px;font-size:13px}
+  .lesson p{font-size:14px;line-height:1.85;color:var(--tx2)}
+  .lesson p b{color:var(--tx)}
+  .codeblk{display:flex;align-items:center;gap:10px;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;padding:10px 14px;margin-top:10px;font-family:var(--mono);font-size:13.5px;color:#a9f5d8;overflow-x:auto}
+  .codeblk .p{color:#4a5878;user-select:none}
+  .codeblk code{white-space:pre}
+  .copy{margin-left:auto;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:3px 9px;transition:.2s;flex-shrink:0}
+  .copy:hover{color:var(--acc);border-color:var(--acc)}
+  .tip{font-size:12.5px;color:#8fd8bd;background:rgba(46,230,168,.06);border-left:3px solid var(--acc);padding:8px 12px;border-radius:0 8px 8px 0;margin-top:10px;line-height:1.7}
+
+  /* virtual terminal */
+  .vterm{background:#070b13;border:1px solid #1d2a45;border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.45)}
+  .vt-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#0d1322;border-bottom:1px solid #1d2a45}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .vt-bar span.t{margin-left:6px;font-size:12px;color:var(--mut);font-family:var(--mono)}
+  .vt-bar .reset{margin-left:auto;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+  .vt-bar .reset:hover{color:var(--rose)}
+  .vt-out{height:230px;overflow-y:auto;padding:12px 14px;font-family:var(--mono);font-size:13px;line-height:1.65;color:#b8e8d2}
+  .vt-out .sys{color:#5c7a95}
+  .vt-out .err{color:#ff9d9d}
+  .vt-out .in{color:#7dd3fc}
+  .vt-out .hl{color:var(--gold)}
+  .vt-in{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #1d2a45;background:#0a0f1a}
+  .vt-in .ps{font-family:var(--mono);font-size:13px;color:var(--acc);white-space:nowrap}
+  .vt-in input{flex:1;background:none;border:none;outline:none;color:#e8f6ff;font-family:var(--mono);font-size:13px;caret-color:var(--acc)}
+  .quest{background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,113,133,.05));border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:14px 18px;margin-top:14px;font-size:14px;line-height:1.8;color:#f3e3bb}
+  .quest b{color:var(--gold)}
+  .quest .qdone{color:var(--acc);font-weight:700}
+  .vt-btns{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+
+  /* quiz */
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .qcard .qn{font-size:12px;color:var(--mut);font-family:var(--mono);margin-bottom:8px;letter-spacing:1px}
+  .qcard .qt{font-size:15px;line-height:1.7;margin-bottom:14px}
+  .qcard .qt code, .opts code{font-family:var(--mono);background:#0a0e18;border:1px solid #1d2740;color:#a9f5d8;padding:1px 7px;border-radius:6px;font-size:13px}
+  .opts{display:grid;gap:9px}
+  .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13.5px;color:var(--tx2);line-height:1.6;transition:.18s;background:#101728}
+  .opt:hover:not(.off){border-color:#3a4d7d;color:var(--tx)}
+  .opt .oi{font-family:var(--mono);font-size:12px;color:var(--mut);padding-top:2px}
+  .opt.right{border-color:var(--acc);background:rgba(46,230,168,.09);color:#d9ffee}
+  .opt.wrong{border-color:var(--rose);background:rgba(251,113,133,.08);color:#ffd7dc}
+  .opt.off{pointer-events:none}
+  .typein{display:flex;gap:10px}
+  .typein input{flex:1;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;padding:11px 14px;color:#a9f5d8;font-family:var(--mono);font-size:14px;outline:none}
+  .typein input:focus{border-color:var(--acc)}
+  .exp{margin-top:12px;font-size:13px;line-height:1.75;color:#a8c4b6;background:rgba(46,230,168,.05);border-left:3px solid var(--acc);padding:9px 13px;border-radius:0 8px 8px 0;display:none}
+  .exp.show{display:block}
+
+  /* cards */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .mcard{perspective:900px;height:120px;cursor:pointer}
+  .mcard .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.9,.3,1)}
+  .mcard.flip .inner{transform:rotateY(180deg)}
+  .mface{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px;text-align:center}
+  .mf-front{background:linear-gradient(150deg,#182545,#101a30);border:1px solid #2b3a63}
+  .mf-front .k{font-family:var(--mono);font-size:15px;color:var(--acc)}
+  .mf-front .hint{font-size:10.5px;color:var(--mut);letter-spacing:1px}
+  .mf-back{background:linear-gradient(150deg,#123430,#0d2438);border:1px solid rgba(46,230,168,.4);transform:rotateY(180deg);font-size:12px;line-height:1.6;color:#c4e9da;overflow-y:auto}
+
+  /* missions */
+  .mission{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--panel);cursor:pointer;transition:.2s}
+  .mission:hover{border-color:#31416a}
+  .mission .box{width:19px;height:19px;border-radius:6px;border:2px solid #35436b;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:.2s}
+  .mission.ok .box{border-color:var(--acc);background:rgba(46,230,168,.15);color:var(--acc)}
+  .mission .mt{font-size:13.5px;line-height:1.7;color:var(--tx2)}
+  .mission.ok .mt{color:#7fae9b;text-decoration:line-through;text-decoration-color:rgba(46,230,168,.4)}
+
+  /* ordering puzzle */
+  .ord-pool{display:flex;flex-direction:column;gap:8px}
+  .ord-item{font-family:var(--mono);font-size:13px;text-align:left;background:#101728;border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:#cfe3ff;transition:.18s}
+  .ord-item:hover:not(.used){border-color:var(--acc2)}
+  .ord-item.used{opacity:.25;pointer-events:none}
+  .ord-slots{min-height:60px;border:2px dashed #2b3a63;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .ord-slot{font-family:var(--mono);font-size:13px;background:rgba(125,211,252,.08);border:1px solid rgba(125,211,252,.35);border-radius:10px;padding:10px 14px;color:#dff0ff;display:flex;gap:10px}
+  .ord-slot button{margin-left:auto;color:var(--mut);font-size:11px}
+  .ord-slot button:hover{color:var(--rose)}
+  .ord-slot.ok{border-color:var(--acc);background:rgba(46,230,168,.1)}
+
+  /* level footer */
+  .lv-foot{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;align-items:center}
+  .lv-foot .fin{font-size:13px;color:var(--acc)}
+
+  /* toast & modal */
+  .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(80px);background:#0e1a20;border:1px solid var(--acc);color:#d9ffee;padding:12px 22px;border-radius:12px;font-size:14px;z-index:99;transition:.35s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 30px rgba(0,0,0,.5);pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.gold{border-color:var(--gold);color:#ffe9b0}
+  .modal-bg{position:fixed;inset:0;background:rgba(5,8,15,.75);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto}
+  .modal h3{font-size:17px;margin-bottom:12px;color:var(--gold)}
+  .modal p{font-size:13.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+  .modal textarea{width:100%;height:110px;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;color:#a9f5d8;font-family:var(--mono);font-size:12px;padding:10px;outline:none;resize:vertical}
+  .modal .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+  /* victory */
+  .victory{display:none;text-align:center;padding:40px 20px}
+  .victory.show{display:block}
+  .victory .vc{font-size:60px;color:var(--gold);text-shadow:0 0 40px rgba(251,191,36,.5);margin-bottom:10px}
+  .victory h2{font-size:26px;margin-bottom:10px}
+  .victory p{color:var(--tx2);line-height:1.9;font-size:14.5px;max-width:520px;margin:0 auto 20px}
+
+  @media (max-width:640px){
+    .hud{margin-left:0}
+    .nodes{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+/* =========================================================
+   终端骑士 · CLI 两周通关课程
+   单文件离线 HTML · 无外部依赖 · 进度通过通关码保存
+   ========================================================= */
+
+/* ---------- 状态 ---------- */
+var S = { xp:0, lv:{}, quiz:{}, chal:{}, miss:{}, badges:{} };
+var RANKS = [
+  {n:'命令学徒', x:0},{n:'见习骑士', x:120},{n:'文件猎人', x:260},{n:'管道术士', x:480},
+  {n:'正则骑士', x:740},{n:'脚本大师', x:1000},{n:'终端宗师', x:1250}
+];
+var BADGES = [
+  {id:'first', n:'初试锋芒', d:'完成第一关'},
+  {id:'week1', n:'一周之约', d:'通关第一周全部 7 关'},
+  {id:'pipe', n:'管道连击', d:'掌握管道炼金术（第 6 关）'},
+  {id:'regex', n:'正则觉醒', d:'领悟正则之道（第 10 关）'},
+  {id:'script', n:'脚本出世', d:'写出第一个脚本（第 11 关）'},
+  {id:'sys', n:'系统掌控者', d:'完成系统试炼（第 13 关）'},
+  {id:'all', n:'终端宗师', d:'14 关全部通关'}
+];
+
+/* ---------- 关卡数据 ---------- */
+var LEVELS = [
+/* ============ DAY 1 ============ */
+{ id:1, title:'迷雾森林 · 初识终端', area:'第一周 · 地基', boss:false,
+  story:'你踏入 Shell 王国的边境。浓雾中，向导乌鸦开口了：「骑士，鼠标在这里毫无用处。想找到传说中的灯塔，你得学会用<b>文字</b>指挥这个世界。」',
+  lessons:[
+    {t:'我在哪儿 —— pwd', c:'pwd', b:'pwd 意为 <b>print working directory</b>，打印你当前所在的文件夹路径。迷路时第一反应就是敲它。'},
+    {t:'这儿有什么 —— ls', c:'ls\nls -l\nls -a', b:'ls 列出当前文件夹的内容；<b>ls -l</b> 显示详细信息（大小、日期、权限）；<b>ls -a</b> 连隐藏文件一起显示——名字以 <b>.</b> 开头的就是隐藏文件。'},
+    {t:'我要去哪儿 —— cd', c:'cd forest\ncd ..\ncd ~\ncd /', b:'cd 是 change directory。`cd 文件夹名` 进入；<b>cd ..</b> 退回上一级；<b>cd ~</b> 回到主目录（你的大本营）；<b>cd /</b> 回到整个磁盘的根。'},
+    {t:'架起桥梁 —— open', c:'open .', b:'`open 文件` 等于用鼠标双击它。<b>open .</b> 打开「当前文件夹」的访达窗口——终端与图形世界之间的传送门。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    forest:{type:'d',ch:{
+      grove:{type:'d',ch:{
+        lighthouse:{type:'d',ch:{'lamp.txt':{type:'f',c:'灯塔亮了。欢迎来到 Shell 王国，骑士。\n记住：Tab 键是你最好的朋友。'}}},
+        meadow:{type:'d',ch:{'deer.txt':{type:'f',c:'一只鹿在吃草。它对命令行毫无兴趣。'}}}
+      }},
+      cave:{type:'d',ch:{'bats.txt':{type:'f',c:'吱吱吱吱。（翻译：里面没有灯塔）'}}}
+    }}
+  }},
+  challenge:{ task:'乌鸦说：灯塔在<b>森林中的树林深处</b>。逐层 cd 探索，最终<b>站进 lighthouse（灯塔）目录里</b>，然后 pwd 确认位置。',
+    check:function(sh){ return sh.cwd.indexOf('/forest/grove/lighthouse')===0; } },
+  quiz:[
+    {q:'敲了 cd forest 之后又敲 cd ..，你现在在哪儿？', o:['forest 的上一级（原地返回）','forest 里面','主目录','报错'], a:0, e:'.. 代表上一级目录，cd .. 就是后退一步。'},
+    {q:'哪个命令能显示隐藏文件？', o:['ls -a','ls -h','ls -x','ls hide'], a:0, e:'-a 即 all，显示以 . 开头的隐藏文件。'},
+    {q:'刚打开终端，一敲 pwd 出现 /Users/你的名字，这个目录被称为什么？', o:['主目录（home）','根目录','用户盘','系统目录'], a:0, e:'波浪号 ~ 就是它的缩写，cd ~ 随时回到这里。'},
+    {q:'亲手打出：列出当前目录内容的命令', type:'ls', e:'ls = list，最朴素的开始。'}
+  ],
+  cards:[{k:'pwd',b:'打印当前所在路径，迷路必敲'},{k:'ls',b:'列出目录内容'},{k:'ls -l',b:'详细列表：权限、大小、日期'},{k:'ls -a',b:'含隐藏文件'},{k:'cd ..',b:'退回上一级'},{k:'cd ~',b:'回到主目录'},{k:'open .',b:'在访达中打开当前文件夹'}],
+  missions:['在你的终端敲 pwd、ls、cd ~ 各试一遍','用 cd 进入你的 Downloads 文件夹，ls 看看里面有什么','试一次 Tab 补全：敲 cd Down 再按 Tab 键']
+},
+/* ============ DAY 2 ============ */
+{ id:2, title:'石匠工坊 · 塑造文件', area:'第一周 · 地基', boss:false,
+  story:'森林尽头的工坊里，老石匠递给你凿子：「材料不会自己变成城堡。mkdir 造屋，touch 生石，cp 复制，mv 搬运——世界任你捏。」',
+  lessons:[
+    {t:'凭空造物 —— mkdir / touch', c:'mkdir quest\ntouch stone.txt\nmkdir -p castle/tower', b:'mkdir 建文件夹，touch 建空文件。<b>mkdir -p</b> 一口气建多层嵌套目录，中间不存在的一并补齐，极常用。'},
+    {t:'复制与搬运 —— cp / mv', c:'cp stone.txt stone_backup.txt\nmv wood.txt plank.txt\nmv plank.txt castle/', b:'cp 复制文件；mv 是搬运工——搬到新目录是<b>移动</b>，改成新名字是<b>重命名</b>。同一个命令，两副面孔。'},
+    {t:'一次抓一把 —— 通配符 *', c:'cp *.txt backup/\nmv report*.docx work/', b:'<b>*</b> 匹配任意字符。*.txt 就是「所有 txt 文件」。批量操作全靠它，但威力大，配合 mv/cp 前先 ls 预览一遍要动的文件。'},
+    {t:'保命提醒', c:'rm stone.txt', b:'页内虚拟终端随便你 rm——但在<b>真机上 rm 删除不经废纸篓，直接蒸发</b>。新手期请绕开它，删文件请移到废纸篓。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    workshop:{type:'d',ch:{
+      'stone.txt':{type:'f',c:'一块粗糙的石头。\n上面刻着字：命运偏爱敢敲命令的人。'},
+      'wood.txt':{type:'f',c:'一根上好的木料。'},
+      plans:{type:'d',ch:{'note.txt':{type:'f',c:'施工图纸：先建 quest 文件夹，再复制宝石，最后改木材名。'}}}
+    }}
+  }},
+  challenge:{ task:'按图纸施工：① 在 workshop 里建一个名为 <b>quest</b> 的文件夹；② 把 stone.txt 复制一份叫 <b>stone_backup.txt</b>；③ 把 wood.txt 改名为 <b>plank.txt</b>。',
+    check:function(sh){ var w=sh.cwd.indexOf('/workshop')===0?sh.resolve(sh.cwd):sh.resolve('/workshop');
+      return w.ch['quest'] && w.ch['stone_backup.txt'] && w.ch['plank.txt'] && !w.ch['wood.txt']; } },
+  quiz:[
+    {q:'mv old.txt new.txt 的效果是？', o:['把 old.txt 重命名为 new.txt','复制一份','移动到 new 文件夹','报错'], a:0, e:'mv 的第二个身份：重命名。'},
+    {q:'想一次建立 a/b/c 三层目录，用哪条？', o:['mkdir -p a/b/c','mkdir a/b/c','mkdir -r a/b/c','touch a/b/c'], a:0, e:'-p 自动补齐中间层，没有 -p 时父目录不存在会报错。'},
+    {q:'cp *.txt backup/ 会发生什么？', o:['把所有 txt 文件复制进 backup 文件夹','报错','只复制第一个 txt','把 backup 复制成 txt'], a:0, e:'* 通配符匹配所有 .txt 结尾的文件，逐个复制进去。'},
+    {q:'亲手打出：把 a.txt 复制为 b.txt', type:'cp a.txt b.txt', e:'cp 源 目标，最经典的两个参数。'}
+  ],
+  cards:[{k:'mkdir -p a/b/c',b:'一次建多层目录'},{k:'touch f.txt',b:'创建空文件'},{k:'cp 源 目标',b:'复制文件'},{k:'mv 源 目标',b:'移动；同名路径下即重命名'},{k:'* 通配符',b:'匹配任意名称片段，批量操作'},{k:'rm（真机慎用）',b:'直接删除不进废纸篓，新手绕行'}],
+  missions:['在终端用 mkdir -p ~/cli-play/level2 建个练习场','touch 三个 txt 文件，用 cp *.txt 复制出一个 backup 文件夹','用 mv 给其中一个文件改个名']
+},
+/* ============ DAY 3 ============ */
+{ id:3, title:'藏书塔 · 阅读之术', area:'第一周 · 地基', boss:false,
+  story:'藏书塔的管理员是位盲眼贤者。「书不在多，在读得法。cat 一览无余，head 窥其开头，tail 探其结尾，wc 清点字数——掌握四式，万卷皆可驾驭。」',
+  lessons:[
+    {t:'一泻千里 —— cat', c:'cat book.txt\ncat a.txt b.txt', b:'cat 把整个文件内容打印到屏幕，也可以接多个文件拼接输出。小文件看它最直接，大文件会刷屏。'},
+    {t:'掐头去尾 —— head / tail', c:'head -20 server.log\ntail -3 diary.txt\ntail -f server.log', b:'<b>head -20</b> 只看前 20 行，<b>tail -3</b> 只看最后 3 行。<b>tail -f</b> 是盯梢神器：实时滚动显示文件新增内容，服务器排障必备。'},
+    {t:'清点家底 —— wc', c:'wc -l book.txt\nls | wc -l', b:'wc = word count，统计文件的行数(-l)、词数(-w)、字符数(-c)。它常从<b>管道</b>接收数据——比如数一数某文件夹有多少文件。'},
+    {t:'翻书器 —— less（真机试）', c:'less bigfile.txt', b:'less 一页页翻着看大文件：上下箭头滚动，/<b>关键词</b> 搜索，q 退出。Mac 终端直接可用。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    library:{type:'d',ch:{
+      'book.txt':{type:'f',c:'第一章 起\n第二章 承\n第三章 转\n第四章 合\n第五章 终\n附录\n注释'},
+      'spell.txt':{type:'f',c:'火球术\n冰霜护体\n末页封印：tail 三行见真言'},
+      'diary.txt':{type:'f',c:'第 1 天 入塔\n第 2 天 抄书\n第 3 天 睡着了\n真言：wc -l 是贤者的眼镜'}
+    }}
+  }},
+  challenge:{ task:'贤者的考题：① 用 <b>wc -l</b> 数出 book.txt 有几行；② 查看 spell.txt 的<b>最后 3 行</b>，找到末页封印的真言。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /wc\s+-l\s+book/.test(h) && /tail\s+(-\d+\s+|-n\s+\d+\s+)spell/.test(h); } },
+  quiz:[
+    {q:'想看日志文件的最新 50 行，用哪条？', o:['tail -50 文件','head -50 文件','cat -50 文件','wc -50 文件'], a:0, e:'tail 看尾部，-50 指定行数。日志的最新内容永远在末尾。'},
+    {q:'wc -l 的 -l 是什么意思？', o:['line，统计行数','list，列出文件','long，详细格式','load，加载'], a:0, e:'wc -l 数行数，文本处理中最常用的统计动作。'},
+    {q:'为什么不建议用 cat 看一个 100 万行的文件？', o:['内容会瞬间刷屏，根本看不清','cat 不支持大文件','会损坏文件','速度太慢会卡死系统'], a:0, e:'刷屏毫无意义，应该用 less 翻页或 head/tail 截取。'},
+    {q:'亲手打出：统计 notes.txt 的行数', type:'wc -l notes.txt', e:'记住这个组合，后面管道关卡天天用。'}
+  ],
+  cards:[{k:'cat f',b:'打印整个文件'},{k:'head -n f',b:'看开头 n 行'},{k:'tail -n f',b:'看结尾 n 行'},{k:'tail -f f',b:'实时盯着文件新内容'},{k:'wc -l',b:'统计行数'},{k:'less f',b:'翻页阅读：/ 搜索，q 退出'}],
+  missions:['找一个真机上的文本文件，用 head 和 tail 各截取一次','用 wc -l 数一数你某个文件有多少行','用 less 打开一个大文件，按 / 搜个词，再按 q 退出']
+},
+/* ============ DAY 4 ============ */
+{ id:4, title:'猎人小径 · find 寻宝', area:'第一周 · 地基', boss:false,
+  story:'小径上的猎人只留下一句话：「宝藏散落在森林各处，名字都以 .map 结尾。找到它们——你不需要地图，你需要 find。」',
+  lessons:[
+    {t:'按名索骥 —— find', c:'find . -name "*.txt"\nfind /forest -name "*.map"', b:'find 从某个目录出发，递归翻遍所有子层，找出符合条件的文件。<b>. 代表从当前目录开始搜</b>，-name 后跟名字模式，务必加引号防止 * 被提前展开。'},
+    {t:'限定类型 —— -type', c:'find . -type d -name "*castle*"\nfind . -type f -name "*.log"', b:'<b>-type d</b> 只找文件夹，<b>-type f</b> 只找普通文件。想让搜索结果干净利落就加上它。'},
+    {t:'宝物太多只看几件 —— 接管道', c:'find . -name "*.log" | head -5', b:'find 结果常常几十上百条，接上管道喂给 head 只看前几条——这是你第一次预演第 6 关的管道术。'},
+    {t:'引号的秘密', c:'find . -name *.txt   # 危险\nfind . -name "*.txt"  # 正确', b:'不加引号时，shell 会先把 *.txt 展开成当前目录的文件名，find 收到的东西就错了。给模式加引号是铁律。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    trail:{type:'d',ch:{
+      'trailhead.txt':{type:'f',c:'猎人留言：宝藏在 *.log 里，gold.map 在某处树洞。'},
+      north:{type:'d',ch:{'camp.log':{type:'f',c:'营地日志：一切正常。'},'hidden':{type:'d',ch:{'treasure.map':{type:'f',c:'★ 藏宝图 ★\n向北走三百步，向键盘低头。'}}}}},
+      south:{type:'d',ch:{'river.log':{type:'f',c:'河边日志：水位正常。'},'old-map.txt':{type:'f',c:'一张过期的地图，指向不存在的矿脉。'}}}
+    }}
+  }},
+  challenge:{ task:'① 在 trail 下用 find 找出<b>所有 .log 文件</b>；② 找到隐藏的宝藏 <b>treasure.map</b> 并 cat 查看它。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /find\s+\S*\s*-name\s+["']?\*?\.?log/.test(h) && /cat\s+\S*treasure\.map/.test(h); } },
+  quiz:[
+    {q:'find . -name "*.pdf" 中，第一个 . 的含义是？', o:['从当前目录开始搜索','隐藏文件','匹配任意字符','结束符'], a:0, e:'. 是当前目录，find 会递归搜遍它和所有子目录。'},
+    {q:'只想找文件夹不找文件，加什么？', o:['-type d','-type f','-only dir','-dir'], a:0, e:'d = directory。对应地，-type f 只找普通文件。'},
+    {q:'为什么 -name "*.txt" 要加引号？', o:['防止 shell 提前把 * 展开成文件名列表','不加引号会报语法错误','为了好看','引号能加速搜索'], a:0, e:'shell 会先展开裸露的 *，find 拿到的参数就乱了。引号把模式完整交给 find。'},
+    {q:'亲手打出：在当前目录下查找所有名字含 map 的文件', type:'find . -name "*map*"', e:'首尾都放 * 就是“包含”匹配。'}
+  ],
+  cards:[{k:'find . -name "*.txt"',b:'当前目录递归找 txt'},{k:'-type d / -type f',b:'限定只找目录 / 只找文件'},{k:'模式加引号',b:'防止 * 被 shell 提前展开'},{k:'find | head -5',b:'结果太多只看前几条'},{k:'*map*',b:'首尾加星号=名字包含 map'}],
+  missions:['在你主目录用 find ~ -name "*.pdf" 找出所有 PDF（结果多就接 | head -10）','用 find ~ -type d -name "*backup*" 找找有没有备份文件夹','把你觉得最常用的 find 写法记在便签上']
+},
+/* ============ DAY 5 ============ */
+{ id:5, title:'暗语侦探 · grep 狩词', area:'第一周 · 地基', boss:false,
+  story:'侦探社的墙上贴满纸条。「一封信里藏着『龙』字，一万封信里也藏着它。肉眼会累，grep 不会——它是最不知疲倦的猎犬。」',
+  lessons:[
+    {t:'猎犬出击 —— grep', c:'grep "龙" letter.txt', b:'grep 在文件内容里逐行搜索，包含关键词的行整行打印出来。这是全宇宙程序员使用频率前三的命令。'},
+    {t:'猎犬的四件装备', c:'grep -i "dragon" book.txt\ngrep -n "龙" letter.txt\ngrep -v "无关" letter.txt\ngrep -r "龙" notes/', b:'<b>-i</b> 忽略大小写；<b>-n</b> 显示行号；<b>-v</b> 反选——输出<b>不含</b>关键词的行；<b>-r</b> 递归搜整个文件夹的所有文件。'},
+    {t:'从管道里吃食', c:'ls | grep pdf\nhistory | grep "ssh"', b:'grep 不只能读文件，还能接收管道喂来的文字。ls 的输出喂给 grep，一秒筛出名字含 pdf 的条目。'},
+    {t:'多文件狩猎', c:'grep "龙" *.txt', b:'一次搜多个文件时，grep 会在每行结果前标注文件名——哪个文件藏了暗语一目了然。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    agency:{type:'d',ch:{
+      'letter1.txt':{type:'f',c:'致骑士：\n城东的旅人说，龙在月圆之夜醒来。\n他还说，龙喜欢金子。\n署名：线人甲'},
+      'letter2.txt':{type:'f',c:'例行报告：\n城东无事发生。\n城西的猫爬上了树。\n署名：线人乙'},
+      'letter3.txt':{type:'f',c:'加急：\n月圆之夜，Dragon 将现身北塔！\n带上 grep，别带剑。\n署名：线人丙'},
+      cold:{type:'d',ch:{'old-case.txt':{type:'f',c:'旧案卷宗：\n三年前也有龙出没的传闻，后来证明是风筝。'}}}
+    }}
+  }},
+  challenge:{ task:'① 用 grep 在 agency 的信件中找出<b>所有提到「龙」的行</b>；② 用 -i 再找找英文线索——三号信里有个 <b>Dragon</b>。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /grep\s+["']?龙/.test(h) && /grep\s+-i\s+["']?dragon/i.test(h); } },
+  quiz:[
+    {q:'想搜 "Error" 但不区分大小写（error/ERROR 都要），加什么？', o:['-i','-n','-v','-r'], a:0, e:'-i = ignore case。'},
+    {q:'grep -v "DEBUG" log.txt 会输出什么？', o:['不含 DEBUG 的行','含 DEBUG 的行','DEBUG 出现次数','只有第一行'], a:0, e:'-v 是反选，输出“排除”后的行。'},
+    {q:'想搜整个文件夹（含子文件夹）里的所有文件，用？', o:['grep -r "词" 文件夹/','grep -a','grep --all','grep 文件夹'], a:0, e:'-r = recursive，递归下钻所有子目录。'},
+    {q:'亲手打出：在 notes.txt 里搜索包含「宝」的行并显示行号', type:'grep -n 宝 notes.txt', e:'关键词不含空格时可以不加引号，含空格必须加。'}
+  ],
+  cards:[{k:'grep "词" f',b:'输出含关键词的行'},{k:'-i',b:'忽略大小写'},{k:'-n',b:'显示行号'},{k:'-v',b:'反选：不含关键词的行'},{k:'-r',b:'递归搜整个文件夹'},{k:'ls | grep pdf',b:'从管道接收输入做筛选'}],
+  missions:['用 grep 在你某个真实文件里搜一个词，再试一次 -n','用 ls ~/Downloads | grep 任意关键词 筛一次文件列表','想一个你工作里最常搜的词，它是你未来用 grep 的第一场景']
+},
+/* ============ DAY 6 ============ */
+{ id:6, title:'炼金工坊 · 管道炼金', area:'第一周 · 地基', boss:false,
+  story:'炼金术士把两个烧瓶用一根玻璃管连了起来。「左边产出，右边吞入——这就是 |（管道）。单个命令是矿石，管道才是炼金术。今天之后，你看命令的眼神会变。」',
+  lessons:[
+    {t:'灵魂符号 —— |', c:'ls | wc -l\ncat names.txt | grep "龙"', b:'竖线把<b>左边命令的输出</b>变成<b>右边命令的输入</b>。ls 本来打印文件名，接上 wc -l 后就回答了「有几个」。数据像水一样从左流到右。'},
+    {t:'排序之术 —— sort', c:'sort names.txt\nsort -r names.txt\nsort -n scores.txt', b:'sort 把输入排序：默认按字母，<b>-r</b> 倒序，<b>-n</b> 按数值大小（不加速 9 会排在 10 后面）。'},
+    {t:'去重与计数 —— uniq', c:'sort list.txt | uniq\ncat list.txt | sort | uniq -c', b:'uniq 去掉<b>相邻</b>的重复行——所以它几乎总是跟在 sort 后面。<b>uniq -c</b> 在去重的同时统计每个值出现几次，是计数流水线的核心。'},
+    {t:'三连必杀 —— 统计排行榜', c:'cat votes.txt | sort | uniq -c | sort -rn | head -3', b:'这段管道的意思：读入 → 排序聚合 → 数出次数 → 按次数从大到小 → 只留前三。「哪个出现得最多」这类问题，一条管道终结。'},
+    {t:'改道入瓶 —— 重定向 >', c:'ls > list.txt\necho "日志" >> log.txt', b:'<b>&gt;</b> 把输出写进文件（覆盖），<b>&gt;&gt;</b> 追加到文件末尾。管道流向另一个命令，重定向流向文件——一对孪生兄弟。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    alchemy:{type:'d',ch:{
+      'ingredients.txt':{type:'f',c:'月光草\n火蜥蜴鳞\n月光草\n星辰砂\n火蜥蜴鳞\n月光草\n龙息粉\n星辰砂\n月光草\n凤凰羽'},
+      'votes.txt':{type:'f',c:'爱丽丝\n鲍勃\n爱丽丝\n查理\n鲍勃\n爱丽丝\n查理\n爱丽丝'},
+      'scores.txt':{type:'f',c:'92\n7\n105\n38\n230\n64'}
+    }}
+  }},
+  challenge:{ task:'炼金考题：① 对 ingredients.txt 用管道数出<b>每种食材各出现几次</b>（sort | uniq -c 风格）；② 想知道哪个食材出现最多——再接 sort -rn 和 head，把<b>冠军</b>顶到第一行。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /ingredients\.txt\s*\|\s*sort\s*\|\s*uniq\s+-c/.test(h) && /uniq\s+-c[^;]*sort\s+-rn/.test(h); } },
+  quiz:[
+    {q:'ls | wc -l 整体在做什么？', o:['数当前文件夹里有多少个条目','列出文件并显示行数','报错','把 ls 的结果存进 wc'], a:0, e:'ls 输出名单，wc -l 数行数，合起来就是“有多少个”。'},
+    {q:'为什么 uniq 前面几乎总要先 sort？', o:['uniq 只能去掉相邻的重复行','uniq 不能单独使用','sort 会加速 uniq','这是习惯没有原因'], a:0, e:'相同内容不相邻时 uniq 视而不见，先排序让它们抱团。'},
+    {q:'votes.txt 里数票并按票数从多到少排，中间那截是？', o:['sort | uniq -c | sort -rn','uniq -c | sort -r','sort -n | uniq','uniq | sort -c'], a:0, e:'先排序聚合、uniq -c 计数、再 sort -rn 按数字倒排——排行榜标准件。'},
+    {q:'亲手打出：把当前目录列表存进 list.txt（覆盖式）', type:'ls > list.txt', e:'> 是重定向，输出改道流进文件而不是屏幕。'}
+  ],
+  cards:[{k:'|',b:'左边的输出=右边的输入'},{k:'sort / sort -rn',b:'排序 / 按数值倒序'},{k:'uniq -c',b:'去重并计数（先 sort）'},{k:'head -3',b:'只留前三行'},{k:'> / >>',b:'覆盖写文件 / 追加写文件'},{k:'排行榜公式',b:'sort|uniq -c|sort -rn|head'}],
+  missions:['在你 Downloads 里跑 ls | wc -l，和第一天比数字变了吗','找任何一个多行文本文件，跑 sort | uniq -c | sort -rn | head','用 echo 追加一行今日心情到 ~/cli-play/diary.txt（>>）']
+},
+/* ============ DAY 7 ============ */
+{ id:7, title:'周 Boss · 遗迹黑雾兽', area:'第一周 · Boss', boss:true,
+  story:'周末，遗迹深处升起黑雾，一头由「乱序数据」凝成的巨兽拦住去路。它浑身缠绕着杂乱的文件与文字。「屠我者，需一手 find，一手 grep，胸怀 wc。」——虚空中传来低语。',
+  lessons:[
+    {t:'Boss 招式拆解', c:'grep -r "宝石" ruins/ | wc -l\nfind ruins -name "*.txt" | wc -l', b:'黑雾兽的本体是三个招式的组合：找到目标、筛出内容、清点数量。你已经学过每一招，现在把它们<b>连起来</b>。'},
+    {t:'连击心法', c:'命令A | 命令B | 命令C', b:'管道不限两层。数据像流水线上的产品，每经过一站就被加工一次。读长管道的诀窍：<b>从左往右一站站想</b>“现在数据长什么样了”。'},
+    {t:'屠龙者的复盘', c:'pwd ls cd → 走位\ncp mv mkdir → 布阵\ncat head tail wc → 观察\nfind grep → 锁定\nsort uniq 管道 → 连击', b:'第一周 42 个知识点，浓缩成五句口诀。Boss 战只是开始。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    ruins:{type:'d',ch:{
+      'gate.txt':{type:'f',c:'大门铭文：黑雾兽惧怕统计数据。\n它藏起了一些宝石。'},
+      hall:{type:'d',ch:{'scroll1.txt':{type:'f',c:'大厅石碑：宝石#1 埋在喷泉下。'},'dust.txt':{type:'f',c:'尘埃落定，别无他物。'}}},
+      crypt:{type:'d',ch:{'scroll2.txt':{type:'f',c:'地穴石碑：宝石#2 压在王座底。'},'scroll3.txt':{type:'f',c:'回廊石碑：宝石#3 藏进书架。'},'bones.txt':{type:'f',c:'一堆白骨，安静得很。'}}}
+    }}
+  }},
+  challenge:{ task:'黑雾兽的弱点是它的<b>宝石总数</b>：在遗迹里用 grep -r 递归找出所有含「宝石」的行，接管道用 <b>wc -l</b> 数出一共有几颗。击中要害，黑雾自散。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /grep\s+-r[^|;]*宝石[^|;]*\|\s*wc\s+-l/.test(h); } },
+  quiz:[
+    {q:'grep -r "宝" . | wc -l 统计的是什么？', o:['当前目录及子目录所有文件中含“宝”的行数','含“宝”的文件个数','“宝”出现的文件路径数','没有任何意义'], a:0, e:'grep -r 递归输出所有匹配行，wc -l 数行数，即匹配行总数。'},
+    {q:'阅读长管道的正确姿势是？', o:['从左到右一站站推演数据形态','从右往左倒着读','背下来就行','交给运气'], a:0, e:'“现在数据长什么样”是唯一需要不断自问的问题。'},
+    {q:'想统计某文件夹下 txt 文件的总数，哪个思路对？', o:['find . -name "*.txt" | wc -l','cat *.txt | wc -l','grep txt | wc','ls -l | wc -w'], a:0, e:'find 负责找出文件（每行一个），wc -l 负责数数。'},
+    {q:'亲手打出：递归搜 current 文件夹中含 key 的行并显示行号', type:'grep -rn key current', e:'-r 和 -n 可以合并书写，这是实战中最常见的写法之一。'}
+  ],
+  cards:[{k:'grep -r 词 目录 | wc -l',b:'递归统计匹配行数'},{k:'find | wc -l',b:'统计找到的文件数'},{k:'读管道',b:'从左到右推演数据形态'},{k:'五句口诀',b:'走位·布阵·观察·锁定·连击'},{k:'Boss 已倒',b:'第一周毕业，荣升见习骑士'}],
+  missions:['真机综合演练：grep -r 某关键词 你的某文件夹 | wc -l','把第一周你觉得最帅的一条管道写在便签上','休息一下——下周进入高阶领域']
+},
+/* ============ DAY 8 ============ */
+{ id:8, title:'剪刀手 · sed 替换术', area:'第二周 · 高阶', boss:false,
+  story:'裁缝铺的师傅十指翻飞，剪刀过处，文字应声而变。「sed 是流动的剪刀——文件流过它，出来时已是新模样。原文件毫发无伤，除非你用 -i 逼它下狠手。」',
+  lessons:[
+    {t:'替换之刃', c:"sed 's/旧/新/g' cloak.txt", b:'格式 s/旧/新/，把每行中<b>第一个</b>“旧”换成“新”；结尾加 <b>g</b>（global）换成<b>所有</b>。sed 默认只把结果打印到屏幕，不动原文件——安全，可反复试。'},
+    {t:'删除之刃', c:"sed '/注释/d' note.txt\nsed '3d' note.txt", b:'/模式/d 删掉匹配的整行；<b>数字 d</b> 删掉第几行。清理日志里的垃圾行时快如闪电。'},
+    {t:'只看某几行', c:"sed -n '5p' note.txt\nsed -n '2,4p' note.txt", b:'-n 配合 p 是“只打印”：第 5 行、或第 2 到 4 行。head/tail 是掐头去尾，sed 是<b>精准抽行</b>。'},
+    {t:'狠手 —— sed -i（真机警告）', c:"sed -i '' 's/旧/新/g' f.txt", b:'<b>-i 会直接改写原文件</b>，屏幕上什么都看不到。真机使用前务必先跑一遍不带 -i 的版本预览效果，或先备份。Mac 的 sed -i 后面还要跟一个空字符串 \'\'，这是 Mac 特有的坑。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    tailor:{type:'d',ch:{
+      'cloak.txt':{type:'f',c:'一件旧斗篷。\n旧线头在旧领口晃荡。\n旧，但仍是件好斗篷。'},
+      'poem.txt':{type:'f',c:'月光落在旧窗台\n旧梦随流水东去\n新的黎明总会到来\n旧年与新岁交替'},
+      'note.txt':{type:'f',c:'第一行\n第二行 注释：待删\n第三行\n第四行'}
+    }}
+  }},
+  challenge:{ task:'① 把 cloak.txt 里<b>所有的「旧」</b>替换成「新」（预览到屏幕即可）；② 用删除之刃，让 note.txt 里<b>不再有含「注释」的行</b>。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /sed\s+['"]?s\/旧\/新\/g['"]?[^;]*cloak/.test(h) && /sed\s+['"]?\/[^'";]*注释[^'";]*\/d['"]?[^;]*note/.test(h); } },
+  quiz:[
+    {q:"sed 's/cat/dog/' 一行里有两个 cat，替换几个？", o:['只换第一个','两个都换','报错','一个都不换'], a:0, e:'不加 g 标志，每行只替换第一处。加 g 才是全部。'},
+    {q:'sed 的替换默认写到哪里？', o:['打印到屏幕，原文件不变','直接改原文件','存到新文件','剪贴板'], a:0, e:'默认是“预览模式”，这是它友好的地方。'},
+    {q:'哪个才是真正修改原文件的用法？', o:["sed -i '' 's/a/b/g' f","sed 's/a/b/g' f","sed -p 's/a/b/g' f","sed --write f"], a:0, e:'-i = in-place 直接改原文件，改之前先预览是铁律。'},
+    {q:'亲手打出：把 data.txt 中所有 2024 替换为 2025（预览版）', type:"sed 's/2024/2025/g' data.txt", e:'记住三段式：s/旧/新/g，引号别丢。'}
+  ],
+  cards:[{k:"sed 's/a/b/g' f",b:'全部替换（仅预览）'},{k:"不加 g",b:'每行只换第一处'},{k:"'/x/d'",b:'删除匹配行'},{k:"'3d' / '2,4d'",b:'删第3行 / 删2至4行'},{k:"-n '5p'",b:'只打印第5行'},{k:'-i（慎用）',b:'直接改原文件，先预览再下手'}],
+  missions:['真机找一个文本文件，跑一遍 sed 替换预览','试一次 sed -n \'2,4p\' 抽行','把 sed -i 的危险性讲给一个朋友听（讲得清才算真懂）']
+},
+/* ============ DAY 9 ============ */
+{ id:9, title:'账房先生 · awk 报表术', area:'第二周 · 高阶', boss:false,
+  story:'王国账房里堆满了账本。「每行一条记录，每列一个字段——awk 眼中，天下文本皆是表格。学会对列说话，你就学会了和一切数据对话。」',
+  lessons:[
+    {t:'列的代号 —— $1 $2 $NF', c:"awk '{print $1}' ledger.txt\nawk '{print $1, $3}' ledger.txt", b:'awk 把每行按空格切成字段：<b>$1</b> 第一列，<b>$2</b> 第二列……<b>$NF</b> 最后一列（Number of Fields）。print $1, $3 可以跳着取。'},
+    {t:'换把刀切 —— -F 分隔符', c:"awk -F, '{print $2}' ledger.csv", b:'csv 文件用逗号分隔，<b>-F,</b> 告诉 awk「按逗号切列」。日志用冒号就 -F:，制表符就 -F\'\\t\'。一切有规律的分隔文本皆可切。'},
+    {t:'跳过表头 —— NR 行号', c:"awk 'NR>1 {print $1}' ledger.csv", b:'<b>NR</b> 是当前行号。NR&gt;1 表示“从第二行开始”，轻松跳过表头。'},
+    {t:'终极一招 —— 求和', c:"awk -F, '{sum+=$3} END {print sum}' ledger.csv", b:'每读到一行就把第三列加进 sum，END 块在<b>全部读完后</b>执行——打印总和。一行命令算总额，Excel 打开文件的时间它已经算完了。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    market:{type:'d',ch:{
+      'ledger.csv':{type:'f',c:'物品,数量,单价\n长剑,3,120\n盾牌,2,85\n药草,10,12\n战马,1,800\n箭矢,50,2'},
+      'access.log':{type:'f',c:'192.168.1.10 GET /index\n192.168.1.15 POST /login\n192.168.1.10 GET /shop\n192.168.1.22 GET /index\n192.168.1.10 POST /pay'}
+    }}
+  }},
+  challenge:{ task:'账房考题：① 打印 ledger.csv 的<b>所有物品名</b>（第一列）；② 用 awk 算出 <b>单价列（第 3 列）的总和</b>，向账房先生报数。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /awk\s+(-F,\s+)?'\{print \$1\}'[^']*ledger/.test(h) && /sum\+=\$3/.test(h); } },
+  quiz:[
+    {q:'awk 眼中的一行文本默认按什么切分？', o:['空格','逗号','冒号','每个字符'], a:0, e:'默认按空白切，$1 就是第一个词。'},
+    {q:'csv 文件想让 awk 按逗号切列，怎么办？', o:['-F,','-F.','--csv','-c'], a:0, e:'-F 指定分隔符，csv 用逗号 -F,。'},
+    {q:'awk \'{print $NF}\' 打印的是什么？', o:['最后一列','第一列','列数','行号'], a:0, e:'NF = 字段总数，$NF 即最后一个字段。'},
+    {q:'亲手打出：对 data.csv 按逗号分列后打印第 2 列', type:"awk -F, '{print $2}' data.csv", e:'-F, 和程序块都别忘引号。'}
+  ],
+  cards:[{k:"awk '{print $1}'",b:'打印第一列'},{k:'$NF',b:'最后一列'},{k:'-F,',b:'指定分隔符为逗号'},{k:'NR>1',b:'跳过表头'},{k:"'{sum+=$3} END{print sum}'",b:'对第三列求和'},{k:'一切有规律的分隔文本',b:'皆可切列成表'}],
+  missions:['真机找任意 csv（或用 Excel 另存一个），用 awk 取一列','用 awk 求和算一列数字的总计','思考：你的工作里哪个报表可以让 awk 代劳？']
+},
+/* ============ DAY 10 ============ */
+{ id:10, title:'正则之道 · 模式觉醒', area:'第二周 · 高阶', boss:false,
+  story:'符文洞窟的石壁上刻着扭曲的纹路。「这不是文字，是<b>模式</b>。」隐士低语，「^ 是开始，$ 是结束，. 是任意一字符，* 是重复。读懂它们，你描述的不再是某个词，而是一类词。」',
+  lessons:[
+    {t:'四位始祖符文', c:"grep -E '^龙' myth.txt\ngrep -E '龙$' myth.txt\ngrep -E 'a.c' myth.txt", b:'<b>^龙</b> = 以龙开头；<b>龙$</b> = 以龙结尾；<b>.</b> = 任意单个字符（a.c 匹配 abc、a1c）。^ 和 $ 叫“锚”，把模式钉死在行首行尾。'},
+    {t:'重复之力', c:"grep -E 'go+d' myth.txt\ngrep -E 'go*d' myth.txt\ngrep -E '[0-9]{3}' myth.txt", b:'<b>+</b> = 前面的东西至少一次（god, good, gooood）；<b>*</b> = 零次或多次；<b>{3}</b> = 恰好三次。'}, 
+    {t:'字符集 —— 方括号', c:"grep -E '[AEIOU]' myth.txt\ngrep -E '[0-9]' myth.txt\nls | grep -E '^[a-d]' | head", b:'[...] 匹配方括号里<b>任意一个</b>字符：[0-9] 任一数字，[aeiou] 任一元音，[a-d] a到d任一。'},
+    {t:'实战组合拳', c:"grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}' log.txt", b:'这条匹配 yyyy-mm-dd 形式的日期开头行。正则的真身就是把符文按需求拼装——先想清楚“我要匹配的东西长什么样”，再翻译成符文。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    cipher:{type:'d',ch:{
+      'lines.txt':{type:'f',c:'龙生于渊\n剑指苍龙\n龙鳞铠甲\n凤舞九天\n双龙戏珠\n龙\n屠龙者终成恶龙\n骑士不屠龙'},
+      'codes.txt':{type:'f',c:'密钥编号：A-12\n密钥编号：B-07\n无效条目：X-999\n密钥编号：C-33\n乱码：??-\n密钥编号：D-41'}
+    }}
+  }},
+  challenge:{ task:'符文试炼：① 找出 lines.txt 中<b>以「龙」开头</b>的所有行；② 在 codes.txt 中找出形如 <b>字母-两位数字</b> 的密钥行（用 [A-Z]-[0-9]{2} 风格的正则）。',
+    check:function(sh){ var h=sh.hist.join(' ; ');
+      return /grep\s+-E\s+["']\^龙["']/.test(h) && /\[A-Z\]-\[0-9\]\{2\}|\[0-9\]\{2\}[^;]*codes/.test(h); } },
+  quiz:[
+    {q:"grep -E '^error' 会匹配哪些行？", o:['以 error 开头的行','包含 error 的行','以 error 结尾的行','单词 error'], a:0, e:'^ 把模式锚定在行首。'},
+    {q:'哪个正则能匹配任意三位数字？', o:['[0-9]{3}','[0-9,3]','3*[0-9]','[123]'], a:0, e:'字符集 [0-9] 配量词 {3}。'},
+    {q:'a*b 能匹配下面哪个？', o:['b','abb','aab（且也匹配 b）','ba'], a:2, e:'* 是零次或多次：b、ab、aab、aaab 都行。正确说法是 ab 也匹配，本题最优选项强调了“零次也可以”。'},
+    {q:'亲手打出：在 f.txt 里用扩展正则找以 Info 结尾的行', type:"grep -E 'Info$' f.txt", e:'$ 锚定行尾。'}
+  ],
+  cards:[{k:'^x / x$',b:'以x开头 / 以x结尾'},{k:'.',b:'任意单个字符'},{k:'+ / *',b:'至少一次 / 零次或多次'},{k:'{n}',b:'恰好 n 次'},{k:'[0-9] [a-z]',b:'字符集：任选其一'},{k:'写正则的顺序',b:'先描述特征，再翻译成符文'}],
+  missions:['真机用 grep -E \'^...\' 试一次行首锚定','用 ls | grep -E 过滤出某类文件名','把日期 yyyy-mm-dd 的正则亲手写一遍并测试']
+},
+/* ============ DAY 11 ============ */
+{ id:11, title:'脚本觉醒 · 第一段咒文', area:'第二周 · 高阶', boss:false,
+  story:'法师塔顶，长老递来一张羊皮卷。「每次都手敲同样的命令，是对生命的浪费。把它<b>写下来，让机器替你重复</b>——这一刻，你从使用者变成指挥者。」',
+  lessons:[
+    {t:'出生证明 —— shebang', c:'#!/bin/bash', b:'脚本第一行固定写它，声明“本文件由 bash 来执行”。没有它，某些环境下脚本会找不到解释者。'},
+    {t:'变量 —— 给数据起名字', c:'#!/bin/bash\nname="骑士"\necho "你好，$name"', b:'赋值时<b>等号两边不能有空格</b>，取值时加 $。echo 把文字打印出来——脚本与世界对话的嘴。'},
+    {t:'赋予生命 —— chmod +x', c:'chmod +x hello.sh\n./hello.sh', b:'新建的脚本默认没有执行权限，<b>chmod +x</b> 为它开光。然后用 ./文件名 运行——./ 的意思是“就在当前目录里找这个文件”。'},
+    {t:'命令替换 —— 咒中咒', c:'today=$(date +%F)\necho "今天是 $today"\nfiles=$(ls | wc -l)', b:'$(命令) 会先执行命令，把结果存进变量。“今天几号”“有几个文件”，从此都成了脚本肚子里的变量。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{
+    tower:{type:'d',ch:{
+      'spellbook.txt':{type:'f',c:'第一页：echo 是初啼\n第二页：变量是记忆\n第三页：chmod +x 是开光\n末页：把咒文写进 quest.log'}
+    }}
+  }},
+  challenge:{ task:'在虚拟终端里预演咒文：① 用 echo 和重定向，把「骑士宣言：命令在手」写入 <b>quest.log</b>（覆盖式 >）；② 再用追加符号 <b>&gt;&gt;</b> 补上一行「今日，脚本觉醒」；③ cat 验收。注：echo 支持引号文本，重定向在本终端可用。',
+    check:function(sh){ var t=sh.resolve('/tower'); var f=t.ch['quest.log'];
+      return f && /骑士宣言/.test(f.c) && /脚本觉醒/.test(f.c); } },
+  quiz:[
+    {q:'脚本第一行的 #!/bin/bash 叫什么、干什么用？', o:['shebang，声明用 bash 解释执行','注释，纯装饰','权限声明','版本号'], a:0, e:'它告诉系统：跑我的时候请叫 bash 来。'},
+    {q:'name = "张三" 这样写变量有什么问题？', o:['等号两边不能有空格','必须用单引号','必须大写','没有问题'], a:0, e:'shell 语法规定赋值紧贴等号，空格会被当成命令参数。'},
+    {q:'./hello.sh 前面的 ./ 是什么意思？', o:['从当前目录找这个文件','表示隐藏','root 权限','调试模式'], a:0, e:'系统默认不搜当前目录，./ 是显式指路。'},
+    {q:'亲手打出：运行当前目录下的 deploy.sh', type:'./deploy.sh', e:'先 chmod +x，再 ./ 运行，两步都不能少。'}
+  ],
+  cards:[{k:'#!/bin/bash',b:'脚本第一行，声明解释器'},{k:'name="x" 取值 $name',b:'赋值无空格，取值加 $'},{k:'echo',b:'打印文字'},{k:'chmod +x f.sh',b:'赋予执行权限'},{k:'./f.sh',b:'运行当前目录脚本'},{k:'$(命令)',b:'先执行，结果作值'}],
+  missions:['真机：把 echo "Hello, Shell" 写进 ~/cli-play/hello.sh','chmod +x 后用 ./ 运行它，见证第一段咒文','把 today=$(date +%F); echo "今天是 $today" 加进脚本再跑一次']
+},
+/* ============ DAY 12 ============ */
+{ id:12, title:'逻辑流 · 让脚本学会思考', area:'第二周 · 高阶', boss:false,
+  story:'傀儡有了心脏。if 让它判断，for 让它不倦，$1 让它听懂吩咐。「会重复的不叫魔法，」长老说，「<b>会判断的</b>才是。」',
+  lessons:[
+    {t:'判断 —— if', c:'#!/bin/bash\nif [ -f data.txt ]; then\n  echo "文件存在"\nelse\n  echo "文件不存在"\nfi', b:'[ -f 文件 ] 判断文件是否存在（-d 判断目录）。注意 [ 和 ] <b>内侧必须有空格</b>，if 的结尾是倒写的 fi。'},
+    {t:'循环 —— for', c:'#!/bin/bash\nfor f in *.txt; do\n  echo "处理 $f"\ndone', b:'for 遍历列表，每轮把当前成员放进变量 f。*.txt 展开后，就是对「每个 txt 文件做某事」——批量操作的灵魂。'},
+    {t:'听懂吩咐 —— 位置参数', c:'#!/bin/bash\necho "你好，$1"\necho "参数共 $# 个"', b:'运行 ./greet.sh 张三 时，<b>$1</b> 就是“张三”，$2 是第二个参数，<b>$#</b> 是参数个数。脚本从此接受指挥。'},
+    {t:'迷你备份脚本（真机可跑）', c:'#!/bin/bash\nfor f in *.txt; do\n  cp "$f" "$f.bak"\ndone\necho "备份完成"', b:'四行代码备份全部 txt。for 负责“每一个”，cp 负责“复制”，$f 负责流转。这就是自动化的最小完整形态。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{ golem:{type:'d',ch:{'core.txt':{type:'f',c:'傀儡核心已启动。\n等待逻辑注入。'}}} }},
+  orderGame:{ title:'注入逻辑：把傀儡备份脚本的行按正确顺序排好',
+    lines:['#!/bin/bash','for f in *.txt; do','cp "$f" "$f.bak"','done','echo "备份完成"'] },
+  challenge:null, orderCheck:true,
+  quiz:[
+    {q:'if [ -f x ]; then 的 -f 测什么？', o:['文件是否存在','-d 才是文件','是否为空','是否可执行'], a:0, e:'-f 文件存在；-d 目录存在。'},
+    {q:'运行 ./s.sh 甲 乙 后，$1 和 $# 分别是？', o:['甲 和 2','甲 和 1','乙 和 2','s.sh 和 2'], a:0, e:'$1 第一个参数“甲”，$# 参数总数 2。'},
+    {q:'for f in *.txt; do ... done 中 $f 是？', o:['当前正在处理的那一个文件','所有文件的总称','固定的变量名 f.txt','命令名'], a:0, e:'每轮循环 $f 依次是每个 txt 文件名。'},
+    {q:'亲手打出：for 循环的结束关键字', type:'done', e:'if 的结尾是 fi，for 的结尾是 done——shell 的倒装浪漫。'}
+  ],
+  cards:[{k:'if [ -f x ]; then ... fi',b:'文件存在则执行'},{k:'for x in 列表; do ... done',b:'遍历每个成员'},{k:'$1 $2 $#',b:'参数们：第几个/共几个'},{k:'[ ] 内侧空格',b:'[ -f x ]，方括号里必须有空格'},{k:'-f / -d',b:'文件存在 / 目录存在'},{k:'批量操作灵魂',b:'for + 通配符 + 命令'}],
+  missions:['真机写出含 if 的脚本：文件存在与否打印不同话','把课堂上的迷你备份脚本跑起来，真的备份几个文件','改造它：给脚本加 $1 参数决定备份哪种后缀']
+},
+/* ============ DAY 13 ============ */
+{ id:13, title:'王座厅 · 系统掌控', area:'第二周 · 高阶', boss:false,
+  story:'登上王座厅，整个王国的运转在你眼前展开：进程是臣民，磁盘是疆土，环境变量是法律。「高阶骑士不仅要会念咒，还要<b>看得见王国的脉搏</b>。」',
+  lessons:[
+    {t:'俯瞰臣民 —— 进程', c:'ps aux | grep Safari\ntop', b:'ps aux 列出所有运行中的程序，接管道 grep 筛出你关心的那个。<b>top</b> 是实时仪表盘（按 q 退出），看谁在吃 CPU 和内存一目了然。'},
+    {t:'安抚失控者 —— kill', c:'kill 12345', b:'每个进程有编号（PID），kill 加编号请它退场。先 ps 找到 PID，再 kill 它——「先侦察后行动」在系统管理中同样是铁律。'},
+    {t:'丈量疆土 —— 磁盘', c:'df -h\ndu -sh ~/Downloads\ndu -sh ~/*  | sort -rh | head -5', b:'<b>df -h</b> 看整块磁盘还剩多少；<b>du -sh 文件夹</b> 看它占多大。第三条是经典连招：主目录下哪个文件夹最占地，一条管道揪出前五名——你已完全体。'},
+    {t:'王国的法律 —— 环境变量', c:'echo $PATH\nexport GREETING="hi"\nwhich python3', b:'环境变量是全系统的公共设置，<b>PATH</b> 最重要：它规定「敲命令时去哪些目录找程序」。<b>which 命令</b> 能告诉你某命令的真身藏在哪。装新工具时 PATH 不对是最常见的坑。'},
+    {t:'招贤纳士 —— Homebrew', c:'brew install wget\nbrew list', b:'Mac 缺包管理器时，<b>Homebrew</b> 补位：一条命令装卸万千工具。去 brew.sh 按官网指引装好后，你的 Mac 就有了整个开源世界的军火库。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{ throne:{type:'d',ch:{'throne.txt':{type:'f',c:'王座铭文：知磁盘者知边界，知进程者知呼吸。'}}} }},
+  orderGame:{ title:'磁盘大扫除：把侦查行动按正确顺序排好',
+    lines:['df -h','du -sh ~/* | sort -rh | head -5','du -sh ~/Library/Caches','ls -lt ~/Downloads | head -10','brew cleanup'] },
+  challenge:null, orderCheck:true,
+  quiz:[
+    {q:'想知道整块磁盘还剩多少空间，敲？', o:['df -h','du -h','free -h','disk -l'], a:0, e:'df 看文件系统（整盘）水位，du 看具体目录占用。'},
+    {q:'想结束一个失控的进程，正确流程是？', o:['ps 找到 PID，再 kill 该 PID','kill 所有进程','重启电脑再说','ps aux 直接结束进程'], a:0, e:'先侦察（ps 拿 PID）后行动（kill PID），精确制导。'},
+    {q:'echo $PATH 显示的是什么？', o:['系统到哪里去找你敲的命令','当前路径','密码','磁盘分区'], a:0, e:'PATH 是命令搜索路径列表，“命令找不到”九成因它。'},
+    {q:'亲手打出：查看主目录下每个文件夹各占多少空间（简洁汇总）', type:'du -sh ~/*', e:'du -sh + 通配符，磁盘侦查第一步。'}
+  ],
+  cards:[{k:'ps aux | grep X',b:'找出某程序的进程'},{k:'kill PID',b:'请进程退场'},{k:'top',b:'实时资源仪表盘（q退出）'},{k:'df -h',b:'整盘剩余空间'},{k:'du -sh 目录',b:'目录占多少空间'},{k:'echo $PATH',b:'命令搜索路径'},{k:'brew install x',b:'Mac 装工具的标准姿势'}],
+  missions:['真机跑 df -h 和 du -sh ~/* | sort -rh | head -5，找出你磁盘上最大的空间黑洞','用 ps aux | grep 浏览器名字 看看它开了多少进程','用 which bash 看看 bash 住在哪']
+},
+/* ============ DAY 14 ============ */
+{ id:14, title:'毕业 Boss · 驯服下载文件夹', area:'第二周 · Boss', boss:true,
+  story:'最终试炼不是巨兽，而是你自己的 Downloads——那个每天都在失控的混沌领域。「把它驯服，」国王说，「两周所学，一役封神。」',
+  lessons:[
+    {t:'目标：自动整理下载文件夹', c:'', b:'每次运行脚本，把 Downloads 里的 pdf、图片、压缩包自动归类进对应子文件夹。从此 Downloads 永远清爽——这是无数人写的第一个“真有用”的脚本。'},
+    {t:'完整咒文（真机可跑）', c:'#!/bin/bash\ncd ~/Downloads || exit\nmkdir -p pdfs images zips others\nfor f in *; do\n  case "$f" in\n    *.pdf) mv "$f" pdfs/ ;;\n    *.png|*.jpg) mv "$f" images/ ;;\n    *.zip) mv "$f" zips/ ;;\n    tidy.sh) ;;\n    *) mv "$f" others/ ;;\n  esac\ndone\necho "整理完成"', b:'逐行读懂它：cd 进战场，mkdir -p 建好收容所，for 遍历每个文件，case 按后缀分流（| 表示“或”），mv 押送归位，自己的脚本本身要豁免（tidy.sh) ;; 那行），最后 echo 汇报。这 15 行，用到了两周课程里你学的几乎一切。'},
+    {t:'进阶方向（毕业后自行探索）', c:'cron 定时任务\nxargs 批量执行\nssh 远程操控\ngit 版本管理', b:'让脚本每天定时自动跑（cron）；把管道输出变成命令参数（xargs）；远程指挥另一台机器（ssh）；给你的脚本做版本管理（git）。终端的世界，这两周只是门口。'}
+  ],
+  vfs:{name:'/',type:'d',ch:{ arena:{type:'d',ch:{'crown.txt':{type:'f',c:'王冠属于亲手写出第一个实用脚本的人。\n去吧，骑士。终端即天下。'}}} }},
+  orderGame:{ title:'终极拼图：把 tidy.sh 整理脚本的行按正确顺序排好',
+    lines:['#!/bin/bash','cd ~/Downloads || exit','mkdir -p pdfs images zips others','for f in *; do','case "$f" in','*.pdf) mv "$f" pdfs/ ;;','esac','done','echo "整理完成"'] },
+  challenge:null, orderCheck:true,
+  quiz:[
+    {q:'mkdir -p pdfs images zips others 一条命令建了几个文件夹？', o:['4 个','1 个','报错','取决于文件数'], a:0, e:'mkdir 天生支持多参数，一口气建齐四个收容所。'},
+    {q:'case 语句里 *.png|*.jpg) 的竖线是什么意思？', o:['或——两种后缀走同一分支','管道','强制换行','注释'], a:0, e:'case 模式里 | 连接多个匹配，殊途同归。'},
+    {q:'脚本里为什么要写 tidy.sh) ;; 这一行？', o:['豁免脚本自身，防止把自己也搬走','装饰','定义变量','结束循环'], a:0, e:'不豁免的话，第二次运行时脚本自己会被 mv 进 others——真实世界的坑，提前踩。'},
+    {q:'亲手打出：让脚本在你敲下回车后立刻定时都不用——手动运行 tidy.sh 的命令', type:'./tidy.sh', e:'chmod +x tidy.sh 一次，./tidy.sh 随时手动召唤。毕业快乐，骑士。'}
+  ],
+  cards:[{k:'case 变量 in 模式) ;; esac',b:'按内容分流的多路判断'},{k:'模式A|模式B)',b:'多种匹配同一分支'},{k:'cd 目标 || exit',b:'进不去就撤退，安全习惯'},{k:'豁免自身',b:'处理脚本所在目录时别忘了自己'},{k:'cron',b:'让脚本定时自动跑'},{k:'毕业不是终点',b:'xargs·ssh·git 在门口等你'}],
+  missions:['真机把 tidy.sh 抄下来跑一次（先在测试文件夹演练！）','观察它如何归类，然后加一个你自己的分支（比如 *.dmg）','拍拍自己的肩：两周，从双击鼠标到指挥机器']
+}
+];
+
+/* ---------- 虚拟终端引擎 ---------- */
+function VShell(fsInit, cwdInit){
+  this.hist=[];
+  this.reset(fsInit, cwdInit||'/');
+}
+VShell.prototype.reset=function(fs,cwd){ this.root=JSON.parse(JSON.stringify(fs)); this.cwd=cwd||'/'; this.hist=[]; };
+VShell.prototype.resolve=function(path){
+  if(!path) path=this.cwd;
+  if(path==='~'||path==='~/') path='/';
+  if(path[0]!=='/') path=(this.cwd==='/'?'':this.cwd)+'/'+path;
+  var parts=path.split('/').filter(Boolean);
+  var stack=[this.root], i, seg, top;
+  for(i=0;i<parts.length;i++){
+    seg=parts[i];
+    if(seg==='.') continue;
+    if(seg==='..'){ if(stack.length>1) stack.pop(); continue; }
+    top=stack[stack.length-1];
+    if(!top.ch || !top.ch[seg]){ return null; }
+    stack.push(top.ch[seg]);
+  }
+  return stack[stack.length-1];
+};
+VShell.prototype.pathOf=function(p){
+  var base=(this.cwd==='/'?'':this.cwd);
+  if(p==null) return this.cwd;
+  if(p==='~') return '/';
+  if(p[0]==='/') return p;
+  if(p[0]==='~') return p.slice(1);
+  /* normalize with . and .. */
+  var abs=(p[0]==='/')?p:(base+'/'+p);
+  var st=[]; abs.split('/').filter(Boolean).forEach(function(s){
+    if(s==='.')return;
+    if(s==='..'){st.pop();return;}
+    st.push(s);
+  });
+  return '/'+st.join('/');
+};
+VShell.prototype.prompt=function(){ return 'knight'+(this.cwd==='/'?'/':this.cwd)+' $'; };
+VShell.prototype.wild=function(pat, names){
+  var rx=new RegExp('^'+pat.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$');
+  return names.filter(function(n){ return rx.test(n); });
+};
+VShell.prototype.filesWithPattern=function(args, cmd){
+  /* expand wildcards in file args; return list of {path,node} or null */
+  var self=this, out=[], i, a, dirPart, namePart, dirNode, names, m, j;
+  var files=[];
+  for(i=0;i<args.length;i++){
+    a=args[i].replace(/^["']|["']$/g,'');
+    if(/[*?]/.test(a)){
+      dirPart=a.lastIndexOf('/')>=0? a.slice(0,a.lastIndexOf('/')) : '.';
+      namePart=a.slice(a.lastIndexOf('/')+1);
+      dirNode=this.resolve(this.pathOf(dirPart===''?'/':dirPart));
+      if(!dirNode) return '找不到目录: '+dirPart;
+      names=Object.keys(dirNode.ch||{});
+      m=this.wild(namePart,names);
+      for(j=0;j<m.length;j++) files.push({path:(dirPart==='.'?this.cwd:this.pathOf(dirPart==='/'?'/':dirPart))+'/'+m[j], node:dirNode.ch[m[j]]});
+      if(!m.length) return '没有匹配: '+a;
+    }else{
+      var n=this.resolve(this.pathOf(a));
+      if(!n) return cmd+': '+a+': 没有那个文件或目录';
+      files.push({path:this.pathOf(a),node:n});
+    }
+  }
+  return files;
+};
+VShell.prototype.run=function(line){
+  this.hist.push(line);
+  var segs=[], cur='', q=null, i, ch;
+  for(i=0;i<line.length;i++){
+    ch=line[i];
+    if(q){ cur+=ch; if(ch===q) q=null; continue; }
+    if(ch==="'"||ch==='"'){ q=ch; cur+=ch; continue; }
+    if(ch==='|'){ segs.push(cur); cur=''; continue; }
+    cur+=ch;
+  }
+  segs.push(cur);
+  segs=segs.map(function(s){return s.trim();}).filter(Boolean);
+  var stdin=null, out='';
+  for(i=0;i<segs.length;i++){
+    out=this.exec(segs[i], stdin);
+    if(typeof out!=='string'){ return out; } /* special objects */
+    stdin=out;
+  }
+  return out;
+};
+VShell.prototype.exec=function(cmdline, stdin){
+  var parts=cmdline.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g)||[];
+  var i, redir=null, args=[];
+  for(i=0;i<parts.length;i++){
+    if(parts[i]==='>'||parts[i]==='>>'){ redir={op:parts[i], file:parts[i+1]||''}; i++; continue; }
+    args.push(parts[i]);
+  }
+  var cmd=args.shift();
+  var out;
+  if(!cmd) out='';
+  else if(cmd==='help') out=this.helpText();
+  else if(cmd==='clear') return {clear:true};
+  else if(cmd==='history') out=this.hist.slice(-30).map(function(l,idx){return String(idx+1)+'  '+l;}).join('\n');
+  else if(cmd==='pwd') out=this.cwd;
+  else if(cmd==='whoami') out='knight';
+  else if(cmd==='date') out=new Date().toString();
+  else if(cmd==='echo') out=args.map(function(a){return a.replace(/^["']|["']$/g,'');}).join(' ');
+  else if(cmd==='ls') out=this.ls(args);
+  else if(cmd==='cd') out=this.cd(args[0]);
+  else if(cmd==='cat'){ var r=this.readFiles(args); if(!Array.isArray(r))return r; out=r.join('\n'); }
+  else if(cmd==='head') out=this.headTail(args,stdin,true);
+  else if(cmd==='tail') out=this.headTail(args,stdin,false);
+  else if(cmd==='wc') out=this.wc(args,stdin);
+  else if(cmd==='grep') out=this.grep(args,stdin);
+  else if(cmd==='find') out=this.find(args);
+  else if(cmd==='sort') out=this.sortC(args,stdin);
+  else if(cmd==='uniq') out=this.uniqC(args,stdin);
+  else if(cmd==='sed') out=this.sedC(args,stdin);
+  else if(cmd==='awk') out=this.awkC(args,stdin);
+  else if(cmd==='mkdir') out=this.mkdirC(args);
+  else if(cmd==='touch') out=this.touchC(args);
+  else if(cmd==='cp') out=this.cpC(args);
+  else if(cmd==='mv') out=this.mvC(args);
+  else if(cmd==='rm') out=this.rmC(args);
+  else out=['骑士，王国的命令书里没有「'+cmd+'」','输入 help 看看可用咒文'].join('\n');
+  if(redir && redir.file){
+    var dn=this.resolve(this.pathOf(redir.file));
+    var path=this.pathOf(redir.file);
+    var dirp=path.lastIndexOf('/')>=0?path.slice(0,path.lastIndexOf('/')):this.cwd;
+    var base=path.slice(path.lastIndexOf('/')+1);
+    var dirNode=this.resolve(dirp===''?'/':dirp)||this.resolve(this.cwd);
+    if(!dirNode||dirNode.type!=='d') return '无法写入: '+redir.file;
+    var prev=(redir.op==='>>'&&dirNode.ch[base]&&dirNode.ch[base].type==='f')?dirNode.ch[base].c:'';
+    dirNode.ch[base]={type:'f',c:prev+(prev&&!prev.endsWith('\n')?'\n':'')+out};
+    return '';
+  }
+  return out===undefined?'':out;
+};
+VShell.prototype.helpText=function(){
+  return ['可用咒文：','  pwd  ls  cd  cat  head  tail  wc','  grep  find  sort  uniq  sed  awk','  mkdir  touch  cp  mv  rm  echo','  history  clear  help','支持管道 | 与重定向 >  >>'];
+};
+VShell.prototype.ls=function(args){
+  var flags=args.filter(function(a){return a[0]==='-';}).join('');
+  var target=args.filter(function(a){return a[0]!=='-';})[0];
+  var node=this.resolve(this.pathOf(target));
+  if(!node) return 'ls: '+(target||'')+'：没有那个目录';
+  if(node.type==='f') return target;
+  var names=Object.keys(node.ch);
+  if(flags.indexOf('a')<0) names=names.filter(function(n){return n[0]!=='.';});
+  names.sort();
+  if(flags.indexOf('l')>=0){
+    return names.map(function(n){var c=node.ch[n];return (c.type==='d'?'d':'-')+'rw-r--r--  knight  '+String((c.c||'').length+64).padStart(6)+'  '+n+(c.type==='d'?'/':'');}).join('\n');
+  }
+  return names.map(function(n){return n+(node.ch[n].type==='d'?'/':'');}).join('  ');
+};
+VShell.prototype.cd=function(t){
+  if(!t) t='~';
+  t=t.replace(/^["']|["']$/g,'');
+  var p=this.pathOf(t);
+  var node=this.resolve(p);
+  if(!node) return 'cd: '+t+'：没有那个目录';
+  if(node.type!=='d') return 'cd: '+t+'：不是目录';
+  this.cwd=p==='//'?'/':(p||'/');
+  return '';
+};
+VShell.prototype.readFiles=function(args){
+  var f=this.filesWithPattern(args,'cat');
+  if(typeof f==='string') return f;
+  var out=[];
+  f.forEach(function(x){ if(x.node.type==='d'){out.push('cat: '+x.path+'：是个目录');} else out.push(x.node.c); });
+  return out;
+};
+VShell.prototype.headTail=function(args,stdin,isHead){
+  var n=10, files=[], i;
+  for(i=0;i<args.length;i++){
+    if(args[i]==='-n'&&i+1<args.length){ n=parseInt(args[i+1],10); i++; continue; }
+    if(/^-\d+$/.test(args[i])){ n=parseInt(args[i].slice(1),10); continue; }
+    if(args[i][0]!=='-') files.push(args[i]);
+  }
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var lines=text.split('\n');
+  if(text==='') return '';
+  return (isHead?lines.slice(0,n):lines.slice(-n)).join('\n');
+};
+VShell.prototype.wc=function(args,stdin){
+  var flags=args.filter(function(a){return a[0]==='-';}).join('');
+  var files=args.filter(function(a){return a[0]!=='-';});
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var lines=text===''?0:text.split('\n').length;
+  var words=text.split(/\s+/).filter(Boolean).length;
+  var chars=text.length;
+  if(flags.indexOf('l')>=0) return String(lines);
+  if(flags.indexOf('w')>=0) return String(words);
+  if(flags.indexOf('c')>=0) return String(chars);
+  return lines+'\t'+words+'\t'+chars+(files.length?'\t'+files.join(' '):'');
+};
+VShell.prototype.grep=function(args,stdin){
+  var flags='',i,pattern=null,files=[];
+  for(i=0;i<args.length;i++){
+    if(args[i][0]==='-'){ flags+=args[i].slice(1); continue; }
+    if(pattern===null){ pattern=args[i].replace(/^["']|["']$/g,''); continue; }
+    files.push(args[i]);
+  }
+  var useE=flags.indexOf('E')>=0, ic=flags.indexOf('i')>=0, nv=flags.indexOf('v')>=0, nn=flags.indexOf('n')>=0;
+  var rx;
+  try{ rx=new RegExp(useE?pattern:pattern.replace(/[.+^${}()|[\]\\*?]/g,'\\$&'), ic?'i':''); }
+  catch(e){ return 'grep: 无效的正则'; }
+  var self=this, results=[];
+  function scanText(text,label){
+    text.split('\n').forEach(function(l,idx){
+      var m=rx.test(l);
+      if(nv) m=!m;
+      if(m) results.push((label?label+':':'')+(nn?(idx+1)+':':'')+l);
+    });
+  }
+  if(files.length){
+    var f=this.filesWithPattern(files,'grep');
+    if(typeof f==='string') return f;
+    f.forEach(function(x){
+      if(x.node.type==='f'){
+        scanText(x.node.c, files.length>1||flags.indexOf('r')>=0 ? x.path : null);
+      } else if(x.node.type==='d'){
+        if(flags.indexOf('r')>=0){
+          (function walk(node,p){
+            Object.keys(node.ch||{}).sort().forEach(function(nm){
+              var c=node.ch[nm], cp=p+'/'+nm;
+              if(c.type==='f') scanText(c.c, cp);
+              else walk(c,cp);
+            });
+          })(x.node, x.path);
+        } else {
+          results.push('grep: '+x.path+'：是个目录（加 -r 可递归搜索）');
+        }
+      }
+    });
+  } else {
+    scanText((stdin===null||stdin===undefined)?'':stdin,null);
+  }
+  return results.join('\n');
+};
+VShell.prototype.find=function(args){
+  var start='.', pattern='*', type=null, i;
+  for(i=0;i<args.length;i++){
+    if(args[i]==='-name'&&i+1<args.length){ pattern=args[i+1].replace(/^["']|["']$/g,''); i++; continue; }
+    if(args[i]==='-type'&&i+1<args.length){ type=args[i+1]; i++; continue; }
+    if(args[i][0]!=='-') start=args[i];
+  }
+  var rx=new RegExp('^'+pattern.replace(/[.+^${}()|[\]\\]/g,'\\$&').replace(/\*/g,'.*').replace(/\?/g,'.')+'$');
+  var self=this, results=[];
+  function walk(node,path){
+    var names=Object.keys(node.ch||{}).sort();
+    names.forEach(function(nm){
+      var child=node.ch[nm], p=(path==='/'?'':path)+'/'+nm;
+      if(rx.test(nm) && (!type||(type==='d')===(child.type==='d'))) results.push(p);
+      if(child.type==='d') walk(child,p);
+    });
+  }
+  var base=this.pathOf(start);
+  var node=this.resolve(base);
+  if(!node) return 'find: '+start+'：没有那个目录';
+  if(node.type==='d') walk(node,base==='/'?'/':base);
+  return results.map(function(p){return p;}).join('\n');
+};
+VShell.prototype.sortC=function(args,stdin){
+  var flags=args.filter(function(a){return a[0]==='-';}).join('');
+  var files=args.filter(function(a){return a[0]!=='-';});
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var lines=text.split('\n').filter(function(l,i,arr){return !(l===''&&i===arr.length-1);});
+  lines.sort();
+  if(flags.indexOf('n')>=0) lines.sort(function(a,b){return parseFloat(a)-parseFloat(b);});
+  if(flags.indexOf('r')>=0) lines.reverse();
+  return lines.join('\n');
+};
+VShell.prototype.uniqC=function(args,stdin){
+  var flags=args.filter(function(a){return a[0]==='-';}).join('');
+  var files=args.filter(function(a){return a[0]!=='-';});
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var lines=text.replace(/\n$/,'').split('\n'), out=[], i;
+  for(i=0;i<lines.length;i++){
+    if(i>0&&lines[i]===lines[i-1]){
+      if(flags.indexOf('c')>=0){ var last=out[out.length-1]; out[out.length-1]=String(parseInt(last.match(/^\s*(\d+)/)[1],10)+1)+' '+lines[i]; }
+      continue;
+    }
+    out.push(flags.indexOf('c')>=0?'1 '+lines[i]:lines[i]);
+  }
+  return out.join('\n');
+};
+VShell.prototype.sedC=function(args,stdin){
+  var prog=null,files=[],i;
+  for(i=0;i<args.length;i++){
+    if(args[i][0]!=='-'&&prog===null&&i===0){ prog=args[i].replace(/^["']|["']$/g,''); continue; }
+    if(args[i][0]!=='-') files.push(args[i]);
+  }
+  if(args.length&&prog===null) prog=args[0];
+  if(!prog||prog[0]!=='s') return 'sed（迷你版）：仅支持 s/旧/新/g 与 /模式/d、行号d、行号p';
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var m=prog.match(/^s\/([^/]*)\/([^/]*)\/(g?)$/);
+  if(m){
+    var old=m[1],nw=m[2],g=m[3]==='g';
+    var rx;
+    try{ rx=new RegExp(old.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),g?'g':''); }catch(e){ return 'sed: 无效模式'; }
+    return text.split('\n').map(function(l){return l.replace(rx,nw);}).join('\n');
+  }
+  return 'sed（迷你版）：无法解析 '+prog;
+};
+VShell.prototype.awkC=function(args,stdin){
+  var fs_=/\s+/, prog=null, files=[], i;
+  for(i=0;i<args.length;i++){
+    var am=args[i].match(/^-F(.*)$/);
+    if(am){ fs_=am[1]===''?(args[i+1]||','):am[1]; if(am[1]==='')i++; continue; }
+    if(prog===null){ prog=args[i].replace(/^["']|["']$/g,''); continue; }
+    files.push(args[i]);
+  }
+  if(!prog) return 'awk（迷你版）：需要程序块，如 \'{print $1}\'';
+  if(fs_==='\\t'||fs_==='tab') fs_='\t';
+  var text;
+  if(files.length){ var r=this.readFiles(files); if(!Array.isArray(r))return r; text=r.join('\n'); }
+  else text=(stdin===null||stdin===undefined)?'':stdin;
+  var lines=text.replace(/\n$/,'').split('\n');
+  var out=[], sum=null, self=this;
+  /* parse conditions */
+  var condMatch=prog.match(/^(?:NR\s*([><=]+)\s*(\d+)\s*)?\{(.*?)\}\s*(?:END\s*\{(.*?)\}\s*)?$/);
+  if(!condMatch) return 'awk（迷你版）：仅支持课程内的写法（print / NR条件 / sum+=）';
+  var op=condMatch[1], opn=condMatch[2], body=condMatch[3], endB=condMatch[4]||'';
+  lines.forEach(function(l,idx){
+    var NR=idx+1;
+    if(op){
+      var ok=false;
+      if(op==='>'&&NR>parseInt(opn,10))ok=true;
+      if(op==='<'&&NR<parseInt(opn,10))ok=true;
+      if(op==='>='&&NR>=parseInt(opn,10))ok=true;
+      if(op==='=='&&NR===parseInt(opn,10))ok=true;
+      if(!ok) return;
+    }
+    var fl=l.split(fs_).filter(function(x){return x!=='';});
+    var bodyM=body.match(/^print\s+\$(\d+|NF)$/);
+    var bodySum=body.match(/^sum\+=\$(\d+)$/);
+    var bodyPlain=body.match(/^print$/);
+    if(bodyPlain){ out.push(l); return; }
+    if(bodyM){
+      var fi=bodyM[1];
+      var v=fi==='NF'?fl[fl.length-1]:fl[parseInt(fi,10)-1];
+      out.push(v===undefined?'':v);
+      return;
+    }
+    if(bodySum){ sum=(sum||0)+(parseFloat(fl[parseInt(bodySum[1],10)-1])||0); return; }
+    if(body===''){ return; }
+    out.push('awk（迷你版）：不认识的写法 '+body);
+  });
+  if(endB){
+    var em=endB.match(/^print\s+(sum|\$\w+)$/);
+    if(em&&em[1]==='sum'&&sum!==null) out.push(String(sum));
+    else if(em) out.push('0');
+  }
+  return out.join('\n');
+};
+VShell.prototype.mkdirC=function(args){
+  var self=this, flags=args.filter(function(a){return a[0]==='-';}).join(''), ok=false;
+  args.filter(function(a){return a[0]!=='-';}).forEach(function(t){
+    var p=self.pathOf(t);
+    var parts=p.split('/').filter(Boolean), cur=self.root;
+    parts.forEach(function(seg){
+      if(!cur.ch[seg]){ if(flags.indexOf('p')<0&&parts.indexOf(seg)<parts.length-1){return;} cur.ch[seg]={type:'d',ch:{}}; ok=true; }
+      if(cur.ch[seg].type!=='d'){ return; }
+      cur=cur.ch[seg];
+    });
+  });
+  return '';
+};
+VShell.prototype.touchC=function(args){
+  var self=this;
+  args.filter(function(a){return a[0]!=='-';}).forEach(function(t){
+    var p=self.pathOf(t);
+    var dirp=p.lastIndexOf('/')>=0?p.slice(0,p.lastIndexOf('/')):'/';
+    var base=p.slice(p.lastIndexOf('/')+1);
+    var dn=self.resolve(dirp===''?'/':dirp);
+    if(!dn||dn.type!=='d'){ return; }
+    if(!dn.ch[base]) dn.ch[base]={type:'f',c:''};
+  });
+  return '';
+};
+VShell.prototype.cpC=function(args){
+  return this.mvcp(args,true);
+};
+VShell.prototype.mvC=function(args){
+  return this.mvcp(args,false);
+};
+VShell.prototype.mvcp=function(args,isCp){
+  var files=args.filter(function(a){return a[0]!=='-';});
+  if(files.length<2) return (isCp?'cp':'mv')+'：需要 源 目标 两个参数';
+  var dest=files.pop(), self=this;
+  var destNode=this.resolve(this.pathOf(dest));
+  var destDir = (destNode&&destNode.type==='d')?destNode:null;
+  var destPath = destDir? this.pathOf(dest) : (dest.lastIndexOf('/')>=0?this.pathOf(dest.slice(0,dest.lastIndexOf('/'))):this.cwd);
+  if(!destDir){
+    var dd=this.resolve(destPath);
+    if(!dd||dd.type!=='d') return '目标目录不存在';
+  }
+  var msgs=[];
+  files.forEach(function(src){
+    var sp=self.pathOf(src);
+    var srcNode=self.resolve(sp);
+    if(!srcNode){ msgs.push((isCp?'cp':'mv')+': '+src+'：没有那个文件'); return; }
+    var base=sp.slice(sp.lastIndexOf('/')+1);
+    var finalName=destDir?base:dest.slice(dest.lastIndexOf('/')+1);
+    destDir=self.resolve(destPath);
+    destDir.ch[finalName]=isCp?JSON.parse(JSON.stringify(srcNode)):srcNode;
+    if(!isCp){ var spDir=self.resolve(sp.slice(0,sp.lastIndexOf('/'))||'/'); delete spDir.ch[base]; }
+  });
+  return msgs.join('\n');
+};
+VShell.prototype.rmC=function(args){
+  var flags=args.filter(function(a){return a[0]==='-';}).join(''), self=this;
+  var files=args.filter(function(a){return a[0]!=='-';});
+  files.forEach(function(t){
+    var p=self.pathOf(t);
+    var node=self.resolve(p);
+    if(!node){ return; }
+    if(node.type==='d'&&flags.indexOf('r')<0){ return; }
+    var dirp=p.slice(0,p.lastIndexOf('/'))||'/';
+    var base=p.slice(p.lastIndexOf('/')+1);
+    var dn=self.resolve(dirp);
+    if(dn) delete dn.ch[base];
+  });
+  return '';
+};
+
+/* ---------- UI ---------- */
+var app=document.getElementById('app');
+var toast=document.getElementById('toast');
+var modalBg=document.getElementById('modalBg');
+var modalBox=document.getElementById('modalBox');
+var view='map', curLevel=null, vsh=null, quizState=null, ordState=null;
+
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!==undefined)e.innerHTML=html; return e; }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg,gold){
+  toast.textContent=msg; toast.className='toast show'+(gold?' gold':'');
+  clearTimeout(showToast._t); showToast._t=setTimeout(function(){toast.className='toast';},2400);
+}
+function rankOf(xp){ var r=RANKS[0]; RANKS.forEach(function(k){ if(xp>=k.x)r=k; }); return r; }
+function nextRank(xp){ for(var i=0;i<RANKS.length;i++){ if(xp<RANKS[i].x) return RANKS[i]; } return null; }
+function addXp(n,msg){
+  var before=rankOf(S.xp).n;
+  S.xp+=n;
+  var after=rankOf(S.xp).n;
+  showToast(msg+'  +'+n+' XP', n>=50);
+  if(after!==before){ setTimeout(function(){ showToast('★ 称号晋升：'+after+' ★', true); },2600); }
+}
+function totalQuiz(){ var t=0; LEVELS.forEach(function(L){t+=L.quiz.length;}); return t; }
+function quizDoneCount(L){ var d=S.quiz[L.id]||[]; return d.filter(Boolean).length; }
+function levelUnlocked(L){
+  if(L.id===1) return true;
+  var prev=LEVELS[L.id-2];
+  return !!S.lv[prev.id];
+}
+function award(id){
+  if(S.badges[id]) return;
+  var b=BADGES.filter(function(x){return x.id===id;})[0];
+  if(!b) return;
+  S.badges[id]=1;
+  setTimeout(function(){ showToast('🏅 徽章解锁：'+b.n+' —— '+b.d, true); },300);
+}
+function checkBadges(){
+  if(S.lv[1]) award('first');
+  var w1=true,i; for(i=1;i<=7;i++){ if(!S.lv[i]) w1=false; }
+  if(w1) award('week1');
+  if(S.lv[6]) award('pipe');
+  if(S.lv[10]) award('regex');
+  if(S.lv[11]) award('script');
+  if(S.lv[13]) award('sys');
+  var all=true; LEVELS.forEach(function(L){ if(!S.lv[L.id]) all=false; });
+  if(all) award('all');
+}
+function copyCode(btn,txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ showToast('已复制到剪贴板'); }); }
+  else{ showToast('请手动选择复制'); }
+}
+
+/* ---------- map view ---------- */
+function renderMap(){
+  view='map'; curLevel=null;
+  app.innerHTML='';
+  var top=el('div','top');
+  top.appendChild(el('div','crest','◆'));
+  top.appendChild(el('div','title','终端骑士<small>SHELL KNIGHT · CLI 两周通关</small>'));
+  var hud=el('div','hud');
+  hud.appendChild(el('div','pill','XP <b>'+S.xp+'</b>'));
+  hud.appendChild(el('div','pill','称号 <b style="color:var(--acc)">'+rankOf(S.xp).n+'</b>'));
+  hud.appendChild(el('div','pill','关卡 <b>'+Object.keys(S.lv).length+'</b>/14'));
+  var saveBtn=el('button','btn ghost small','存档');
+  saveBtn.onclick=openSave;
+  hud.appendChild(saveBtn);
+  top.appendChild(hud);
+  app.appendChild(top);
+
+  var rk=rankOf(S.xp), nx=nextRank(S.xp);
+  var rb=el('div','rankbar');
+  var pct = nx? Math.min(100,Math.round((S.xp-rk.x)/(nx.x-rk.x)*100)) : 100;
+  rb.appendChild(el('div','rankline','<span>当前称号：<b>'+rk.n+'</b></span><span>'+(nx?('距离「'+nx.n+'」还差 '+(nx.x-S.xp)+' XP'):'已至巅峰')+'</span>'));
+  var track=el('div','track'), fill=el('div','fill'); fill.style.width=pct+'%';
+  track.appendChild(fill); rb.appendChild(track);
+  app.appendChild(rb);
+
+  var weeks=el('div','weeks');
+  [['第一周 · 地基与Boss',1,7,'7关 · pwd到管道'],['第二周 · 高阶修行',8,14,'7关 · sed到毕业']].forEach(function(w){
+    var wk=el('div','week');
+    wk.appendChild(el('h3','',
+      '<span class="wk-tag">'+w[3]+'</span> '+w[0]));
+    var nodes=el('div','nodes');
+    LEVELS.slice(w[1]-1,w[2]).forEach(function(L){
+      var done=!!S.lv[L.id], open=levelUnlocked(L);
+      var n=el('div','node'+(done?' done':open?' open':' locked')+(L.boss?' boss':''));
+      n.appendChild(el('div','dn',L.boss?'BOSS':'DAY '+L.id));
+      n.appendChild(el('div','nm',L.title.split(' · ')[0]));
+      n.appendChild(el('div','st',done?'已通关':open?(L.boss?'决战':'进入'):'未解锁'));
+      n.appendChild(el('div','mark',done?'✓':(open?'▶':'')));
+      if(open) n.onclick=function(){ renderLevel(L.id); };
+      nodes.appendChild(n);
+    });
+    wk.appendChild(nodes);
+    weeks.appendChild(wk);
+  });
+  app.appendChild(weeks);
+
+  var bh=el('div');
+  bh.appendChild(el('h4','','&nbsp;'));
+  var h4=el('h4'); h4.style.cssText='color:var(--gold);font-size:14px;margin:22px 0 10px;letter-spacing:1px';
+  h4.textContent='徽 章殿';
+  bh.appendChild(h4);
+  var badges=el('div','badges');
+  BADGES.forEach(function(b){
+    var w=S.badges[b.id];
+    badges.appendChild(el('div','badge'+(w?' won':''),'<span class="bs">'+(w?'★':'✧')+'</span>'+b.n+'<span style="color:var(--mut);font-size:11px">· '+b.d+'</span>'));
+  });
+  bh.appendChild(badges);
+  app.appendChild(bh);
+
+  var v=el('div','victory'+(Object.keys(S.lv).length>=14?' show':''));
+  v.innerHTML='<div class="vc">♛</div><h2>终端宗师 · 加冕</h2><p>你用两周时间，从双击鼠标走到了指挥机器。<br>keep going：cron、xargs、ssh、git 正在门外等你。<br>「终端即天下。」</p>';
+  app.appendChild(v);
+}
+
+/* ---------- level view ---------- */
+function renderLevel(id){
+  view='level'; curLevel=LEVELS[id-1];
+  quizState={answers:{},done:false};
+  ordState=null;
+  app.innerHTML='';
+  var L=curLevel;
+
+  var head=el('div','lv-head');
+  var back=el('button','back','← 返回地图');
+  back.onclick=renderMap;
+  head.appendChild(back);
+  var ht=el('div');
+  ht.appendChild(el('div','lv-tag',(L.boss?'◆ BOSS 战 · ':'DAY '+L.id+' · ')+L.area));
+  ht.appendChild(el('div','lv-title',L.title));
+  head.appendChild(ht);
+  app.appendChild(head);
+
+  app.appendChild(el('div','story',L.story));
+
+  /* lessons */
+  var sec=el('div','sect');
+  sec.appendChild(el('h4','','知识讲坛'));
+  L.lessons.forEach(function(ls){
+    var card=el('div','lesson');
+    card.appendChild(el('h5','',ls.t+(ls.c?'<code>'+esc(ls.c.split('\n')[0].length>40?ls.c.split('\n')[0].slice(0,40)+'…':ls.c.split('\n')[0])+'</code>':'')));
+    card.appendChild(el('p','',ls.b));
+    if(ls.c){
+      var cb=el('div','codeblk');
+      cb.appendChild(el('span','p','$ '));
+      cb.appendChild(el('code','',esc(ls.c)));
+      var cp=el('button','copy','复制');
+      cp.onclick=function(){ copyCode(cp,ls.c); };
+      cb.appendChild(cp);
+      card.appendChild(cb);
+    }
+    sec.appendChild(card);
+  });
+  app.appendChild(sec);
+
+  /* challenge / terminal */
+  if(L.challenge){
+    var cs=el('div','sect');
+    cs.appendChild(el('h4','','试炼场 · 虚拟终端'));
+    cs.appendChild(buildTerm());
+    var q=el('div','quest',(S.chal[L.id]?'<span class="qdone">✓ 试炼已完成</span> · ':'')+'<b>任务：</b>'+L.challenge.task);
+    cs.appendChild(q);
+    app.appendChild(cs);
+  }
+
+  /* ordering game */
+  if(L.orderGame){
+    var os=el('div','sect');
+    os.appendChild(el('h4','','试炼场 · 逻辑拼图'));
+    os.appendChild(el('div','quest','<b>任务：</b>'+L.orderGame.title+(S.chal[L.id]?'　<span class="qdone">✓ 已完成</span>':'')));
+    os.appendChild(buildOrder());
+    app.appendChild(os);
+  }
+
+  /* quiz */
+  var qs=el('div','sect');
+  qs.appendChild(el('h4','','自测试炼 · '+quizDoneCount(L)+'/'+L.quiz.length+' 已答对'));
+  qs._h=qs.querySelector('h4');
+  L.quiz.forEach(function(Q,qi){
+    qs.appendChild(buildQuiz(L,Q,qi,qs));
+  });
+  app.appendChild(qs);
+
+  /* cards */
+  var cds=el('div','sect');
+  cds.appendChild(el('h4','','记忆卡片 · 点击翻面'));
+  var grid=el('div','cards');
+  L.cards.forEach(function(c){
+    var mc=el('div','mcard');
+    mc.innerHTML='<div class="inner"><div class="mface mf-front"><div class="k">'+esc(c.k)+'</div><div class="hint">点击查看</div></div><div class="mface mf-back">'+esc(c.b)+'</div></div>';
+    mc.onclick=function(){ mc.classList.toggle('flip'); };
+    grid.appendChild(mc);
+  });
+  cds.appendChild(grid);
+  app.appendChild(cds);
+
+  /* missions */
+  var ms=el('div','sect');
+  ms.appendChild(el('h4','','真机任务 · 到你的终端里去'));
+  L.missions.forEach(function(m,i){
+    var key=L.id+'_'+i;
+    var mi=el('div','mission'+(S.miss[key]?' ok':''));
+    mi.innerHTML='<div class="box">✓</div><div class="mt">'+m+'</div>';
+    mi.onclick=function(){ S.miss[key]=!S.miss[key]; mi.classList.toggle('ok'); };
+    ms.appendChild(mi);
+  });
+  app.appendChild(ms);
+
+  /* footer */
+  var ft=el('div','lv-foot');
+  var fin=el('div','fin','');
+  var finBtn=el('button','btn','完成本关 ✦');
+  finBtn.onclick=function(){ finishLevel(L); };
+  var nxt=el('button','btn ghost','下一关 →');
+  nxt.onclick=function(){ if(L.id<14) renderLevel(L.id+1); else renderMap(); };
+  ft.appendChild(finBtn);
+  ft.appendChild(nxt);
+  ft.appendChild(fin);
+  app.appendChild(ft);
+  updateFin(fin,L);
+  window.scrollTo(0,0);
+}
+function updateFin(fin,L){
+  var qd=quizDoneCount(L), cd=!!S.chal[L.id];
+  fin.textContent='进度：试炼'+(cd?'✓':'✗')+' / 答题 '+qd+'/'+L.quiz.length;
+}
+function finishLevel(L){
+  if(S.lv[L.id]){ showToast('本关已通关过'); return; }
+  var qd=quizDoneCount(L);
+  if(!S.chal[L.id]){ showToast('还差一步：先完成试炼场的任务'); return; }
+  if(qd<L.quiz.length){ showToast('还差一步：自测试炼还有 '+(L.quiz.length-qd)+' 题未答对'); return; }
+  S.lv[L.id]=1;
+  var bonus=L.boss?60:20;
+  addXp(bonus,'「'+L.title.split(' · ')[0]+'」通关！');
+  checkBadges();
+  if(L.id===14){ setTimeout(function(){ renderMap(); },1200); }
+  else showToast('关卡完成，地图上点亮下一关', false);
+  renderLevel(L.id);
+}
+
+/* ---------- terminal widget ---------- */
+function buildTerm(){
+  var L=curLevel;
+  vsh=new VShell(L.vfs,'/');
+  var box=el('div','vterm');
+  var bar=el('div','vt-bar');
+  ['','#','#'].forEach(function(c,i){ var d=el('span','dot'); d.style.background=['#ff5f57','#febc2e','#28c840'][i]; bar.appendChild(d); });
+  bar.appendChild(el('span','t','knight-shell · 页内沙盒，放心乱敲'));
+  var rst=el('button','reset','重置');
+  rst.onclick=function(){ vsh.reset(L.vfs,'/'); renderTermOut(); };
+  bar.appendChild(rst);
+  box.appendChild(bar);
+  var out=el('div','vt-out');
+  out.id='vtOut';
+  var inrow=el('div','vt-in');
+  var ps=el('span','ps','');
+  var inp=document.createElement('input');
+  inp.id='vtInp'; inp.placeholder='输入命令，回车执行（help 查看可用命令）';
+  inrow.appendChild(ps); inrow.appendChild(inp);
+  box.appendChild(out); box.appendChild(inrow);
+  setTimeout(function(){ renderTermOut(); ps.textContent=vsh.prompt(); },0);
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      var line=inp.value.trim();
+      inp.value='';
+      if(!line) return;
+      var p0=vsh.prompt();
+      var res=vsh.run(line);
+      if(res&&res.clear){ out.innerHTML=''; ps.textContent=vsh.prompt(); return; }
+      appendOut('<span class="in">'+esc(p0)+' '+esc(line)+'</span>');
+      appendOut(esc(res===''?'':String(res))||'<span class="sys">（无输出）</span>');
+      ps.textContent=vsh.prompt();
+      checkChallenge();
+    }
+  });
+  return box;
+}
+function renderTermOut(){
+  var out=document.getElementById('vtOut'); if(!out)return;
+  out.innerHTML='<span class="sys">欢迎来到试炼场。这是页内沙盒：怎么敲都伤不到真机。\n输入 help 查看可用命令，或直接开始任务。\n</span>';
+}
+function appendOut(html){
+  var out=document.getElementById('vtOut'); if(!out)return;
+  var pre=document.createElement('div');
+  pre.style.whiteSpace='pre-wrap';
+  pre.innerHTML=html.replace(/\n/g,'<br>');
+  out.appendChild(pre);
+  out.scrollTop=out.scrollHeight;
+}
+function checkChallenge(){
+  var L=curLevel;
+  if(!L.challenge||S.chal[L.id]) return;
+  try{
+    if(L.challenge.check(vsh)){
+      S.chal[L.id]=1;
+      appendOut('<span class="hl">✦ 试炼达成！获得 30 XP</span>');
+      addXp(30,'试炼达成');
+      checkBadges();
+      var quests=document.querySelectorAll('.quest');
+      quests.forEach(function(q){
+        if(q.innerHTML.indexOf('任务')>=0&&!q.innerHTML.indexOf('已完成')>=0){}
+      });
+    }
+  }catch(e){}
+}
+
+/* ---------- quiz widget ---------- */
+function buildQuiz(L,Q,qi,sec){
+  var card=el('div','qcard');
+  card.appendChild(el('div','qn','QUESTION '+(qi+1)+(L.quiz[qi].type?' · 亲手打出来':'')));
+  card.appendChild(el('div','qt',Q.q));
+  var exp=el('div','exp','<b>解析：</b>'+Q.e);
+  var solved=function(){
+    if(!S.quiz[L.id]) S.quiz[L.id]=[];
+    if(S.quiz[L.id][qi]) return false;
+    S.quiz[L.id][qi]=1;
+    addXp(10,'答对');
+    return true;
+  };
+  if(Q.type){
+    var row=el('div','typein');
+    var inp=document.createElement('input');
+    inp.placeholder='在这里敲出命令…';
+    var btn=el('button','btn small','提交');
+    var submit=function(){
+      var v=inp.value.trim().replace(/\s+/g,' ');
+      var ans=Q.type.replace(/\s+/g,' ');
+      if(v===ans||v===ans.replace(/"/g,"'")){
+        if(solved()) { card.style.borderColor='rgba(46,230,168,.6)'; }
+        exp.classList.add('show'); updateLevelHead(L);
+        showToast('✓ 正确');
+      } else {
+        exp.classList.add('show');
+        showToast('再想想，注意命令和参数的拼写');
+      }
+    };
+    btn.onclick=submit;
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') submit(); });
+    row.appendChild(inp); row.appendChild(btn);
+    card.appendChild(row);
+  } else {
+    var opts=el('div','opts');
+    Q.o.forEach(function(o,oi){
+      var b=el('button','opt');
+      b.innerHTML='<span class="oi">'+String.fromCharCode(65+oi)+'</span><span>'+o+'</span>';
+      b.onclick=function(){
+        if(S.quiz[L.id]&&S.quiz[L.id][qi]){ return; }
+        var all=opts.querySelectorAll('.opt');
+        all.forEach(function(x){x.classList.add('off');});
+        if(oi===Q.a){
+          b.classList.add('right');
+          solved();
+          updateLevelHead(L);
+          showToast('✓ 正确');
+        } else {
+          b.classList.add('wrong');
+          all[Q.a].classList.add('right');
+          showToast('答错了，看解析');
+        }
+        exp.classList.add('show');
+      };
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+  }
+  card.appendChild(exp);
+  return card;
+}
+function updateLevelHead(L){
+  var h4s=app.querySelectorAll('.sect h4');
+  h4s.forEach(function(h){
+    if(h.textContent.indexOf('自测试炼')===0){
+      h.textContent='自测试炼 · '+quizDoneCount(L)+'/'+L.quiz.length+' 已答对';
+    }
+  });
+  var fin=app.querySelector('.lv-foot .fin');
+  if(fin) updateFin(fin,L);
+}
+
+/* ---------- ordering puzzle ---------- */
+function buildOrder(){
+  var L=curLevel, G=L.orderGame;
+  var pool=el('div','ord-pool');
+  var slots=el('div','ord-slots');
+  slots.appendChild(el('div','','<span style="color:var(--mut);font-size:12px">按顺序点击下方命令行，组装你的咒文：</span>'));
+  var chosen=[];
+  var idx=G.lines.map(function(_,i){return i;});
+  /* deterministic-ish shuffle different from correct order */
+  var shuffled=idx.slice();
+  do{
+    for(var i=shuffled.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=shuffled[i]; shuffled[i]=shuffled[j]; shuffled[j]=t; }
+  }while(shuffled.every(function(v,i){return v===i;}));
+  function refresh(){
+    slots.innerHTML='';
+    chosen.forEach(function(ci,pos){
+      var s=el('div','ord-slot');
+      s.innerHTML='<span style="color:var(--mut)">'+(pos+1)+'</span><code style="white-space:pre-wrap">'+esc(G.lines[ci])+'</code>';
+      var x=el('button','','移除');
+      x.onclick=function(){ chosen.splice(pos,1); refresh(); };
+      s.appendChild(x);
+      slots.appendChild(s);
+    });
+    if(!chosen.length) slots.appendChild(el('div','','<span style="color:var(--mut);font-size:12px">按顺序点击下方命令行，组装你的咒文：</span>'));
+    pool.innerHTML='';
+    shuffled.forEach(function(ci){
+      var used=chosen.indexOf(ci)>=0;
+      var it=el('button','ord-item'+(used?' used':''));
+      it.innerHTML=esc(G.lines[ci]);
+      it.onclick=function(){
+        if(used) return;
+        chosen.push(ci); refresh();
+        if(chosen.length===G.lines.length){
+          var ok=chosen.every(function(v,i){return v===i;});
+          if(ok){
+            if(!S.chal[L.id]){ S.chal[L.id]=1; addXp(30,'拼图达成'); checkBadges(); }
+            showToast('✓ 咒文组装正确！',true);
+            slots.querySelectorAll('.ord-slot').forEach(function(s){s.classList.add('ok');});
+          } else {
+            showToast('顺序不对——回想每一步的依赖关系');
+          }
+        }
+      };
+      pool.appendChild(it);
+    });
+  }
+  refresh();
+  var wrap=el('div');
+  wrap.appendChild(slots);
+  wrap.appendChild(el('div','','')); 
+  wrap.appendChild(pool);
+  return wrap;
+}
+
+/* ---------- save / load ---------- */
+function saveCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }catch(e){ return ''; } }
+function openSave(){
+  modalBox.innerHTML='';
+  modalBox.appendChild(el('h3','','通关码存档'));
+  modalBox.appendChild(el('p','','本页为离线单文件、不使用浏览器存储。复制下面的通关码妥善保存（可贴进备忘录），下次回来粘贴即可恢复进度。'));
+  var ta=document.createElement('textarea');
+  ta.value=saveCode(); ta.readOnly=true;
+  modalBox.appendChild(ta);
+  var row=el('div','row');
+  var cp=el('button','btn','复制通关码');
+  cp.onclick=function(){ copyCode(cp,ta.value); };
+  var ld=el('button','btn ghost','导入通关码');
+  ld.onclick=function(){ loadFromTa(ta); };
+  var cl=el('button','btn ghost','关闭');
+  cl.onclick=function(){ modalBg.classList.remove('show'); };
+  row.appendChild(cp); row.appendChild(ld); row.appendChild(cl);
+  modalBox.appendChild(row);
+  modalBg.classList.add('show');
+}
+function loadFromTa(ta){
+  try{
+    var s=JSON.parse(decodeURIComponent(escape(atob(ta.value.trim()))));
+    if(typeof s.xp!=='number') throw 0;
+    S=s;
+    modalBg.classList.remove('show');
+    renderMap();
+    showToast('进度已恢复，欢迎回来，骑士',true);
+  }catch(e){ showToast('通关码无法识别，请检查是否复制完整'); }
+}
+modalBg.addEventListener('click',function(e){ if(e.target===modalBg) modalBg.classList.remove('show'); });
+
+renderMap();
+</script>
+</body>
+</html>
