@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文艺复兴 · 人性的觉醒 — 选择展示风格</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#f6f3ee;color:#221d17;font-family:-apple-system,"Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.7;overflow-x:hidden}
+header{text-align:center;padding:96px 6vw 40px;position:relative}
+header .tag{display:inline-block;font-size:.72rem;letter-spacing:.34em;color:#9a5a24;font-weight:700;margin-bottom:18px;border:1px solid rgba(154,90,36,.3);padding:6px 18px;border-radius:99px}
+header h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;letter-spacing:-.01em}
+header h1 span{color:#9a5a24}
+header p{color:#6b675f;max-width:700px;margin:16px auto 0;font-size:.98rem}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 6vw 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;align-items:stretch}
+.card{border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 8px 34px rgba(34,29,23,.08);transition:.45s;display:flex;flex-direction:column;border:1px solid #e8e2d8}
+.card:hover{transform:translateY(-10px);box-shadow:0 26px 60px rgba(34,29,23,.16)}
+.preview{height:230px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* A 预览：湿壁画暗金 */
+.pv-a{background:radial-gradient(ellipse at 50% 28%,rgba(212,175,55,.24),transparent 60%),#141019}
+.pv-a .arch{position:absolute;bottom:-60px;left:50%;transform:translateX(-50%);width:230px;height:160px;border:1.5px solid rgba(212,175,55,.65);border-bottom:none;border-radius:230px 230px 0 0}
+.pv-a .arch::before{content:"";position:absolute;top:26px;left:50%;transform:translateX(-50%);width:110px;height:66px;border:1.5px solid rgba(212,175,55,.45);border-radius:110px 110px 0 0;border-bottom:none}
+.pv-a .t{font-family:Georgia,"Songti SC",serif;color:#f0d27c;font-size:1.4rem;letter-spacing:.3em;text-shadow:0 0 30px rgba(212,175,55,.5);z-index:2}
+.pv-a .s{position:absolute;top:14px;right:18px;font-size:.6rem;letter-spacing:.3em;color:#c9b98a;border:1px solid rgba(212,175,55,.4);padding:3px 10px}
+.pv-a .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(212,175,55,.4) 1px,transparent 1px);background-size:24px 24px;opacity:.3}
+/* B 预览：羊皮手稿 */
+.pv-b{background:
+  radial-gradient(circle at 15% 15%,rgba(154,90,36,.06),transparent 50%),
+  radial-gradient(circle at 85% 80%,rgba(154,90,36,.07),transparent 50%),
+  #f2e7d2}
+.pv-b::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(120,80,40,.08) 1px,transparent 1px);background-size:18px 18px}
+.pv-b .frame{position:absolute;inset:14px;border:1px solid rgba(120,80,40,.5);pointer-events:none}
+.pv-b .frame::after{content:"";position:absolute;inset:5px;border:1px solid rgba(120,80,40,.25)}
+.pv-b .t{font-family:"Kaiti SC","STKaiti",KaiTi,serif;color:#4a3218;font-size:1.5rem;letter-spacing:.3em;z-index:2;position:relative}
+.pv-b .drop{position:absolute;top:44px;left:38px;font-family:"Kaiti SC",serif;font-size:2.6rem;color:#9a5a24;line-height:1;z-index:2}
+.pv-b .en{position:absolute;bottom:40px;right:34px;font-size:.55rem;letter-spacing:.28em;color:#8a6a45;z-index:2}
+.pv-b .seal{position:absolute;top:-18px;right:-12px;width:52px;height:52px;border-radius:50%;border:3px double #9a5a24;display:flex;align-items:center;justify-content:center;color:#9a5a24;font-size:.46rem;letter-spacing:.12em;line-height:1.5;text-align:center;background:#ecd9b6;z-index:3}
+/* C 预览：极简现代 */
+.pv-c{background:#fafafa;position:relative}
+.pv-c .t{font-weight:800;font-size:1.9rem;letter-spacing:-.02em;color:#221d17}
+.pv-c .t i{font-style:normal;color:#8a9a5b}
+.pv-c .yr{display:block;font-size:.6rem;font-weight:500;color:#9a958a;letter-spacing:.4em;margin-top:8px}
+.pv-c .bar{position:absolute;bottom:0;left:0;right:0;height:4px;display:flex}
+.pv-c .bar span{flex:1}
+.pv-c .bar .w{background:#f5f5f5}.pv-c .bar .g{background:#8a9a5b}.pv-c .bar .r{background:#b3243a}
+.pv-c::before{content:"";position:absolute;top:26px;left:26px;width:8px;height:8px;border-radius:50%;background:#b3243a}
+.pv-c::after{content:"";position:absolute;top:26px;left:42px;width:8px;height:8px;border-radius:50%;background:#8a9a5b}
+.card .body{padding:26px 26px 30px;display:flex;flex-direction:column;flex:1}
+.card .body h3{font-size:1.18rem;font-weight:800}
+.card .body .en{font-size:.72rem;color:#9a958a;letter-spacing:.2em;margin-top:4px;text-transform:uppercase}
+.card .body .desc{font-size:.88rem;color:#6b675f;margin-top:12px;flex:1}
+.card .body .feats{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.card .body .feats span{font-size:.66rem;color:#5c574e;background:#f1efe9;padding:3px 10px;border-radius:99px}
+.card .body a{margin-top:22px;display:inline-block;text-align:center;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:.88rem;font-weight:700;transition:.3s}
+.card.a a{background:#141019;color:#f0d27c}
+.card.a a:hover{background:#241d33}
+.card.b a{background:#4a3218;color:#f2e7d2}
+.card.b a:hover{background:#33220e}
+.card.c a{background:#221d17;color:#fff}
+.card.c a:hover{background:#3a362f}
+.note{max-width:780px;margin:56px auto 0;text-align:center;font-size:.82rem;color:#9a958a;line-height:2}
+footer{text-align:center;padding:0 6vw 60px;color:#9a958a;font-size:.76rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">吴军来信 · 世界文明史 专题整理</div>
+  <h1>文艺复兴 · <span>人性的觉醒</span></h1>
+  <p>基于《吴军来信·世界文明史》第 151、154–161 讲及周五专题 39、40 等十数篇相关信件的交叉梳理，从 14 世纪欧洲大危机讲到佛罗伦萨的萌芽、美第奇家族的赞助、三杰的辉煌、印刷术的传播与近代科学的曙光。同一套内容，三种展示风格——请选择你最喜欢的一款。</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card a">
+      <div class="preview pv-a">
+        <div class="dots"></div>
+        <div class="arch"></div>
+        <span class="s">1315 — 1633</span>
+        <div class="t">湿壁画·金辉</div>
+      </div>
+      <div class="body">
+        <h3>风格 A · 湿壁画金辉</h3>
+        <div class="en">Fresco Noir — Dark Luxe</div>
+        <p class="desc">深蓝夜色之上，金箔勾勒圣母百花大教堂的拱顶意象。金色粒子如尘埃飘落、拱券玻璃拟态卡片、菱形节点编年——肃穆、华贵、充满神性与人性交织的张力，致敬从黑暗到黎明的那三百年。</p>
+        <div class="feats"><span>金色粒子动效</span><span>深色玻璃拟态</span><span>拱券剪影</span><span>数字滚动</span></div>
+        <a href="style-a.html">进入风格 A →</a>
+      </div>
+    </div>
+
+    <div class="card b">
+      <div class="preview pv-b">
+        <div class="frame"></div>
+        <div class="drop">文</div>
+        <div class="t">人文复兴</div>
+        <div class="en">RINASCIMENTO · MANUSCRIPT</div>
+        <div class="seal">人文<br>之光</div>
+      </div>
+      <div class="body">
+        <h3>风格 B · 羊皮手稿</h3>
+        <div class="en">Renaissance Chronicle — Manuscript</div>
+        <p class="desc">米金羊皮纸底色与墨色楷体，仿古双线花框、火漆印章与首字下沉，如展开一部文艺复兴时代的手抄典籍。展卷动效与衬线首字，讲述从但丁《神曲》到伽利略望远镜的人文史诗。</p>
+        <div class="feats"><span>羊皮纸质感</span><span>火漆印章</span><span>卷轴展阅动效</span><span>首字下沉</span></div>
+        <a href="style-b.html">进入风格 B →</a>
+      </div>
+    </div>
+
+    <div class="card c">
+      <div class="preview pv-c">
+        <div class="t">文艺复兴<i>·</i>人性觉醒</div>
+        <div class="yr">FROM CRISIS TO RENAISSANCE</div>
+        <div class="bar"><span class="w"></span><span class="g"></span><span class="r"></span></div>
+      </div>
+      <div class="body">
+        <h3>风格 C · 极简现代</h3>
+        <div class="en">Modern Minimal — Data Story</div>
+        <p class="desc">大量留白与三色点缀（绿·白·红，呼应意大利三色旗），数据图表与计数动画直给信息。清爽克制、信息密度高，以"人如何重新成为万物的尺度"为线索，适合快速通读与展示汇报。</p>
+        <div class="feats"><span>留白美学</span><span>三色旗点缀</span><span>数据图表</span><span>轻量动效</span></div>
+        <a href="style-c.html">进入风格 C →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    三种风格内容完全一致，均含：三百年时间线（19 个关键事件，逐条展开背景 / 原因 / 影响）· 16 位重要人物 · 爆发前的欧洲 · 天上·天上人间·人间天上·人间 艺术四重境 · 吴军的思考。<br>
+    建议使用 Chrome / Edge 浏览器打开以获得最佳动效体验。
+  </div>
+</div>
+
+<footer>文艺复兴 · 人性的觉醒 — 基于《吴军来信·世界文明史》资料整理 · 内容据课程原文提炼</footer>
+
+<script>
+document.querySelectorAll('.card').forEach((c,i)=>{
+  c.style.opacity='0';c.style.transform='translateY(26px)';
+  c.style.transition='opacity .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, transform .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, box-shadow .45s, border-color .45s';
+  requestAnimationFrame(()=>{c.style.opacity='1';c.style.transform='none';});
+});
+</script>
+</body>
+</html>

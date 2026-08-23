@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英国历史时间线 · 吴军《世界文明史》学习笔记</title>
+<style>
+:root{
+  --bg:#0f1420; --bg2:#151c2c; --card:#1b2438; --card2:#212c45;
+  --line:#2c3a5c; --text:#e8edf6; --sub:#9fb0d0; --dim:#6b7ba0;
+  --gold:#d4af37; --gold2:#f0d27a;
+  --c1:#4e8bff; --c2:#8a63d2; --c3:#d4626a; --c4:#2fa87a;
+  --c5:#e08a3c; --c6:#5aa7d8;
+  --shadow:0 8px 30px rgba(0,0,0,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;line-height:1.7;overflow-x:hidden}
+a{color:var(--gold2);text-decoration:none}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+
+/* ===== Hero ===== */
+.hero{position:relative;padding:64px 24px 40px;text-align:center;overflow:hidden;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,#243353 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 80% 110%,#2a2438 0%,transparent 60%);}
+.hero::before{content:"";position:absolute;inset:0;opacity:.06;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 4 L52 36 L40 68 L28 36 Z' fill='%23d4af37'/%3E%3C/svg%3E");
+  background-size:80px 80px}
+.hero .badge{display:inline-block;padding:6px 18px;border:1px solid var(--gold);color:var(--gold2);
+  border-radius:100px;font-size:13px;letter-spacing:2px;margin-bottom:18px;background:rgba(212,175,55,.08)}
+.hero h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:2px;position:relative}
+.hero h1 span{background:linear-gradient(90deg,var(--gold2),var(--gold));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero .sub{color:var(--sub);font-size:15px;max-width:720px;margin:14px auto 0;position:relative}
+.stats{display:flex;justify-content:center;gap:clamp(16px,4vw,48px);margin-top:30px;flex-wrap:wrap;position:relative}
+.stat{text-align:center}
+.stat b{display:block;font-size:30px;color:var(--gold2);font-weight:800}
+.stat span{font-size:13px;color:var(--sub);letter-spacing:1px}
+
+/* ===== Toolbar ===== */
+.toolbar{position:sticky;top:0;z-index:100;background:rgba(15,20,32,.92);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);padding:12px 16px}
+.toolbar-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tabs{display:flex;gap:6px;margin-right:auto}
+.tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--sub);
+  border:1px solid transparent;transition:.2s;background:transparent;white-space:nowrap}
+.tab:hover{color:var(--text);background:var(--bg2)}
+.tab.active{color:#0f1420;background:var(--gold);font-weight:700}
+.search-wrap{display:flex;align-items:center;background:var(--bg2);border:1px solid var(--line);border-radius:8px;padding:0 12px}
+.search-wrap input{background:transparent;border:none;outline:none;color:var(--text);padding:8px 4px;width:160px;font-size:14px}
+.search-wrap input::placeholder{color:var(--dim)}
+.search-wrap svg{width:16px;height:16px;stroke:var(--dim)}
+
+/* ===== Era filter chips ===== */
+.era-bar{max-width:1180px;margin:18px auto 6px;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:6px 14px;border-radius:100px;font-size:13px;cursor:pointer;border:1px solid var(--line);
+  background:var(--bg2);color:var(--sub);transition:.2s;display:flex;align-items:center;gap:6px}
+.chip .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip:hover{color:var(--text);border-color:var(--dim)}
+.chip.active{color:#fff;border-color:transparent;box-shadow:0 0 0 1px currentColor inset}
+.chip[data-e="all"].active{color:var(--gold);border-color:var(--gold);background:rgba(212,175,55,.1)}
+
+/* ===== Layout ===== */
+main{max-width:1180px;margin:0 auto;padding:20px 16px 80px}
+
+/* ===== Timeline view ===== */
+.timeline{position:relative;margin-top:24px}
+.timeline::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:3px;transform:translateX(-50%);
+  background:linear-gradient(180deg,var(--gold),var(--line) 30%,var(--line) 70%,var(--gold))}
+.t-item{position:relative;width:50%;padding:0 40px 34px 0;cursor:pointer}
+.t-item:nth-child(even){left:50%;padding:0 0 34px 40px}
+.t-item .dot{position:absolute;top:6px;right:-9px;width:18px;height:18px;border-radius:50%;
+  border:3px solid var(--bg);box-shadow:0 0 0 2px var(--ec),0 0 18px var(--ec);background:var(--ec);z-index:2}
+.t-item:nth-child(even) .dot{right:auto;left:-9px}
+.t-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
+  transition:.25s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.t-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ec)}
+.t-card:hover{transform:translateY(-3px);border-color:var(--ec)}
+.t-year{font-size:22px;font-weight:800;color:var(--ec);letter-spacing:1px}
+.t-title{font-size:16px;font-weight:700;margin:4px 0 6px;color:var(--text)}
+.t-sum{font-size:13px;color:var(--sub);line-height:1.6}
+.t-tags{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.t-tag{font-size:11px;padding:2px 8px;border-radius:100px;background:rgba(255,255,255,.06);color:var(--dim);border:1px solid var(--line)}
+.t-tag.cat{background:color-mix(in srgb,var(--ec) 18%,transparent);color:var(--ec);border-color:transparent}
+.t-expand{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:13.5px;color:var(--sub)}
+.t-item.open .t-expand{display:block}
+.t-expand h4{color:var(--gold2);font-size:13px;letter-spacing:1px;margin:10px 0 4px}
+.t-expand h4:first-child{margin-top:0}
+.t-expand p{margin-bottom:6px}
+.t-expand .people{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.t-expand .pp{font-size:12px;background:var(--bg2);border:1px solid var(--line);border-radius:100px;padding:3px 10px;color:var(--text)}
+.t-expand .chain{font-size:12px;color:var(--gold2);background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);
+  padding:8px 10px;border-radius:8px;margin-top:10px}
+.t-expand .src{font-size:11px;color:var(--dim);margin-top:10px;font-style:italic}
+.hint{text-align:center;color:var(--dim);font-size:13px;margin:10px 0 30px}
+
+/* ===== Chain view ===== */
+.chain-view{display:none;margin-top:20px}
+.chain-view.active{display:block}
+.chain-title{text-align:center;font-size:22px;font-weight:800;color:var(--gold2);margin-bottom:6px}
+.chain-sub{text-align:center;color:var(--sub);font-size:13px;margin-bottom:24px}
+.chains{display:flex;flex-direction:column;gap:26px}
+.chain-group{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.chain-group h3{font-size:16px;color:var(--gold2);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.chain-group h3 .no{background:var(--gold);color:#0f1420;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.chain-flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+.c-node{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;max-width:190px;flex:1;min-width:140px;cursor:pointer;transition:.2s}
+.c-node:hover{transform:translateY(-2px);border-color:var(--gold)}
+.c-node .y{font-size:12px;color:var(--gold2);font-weight:700}
+.c-node .n{font-size:13px;color:var(--text);margin-top:2px}
+.c-arrow{display:flex;align-items:center;color:var(--gold);font-size:20px;padding:0 6px;flex-shrink:0}
+.c-arrow svg{width:22px;height:22px}
+.c-note{font-size:12px;color:var(--dim);margin-top:10px;padding:8px 10px;background:rgba(255,255,255,.03);border-radius:8px;border-left:2px solid var(--gold)}
+
+/* ===== Quiz view ===== */
+.quiz-view{display:none;margin-top:20px}
+.quiz-view.active{display:block}
+.quiz-setup{text-align:center;margin-bottom:20px}
+.quiz-setup .q-eras{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.quiz-card{max-width:640px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:18px;
+  padding:32px;text-align:center;position:relative;min-height:280px;box-shadow:var(--shadow);
+  perspective:1000px;cursor:pointer}
+.quiz-inner{position:relative;transition:transform .5s;transform-style:preserve-3d;min-height:220px}
+.quiz-card.flip .quiz-inner{transform:rotateY(180deg)}
+.quiz-face{backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.quiz-front{color:var(--text)}
+.quiz-front .q-y{font-size:14px;color:var(--gold2);letter-spacing:2px;margin-bottom:12px}
+.quiz-front .q-title{font-size:22px;font-weight:800;margin-bottom:18px;line-height:1.5}
+.quiz-front .q-hint{font-size:13px;color:var(--dim)}
+.quiz-back{position:absolute;inset:0;transform:rotateY(180deg);color:var(--text);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px}
+.quiz-back .a{font-size:16px;line-height:1.7;color:var(--sub);max-width:520px}
+.quiz-back .a b{color:var(--gold2)}
+.quiz-back .a-note{font-size:13px;color:var(--gold2);background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);padding:8px 12px;border-radius:8px;max-width:520px}
+.quiz-controls{display:flex;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+.qbtn{padding:10px 22px;border-radius:10px;font-size:14px;cursor:pointer;border:1px solid var(--line);
+  background:var(--bg2);color:var(--text);transition:.2s}
+.qbtn:hover{transform:translateY(-2px)}
+.qbtn.primary{background:var(--gold);color:#0f1420;font-weight:700;border-color:var(--gold)}
+.qbtn.green{background:var(--c4);color:#fff;border-color:var(--c4)}
+.qbtn.red{background:var(--c3);color:#fff;border-color:var(--c3)}
+.quiz-progress{text-align:center;color:var(--dim);font-size:13px;margin-top:14px}
+.mastery-bar{height:6px;background:var(--bg2);border-radius:3px;max-width:640px;margin:12px auto 0;overflow:hidden}
+.mastery-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--c4));transition:width .4s;border-radius:3px}
+.quiz-done{text-align:center;padding:30px;display:none}
+.quiz-done h3{font-size:24px;color:var(--gold2);margin-bottom:10px}
+.quiz-done p{color:var(--sub);margin-bottom:20px}
+
+/* ===== Footer ===== */
+footer{border-top:1px solid var(--line);padding:30px 16px;text-align:center;color:var(--dim);font-size:12px;background:var(--bg2)}
+footer p{margin:4px 0}
+
+/* ===== Modal ===== */
+.modal{position:fixed;inset:0;background:rgba(5,8,16,.8);backdrop-filter:blur(6px);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:20px}
+.modal.open{display:flex}
+.modal-box{background:var(--card2);border:1px solid var(--line);border-radius:18px;max-width:640px;width:100%;
+  max-height:85vh;overflow-y:auto;padding:28px;position:relative;box-shadow:var(--shadow)}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);
+  background:var(--bg2);color:var(--sub);font-size:16px;cursor:pointer;transition:.2s}
+.modal-close:hover{color:var(--text);border-color:var(--gold)}
+.modal-box .m-y{font-size:26px;font-weight:800;color:var(--ec)}
+.modal-box .m-title{font-size:20px;font-weight:800;margin:4px 0 14px}
+.modal-box h4{color:var(--gold2);font-size:14px;letter-spacing:1px;margin:16px 0 6px}
+.modal-box p{font-size:14px;color:var(--sub);margin-bottom:8px;line-height:1.8}
+.modal-box .people{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.modal-box .pp{font-size:12px;background:var(--bg2);border:1px solid var(--line);border-radius:100px;padding:3px 10px;color:var(--text)}
+.modal-box .chain{font-size:13px;color:var(--gold2);background:rgba(212,175,55,.1);border:1px solid rgba(212,175,55,.3);
+  padding:10px 12px;border-radius:8px;margin-top:12px}
+.modal-box .src{font-size:11px;color:var(--dim);margin-top:14px;font-style:italic}
+.modal-nav{display:flex;justify-content:space-between;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.modal-nav button{background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;transition:.2s}
+.modal-nav button:hover{border-color:var(--gold);color:var(--gold2)}
+
+/* ===== No result ===== */
+.no-result{display:none;text-align:center;padding:60px 20px;color:var(--dim)}
+.no-result.show{display:block}
+.no-result .big{font-size:48px;margin-bottom:10px}
+
+/* ===== Responsive ===== */
+@media (max-width:760px){
+  .timeline::before{left:16px;transform:none}
+  .t-item,.t-item:nth-child(even){width:100%;left:0;padding:0 0 28px 44px}
+  .t-item .dot,.t-item:nth-child(even) .dot{left:8px;right:auto}
+  .t-item .t-card{margin-left:0}
+  .toolbar-inner{gap:8px}
+  .search-wrap input{width:110px}
+  .chain-flow{flex-direction:column;align-items:stretch}
+  .c-arrow{transform:rotate(90deg);justify-content:center;padding:2px 0}
+  .c-node{max-width:none}
+  .hero{padding:48px 16px 32px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Hero ===== -->
+<header class="hero">
+  <div class="badge">吴军 · 《吴军来信·世界文明史》系列整理</div>
+  <h1>不列颠的崛起 <span>· 英国历史时间线</span></h1>
+  <p class="sub">从凯撒登陆到维多利亚女王——一条主线读懂英国如何从海岛边陲走向世界霸主。
+  点击事件卡片展开详情，切换「因果链」理清事件间的联系，用「记忆测验」巩固所学。</p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<!-- ===== Toolbar ===== -->
+<nav class="toolbar">
+  <div class="toolbar-inner">
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-view="timeline">时间线</button>
+      <button class="tab" data-view="chain">因果链</button>
+      <button class="tab" data-view="quiz">记忆测验</button>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="搜索事件/人物…">
+    </div>
+  </div>
+</nav>
+
+<div class="era-bar" id="eraBar"></div>
+
+<main>
+  <!-- ===== Timeline ===== -->
+  <section id="view-timeline" class="view">
+    <p class="hint">点击卡片查看事件背景、过程与影响 ▼</p>
+    <div class="timeline" id="timeline"></div>
+    <div class="no-result" id="noResult">
+      <div class="big">🔍</div>
+      <p>没有找到匹配的历史事件，换个关键词试试吧</p>
+    </div>
+  </section>
+
+  <!-- ===== Chain ===== -->
+  <section id="view-chain" class="chain-view"></section>
+
+  <!-- ===== Quiz ===== -->
+  <section id="view-quiz" class="quiz-view"></section>
+</main>
+
+<footer>
+  <p>内容整理自《吴军来信·世界文明史》课程文章（2022–2023年连载）中涉及英国历史的 26 篇</p>
+  <p>制作目的：辅助学习与记忆 · 所有年份与史实均以原文章表述为准</p>
+</footer>
+
+<!-- ===== Modal ===== -->
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script>
+/* ================= 数据 ================= */
+const ERAS = [
+  {id:1, name:"罗马与盎格鲁-撒克逊", range:"前55—1066", color:"#4e8bff"},
+  {id:2, name:"诺曼王朝与中世纪", range:"1066—1485", color:"#8a63d2"},
+  {id:3, name:"都铎王朝", range:"1485—1603", color:"#d4626a"},
+  {id:4, name:"革命与复辟", range:"1603—1689", color:"#2fa87a"},
+  {id:5, name:"启蒙与帝国", range:"1689—1783", color:"#e08a3c"},
+  {id:6, name:"工业革命与维多利亚", range:"1760—1901", color:"#5aa7d8"},
+];
+
+const EVENTS = [
+{id:1, y:"前55年", era:1, cat:"军事·征服", title:"凯撒率罗马军团登陆不列颠",
+ sum:"不列颠进入有文字记载的信史阶段，罗马开始介入不列颠事务。",
+ bg:"在此之前，不列颠岛上的凯尔特人处于部落时代，与地中海世界几乎没有联系。凯撒两次远征不列颠，是罗马第一次将触角伸向这座岛屿。",
+ impact:"不列颠从此进入罗马人的视野。近一百年后（公元43年），罗马正式征服不列颠，将其变为帝国行省，罗马文明——城镇、道路、法律、基督教——开始输入不列颠。",
+ people:["凯撒"], chain:"奠定罗马化基础 → 43年罗马征服",
+ src:"《113 | 英格兰的诞生》"},
+{id:2, y:"公元43年", era:1, cat:"政治·征服", title:"不列颠成为罗马行省",
+ sum:"罗马皇帝克劳狄一世派军正式征服不列颠南部，设行省统治，哈德良在位时还修建了哈德良长城。",
+ bg:"凯撒之后罗马与不列颠的接触断续，直到克劳狄一世决定正式吞并不列颠，将其纳入帝国版图。",
+ impact:"罗马在此修建城镇（如伦敦）、道路与防御工事，带来拉丁文、法律与基督教。这种罗马化文明在公元410年罗马撤离后大部分湮灭，但基督教种子留存下来，为后来的英格兰教会奠基。",
+ people:["克劳狄一世","哈德良"], chain:"前55年凯撒登陆 → 罗马行省 → 410年撤离",
+ src:"《113 | 英格兰的诞生》"},
+{id:3, y:"公元410年", era:1, cat:"政治·衰落", title:"罗马人撤离不列颠，文明大倒退",
+ sum:"因蛮族入侵罗马帝国自顾不暇，驻不列颠的罗马军团撤离，不列颠文明出现大倒退，几乎无人会用文字。",
+ bg:"罗马帝国晚期面临日耳曼蛮族的持续压力，帝国重心转向欧陆防务，不列颠成为可弃之地。",
+ impact:"罗马撤离后，不列颠陷入各族混战，凯尔特人退守苏格兰、威尔士。这一权力真空随后被渡海而来的盎格鲁-撒克逊人填补，也彻底改变了不列颠的民族构成。",
+ people:["—"], chain:"罗马行省（43年） → 撤离 → 盎格鲁-撒克逊人入侵",
+ src:"《113 | 英格兰的诞生》"},
+{id:4, y:"5世纪起", era:1, cat:"民族·迁徙", title:"盎格鲁-撒克逊人征服不列颠南部，进入「七国时代」",
+ sum:"日耳曼系的盎格鲁、撒克逊等部族渡海征服不列颠南部（今英格兰），建立众多小国，后兼并成七国。",
+ bg:"罗马撤离后的不列颠防御空虚，盎格鲁-撒克逊人陆续渡海入侵。他们逐步把凯尔特人赶往西、北部。",
+ impact:"「英格兰」（England）一词即「盎格鲁人的土地」（E-N-G + land）。七国时代是英格兰国家形成的起点，也为后来威塞克斯统一全英格兰埋下伏笔。凯尔特人则退居威尔士与苏格兰，成为后世区分凯尔特人与盎格鲁-撒克逊人的历史根源。",
+ people:["盎格鲁-撒克逊诸部族"], chain:"罗马撤离 → 七国时代 → 927年英格兰统一",
+ src:"《113 | 英格兰的诞生》《答读者问40》"},
+{id:5, y:"8—9世纪", era:1, cat:"军事·入侵", title:"维京人（北欧海盗）入侵不列颠",
+ sum:"北欧维京人不断袭扰不列颠海岸，诸国被迫联手，最强大的威塞克斯王国成为共主。",
+ bg:"维京人凭借远超当时欧洲大陆的造船与航海技术纵横海上，起初劫掠修道院与城镇，后来转为征服与定居。",
+ impact:"维京入侵意外成为英格兰统一的催化剂——面对共同外敌，不列颠诸国走向联合，威塞克斯顺势崛起。维京人也带来了北欧文化与血统的融合。",
+ people:["威塞克斯诸王","维京首领"], chain:"维京入侵 → 诸国联合 → 927年统一",
+ src:"《113 | 英格兰的诞生》《111 | 北欧海盗》"},
+{id:6, y:"927年", era:1, cat:"政治·统一", title:"威塞克斯统一英格兰，英格兰王国建立",
+ sum:"威塞克斯王国在多次击败维京人后统一英格兰，建立英格兰王国。",
+ bg:"面对维京威胁，威塞克斯历代国王励精图治，逐步吞并其余六国，终于完成统一。",
+ impact:"英格兰作为一个政治实体诞生。但统一后的英格兰并未从此太平：991年起向丹麦进贡求和，1002年埃塞尔雷德屠杀丹麦人，1013年丹麦国王斯韦恩反而夺取英格兰王位——统一与动荡交织。",
+ people:["威塞克斯国王","埃塞尔雷德","斯韦恩"], chain:"七国时代 → 927年统一 → 1066年诺曼征服",
+ src:"《113 | 英格兰的诞生》"},
+{id:7, y:"1066年", era:1, cat:"军事·征服", title:"诺曼征服：黑斯廷斯战役与威廉一世加冕",
+ sum:"诺曼底公爵威廉渡海征服英格兰，在黑斯廷斯战役中击杀国王哈罗德，开创诺曼王朝。",
+ bg:"英格兰国王爱德华去世无继承人，贵族哈罗德被推举为王。威廉以血统为由（并获教宗支持）渡海征英，双方在黑斯廷斯激战一整天，哈罗德战死。",
+ impact:"这是英国历史的分水岭。诺曼人带来更先进的税收、司法与行政制度，大量法语词汇进入英语，伦敦塔、温莎城堡建于此时。由于威廉是征服者，诸侯都是他的直接封臣，英格兰从一开始就确立了强大的王权——这与受大贵族牵制的法兰西、德意志国王形成鲜明对比，也为日后王权与贵族、教会的冲突（最终催生《大宪章》）埋下伏笔。现代英国王室血缘可追溯至此。",
+ people:["征服者威廉","哈罗德","爱德华国王"], chain:"诺曼征服 → 强王权 → 王权与贵族冲突 → 1215年《大宪章》",
+ src:"《113 | 英格兰的诞生》"},
+{id:8, y:"1170年", era:2, cat:"宗教·冲突", title:"坎特伯雷大主教贝克特遇刺",
+ sum:"金雀花王朝亨利二世与坎特伯雷大主教托马斯·贝克特冲突，四名随从刺杀贝克特，亨利被迫忏悔。",
+ bg:"亨利二世想任用自己的亲信控制教会，贝克特却坚守教会的独立地位，两人矛盾激化。",
+ impact:"事件确立了坎特伯雷在英国宗教与权力结构中的中心地位，也说明英格兰的王权并非无限——国王也要向教会和舆论低头。王权与教权、王权与贵族的双重博弈，成为英国中世纪政治的主线。",
+ people:["亨利二世","托马斯·贝克特"], chain:"诺曼强王权 → 教权制衡 → 1215年《大宪章》",
+ src:"《163 | 亨利八世如何改革英国国教》"},
+{id:9, y:"1215年", era:2, cat:"政治·宪政", title:"《大宪章》签署：王在法下",
+ sum:"失地王约翰在贵族武力挟持下于《大宪章》加盖御玺，确立「王在法下」原则，被视为英国宪政的起源。",
+ bg:"约翰王接连战败丧失诺曼底等领地，威信扫地；又为筹军费横征暴敛。最核心的贵族矛盾来自诺曼王朝的痼疾：新封贵族多是国王的兄弟堂兄弟，随时可能争夺王位。1215年初贵族武装反叛，约翰在布汶战败后再遭重创，被迫妥协。",
+ impact:"《大宪章》最核心的是第61条「安全法」：25名贵族组成的委员会有权否决国王命令、必要时武力占据国王城堡——英格兰历史上首次建立「贵族共同体可凌驾王权」的机制。约翰脱身后立即废弃《大宪章》并引发内战，但继任的亨利三世为换取贵族支持多次重发，使其最终站稳脚跟。英国迄今没有成文宪法，《大宪章》在一定程度上起着宪法作用；法国孟德斯鸠的分权理论也受其启发。",
+ people:["约翰王","亨利三世"], chain:"诺曼强王权 → 贵族反抗 → 大宪章 → 议会传统 → 1640年革命",
+ src:"《114 | 《大宪章》》"},
+{id:10, y:"1339—1453年", era:2, cat:"军事·战争", title:"英法百年战争",
+ sum:"英格兰与法兰西为争夺法兰西王位继承权爆发百年战争，历经三阶段，以英格兰失败告终。",
+ bg:"法兰西1316年否决女性王位继承权，1328年查理四世绝嗣后，英格兰爱德华三世以其母亲血统主张继承法王位，被法国贵族推举的腓力六世拒绝。1339年爱德华三世率军登陆法兰西，战争爆发。",
+ impact:"战争三个阶段：爱德华三世时期英军以长弓兵压倒性取胜（克雷西、普瓦捷战役，俘获法王约翰二世）；中间因黑死病与继承人危机双方持平；15世纪法兰西改进火炮技术后反攻，1452年卡斯蒂永之战收复除加莱外全部失地。战争强化了两国的民族国家认同。英格兰战败后内部爆发玫瑰战争，却也促使两国最终形成清晰的国族边界。",
+ people:["爱德华三世","黑太子","亨利五世","圣女贞德"], chain:"王位继承之争 → 百年战争 → 玫瑰战争 → 都铎王朝",
+ src:"《周五专题29 | 英法百年战争》"},
+{id:11, y:"1455—1485年", era:2, cat:"政治·内战", title:"玫瑰战争与都铎王朝的建立",
+ sum:"兰开斯特（红玫瑰）与约克（白玫瑰）两家族争夺王位爆发内战，两家族继承人基本打光，以联姻结束并开启都铎王朝。",
+ bg:"百年战争失败后，英格兰内部分裂加剧。亨利六世（兰开斯特）统治无方，约克家族挑战王位，内战爆发。",
+ impact:"贵族在战争中大量消亡，反而为都铎王朝的统一集权铺平道路。亨利·都铎娶约克家族伊丽莎白，红白玫瑰合一，英格兰进入都铎王朝。战争结束后王权相对稳定，为亨利八世的宗教改革与伊丽莎白时代奠定了基础。",
+ people:["亨利·都铎","爱德华四世","理查三世"], chain:"百年战争 → 玫瑰战争 → 都铎王朝 → 宗教改革",
+ src:"《周五专题29 | 英法百年战争》《0101元旦彩蛋》"},
+{id:12, y:"1534年", era:3, cat:"宗教·改革", title:"亨利八世宗教改革：英国教会脱离罗马",
+ sum:"亨利八世因离婚问题与教宗决裂，通过国会立法使英国教会脱离罗马天主教，建立英国国教（圣公会）。",
+ bg:"亨利八世娶亡兄遗孀西班牙公主凯瑟琳，只留下女儿玛丽。亨利认定「弟娶兄嫂者无后代」，想离婚另娶安妮·博林；教宗为不得罪西班牙帝国而拖延。亨利遂借宗教改革大势，自立法统。",
+ impact:"英国国会通过《至尊法案》（英王是英国教会唯一最高权威）等系列法案，王室没收教会财产，摆脱罗马教廷控制。圣公会既独立于罗马天主教，又不同于路德宗、加尔文宗，是改革最不彻底的新教分支。此后宗教问题深刻影响英国政治：血腥玛丽的反扑、伊丽莎白的宽容、斯图亚特王朝的教派冲突，乃至《王位继承法》规定国王必须信奉圣公会——都源于这场改革。",
+ people:["亨利八世","安妮·博林","托马斯·克伦威尔","托马斯·克兰麦"], chain:"宗教改革 → 教派冲突 → 伊丽莎白宗教宽容",
+ src:"《163 | 亨利八世如何改革英国国教》"},
+{id:13, y:"1553—1558年", era:3, cat:"宗教·冲突", title:"「血腥玛丽」的反扑",
+ sum:"玛丽一世（亨利八世与凯瑟琳之女）即位后疯狂镇压新教，将大主教克兰麦施以火刑，获得「血腥玛丽」恶名。",
+ bg:"玛丽是天主教徒，信奉亨利八世改革前父亲与凯瑟琳的天主教婚姻。她即位后力图恢复天主教，残酷迫害新教徒。",
+ impact:"血腥镇压激起强烈反弹，玛丽死后英国天主教迅速衰落。继任的伊丽莎白一世吸取教训，奉圣公会为国教但采取宗教宽容——不迫害天主教徒，从而结束了教派血腥纷争，为「黄金时代」铺平道路。",
+ people:["玛丽一世","托马斯·克兰麦"], chain:"宗教改革 → 血腥玛丽 → 伊丽莎白宽容 → 黄金时代",
+ src:"《163 | 亨利八世如何改革英国国教》"},
+{id:14, y:"1558—1603年", era:3, cat:"政治·盛世", title:"伊丽莎白一世与「黄金时代」",
+ sum:"伊丽莎白一世统治45年，以宗教宽容、中央集权、发展工商业与重视教育，开创英国历史上的黄金时代。",
+ bg:"此前英国经历百年战争、玫瑰战争与宗教改革引发的教派对立，伊丽莎白以宽容政策结束内耗，和平发展四十多年。",
+ impact:"黄金时代四大支柱：①宗教宽容+停止战争带来的长期和平；②有效中央集权，贵族效忠王室但无力对抗王权；③发展工商业、参与大航海致富；④普及基础教育，普通人子弟也能上学——这正是培根、莎士比亚与后来的牛顿得以涌现的社会土壤。1588年击败无敌舰队后英国控制北海、本土安全，确立欧洲大国地位，成为世界强国崛起的起点。",
+ people:["伊丽莎白一世","莎士比亚","培根","德雷克"], chain:"伊丽莎白宽容 → 击败无敌舰队 → 海权扩张 → 殖民帝国",
+ src:"《172 | 伊丽莎白时代》《加餐3》"},
+{id:15, y:"1588年", era:3, cat:"军事·海战", title:"击败西班牙无敌舰队",
+ sum:"英西战争高潮，英国以约200艘拼凑的舰船击败西班牙130艘战舰组成的「无敌舰队」。",
+ bg:"英西矛盾由来已久：宗教上英国脱离天主教，经济上争夺全球贸易。1587年伊丽莎白处死苏格兰女王玛丽，西班牙腓力二世决意远征。",
+ impact:"此战宣告西班牙海权达到极限——无法控制全世界所有海域，但历史学家强调：西班牙并未就此衰落，此后一百多年仍是世界最强海权国。英国真正的崛起靠的是此后工业、贸易与科技实力。战争的另一结果是英西双方都吸取教训：西班牙给商船配长程火炮防海盗，英国则巩固了北海与本土安全。1604年英西议和，英国主要对手从此变为法国。",
+ people:["腓力二世","伊丽莎白一世","德雷克","西多尼亚公爵"], chain:"英西矛盾 → 无敌舰队之败 → 英国海权扩张",
+ src:"《周五专题45 | 西班牙的无敌舰队》"},
+{id:16, y:"1564—1616年", era:3, cat:"文化·文学", title:"莎士比亚：英语文学的奠基者",
+ sum:"威廉·莎士比亚用英语创作戏剧与诗歌，使用2万多个英语单词，其中1700多个由他创造，堪称创造了书面英语。",
+ bg:"莎士比亚出身富裕商人家庭，22岁到伦敦从剧院杂役做起，逆袭为宫内大臣剧团的合伙人。创作黄金期1590—1613年，四大悲剧诞生于此。",
+ impact:"在莎士比亚之前，英语只是德语变种、少数人使用的方言，书面语言是拉丁文。他用英语写作，实际上创造了用于书面写作的英语，作品对人性的洞察跨越时空。他与培根共同代表了伊丽莎白时代思想文化的巅峰。",
+ people:["莎士比亚","培根"], chain:"黄金时代 → 文化繁荣 → 英语文学与科学方法论",
+ src:"《加餐3 | 莎士比亚和培根》"},
+{id:17, y:"1561—1626年", era:3, cat:"思想·科学", title:"培根：经验主义与归纳法",
+ sum:"弗朗西斯·培根既是政治家、法学家，也是哲学家，在《新工具》中系统阐述归纳法，奠定近代科学方法论。",
+ bg:"培根出身高级官员家庭，23岁当选议员，仕途一度辉煌至大法官，晚年因受贿案被罢免后转向著书立说。",
+ impact:"培根主张通过对具体事物的研究归纳出共性规律，是经验主义哲学的代表。这一方法论影响了牛顿等一大批科学精英，是欧洲近代科学革命的重要思想基础。他的「知识就是力量」成为近代科学的座右铭。",
+ people:["培根"], chain:"培根归纳法 → 科学革命 → 牛顿 → 启蒙运动",
+ src:"《加餐3 | 莎士比亚和培根》"},
+{id:18, y:"1603年", era:4, cat:"政治·王朝", title:"斯图亚特王朝开始：苏格兰式王权撞上英格兰议会传统",
+ sum:"伊丽莎白一世无嗣去世，苏格兰国王詹姆斯六世入主英格兰（称詹姆斯一世），都铎王朝结束，斯图亚特王朝开始。",
+ bg:"英格兰与苏格兰虽同归一君，但仍是两个国家、各有议会。詹姆斯把苏格兰「议会是摆设」的观念带入英格兰，而英格兰下议院（商人代表）势力已超过上议院，轻视下议院被视为专制独裁。",
+ impact:"王权与议会的结构性冲突就此展开：国王想加税需议会批准，议会想限制王权。经济上，土地收入不敌工商业收入，通货膨胀令国王财富缩水，国王频繁要求加税，与下议院矛盾日益尖锐——这正是英国内战的远因。",
+ people:["詹姆斯一世","培根"], chain:"都铎绝嗣 → 斯图亚特王朝 → 王权与议会冲突 → 革命",
+ src:"《175 | 英国资产阶级革命》"},
+{id:19, y:"1640—1649年", era:4, cat:"政治·革命", title:"英国内战：查理一世被处死",
+ sum:"查理一世为筹军费重开议会，议会要求限制王权，双方开战。1649年查理一世被处死，成为英国历史上唯一被处死的国王。",
+ bg:"查理一世比父亲更独裁：迎娶天主教公主、迫害清教徒、无故征税、企图推翻议会权威。1640年为筹军费被迫重开被解散的议会——这被视为英国资产阶级革命的起点。1642年查理在诺丁汉竖王旗宣战。",
+ impact:"议会控制伦敦与东南富庶地区，并与苏格兰结盟，历经两次内战（1642—1646、1648）俘获并处死查理一世。英国建立以议会为中心的共和国，王权没落、新兴政治力量登台。但民众尚无现代民主思想，为权力真空做好准备，独裁者克伦威尔随后攫取了权力。",
+ people:["查理一世","克伦威尔"], chain:"王权议会冲突 → 内战 → 处死国王 → 克伦威尔护国",
+ src:"《175 | 英国资产阶级革命》"},
+{id:20, y:"1653年", era:4, cat:"政治·独裁", title:"克伦威尔任护国公",
+ sum:"克伦威尔武力解散议会，建立完全由自己控制的新议会，自封「护国公」实行军事独裁。",
+ bg:"处死国王后建立的共和国缺乏制度设计，克伦威尔先罢黜反对派议员，后武力解散议会，集大权于一身。",
+ impact:"克伦威尔五年后去世，传位儿子理查德，后者无实力被推翻。他的独裁说明：革命推翻了旧王权，但尚未建立新制度。克伦威尔评价两极：既被视为革命功臣，也被批评为「大逆不道」。他死后被复辟的查理二世掘墓羞辱，头颅示众25年。",
+ people:["克伦威尔"], chain:"处死国王 → 克伦威尔护国 → 复辟 → 光荣革命",
+ src:"《175 | 英国资产阶级革命》"},
+{id:21, y:"1660年", era:4, cat:"政治·复辟", title:"查理二世复辟",
+ sum:"议会迎回查理一世之子查理二世，斯图亚特王朝复辟。查理二世初期与议会和平相处，1681年却解散议会意图恢复绝对君主制。",
+ bg:"克伦威尔死后政局动荡，议会决定复辟君主制。流亡9年、养成狡黠性格的查理二世，先谨慎行使有限王权、向强势议会妥协，十几年来相安无事。",
+ impact:"1681年查理二世解散议会，第二次王朝复辟，无议会统治英国。但他无子嗣，弟弟詹姆斯二世（皈依天主教）成为继承人，新教徒担忧建立天主教王朝，引发辉格党（支持议会）与托利党（支持王权）之争——英国两党制雏形由此出现。",
+ people:["查理二世","詹姆斯二世"], chain:"复辟 → 詹姆斯二世天主教化 → 光荣革命",
+ src:"《176 | 光荣革命何以光荣》"},
+{id:22, y:"1665—1666年", era:4, cat:"科学·革命", title:"牛顿的「奇迹年」",
+ sum:"1665—1666年，牛顿因伦敦大瘟疫在家乡期间提出微积分、三大定律、万有引力定律与一整套光学理论。",
+ bg:"19岁进剑桥三一学院的牛顿，因1665年伦敦大瘟疫大学关闭而回乡研究。此前伽利略证实日心说，开普勒提出行星椭圆运动规律，但没人知道为什么是椭圆。",
+ impact:"牛顿以万有引力定律解释了开普勒定律，为两千年的日心说之争画上句号；更重要的是，他构建了逻辑严密、数学化的物理学学科体系，改变「先观察现象再找规律」的旧范式，确立「先理论推导再实验证实」的现代科学方法。人类文明史由此分为牛顿之前（从神找答案）与牛顿之后（万物有规律且可被认识）。",
+ people:["牛顿","伽利略","开普勒"], chain:"科学革命 → 牛顿 → 启蒙运动 → 工业革命",
+ src:"《180 | 牛顿对近代科学有什么贡献》"},
+{id:23, y:"1688—1689年", era:4, cat:"政治·宪政", title:"光荣革命与《权利法案》",
+ sum:"詹姆斯二世之子出生引发天主教王朝恐慌，新教徒请荷兰威廉亲王率军入英，詹姆斯出逃，威廉与玛丽登基，确立君主立宪制。",
+ bg:"詹姆斯二世接见教宗代表、让天主教徒占据要职、组建3万人常备军，基本失去统治基础。1688年6月其子出生成为压垮骆驼的最后一根稻草。11月威廉登陆，英军新教军官纷纷倒戈，詹姆斯把国玺扔进泰晤士河逃亡法国。",
+ impact:"1689年《权利法案》规定国王不得干涉法律、非经议会同意不得征税，完全废除绝对君主制。英国以极小代价（相比法国大革命的流血）完成从君主制到君主立宪的转变，此后未再爆发内战。这一制度为随后的科学革命、工业革命与全球贸易做好了制度准备。《权利法案》深刻影响了美国宪法等世界多国宪法。",
+ people:["威廉三世","玛丽","詹姆斯二世"], chain:"詹姆斯二世 → 光荣革命 → 君主立宪 → 工业革命",
+ src:"《176 | 光荣革命何以光荣》"},
+{id:24, y:"1632—1704年", era:5, cat:"思想·哲学", title:"洛克：自由主义思想鼻祖",
+ sum:"约翰·洛克提出社会契约、分权原则、天赋人权与宗教宽容，成为启蒙运动与美国《独立宣言》的思想源头。",
+ bg:"洛克主业是医生，因救治辉格党领袖沙夫茨伯里伯爵而进入政坛，1683年因涉嫌谋刺案逃亡荷兰，光荣革命后返回英国出版《政府论》等著作。",
+ impact:"《政府论》驳斥君权神授，主张政府建立在社会契约之上、立法权与行政权分立、立法权至上；主张人人拥有生命、自由与财产的自然权利，法律面前人人平等；《论宽容》主张宗教宽容。孟德斯鸠的分权理论是对洛克的完善，杰斐逊起草《独立宣言》、麦迪逊起草美国宪法，都是洛克思想的体现。伏尔泰、卢梭也深受其影响。",
+ people:["洛克","沙夫茨伯里伯爵","牛顿"], chain:"光荣革命 → 洛克思想 → 启蒙运动 → 美国独立",
+ src:"《177 | 约翰·洛克》"},
+{id:25, y:"1702—1713年", era:5, cat:"军事·霸权", title:"西班牙王位继承战争与约翰·丘吉尔",
+ sum:"马尔博罗公爵约翰·丘吉尔（温斯顿·丘吉尔祖先）在布伦海姆战役（1704）、拉米伊会战（1706）大败法军，遏制了路易十四的欧洲霸权。",
+ bg:"西班牙哈布斯堡王朝绝嗣，法国路易十四扶持孙子菲利普五世即位，企图吞并西班牙。英国联合奥地利、荷兰组成反法同盟。约翰·丘吉尔早年曾为詹姆斯二世效力，光荣革命时临阵倒戈支持威廉，此后成为英军统帅。",
+ impact:"1704年布伦海姆战役歼灭法军近半兵力扭转战局，1706年拉米伊会战不到4小时打垮法国尼德兰军团。1713年《乌得勒支和约》标志路易十四控制欧洲的野心落空，欧洲均势体系形成；英国保全直布罗陀至今。约翰·丘吉尔与纳尔逊、威灵顿并称英国三位战神。",
+ people:["约翰·丘吉尔","路易十四","安妮女王"], chain:"欧洲均势 → 击败法国 → 英国崛起为欧洲强国",
+ src:"《加餐5 | 约翰·丘吉尔》"},
+{id:26, y:"1707年", era:5, cat:"政治·联合", title:"英格兰与苏格兰合并为大不列颠",
+ sum:"苏格兰因海外殖民失败经济濒临破产，与英格兰签署《1707年合并法案》，成立大不列颠王国。",
+ bg:"苏格兰曾在中美洲建立殖民地却被西班牙消灭，经济濒临崩溃。合并后英格兰控制外交与国防，苏格兰保留部分独立性。",
+ impact:"合并使苏格兰商人受英国海军保护，获得和平发展环境，但也成为「英格兰的穷兄弟」。为改变处境，苏格兰知识精英发起全民启蒙运动——这正是苏格兰启蒙运动（休谟、亚当·斯密）的直接背景。",
+ people:["—"], chain:"苏格兰经济困境 → 合并 → 苏格兰启蒙运动",
+ src:"《188 | 苏格兰启蒙运动》"},
+{id:27, y:"18世纪中叶", era:5, cat:"思想·启蒙", title:"苏格兰启蒙运动：公民社会与商业文明的思想起点",
+ sum:"休谟、亚当·斯密等思想家研究人与社会的关系，催生工业革命与自由贸易理论，被视为现代社会思想的起点之一。",
+ bg:"苏格兰地理条件差，走农业或荷兰式贸易都不行，知识精英转而发起全民启蒙运动。五所大学（英格兰只有两所）使平民也能接受教育，全社会参与讨论「人是自私还是无私」「个体与社会的关系」。",
+ impact:"三大成就：①研究人与社会关系，奠定公民社会思想基础；②直接助推工业革命（瓦特改良蒸汽机）；③亚当·斯密「看不见的手」与分工理论开启自由贸易与全球商业文明。与法国启蒙运动（反王权、暴力革命）不同，苏格兰启蒙走温和渐进改良路线，使英国社会稳定发展、不断进步。",
+ people:["大卫·休谟","亚当·斯密","瓦特"], chain:"合并 → 苏格兰启蒙 → 工业革命 → 自由贸易",
+ src:"《188 | 苏格兰启蒙运动》《189 | 法苏启蒙对比》"},
+{id:28, y:"1756—1763年", era:5, cat:"军事·战争", title:"七年战争：英国成为最大赢家",
+ sum:"英法争夺殖民地与全球贸易主导权的七年战争，英国击败法国，获得加拿大与印度绝大多数殖民地。",
+ bg:"地理大发现完成后，各强国只能抢别人的殖民地和市场。英国（海权国家）靠支持普鲁士在欧洲周旋，自己全力争夺海外殖民地；法国（陆权国家）主力在欧洲大陆。",
+ impact:"1763年《巴黎和约》后，英国获得法国在加拿大与印度的殖民地，成为最大赢家，法国成为最大输家。但英国也因此背上沉重债务——为了还债向北美殖民地征税，直接引爆美国独立革命；法国则因屈辱与财政负担，十多年后全力支持北美殖民地复仇。一场战争同时埋下两次大革命的种子。",
+ people:["腓特烈二世","玛丽娅·特蕾莎","皮特"], chain:"英法争霸 → 七年战争 → 北美独立 + 法国大革命",
+ src:"《周五专题49 | 七年战争》"},
+{id:29, y:"1607—1776年", era:5, cat:"殖民·帝国", title:"北美殖民地的建立与自治传统",
+ sum:"英国从1607年詹姆斯敦起在大西洋沿岸建立十三州殖民地，以移民定居与人口优势站稳脚跟，形成地方自治传统。",
+ bg:"英国把爱尔兰的殖民经验用于美洲：不靠武力统治，而靠拖家带口的大规模移民形成人口优势。殖民地有地方议会与不受宗主国控制的财政权，这在西班牙的拉丁美洲殖民地难以想象。",
+ impact:"《五月花号公约》（1620）创立了社会样板，殖民地议会掌握征税与预算权，宗教宽容、无等级观念。这种自治传统使英国逐渐失去对殖民地的控制，也决定了北美殖民地与拉丁美洲完全不同的革命道路。",
+ people:["华盛顿","富兰克林"], chain:"殖民 → 自治传统 → 七年战争加税 → 独立革命",
+ src:"《191 | 北美殖民地社会》《192 | 革命的前夜》"},
+{id:30, y:"1775—1783年", era:5, cat:"政治·革命", title:"美国独立革命：英国失去北美十三州",
+ sum:"七年战争后英国向殖民地征税（食糖条例、印花税法、波士顿倾茶事件后），殖民地武装反抗，在法国帮助下赢得独立。",
+ bg:"英国为还七年战争债务向北美加税，殖民地以「无代表，不纳税」反抗：1765年印花税被废止、1770年波士顿大屠杀、1773年波士顿倾茶事件、1774年《强制法案》。1775年莱克星顿枪声打响独立战争，1776年《独立宣言》发表。",
+ impact:"三支力量决定战争结果：华盛顿的坚韧（定海神针）、富兰克林的外交、法国的出兵相助。1783年英国承认美国独立。英国虽失去十三州，但此战暴露的教训促使英国调整殖民策略；而法国为帮助美国耗尽财政，成为法国大革命的直接诱因之一。",
+ people:["华盛顿","富兰克林","杰斐逊","潘恩"], chain:"七年战争加税 → 独立战争 → 法国大革命诱因",
+ src:"《193 | 美国独立革命》"},
+{id:31, y:"1763—1776年", era:6, cat:"科技·工业", title:"工业革命：瓦特改良蒸汽机",
+ sum:"瓦特运用科学原理改良纽卡门蒸汽机，分离冷凝器、提高效率数倍，人类进入蒸汽动力时代。",
+ bg:"工业革命是英国社会土壤的产物：牛顿科学理论、资产阶级统治与专利制度、重商主义积累的财富，以及工业发展对动力的巨大需求。伯明翰「月光社」聚集瓦特、达尔文、普里斯特里等科技精英，形成交流网络。",
+ impact:"瓦特与博尔顿合作，1776年造出第一批新型蒸汽机用于工业生产，效率是纽卡门蒸汽机的数倍。瓦特发明双向气缸等改进，并带来「机械思维」方法论——把世界问题变成机械问题来求解，催生此后半个世纪的发明浪潮。工业革命使世界文明进程瞬间加速，是人类历史上最重要的事件之一。",
+ people:["瓦特","博尔顿","韦奇伍德"], chain:"科学革命 → 专利制度 → 蒸汽机 → 蒸汽时代",
+ src:"《201 | 月光社》"},
+{id:32, y:"1786年", era:6, cat:"经济·贸易", title:"从重商主义转向自由贸易",
+ sum:"首相小威廉·皮特奉行亚当·斯密《国富论》理论，签订《英法商约》、解散东印度公司垄断，开启自由贸易时代。",
+ bg:"工业革命使英国商品过剩，面临「卖给谁」的问题。亚当·斯密指出财富由劳动创造，自由贸易比贸易保护能赚更多钱——让别国富起来才能买更多英国货。",
+ impact:"皮特在任19年，推行自由贸易新国策，填补美国独立战争遗留的财政赤字。到1851年伦敦举办第一届世界博览会（维多利亚女王称「荣光」），英国已成为世界经济中心。自由贸易体系从此成为全球经济的主导逻辑。",
+ people:["小威廉·皮特","亚当·斯密","维多利亚女王"], chain:"工业革命 → 商品过剩 → 自由贸易 → 经济中心",
+ src:"《加餐1 | 全球贸易》"},
+{id:33, y:"1807—1825年", era:6, cat:"科技·交通", title:"蒸汽时代：蒸汽船与铁路改变世界",
+ sum:"富尔顿蒸汽船（1807年）与史蒂芬森火车（1825年）先后成功，交通革命把世界连成一体。",
+ bg:"富尔顿本是画家，在英国结识瓦特后痴迷蒸汽机，1807年在纽约哈德逊河试航成功「克莱蒙特号」。英国工匠史蒂芬森1825年火车运客，时速24公里，超越骑马。",
+ impact:"蒸汽船取代大帆船，为全球贸易时代做好准备；铁路大幅降低人员往来成本，把各地连成统一大市场（美国因此成为仅次于英国的第二大工业国）。机械思维带来轧棉机、打字机、差分机等一系列发明，人类生活面貌彻底改变。",
+ people:["富尔顿","史蒂芬森","惠特尼"], chain:"蒸汽机 → 蒸汽船/铁路 → 全球贸易时代",
+ src:"《202 | 蒸汽时代》"},
+{id:34, y:"1851年", era:6, cat:"政治·盛世", title:"维多利亚时代与第一届世博会",
+ sum:"维多利亚女王执政时期英国工业产能冠绝全球，1851年伦敦举办第一届世界博览会，展示工业文明成就。",
+ bg:"光荣革命到维多利亚即位的一个半世纪里，英国完成从重商主义到自由贸易的转变，工业革命让英国成为「世界工厂」。",
+ impact:"世博会上英国展品多为工业品与蒸汽机械，外国商家多为农产品与手工产品——工业实力的代差一目了然。英国迎来国力巅峰，随后美、德在第二次工业革命（电力）中反超。",
+ people:["维多利亚女王"], chain:"工业革命 → 自由贸易 → 世界工厂 → 维多利亚时代",
+ src:"《加餐1 | 全球贸易》"},
+{id:35, y:"1866年", era:6, cat:"科技·电力", title:"第二次工业革命：电力时代到来",
+ sum:"西门子1866年造出第一台可用的交流发电机，美、德凭借电力与内燃机在工业上反超英国。",
+ bg:"富兰克林揭示电的本质、伏特发明电池、法拉第与麦克斯韦建立电磁学理论后，电终于能转化为机械能。爱迪生改进电灯（从碳丝到钨丝），特斯拉发明多相交流发电机。",
+ impact:"电不只是更方便的动力——电梯带来摩天大楼、有轨电车改变城市、电解法炼出纯铜铝、电影与电灯改变生活方式，80—90%的既有产业因电而脱胎换骨。美、德在19世纪末20世纪初成为数一数二的工业国，英国的世界霸主地位开始让渡。",
+ people:["西门子","爱迪生","特斯拉","麦克斯韦"], chain:"蒸汽时代 → 电力革命 → 美德崛起 → 英国霸权让渡",
+ src:"《203 | 第二次工业革命》"},
+];
+
+/* ===== 因果链数据 ===== */
+const CHAINS = [
+{name:"宪政之路：从王权到君主立宪", no:1, color:"#4e8bff",
+ nodes:[
+  {y:"1066", n:"诺曼征服：确立强王权", id:7},
+  {y:"1215", n:"《大宪章》：王在法下", id:9},
+  {y:"1603", n:"斯图亚特王朝：王权议会冲突", id:18},
+  {y:"1640—49", n:"内战与处死查理一世", id:19},
+  {y:"1653", n:"克伦威尔护国公", id:20},
+  {y:"1660", n:"查理二世复辟", id:21},
+  {y:"1689", n:"光荣革命与《权利法案》", id:23},
+ ],
+ note:"诺曼征服留下的强王权，经过贵族反抗（《大宪章》）、议会传统的积累，最终在斯图亚特王朝时期爆发革命。经历内战、处死国王、克伦威尔独裁、复辟的反复震荡后，英国人用一场「不流血」的光荣革命确立了君主立宪——此后英国再未爆发内战。"},
+{name:"宗教主线：从罗马教廷到圣公会", no:2, color:"#d4626a",
+ nodes:[
+  {y:"1170", n:"贝克特遇刺：王权教权博弈", id:8},
+  {y:"1534", n:"亨利八世宗教改革", id:12},
+  {y:"1553—58", n:"血腥玛丽反扑", id:13},
+  {y:"1558", n:"伊丽莎白宗教宽容", id:14},
+  {y:"1588", n:"击败无敌舰队", id:15},
+ ],
+ note:"王权始终处于「教会双重阴影」下。亨利八世借离婚问题让英国教会脱离罗马，血腥玛丽的镇压证明强制不能持久，伊丽莎白以宽容政策终结教派纷争。宗教问题又与外交纠缠——英西战争（无敌舰队）既是宗教之战，更是商业霸权之争。"},
+{name:"科学革命：从培根到牛顿", no:3, color:"#5aa7d8",
+ nodes:[
+  {y:"1561—1626", n:"培根：归纳法方法论", id:17},
+  {y:"1665—66", n:"牛顿奇迹年", id:22},
+  {y:"1632—1704", n:"洛克：社会契约与分权", id:24},
+  {y:"18世纪", n:"苏格兰启蒙运动", id:27},
+  {y:"1763—76", n:"瓦特蒸汽机与工业革命", id:31},
+ ],
+ note:"培根的经验主义与归纳法为科学革命提供方法论，牛顿以数学化物理学确立「世界有规律且可被认识」的信念。洛克的契约与分权思想把理性精神引入政治。苏格兰启蒙则把科学精神应用于社会与经济——最终在18世纪末催生工业革命。思想革命 → 科学革命 → 社会革命 → 产业革命，环环相扣。"},
+{name:"帝国主线：从殖民到霸权的得失", no:4, color:"#e08a3c",
+ nodes:[
+  {y:"1588", n:"击败无敌舰队", id:15},
+  {y:"1607—1620", n:"北美殖民地建立", id:29},
+  {y:"1756—63", n:"七年战争大胜法国", id:28},
+  {y:"1775—83", n:"美国独立：失去十三州", id:30},
+  {y:"1786", n:"转向自由贸易", id:32},
+  {y:"1851", n:"世界经济中心", id:34},
+ ],
+ note:"海权胜利 → 殖民扩张 → 七年战争奠定殖民帝国 → 但对殖民地征税引爆美国独立 → 英国反而「失之东隅，收之桑榆」，转向自由贸易，凭借工业与贸易实力成为世界经济中心。帝国之路说明：军事征服的收益有限，制度与产业的竞争力才是长久的霸权基础。"},
+];
+
+/* ===== 测验数据 ===== */
+const QUIZ = [
+{q:"1066年英国发生了什么？", a:"<b>诺曼征服</b>：威廉一世在黑斯廷斯战役击败哈罗德，开创诺曼王朝，带来先进税收、司法、行政制度，确立强王权。"},
+{q:"《大宪章》最核心的条款是什么？", a:"第61条「安全法」：<b>25名贵族组成的委员会有权否决国王命令、必要时武力占据国王城堡</b>——首次建立贵族共同体可凌驾王权的机制，确立「王在法下」。"},
+{q:"英法百年战争爆发的原因是什么？", a:"<b>法兰西王位继承权之争</b>：法兰西否决女性继承权，1328年查理四世绝嗣后，英格兰爱德华三世凭母系血统主张继承法王位。"},
+{q:"亨利八世宗教改革的直接导火索是什么？", a:"<b>离婚问题</b>：亨利想离婚另娶安妮·博林，教宗因忌惮西班牙而拖延，亨利遂借国会使英国教会脱离罗马教廷，建立圣公会。"},
+{q:"「血腥玛丽」为什么得名？", a:"玛丽一世（亨利八世与凯瑟琳之女）即位后<b>疯狂镇压新教徒</b>，将大主教克兰麦施以火刑，残暴手段让她获得这个恶名。"},
+{q:"为什么说1588年无敌舰队之战没有让西班牙衰落？", a:"历史学家的共识是：<b>此战只宣告西班牙海权达到极限</b>（无法控制所有海域），此后一百多年西班牙仍是世界最强海权国；英国真正崛起靠的是工业、贸易与科技。"},
+{q:"英国内战（1642—1649）的结局是什么？", a:"<b>查理一世被处死</b>，成为英国历史上唯一被处死的国王；英国建立以议会为中心的共和国，但随后克伦威尔攫取权力实行护国公独裁。"},
+{q:"牛顿在1665—1666年「奇迹年」完成了什么？", a:"因伦敦大瘟疫回乡期间，提出<b>微积分、力学三大定律、万有引力定律与一整套光学理论</b>；万有引力解释了开普勒的椭圆轨道之谜。"},
+{q:"为什么1688年的事件被称为「光荣革命」？", a:"它以<b>不流血的方式</b>推翻詹姆斯二世，威廉与玛丽登基并通过《权利法案》确立君主立宪——英国人因以温和方式改朝换代感到荣耀，故称「光荣」。"},
+{q:"洛克的《政府论》提出了哪些核心思想？", a:"<b>社会契约论</b>（政府由公民代表组成）、<b>分权原则</b>（立法权最高、立法行政分立）、<b>天赋人权</b>（生命、自由、财产）、以及《论宽容》中的宗教宽容。孟德斯鸠分权理论是对他的完善。"},
+{q:"苏格兰启蒙运动与法国启蒙运动有什么不同？", a:"法国启蒙<b>反王权、反教会、走暴力革命</b>；苏格兰启蒙<b>温和渐进</b>，尊重风俗与君主，强调法律与制度、全民参与，最终以改良方式改变英国国策，社会稳定发展。"},
+{q:"七年战争如何埋下两次大革命的种子？", a:"英国虽获胜但债台高筑→<b>向北美征税→美国独立革命</b>；法国惨败、财政崩溃→<b>十几年后全力支持北美复仇，耗尽国力→法国大革命</b>。"},
+{q:"瓦特改良蒸汽机的关键创新是什么？", a:"<b>把冷凝器与气缸分离</b>（纽卡门蒸汽机80%热量耗费在维持气缸温度上），配合双向气缸与高压蒸汽阀，效率提高数倍，并引入「机械思维」方法论。"},
+{q:"亚当·斯密「看不见的手」指什么？", a:"<b>市场供求规律</b>：需求大于供应→价格利润上升→资源倾斜→供求平衡，形成最高效的资源分配模式；他还提出分工协作与劳动价值论，主张自由贸易。"},
+{q:"第二次工业革命中，为什么美、德能反超英国？", a:"英国领先的是<b>蒸汽动力</b>；美、德抓住<b>电力与内燃机</b>（西门子发电机、爱迪生电灯、特斯拉交流电、本茨汽车），19世纪末20世纪初成为数一数二的工业国。"},
+];
+
+/* ================= 渲染 ================= */
+let curEra = "all";
+let curSearch = "";
+let quizIdx = 0;
+let quizOrder = [];
+let known = new Set();
+let showing = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+function eraColor(e){ return ERAS.find(x=>x.id===e).color; }
+function eraName(e){ return ERAS.find(x=>x.id===e).name; }
+
+function initStats(){
+  const eras = ERAS.map(e=>`<div class="stat"><b>${e.range}</b><span>${e.name}</span></div>`).join("");
+  $("#stats").innerHTML =
+    `<div class="stat"><b>${EVENTS.length}</b><span>核心事件</span></div>` +
+    `<div class="stat"><b>6</b><span>历史时期</span></div>` +
+    `<div class="stat"><b>26</b><span>来源文章</span></div>` +
+    `<div class="stat"><b>4</b><span>因果主线</span></div>` + eras;
+}
+
+function initEraBar(){
+  const html = [`<button class="chip active" data-e="all"><span class="dot" style="background:#d4af37"></span>全部时期</button>`];
+  ERAS.forEach(e=>{
+    html.push(`<button class="chip" data-e="${e.id}"><span class="dot" style="background:${e.color}"></span>${e.name}（${e.range}）</button>`);
+  });
+  $("#eraBar").innerHTML = html.join("");
+  $("#eraBar").addEventListener("click", e=>{
+    const chip = e.target.closest(".chip"); if(!chip) return;
+    document.querySelectorAll(".chip").forEach(c=>c.classList.remove("active"));
+    chip.classList.add("active");
+    curEra = chip.dataset.e;
+    renderTimeline();
+  });
+}
+
+function filtered(){
+  return EVENTS.filter(ev=>{
+    if(curEra!=="all" && ev.era!==+curEra) return false;
+    if(curSearch){
+      const hay = (ev.title+ev.sum+ev.bg+ev.impact+ev.people.join(" ")).toLowerCase();
+      if(!hay.includes(curSearch.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
+
+function renderTimeline(){
+  const list = filtered();
+  const tl = $("#timeline");
+  $("#noResult").classList.toggle("show", list.length===0);
+  tl.innerHTML = list.map(ev=>{
+    const c = eraColor(ev.era);
+    return `<div class="t-item" data-id="${ev.id}" style="--ec:${c}">
+      <div class="dot"></div>
+      <div class="t-card">
+        <div class="t-year">${ev.y}</div>
+        <div class="t-title">${esc(ev.title)}</div>
+        <div class="t-sum">${esc(ev.sum)}</div>
+        <div class="t-tags">
+          <span class="t-tag cat">${ev.cat}</span>
+          <span class="t-tag">${eraName(ev.era)}</span>
+        </div>
+        <div class="t-expand">${detailHTML(ev)}</div>
+      </div>
+    </div>`;
+  }).join("");
+  tl.querySelectorAll(".t-item").forEach(item=>{
+    item.addEventListener("click", e=>{
+      if(e.target.closest(".t-expand")) return;
+      item.classList.toggle("open");
+      const others = tl.querySelectorAll(".t-item.open");
+      others.forEach(o=>{ if(o!==item) o.classList.remove("open"); });
+    });
+  });
+}
+
+function detailHTML(ev){
+  return `
+    <h4>📜 历史背景</h4><p>${ev.bg}</p>
+    <h4>🌍 影响与意义</h4><p>${ev.impact}</p>
+    ${ev.people[0]!=="—" ? `<h4>👤 关键人物</h4><div class="people">${ev.people.map(p=>`<span class="pp">${esc(p)}</span>`).join("")}</div>`:""}
+    <div class="chain">🔗 前后关联：${ev.chain}</div>
+    <div class="src">📖 来源：${esc(ev.src)}</div>`;
+}
+
+/* ===== Chain ===== */
+function renderChain(){
+  $("#view-chain").innerHTML = `
+    <div class="chain-title">因果链 · 四条主线看懂英国历史</div>
+    <div class="chain-sub">点击节点可查看该事件详情；箭头表示「导致 →」的因果关系</div>
+    <div class="chains">
+      ${CHAINS.map(ch=>`
+        <div class="chain-group">
+          <h3><span class="no">${ch.no}</span>${ch.name}</h3>
+          <div class="chain-flow" style="--ec:${ch.color}">
+            ${ch.nodes.map(n=>`
+              <div class="c-node" data-id="${n.id}" style="border-top:3px solid ${ch.color}">
+                <div class="y">${n.y}</div><div class="n">${esc(n.n)}</div>
+              </div>
+              <div class="c-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+            `).join("")}
+          </div>
+          <div class="c-note">💡 ${ch.note}</div>
+        </div>`).join("")}
+    </div>`;
+  $("#view-chain").querySelectorAll(".c-node").forEach(n=>{
+    n.addEventListener("click", ()=>openModal(+n.dataset.id));
+  });
+}
+
+/* ===== Quiz ===== */
+function initQuiz(){
+  quizOrder = QUIZ.map((_,i)=>i);
+  shuffle(quizOrder);
+  quizIdx = 0; known.clear();
+  renderQuizControls();
+  showQuizCard();
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function showQuizCard(){
+  const card = $("#quizCard");
+  const done = $("#quizDone");
+  if(quizIdx>=quizOrder.length){
+    card.style.display="none"; done.style.display="block";
+    $("#quizScore").textContent = `共 ${quizOrder.length} 题 · 已掌握 ${known.size} 题`;
+    $("#masteryBar").style.width = "100%";
+    return;
+  }
+  card.style.display=""; done.style.display="none";
+  const item = QUIZ[quizOrder[quizIdx]];
+  card.classList.remove("flip");
+  $("#qYear").textContent = `第 ${quizIdx+1} / ${quizOrder.length} 题`;
+  $("#qTitle").textContent = item.q;
+  $("#qAnswer").innerHTML = item.a;
+  $("#quizProgress").textContent = `已掌握 ${known.size} 题`;
+  $("#masteryBar").style.width = (known.size/quizOrder.length*100)+"%";
+  showing = false;
+}
+function renderQuizControls(){
+  $("#quizControls").innerHTML = `
+    <button class="qbtn" onclick="quizBack()">⬅ 上一题</button>
+    <button class="qbtn primary" onclick="flipCard()">${showing?"显示答案":"翻转查看答案"}</button>
+    <button class="qbtn red" onclick="markKnown(false)">✗ 未掌握</button>
+    <button class="qbtn green" onclick="markKnown(true)">✓ 已掌握</button>
+    <button class="qbtn" onclick="quizNext()">下一题 ➡</button>`;
+}
+function flipCard(){ const c=$("#quizCard"); c.classList.toggle("flip"); showing=!showing; renderQuizControls(); }
+function markKnown(k){ if(k){known.add(quizOrder[quizIdx]);} else {known.delete(quizOrder[quizIdx]);} showQuizCard(); }
+function quizNext(){ if(quizIdx<quizOrder.length-1) quizIdx++; showQuizCard(); }
+function quizBack(){ if(quizIdx>0) quizIdx--; showQuizCard(); }
+
+/* ===== Modal ===== */
+function openModal(id){
+  const ev = EVENTS.find(x=>x.id===id); if(!ev) return;
+  const idx = EVENTS.indexOf(ev);
+  const prev = idx>0 ? EVENTS[idx-1] : null;
+  const next = idx<EVENTS.length-1 ? EVENTS[idx+1] : null;
+  $("#modalBox").innerHTML = `
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="m-y" style="--ec:${eraColor(ev.era)}">${ev.y}</div>
+    <div class="m-title">${esc(ev.title)}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+      <span class="t-tag cat" style="--ec:${eraColor(ev.era)};color:${eraColor(ev.era)}">${ev.cat}</span>
+      <span class="t-tag">${eraName(ev.era)}</span>
+    </div>
+    <h4>📜 历史背景</h4><p>${ev.bg}</p>
+    <h4>🌍 影响与意义</h4><p>${ev.impact}</p>
+    ${ev.people[0]!=="—" ? `<h4>👤 关键人物</h4><div class="people">${ev.people.map(p=>`<span class="pp">${esc(p)}</span>`).join("")}</div>`:""}
+    <div class="chain">🔗 前后关联：${ev.chain}</div>
+    <div class="src">📖 来源：${esc(ev.src)}</div>
+    <div class="modal-nav">
+      <button onclick="openModal(${prev?prev.id:0})" ${prev?"":"disabled"}>⬅ 上一个：${prev?esc(prev.title.slice(0,12)):""}</button>
+      <button onclick="openModal(${next?next.id:0})" ${next?"":"disabled"}>下一个：${next?esc(next.title.slice(0,12)):""} ➡</button>
+    </div>`;
+  $("#modal").classList.add("open");
+}
+function closeModal(){ $("#modal").classList.remove("open"); }
+
+/* ===== Tabs ===== */
+function switchView(v){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===v));
+  document.querySelectorAll(".view").forEach(s=>s.style.display="none");
+  document.querySelectorAll(".chain-view,.quiz-view").forEach(s=>s.classList.remove("active"));
+  if(v==="timeline"){ $("#view-timeline").style.display=""; }
+  else if(v==="chain"){ $("#view-chain").classList.add("active"); }
+  else if(v==="quiz"){ $("#view-quiz").classList.add("active"); }
+}
+$("#tabs").addEventListener("click", e=>{
+  const t = e.target.closest(".tab"); if(!t) return;
+  switchView(t.dataset.view);
+});
+
+/* ===== Events ===== */
+$("#search").addEventListener("input", e=>{ curSearch=e.target.value.trim(); renderTimeline(); });
+$("#modal").addEventListener("click", e=>{ if(e.target===$("#modal")) closeModal(); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+/* ===== Quiz HTML init ===== */
+$("#view-quiz").innerHTML = `
+  <div class="quiz-setup">
+    <h2 style="color:var(--gold2);font-size:24px;font-weight:800;margin-bottom:8px">🧠 记忆测验</h2>
+    <p style="color:var(--sub);font-size:14px;margin-bottom:16px">共 ${QUIZ.length} 道题 · 点击卡片翻转查看答案 · 用「已掌握/未掌握」标记进度</p>
+  </div>
+  <div class="quiz-card" id="quizCard" onclick="flipCard()">
+    <div class="quiz-inner">
+      <div class="quiz-face quiz-front">
+        <div class="q-y" id="qYear"></div>
+        <div class="q-title" id="qTitle"></div>
+        <div class="q-hint">👆 点击卡片翻转查看答案</div>
+      </div>
+      <div class="quiz-face quiz-back" id="quizBack">
+        <div class="a" id="qAnswer"></div>
+        <div class="a-note">💡 点击卡片翻回问题</div>
+      </div>
+    </div>
+  </div>
+  <div class="quiz-controls" id="quizControls"></div>
+  <div class="quiz-progress" id="quizProgress"></div>
+  <div class="mastery-bar"><i id="masteryBar"></i></div>
+  <div class="quiz-done" id="quizDone">
+    <h3>🎉 本轮完成！</h3>
+    <p id="quizScore"></p>
+    <button class="qbtn primary" onclick="initQuiz()">🔁 重新开始</button>
+  </div>`;
+
+/* ===== Init ===== */
+initStats();
+initEraBar();
+renderTimeline();
+renderChain();
+initQuiz();
+const _initialView = location.hash.replace("#","") || "timeline";
+switchView(["timeline","chain","quiz"].includes(_initialView) ? _initialView : "timeline");
+</script>
+</body>
+</html>

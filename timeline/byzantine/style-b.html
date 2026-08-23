@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>拜占庭编年史 · 千年帝国 — 羊皮卷典藏版</title>
+<style>
+:root{
+  --paper:#f2e8d0; --paper2:#eadfc2; --paper3:#e3d5b4;
+  --ink:#3a2d1e; --ink2:#5b4a33; --ink3:#857252;
+  --red:#a32929; --red-d:#7a1d1d;
+  --gold:#8a6d1f; --gold-l:#b8973a;
+  --serif:"Georgia","STSong","Songti SC","SimSun",serif;
+  --kai:"Kaiti SC","STKaiti","KaiTi","楷体",var(--serif);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:
+  radial-gradient(ellipse 80% 60% at 50% -10%,rgba(138,109,31,.10),transparent 60%),
+  var(--paper);
+  color:var(--ink);font-family:var(--serif);line-height:1.85;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.055'/%3E%3C/svg%3E")}
+::selection{background:rgba(163,41,41,.22)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#eadfc2}
+::-webkit-scrollbar-thumb{background:linear-gradient(#857252,#3a2d1e);border-radius:5px}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--red-d),var(--red));z-index:999}
+
+/* 卷轴顶栏 */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px 4vw;background:rgba(242,232,208,.88);backdrop-filter:blur(10px);border-bottom:2px solid var(--ink2);font-size:.9rem}
+nav .brand{letter-spacing:.3em;font-weight:700;color:var(--red-d)}
+nav .links{display:flex;gap:22px;font-size:.85rem}
+nav .links a{color:var(--ink2);text-decoration:none;transition:.3s;letter-spacing:.1em}
+nav .links a:hover{color:var(--red)}
+@media(max-width:820px){nav .links{display:none}}
+
+/* Hero */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 6vw;overflow:hidden}
+.hero .frame{position:relative;max-width:860px;border:2px solid var(--ink2);padding:70px 60px;background:rgba(242,232,208,.6)}
+.hero .frame::before,.hero .frame::after{content:"";position:absolute;width:26px;height:26px;border:2px solid var(--red);opacity:.75}
+.hero .frame::before{top:-4px;left:-4px;border-right:none;border-bottom:none}
+.hero .frame::after{bottom:-4px;right:-4px;border-left:none;border-top:none}
+.hero .orn{font-size:1.4rem;color:var(--red);letter-spacing:.5em;margin-bottom:18px}
+.hero h1{font-family:var(--kai);font-size:clamp(2.4rem,6vw,4.6rem);letter-spacing:.18em;color:var(--ink);font-weight:700}
+.hero h1 .en{display:block;font-size:.32em;letter-spacing:.5em;color:var(--ink3);margin-top:16px;font-style:italic}
+.hero .rule{width:220px;height:1px;background:linear-gradient(90deg,transparent,var(--ink2),transparent);margin:30px auto}
+.hero .sub{font-size:1.02rem;color:var(--ink2);max-width:620px;margin:0 auto;line-height:2}
+.hero .seal{width:74px;height:74px;border-radius:50%;border:3px double var(--red);display:flex;align-items:center;justify-content:center;margin:34px auto 0;color:var(--red);font-size:.6rem;letter-spacing:.2em;text-align:center;line-height:1.6;position:relative;animation:sealIn 1.6s cubic-bezier(.2,1.4,.3,1) both}
+.hero .seal::before{content:"";position:absolute;inset:5px;border:1px solid var(--red);border-radius:50%}
+@keyframes sealIn{from{transform:scale(2.4) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.hero .scroll-hint{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);color:var(--ink3);font-size:.75rem;letter-spacing:.4em;animation:bob 2.6s infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,9px)}}
+
+/* 章节 */
+section{position:relative;z-index:1;padding:100px 6vw}
+.sec-head{text-align:center;margin-bottom:64px}
+.sec-head .chap{font-size:.78rem;letter-spacing:.5em;color:var(--red);margin-bottom:12px}
+.sec-head h2{font-family:var(--kai);font-size:clamp(1.7rem,3.6vw,2.6rem);letter-spacing:.14em;color:var(--ink)}
+.sec-head .deco{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px;color:var(--red)}
+.sec-head .deco::before,.sec-head .deco::after{content:"";width:90px;height:1px;background:linear-gradient(90deg,transparent,var(--red));}
+.sec-head .deco::after{background:linear-gradient(90deg,var(--red),transparent)}
+.sec-head p{color:var(--ink2);max-width:640px;margin:14px auto 0;font-size:.95rem}
+.reveal{opacity:0;transform:translateY(30px) rotate(.6deg);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* 首字下沉 */
+.drop p{text-indent:0;margin-bottom:18px;font-size:1.02rem;color:var(--ink2)}
+.drop p:first-of-type::first-letter{font-family:var(--kai);font-size:3.4em;float:left;line-height:.8;padding:8px 14px 0 0;color:var(--red)}
+.drop .hl{color:var(--red-d);font-weight:700}
+
+/* 数据 */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:16px;max-width:1080px;margin:0 auto}
+.stat{border:1.5px solid var(--ink3);background:rgba(234,223,194,.55);padding:28px 14px;text-align:center;position:relative;transition:.4s}
+.stat::after{content:"";position:absolute;inset:5px;border:1px dashed rgba(133,114,82,.4);pointer-events:none}
+.stat:hover{transform:translateY(-5px);background:rgba(227,213,180,.7);box-shadow:0 10px 30px rgba(58,45,30,.12)}
+.stat .num{font-size:2.5rem;color:var(--red-d);font-weight:700;line-height:1.1}
+.stat .lbl{margin-top:8px;font-size:.82rem;letter-spacing:.2em;color:var(--ink2)}
+.stat .note{font-size:.72rem;color:var(--ink3);margin-top:3px}
+
+/* 编年史主体 */
+#chronicle{background:linear-gradient(180deg,transparent,rgba(227,213,180,.4),transparent)}
+.chap-nav{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:52px}
+.chap-nav button{padding:8px 22px;border:1.5px solid var(--ink3);background:transparent;color:var(--ink2);font-family:var(--serif);font-size:.85rem;letter-spacing:.16em;cursor:pointer;transition:.35s}
+.chap-nav button:hover,.chap-nav button.active{background:var(--red);color:#f2e8d0;border-color:var(--red)}
+.chronicle{max-width:900px;margin:0 auto;position:relative}
+.chronicle::before{content:"";position:absolute;left:96px;top:10px;bottom:10px;width:2px;background:repeating-linear-gradient(180deg,var(--ink3) 0 8px,transparent 8px 16px);opacity:.5}
+.entry{display:grid;grid-template-columns:96px 1fr;gap:30px;padding:0 0 34px;cursor:pointer;position:relative}
+.entry .year{text-align:right;padding-top:26px;font-size:1.25rem;color:var(--red-d);font-weight:700;letter-spacing:.04em;line-height:1.4}
+.entry .year small{display:block;font-size:.68rem;color:var(--ink3);letter-spacing:.2em;font-weight:400}
+.entry .mark{position:absolute;left:96px;top:30px;transform:translateX(-50%);width:14px;height:14px;border-radius:50%;background:var(--paper);border:2.5px solid var(--red);transition:.35s;z-index:1}
+.entry:hover .mark{background:var(--red);box-shadow:0 0 0 6px rgba(163,41,41,.18)}
+.entry .card{border:1.5px solid var(--ink3);background:rgba(242,232,208,.8);padding:24px 28px;position:relative;transition:.45s;box-shadow:0 4px 16px rgba(58,45,30,.07)}
+.entry .card::before{content:"";position:absolute;top:-1px;left:28px;width:52px;height:3px;background:var(--red)}
+.entry:hover .card{transform:translateY(-4px);background:rgba(245,236,216,.95);box-shadow:0 14px 34px rgba(58,45,30,.16)}
+.entry .tag{font-size:.68rem;letter-spacing:.28em;color:var(--red);border:1px solid var(--red);padding:2px 10px;display:inline-block;margin-bottom:10px}
+.entry h3{font-family:var(--kai);font-size:1.3rem;color:var(--ink);letter-spacing:.06em}
+.entry .fig{font-size:.8rem;color:var(--ink3);margin-top:6px}
+.entry .fig b{color:var(--ink2)}
+.entry .sum{margin-top:8px;font-size:.92rem;color:var(--ink2);line-height:1.8}
+.entry .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.7,.2,1)}
+.entry .detail.open{grid-template-rows:1fr}
+.entry .detail>div{overflow:hidden}
+.entry .dbox{margin-top:16px;border-top:1.5px dashed var(--ink3);padding-top:16px;display:grid;gap:12px}
+.entry .blk{padding:12px 16px;background:rgba(234,223,194,.6);border-left:3px solid var(--gold)}
+.entry .blk.bg{border-color:var(--gold)}
+.entry .blk.ct{border-color:var(--red)}
+.entry .blk.im{border-color:var(--red-d)}
+.entry .blk h4{font-size:.74rem;letter-spacing:.26em;color:var(--red-d);margin-bottom:5px}
+.entry .blk p{font-size:.88rem;color:var(--ink2);line-height:1.8}
+.entry .toggle{margin-top:12px;font-size:.76rem;letter-spacing:.22em;color:var(--red);border-bottom:1px dashed var(--red);display:inline-block;padding-bottom:2px;transition:.3s}
+.entry .toggle:hover{color:var(--red-d)}
+@media(max-width:820px){
+  .chronicle::before{left:22px}
+  .entry{grid-template-columns:1fr;padding-left:44px}
+  .entry .year{text-align:left;padding-top:0}
+  .entry .mark{left:22px;top:8px}
+}
+
+/* 卡片组 */
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;max-width:1100px;margin:0 auto}
+.p-card{border:1.5px solid var(--ink3);background:rgba(242,232,208,.75);padding:28px 26px;position:relative;transition:.45s}
+.p-card::before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;border:1px dashed rgba(133,114,82,.35);pointer-events:none;padding:5px}
+.p-card:hover{transform:translateY(-5px);background:rgba(245,236,216,.95);box-shadow:0 12px 30px rgba(58,45,30,.14)}
+.p-card .ic{font-size:1.6rem;color:var(--red);display:block;margin-bottom:12px}
+.p-card h3{font-family:var(--kai);font-size:1.25rem;color:var(--ink);letter-spacing:.08em;margin-bottom:10px}
+.p-card .lead{font-size:.9rem;color:var(--ink2);margin-bottom:12px}
+.p-card ul{list-style:none}
+.p-card li{font-size:.85rem;color:var(--ink2);padding:6px 0 6px 22px;position:relative;line-height:1.75}
+.p-card li::before{content:"❖";position:absolute;left:0;color:var(--red);font-size:.7rem;top:10px}
+.p-card li b{color:var(--red-d)}
+
+/* 人物 */
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;max-width:1120px;margin:0 auto}
+.fig{border:1.5px solid var(--ink3);background:rgba(242,232,208,.75);padding:26px 22px;text-align:center;position:relative;transition:.45s}
+.fig:hover{transform:translateY(-5px) rotate(-.4deg);background:rgba(245,236,216,.95);box-shadow:0 12px 30px rgba(58,45,30,.14)}
+.fig .seal-sm{width:56px;height:56px;border-radius:50%;border:2px double var(--red);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;color:var(--red);font-family:var(--kai);font-size:1.5rem}
+.fig h3{font-family:var(--kai);font-size:1.18rem;color:var(--ink)}
+.fig .years{font-size:.74rem;color:var(--ink3);margin-top:3px;letter-spacing:.08em}
+.fig .role{font-size:.76rem;color:var(--red);letter-spacing:.18em;margin-top:7px}
+.fig .tags{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.fig .tags span{font-size:.64rem;color:var(--ink2);border:1px solid var(--ink3);padding:1px 9px;letter-spacing:.1em}
+.fig p{font-size:.84rem;color:var(--ink2);margin-top:12px;line-height:1.75}
+
+/* 引语 */
+.quotes{max-width:820px;margin:0 auto;display:grid;gap:22px}
+.quote{border:1.5px solid var(--ink3);background:rgba(242,232,208,.75);padding:34px 40px;position:relative;transition:.4s}
+.quote::before{content:"“";position:absolute;top:-6px;left:20px;font-size:5rem;color:rgba(163,41,41,.3);font-family:var(--kai)}
+.quote:hover{transform:translateX(6px);background:rgba(245,236,216,.95)}
+.quote p{font-family:var(--kai);font-size:1.2rem;line-height:2;color:var(--ink)}
+.quote .from{margin-top:12px;font-size:.76rem;color:var(--ink3);letter-spacing:.16em}
+
+/* 结语 */
+.outro{max-width:760px;margin:0 auto;text-align:center}
+.outro p{font-family:var(--kai);font-size:1.15rem;line-height:2.2;color:var(--ink2)}
+
+/* 来源 */
+.src{max-width:820px;margin:0 auto;font-size:.84rem;color:var(--ink3);line-height:2}
+.src h3{color:var(--red-d);font-size:.9rem;letter-spacing:.3em;margin-bottom:10px}
+footer{padding:56px 6vw 70px;text-align:center;color:var(--ink3);font-size:.78rem;letter-spacing:.16em;border-top:2px solid var(--ink2)}
+#topBtn{position:fixed;right:26px;bottom:26px;width:44px;height:44px;border:1.5px solid var(--ink3);background:rgba(242,232,208,.9);color:var(--red);font-size:1rem;cursor:pointer;opacity:0;pointer-events:none;transition:.4s;z-index:800;font-family:var(--serif)}
+#topBtn.show{opacity:1;pointer-events:auto}
+#topBtn:hover{background:var(--red);color:#f2e8d0}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav>
+  <div class="brand">拜占庭编年史</div>
+  <div class="links">
+    <a href="#overview">卷首</a><a href="#origin">缘起</a><a href="#chronicle">编年</a>
+    <a href="#advantages">优势</a><a href="#figures">人物志</a><a href="#decline">衰亡</a><a href="#legacy">遗泽</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="frame">
+    <div class="orn">❖ ✦ ❖</div>
+    <h1>拜占庭编年史<span class="en">CHRONICON BYZANTINUM · 330 — 1453</span></h1>
+    <div class="rule"></div>
+    <p class="sub">自君士坦丁大帝营建“新罗马”，至穆罕默德二世兵临城下，千年之间，九十余位君主在此登基与谢幕。今以羊皮卷之体，录其盛衰、列其人事，以备观览。</p>
+    <div class="seal">千年<br>帝国</div>
+  </div>
+  <div class="scroll-hint">— 展卷 —</div>
+</header>
+
+<section id="overview">
+  <div class="sec-head reveal">
+    <div class="chap">卷 首</div><h2>以数观史</h2>
+    <div class="deco">❖</div>
+    <p>拜占庭（东罗马帝国）是中古欧洲最悠久的专制君主制国家。一千余年里，王朝频繁更替，疆域不断收缩，而国祚始终延续——正是所谓“换人不换国”。</p>
+  </div>
+  <div class="stats">
+    <div class="stat reveal"><div class="num" data-count="1100" data-suffix="余年">0</div><div class="lbl">存续时间</div><div class="note">公元330 — 1453</div></div>
+    <div class="stat reveal"><div class="num" data-count="90" data-suffix="余位">0</div><div class="lbl">皇帝人数</div><div class="note">横跨11个世纪</div></div>
+    <div class="stat reveal"><div class="num" data-count="14" data-suffix="个王朝">0</div><div class="lbl">王朝更替</div><div class="note">大多无血亲继承</div></div>
+    <div class="stat reveal"><div class="num" data-count="3000" data-suffix="万">0</div><div class="lbl">人口峰值</div><div class="note">查士丁尼时代</div></div>
+    <div class="stat reveal"><div class="num" data-count="300" data-suffix="万km²">0</div><div class="lbl">疆域峰值</div><div class="note">地中海霸主</div></div>
+  </div>
+</section>
+
+<section id="origin">
+  <div class="sec-head reveal">
+    <div class="chap">卷 一 · 缘起</div><h2>罗马东迁之故</h2>
+    <div class="deco">❖</div>
+  </div>
+  <div class="drop reveal" style="max-width:820px;margin:0 auto">
+    <p>罗马帝国分裂之后，西罗马为蛮族所陷，历经混战渐成封建之制；东部之罗马则绵延不绝，是为史称<b class="hl">拜占庭（东罗马帝国）</b>之千年帝国。其始年众说纷纭：或曰 <b class="hl">286年戴克里先东西分治</b>，或曰 <b class="hl">330年君士坦丁大帝营建君士坦丁堡</b>，或曰 <b class="hl">395年狄奥多西一世崩、东西自此不隶属</b>。然无论何说，至1453年奥斯曼苏丹穆罕默德二世夺城而亡，其祚皆逾千年。</p>
+    <p>罗马何故弃罗马城而东迁？其故有二：其一，<b class="hl">三世纪之乱</b>使罗马及其周边残破不堪，帝国财力已难供养此巨都；其二，<b class="hl">帝国东方素来富庶</b>，胜于西方。故帝国衰微之际，东迁几为必然，而君士坦丁堡扼海陆要冲，遂定鼎焉。</p>
+    <p>中心东移，两果并生：<b class="hl">西陲御蛮之力愈弱，终至沦亡</b>；东境则因国势聚合而愈强，得以于古典文明之末、中世纪之初抵御蛮族，<b class="hl">延续罗马文明于不坠</b>。</p>
+  </div>
+</section>
+
+<section id="chronicle">
+  <div class="sec-head reveal">
+    <div class="chap">卷 二 · 编年</div><h2>千年兴衰录</h2>
+    <div class="deco">❖</div>
+    <p>吴军以“三个繁荣期、两个混乱期、数世纪衰退期”概括拜占庭全史。点击条目，可展阅其背景、缘由与影响。</p>
+  </div>
+  <div class="chap-nav reveal" id="chapNav"></div>
+  <div class="chronicle" id="chronicleBox"></div>
+</section>
+
+<section id="advantages">
+  <div class="sec-head reveal">
+    <div class="chap">卷 三 · 立国之本</div><h2>何以延续千年</h2>
+    <div class="deco">❖</div>
+    <p>强敌环伺而屹立千年，且中世纪早期为欧洲乃至世界最富之国——吴军归之三端：地理、文化、经济。</p>
+  </div>
+  <div class="grid3">
+    <div class="p-card reveal"><span class="ic">◈</span><h3>地理 · 要冲与天险</h3>
+      <p class="lead">希腊半岛、巴尔干与小亚细亚扼欧亚之咽喉。</p>
+      <ul><li><b>贸易枢纽</b>：博斯普鲁斯与达达尼尔海峡，亚欧、黑海—地中海商路所必经</li><li><b>山岭为屏</b>：多山易守难攻，天然之壁垒</li><li><b>首都要塞</b>：进可通商，退可拒敌</li></ul>
+    </div>
+    <div class="p-card reveal"><span class="ic">✦</span><h3>文化 · 文明之高地</h3>
+      <p class="lead">西欧战乱、东亚动荡之际，唯拜占庭承希腊罗马之全脉。</p>
+      <ul><li><b>设学兴教</b>：425年创帝国大学，1046年重建，早于博洛尼亚</li><li><b>四艺之教</b>：算术、几何、音乐、天文，兼修哲学、修辞、希腊语</li><li><b>营造之绝</b>：圣索菲亚大教堂与地下蓄水池，超越前代诸文明</li></ul>
+    </div>
+    <div class="p-card reveal"><span class="ic">♛</span><h3>经济 · 黄金之国帑</h3>
+      <p class="lead">减税而民富，民富而国殷。</p>
+      <ul><li><b>藏富于民</b>：阿纳斯塔修斯一世减税，国入反增</li><li><b>币制完备</b>：金、银、铜三级货币，通行中世纪</li><li><b>府库充盈</b>：曾积金约150吨，为中世纪最富之国</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="sec-head reveal">
+    <div class="chap">卷 四 · 性情</div><h2>与罗马之别</h2>
+    <div class="deco">❖</div>
+    <p>拜占庭虽承罗马法统，而其文明形态迥异于罗马——故史家从不以罗马混同之。</p>
+  </div>
+  <div class="grid3">
+    <div class="p-card reveal"><span class="ic">☩</span><h3>政教合一</h3>
+      <ul><li>皇帝兼政治、军事、司法、宗教之<b>最高权柄</b></li><li>三称并存：“君主”、“虔信基督的皇帝”、“罗马人的皇帝”</li><li><b>神权奉皇权</b>，与阿拉伯之教权凌驾王权恰相反</li></ul>
+    </div>
+    <div class="p-card reveal"><span class="ic">Α</span><h3>深度希腊化</h3>
+      <ul><li>620年希拉克略以<b>希腊语</b>代拉丁语为官话</li><li>东部行省素尚希腊文风，渐与罗马分途</li><li>终成与罗马并立的<b>独立文明</b></li></ul>
+    </div>
+    <div class="p-card reveal"><span class="ic">⟲</span><h3>收缩·输入之文明</h3>
+      <ul><li>罗马扩张输出，拜占庭<b>收缩输入</b></li><li>人口由5世纪1550万降至12世纪约1000万</li><li>吸纳基督教、佛教乃至伊斯兰之影响，鲜有对外输出</li></ul>
+    </div>
+  </div>
+</section>
+
+<section id="figures">
+  <div class="sec-head reveal">
+    <div class="chap">卷 五 · 人物志</div><h2>操持国运之人</h2>
+    <div class="deco">❖</div>
+    <p>自奠基之君至亡国之主，十人一线，串起千年兴衰。</p>
+  </div>
+  <div class="fig-grid" id="figGrid"></div>
+</section>
+
+<section id="reforms">
+  <div class="sec-head reveal">
+    <div class="chap">卷 六 · 革新</div><h2>中兴之三策</h2>
+    <div class="deco">❖</div>
+  </div>
+  <div class="grid3">
+    <div class="p-card reveal"><span class="ic">⚖</span><h3>政治 · 凝聚人心</h3><ul><li>以基督教代多神教，成<b>政教合一</b>之制</li><li>重聚民众<b>向心力</b></li><li>皇位传承较稳，无罗马晚期“一年一帝”之乱</li></ul></div>
+    <div class="p-card reveal"><span class="ic">⚔</span><h3>军事 · 军区之制</h3><ul><li>授田养兵，以田代饷</li><li>设塞马州（军事行政州），长官<b>皇帝亲任</b></li><li>免罗马晚期<b>军队蛮族化</b>之祸</li></ul></div>
+    <div class="p-card reveal"><span class="ic">❖</span><h3>经济 · 藏富于民</h3><ul><li>废按月苛税，改按<b>庄园盈利</b>征收</li><li>减税而经济繁，间接税水涨船高</li><li>开后世“低税率”经济学之先声</li></ul></div>
+  </div>
+</section>
+
+<section id="decline">
+  <div class="sec-head reveal">
+    <div class="chap">卷 七 · 衰亡</div><h2>覆灭之由</h2>
+    <div class="deco">❖</div>
+    <p>外有强敌迭至，内则积弊丛生。吴军之断：其病在“老”。</p>
+  </div>
+  <div class="grid3">
+    <div class="p-card reveal"><span class="ic">⏳</span><h3>帝国太老</h3><p class="lead">凡政权皆有生命期。</p><ul><li>自罗马重建计之，延续约<b>1800年</b></li><li>如东汉、东晋、南宋，承前朝衣钵亦承其弊</li><li>屡次“中兴”之后，非崛起而益衰</li></ul></div>
+    <div class="p-card reveal"><span class="ic">🜨</span><h3>兵源枯竭</h3><ul><li>自由农沦为农奴——农奴系私产，<b>国不可征</b></li><li>后期陆军仰仗雇佣军，乃至雇自敌国奥斯曼</li><li>海军衰落，赖威尼斯、热那亚护航</li></ul></div>
+    <div class="p-card reveal"><span class="ic">☍</span><h3>中央失控</h3><ul><li>被迫行西欧式分封，残省几成<b>独立王国</b></li><li>地方不纳赋、不供兵，政令不出君士坦丁堡</li><li>变卖皇产、举债度日</li></ul></div>
+    <div class="p-card reveal"><span class="ic">◴</span><h3>制度守旧</h3><ul><li>5世纪、10世纪、15世纪，<b>进步甚微</b></li><li>同期西欧已启文艺复兴、资本主义萌芽</li><li>五大文明中心，起点最高而进步最慢</li></ul></div>
+    <div class="p-card reveal"><span class="ic">☩☪</span><h3>外敌迭至</h3><ul><li>阿拉伯夺其埃及与东土</li><li>塞尔柱取安纳托利亚，逼出十字军</li><li>十字军“援救”反成致命一击，奥斯曼终收其局</li></ul></div>
+    <div class="p-card reveal"><span class="ic">♟</span><h3>雇佣军之弊</h3><ul><li>失向心力，守土唯赖钱财募兵</li><li>雇佣军亦兵亦匪，动辄劫掠百姓</li><li>末年竟以敌国之兵卫都城</li></ul></div>
+  </div>
+</section>
+
+<section id="legacy">
+  <div class="sec-head reveal">
+    <div class="chap">卷 八 · 遗泽</div><h2>1453：一代之终</h2>
+    <div class="deco">❖</div>
+    <p>君士坦丁堡之陷，为中世纪与近代之分水岭。国虽亡，文明之种已随风散播全欧。</p>
+  </div>
+  <div class="grid3">
+    <div class="p-card reveal"><span class="ic">◌</span><h3>文艺复兴之引信</h3><ul><li>流亡学者携<b>古希腊语法、文学</b>至意大利</li><li>带去阿拉伯之<b>数学、天文学</b></li><li>植物学、医学、动物学著作及亚里士多德物理学之改良</li></ul></div>
+    <div class="p-card reveal"><span class="ic">⚓</span><h3>大航海之推手</h3><ul><li>奥斯曼控东西要冲、课以重税，<b>商路阻断</b></li><li>欧洲被迫另辟新航路以通东方</li><li>迪亚士、达伽马南行，哥伦布、麦哲伦西向——<b>地理大发现</b>由此启</li></ul></div>
+    <div class="p-card reveal"><span class="ic">☦</span><h3>东正教之世界</h3><ul><li>988年基辅罗斯皈依东正教，东欧文明进程始</li><li>俄罗斯自居<b>“罗马之继承者”</b></li><li>为今俄、乌、白三国共同之文化源头</li></ul></div>
+    <div class="p-card reveal"><span class="ic">⚜</span><h3>法律与学术</h3><ul><li>《查士丁尼法典》为后世<b>民法之基石</b></li><li>帝国大学与抄本传统，存古典之火种</li><li>古典成就经拜占庭传阿拉伯，复还欧洲</li></ul></div>
+    <div class="p-card reveal"><span class="ic">♞</span><h3>文明之对照</h3><ul><li>拜占庭为五大文明中<b>起点最高、进步最慢</b>者</li><li>西欧反之，由低走高，活力最强</li><li>“公元400年我居拜占庭；1400年我居西欧”——吴军</li></ul></div>
+    <div class="p-card reveal"><span class="ic">✧</span><h3>薪尽火传</h3><ul><li><b>“文明即信息，薪尽火传”</b></li><li>旧时代之中断，常为新时代之序章</li><li>历史之律：个体不死，种群则亡</li></ul></div>
+  </div>
+</section>
+
+<section id="outro">
+  <div class="sec-head reveal"><div class="chap">跋</div><h2>吴军之思</h2><div class="deco">❖</div></div>
+  <div class="quotes">
+    <div class="quote reveal"><p>“大到宇宙、星球，中到文明，小到企业、个人，都是有生命周期的。生命太长，相关的问题就会很多，很容易失去发展的动力。”</p><div class="from">——《帝国的衰落：拜占庭如何走向覆灭？》</div></div>
+    <div class="quote reveal"><p>“文明，或者说信息，是可以薪尽火传的。我们不必为历史上某一个文明的消亡而担心。”</p><div class="from">——吴军 ·《吴军来信·世界文明史》</div></div>
+  </div>
+  <div class="outro reveal" style="margin-top:56px">
+    <p>拜占庭之千年，一部“换人不换国”之延续史，亦一部由盛而衰之收缩史。以地理、文化、经济之利而成奇迹，终以“太老”“守旧”而谢幕。然其所遗法律、学术、信仰，随流亡学士之行囊、远航船队之风帆，潜入近代世界之血脉——<br>文明之死，非信息之终也。</p>
+  </div>
+</section>
+
+<section id="sources" style="padding-top:30px">
+  <div class="src reveal">
+    <h3>资料来源</h3>
+    <p>吴军《吴军来信·世界文明史》：第121讲《文明东进：拜占庭帝国的崛起》· 第122讲《优势：拜占庭为什么能延续上千年？》· 第123讲《帝国的衰落：拜占庭如何走向覆灭？》· 答读者问32《为什么拜占庭文明没有延续？》· 第120讲《十字军东征》· 第145讲《基辅罗斯》· 第148讲《突厥的兴起》· 第151讲《走出中世纪》· 第152/153讲《四种文明的比较》· 第164讲《大航海时代的动机》· 第107讲《消失的文明》等。</p>
+    <p style="margin-top:8px;opacity:.75">注：部分年份（如1071年曼齐刻尔特战役、1204年第四次十字军陷城等）为依据课程叙述补充的通行史实时间点。</p>
+  </div>
+</section>
+
+<footer>拜占庭编年史 · 千年帝国 — 据《吴军来信·世界文明史》整理<br>交互编年体 · 点击条目展卷 · 三式可选其一</footer>
+
+<button id="topBtn" title="返回卷首">↑</button>
+
+<script>
+const TIMELINE=[
+{era:"奠基",year:"286",title:"戴克里先行东西分治",figure:"戴克里先",tag:"序幕",sum:"三世纪危机后，罗马残破难支，帝国一分为二——东迁之起点。",
+ bg:"三世纪危机之后，罗马城及其周边饱受战乱破坏，帝国财政已难支撑这座巨都；帝国东部行省则因长期积累而更富庶。",
+ ct:"戴克里先为应对危机，将帝国分为东西两部、各设皇帝，中心东移自此肇端。",
+ im:"帝国重心东倾，为君士坦丁堡之诞生与拜占庭之崛起埋下伏笔。"},
+{era:"奠基",year:"330",title:"营建君士坦丁堡 · “新罗马”",figure:"君士坦丁大帝",tag:"奠基",sum:"罗马政治中心正式东移，扼守欧亚咽喉之新都拔地而起。",
+ bg:"罗马帝国走下坡路，东方行省较西方更发达、更富有，中心东移几为必然。",
+ ct:"君士坦丁堡地处博斯普鲁斯海峡，扼欧亚与黑海—地中海之要冲，且多山易守难攻，遂定为新都。",
+ im:"西陲御蛮之力削弱、终至沦陷；东境则国势愈强，延续罗马文明千余年。"},
+{era:"奠基",year:"395",title:"东西罗马正式分裂",figure:"狄奥多西一世",tag:"转折",sum:"最后一位统治全帝国之皇帝崩，东西自此互不隶属。",
+ bg:"最后一位统治整个罗马帝国的皇帝狄奥多西一世崩，帝国由其后代分治。",
+ ct:"东西部经济、文化之异已难弥合，分治成为现实之选。",
+ im:"西罗马5世纪为蛮族所陷；东罗马（拜占庭）成独立国家，开启千年国祚。"},
+{era:"中兴",year:"491",title:"阿纳斯塔修斯一世税制改革",figure:"阿纳斯塔修斯一世",tag:"中兴之基",sum:"废苛税、藏富于民，为帝国积金150吨。",
+ bg:"罗马后期按月计征、四年一结之税制令民众不堪重负，无力缴者卖儿鬻女甚至卖身为奴。",
+ ct:"阿纳斯塔修斯一世废旧税，改按庄园盈利征收，民负大减。",
+ im:"减税反致繁荣，间接税大增；崩时国库存金约32万磅（约150吨），为查士丁尼伟业奠定财基。"},
+{era:"中兴",year:"518",title:"查士丁登位，王朝开启",figure:"查士丁",tag:"更替",sum:"一似“黄袍加身”之夺位，开启查士丁尼王朝。",
+ bg:"阿纳斯塔修斯一世崩而无嗣，宫廷内务总管阿曼提乌斯贿赂卫队长查士丁，欲扶宫廷派之选。",
+ ct:"查士丁散金于部下以自固，得军人拥立而登极——颇类赵匡胤“黄袍加身”。",
+ im:"王朝更替仅为上层之权力交接，与黎庶无涉；查士丁尼王朝自此始。"},
+{era:"中兴",year:"527–565",title:"查士丁尼一世中兴盛世",figure:"查士丁尼一世",tag:"极盛",sum:"以“再造罗马”为志，疆域人口双登帝国巅峰。",
+ bg:"承阿纳斯塔修斯之充盈国库，查士丁尼一生以“再造罗马”为志业。",
+ ct:"武力收复意大利故土与北非全境，荡平汪达尔人；与萨珊波斯订五十年和约；主持编纂《查士丁尼法典》；营建圣索菲亚大教堂。",
+ im:"复罗马除高卢、不列颠外之全境，疆域峰值近300万平方公里、人口峰值约3000万；然529年关雅典学校、禁研数学，亦埋科技停滞之隐患。"},
+{era:"中兴",year:"532",title:"尼卡暴动与狄奥多拉",figure:"狄奥多拉皇后",tag:"危机",sum:"一场几覆皇位之乱，赖一皇后力挽狂澜。",
+ bg:"君士坦丁堡民众因苛政与党争积怨，暴动大起，暴民几入皇宫。",
+ ct:"皇后狄奥多拉力主留守平叛、安定军心，查士丁尼遂得镇压。",
+ im:"皇权重固；亦证拜占庭女性继承权所予之政治影响力。"},
+{era:"中兴",year:"537",title:"圣索菲亚大教堂落成",figure:"查士丁尼一世",tag:"建筑",sum:"“最大教堂”纪录保持近千年之旷世建筑。",
+ bg:"查士丁尼大兴土木，志营超越万神殿之巨构。",
+ ct:"拜占庭承希腊罗马工程数学之学，攻克巨穹营造之难。",
+ im:"成当时世界最大教堂，纪录近千年；为拜占庭建筑与科技之巅峰象征。"},
+{era:"转折",year:"620",title:"希腊语为官方语言",figure:"希拉克略",tag:"分家",sum:"帝国于文化上与罗马彻底分途，希腊化乃成。",
+ bg:"东部本崇希腊文风，西罗马亡后拉丁语根基渐失。",
+ ct:"希拉克略皇帝首以希腊语代拉丁语为帝国官话。",
+ im:"拜占庭与罗马于文化上分家，后世视为独立文明。"},
+{era:"转折",year:"7世纪",title:"阿拉伯崛起，埃及陷落",figure:"—",tag:"萎缩",sum:"新生之阿拉伯帝国夺其最富庶之东土。",
+ bg:"阿拉伯帝国骤兴，席卷西亚北非。",
+ ct:"拜占庭经查士丁尼王朝后期之耗，已无力两线作战。",
+ im:"失埃及与东方大部，入第一个混乱期，此后长期仅控小亚细亚与希腊。"},
+{era:"中兴",year:"9–11世纪",title:"马其顿王朝：第二黄金时代",figure:"利奥六世 · 巴西尔二世",tag:"由盛转衰",sum:"文治武功再攀高峰，亦自掘帝国之根基。",
+ bg:"经混乱期后，马其顿王朝重整合帝国。",
+ ct:"军功：重夺巴尔干、小亚细亚败阿拉伯、收复意大利南部；文治三事：利奥六世成60卷法律总纂；败基辅罗斯而令其皈依东正教；营君士坦丁堡为欧洲最大最富之城与东西贸易之纽。",
+ im:"表面辉煌，实则坏土地之制——自由农大量沦为农奴，帝国失兵源与向心力，唯赖雇佣军，为由盛转衰之转折。"},
+{era:"转折",year:"988",title:"基辅罗斯皈依东正教",figure:"弗拉基米尔大公",tag:"辐射",sum:"东欧首次整体归入拜占庭文明之怀抱。",
+ bg:"弗拉基米尔大公欲娶拜占庭公主安娜以自重，拜占庭则借机令其皈依东正教。",
+ ct:"使者自君士坦丁堡归，称“分不清是在人间还是天堂”；其要者，在通好拜占庭、见容于欧洲。",
+ im:"基辅罗斯入文明社会，演化为俄、乌、白之共同源头；东正教由此辐射东欧。"},
+{era:"转折",year:"1046",title:"重建帝国大学",figure:"君士坦丁九世",tag:"文教",sum:"古典学术存续于君士坦丁堡之“方舟”。",
+ bg:"425年创于马格瑙拉宫之帝国大学早已停办，而西欧民众尚普遍不识字。",
+ ct:"君士坦丁九世重建大学，设法律、哲学诸系，授经济、艺术、科学与工程，且有藏书。",
+ im:"有学者以为此乃世界第一所大学（早于博洛尼亚）；古典学术赖此延续。"},
+{era:"衰落",year:"1071",title:"曼齐刻尔特惨败，安纳托利亚易手",figure:"图赫里勒·贝格（塞尔柱）",tag:"巨变",sum:"帝国失东方屏障，被迫西向乞援。",
+ bg:"塞尔柱突厥崛起，1055年架空哈里发、实控阿拉伯世界，继与拜占庭接壤而夺其亚洲疆域。",
+ ct:"拜占庭军区制瓦解、兵力枯竭，不敌塞尔柱骑兵，曼齐刻尔特一役大败。",
+ im:"失东方屏障安纳托利亚，存亡受致命之胁，被迫向西欧求援，直接引发十字军东征。"},
+{era:"衰落",year:"1095–1204",title:"十字军东征：援救成浩劫",figure:"—",tag:"反噬",sum:"本为救拜占庭而兴之战，反成压垮之巨石。",
+ bg:"江河日下之拜占庭无力御塞尔柱，向西欧基督教世界乞援。",
+ ct:"十字军名义相援，实则觊觎其财；1204年第四次十字军陷君士坦丁堡。",
+ im:"拜占庭入漫长衰落，终不复振；然十字军携东方浴池、香料、丝绸与生活方式西归，客观上唤醒西欧。"},
+{era:"衰亡",year:"1453",title:"君士坦丁堡陷落 · 千年帝国终结",figure:"穆罕默德二世",tag:"终章",sum:"中世纪与近代之分水岭：一代终，一代始。",
+ bg:"奥斯曼帝国崛起（突厥乌古斯部卡耶部落后裔），代塞尔柱为安纳托利亚霸主，渐蚕拜占庭残土。",
+ ct:"末年军区制崩溃、财政枯竭，乃至雇奥斯曼之兵为卫，君士坦丁堡已成孤城；穆罕默德二世举总攻。",
+ im:"中世纪与近代之分水岭：流亡学者携古希腊典籍与阿拉伯科学赴意大利，推动文艺复兴；奥斯曼断东西商路，逼出大航海时代。"}
+];
+const FIGURES=[
+{name:"君士坦丁大帝",years:"约272–337",role:"罗马皇帝 · 奠基者",tags:["奠基","新都"],desc:"330年营建君士坦丁堡“新罗马”，罗马中心东移——拜占庭千年国祚之起点。"},
+{name:"阿纳斯塔修斯一世",years:"约430–518",role:"皇帝 · 改革家",tags:["税制","藏富于民"],desc:"废苛税、立金币币制；身后留金约150吨，为查士丁尼之伟业买单。"},
+{name:"查士丁尼一世",years:"约482–565",role:"皇帝 · 中兴之主",tags:["立法","圣索菲亚"],desc:"“再造罗马”：复北非意大利、纂《查士丁尼法典》、营圣索菲亚；疆域人口登峰。"},
+{name:"狄奥多拉皇后",years:"约500–548",role:"皇后 · 女政治家",tags:["尼卡暴动"],desc:"出身微贱而权倾朝野，尼卡暴动中力主留守平叛，救查士丁尼之皇位。"},
+{name:"希拉克略",years:"约575–641",role:"皇帝 · 希腊化推动者",tags:["官方语言"],desc:"620年以希腊语为官话，拜占庭与罗马于文化上分家。"},
+{name:"利奥六世",years:"866–912",role:"皇帝 · 立法者",tags:["法典"],desc:"主成60卷法律总纂，为后世一切拜占庭法律之基，至今犹为学者所研。"},
+{name:"君士坦丁九世",years:"约1000–1055",role:"皇帝 · 文教复兴",tags:["帝国大学"],desc:"1046年重建帝国大学，古典学术之火种得以延续。"},
+{name:"弗拉基米尔大公",years:"约958–1015",role:"基辅罗斯君主",tags:["东正教"],desc:"988年率罗斯人皈依东正教，东欧文明进程由此始，俄罗斯自居罗马之继承者。"},
+{name:"图赫里勒·贝格",years:"约990–1063",role:"塞尔柱苏丹",tags:["塞尔柱"],desc:"1055年为哈里发册封苏丹，架空阿拉伯帝国，成压垮拜占庭之第一块多米诺。"},
+{name:"穆罕默德二世",years:"1432–1481",role:"奥斯曼苏丹 · 征服者",tags:["1453"],desc:"1453年陷君士坦丁堡，终结千年帝国，开奥斯曼与近代世界之新篇。"}
+];
+const FILTERS=["全部","奠基","中兴","转折","衰落","衰亡"];
+
+/* 编年渲染 */
+const box=document.getElementById("chronicleBox"),nav=document.getElementById("chapNav");
+FILTERS.forEach(f=>{const b=document.createElement("button");b.textContent=f;b.className=f==="全部"?"active":"";b.onclick=()=>{nav.querySelectorAll("button").forEach(x=>x.classList.remove("active"));b.classList.add("active");render(f);};nav.appendChild(b);});
+function render(active){
+  box.innerHTML="";
+  TIMELINE.filter(e=>active==="全部"||e.era===active).forEach(e=>{
+    const d=document.createElement("div");d.className="entry reveal";
+    d.innerHTML=`<div class="year">${e.year}<small>${e.era}</small></div>
+      <div class="mark"></div>
+      <div class="card">
+        <span class="tag">${e.era} · ${e.tag}</span>
+        <h3>${e.title}</h3>
+        <div class="fig"><b>关键人物：</b>${e.figure}</div>
+        <p class="sum">${e.sum}</p>
+        <div class="detail"><div><div class="dbox">
+          <div class="blk bg"><h4>▍背景</h4><p>${e.bg}</p></div>
+          <div class="blk ct"><h4>▍缘由 / 经过</h4><p>${e.ct}</p></div>
+          <div class="blk im"><h4>▍影响</h4><p>${e.im}</p></div>
+        </div></div></div>
+        <span class="toggle">展卷 ▾</span>
+      </div>`;
+    const card=d.querySelector(".card"),detail=d.querySelector(".detail"),toggle=d.querySelector(".toggle");
+    card.addEventListener("click",()=>{const open=detail.classList.toggle("open");toggle.textContent=open?"合卷 ▴":"展卷 ▾";});
+    box.appendChild(d);
+  });
+  requestAnimationFrame(()=>{document.querySelectorAll("#chronicleBox .reveal").forEach(el=>{if(el.getBoundingClientRect().top<innerHeight*.92)el.classList.add("in");});});
+}
+render("全部");
+
+/* 人物 */
+const fg=document.getElementById("figGrid");
+FIGURES.forEach(f=>{const d=document.createElement("div");d.className="fig reveal";
+  d.innerHTML=`<div class="seal-sm">${f.name[0]}</div><h3>${f.name}</h3>
+  <div class="years">${f.years}</div><div class="role">${f.role}</div>
+  <div class="tags">${f.tags.map(t=>`<span>${t}</span>`).join("")}</div><p>${f.desc}</p>`;
+  fg.appendChild(d);});
+
+/* 动效 */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;cio.unobserve(e.target);
+  const el=e.target,count=+el.dataset.count,suf=el.dataset.suffix||"",t0=performance.now(),dur=1800;
+  const step=t=>{const p=Math.min(1,(t-t0)/dur),ease=1-Math.pow(1-p,3);el.textContent=Math.round(count*ease).toLocaleString()+suf;if(p<1)requestAnimationFrame(step);};
+  requestAnimationFrame(step);}),{threshold:.5});
+document.querySelectorAll(".stat .num").forEach(el=>cio.observe(el));
+const prog=document.getElementById("progress"),topBtn=document.getElementById("topBtn");
+addEventListener("scroll",()=>{const h=document.documentElement.scrollHeight-innerHeight;prog.style.width=(scrollY/h*100)+"%";topBtn.classList.toggle("show",scrollY>600);},{passive:true});
+topBtn.onclick=()=>scrollTo({top:0,behavior:"smooth"});
+const secs=[...document.querySelectorAll("section")];
+addEventListener("scroll",()=>{const y=scrollY+innerHeight*.35;let cur=null;secs.forEach(s=>{if(s.offsetTop<=y)cur=s.id;});
+  document.querySelectorAll("nav .links a").forEach(a=>a.style.color=a.getAttribute("href")==="#"+cur?"var(--red)":"");},{passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的学习导航</title>
+<style>
+  :root {
+    --bg: #f5f5f0;
+    --card-bg: #ffffff;
+    --text: #2c2c2c;
+    --text-secondary: #666;
+    --accent: #3b5998;
+    --border: #e8e8e0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px 80px;
+  }
+
+  .container { width: 100%; max-width: 720px; }
+
+  header {
+    text-align: center;
+    padding: 48px 0 40px;
+  }
+  header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  header p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+  }
+
+  .section { margin-bottom: 32px; }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    padding: 0 4px 12px;
+  }
+
+  .card-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-color: #ccc;
+  }
+
+  .card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-title { font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+  .card-subtitle { font-size: 12px; color: var(--text-secondary); }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .card-arrow {
+    color: #ccc;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .card:hover .card-arrow {
+    transform: translateX(3px);
+    color: var(--accent);
+  }
+
+  footer {
+    text-align: center;
+    padding-top: 40px;
+    font-size: 12px;
+    color: #bbb;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 480px) {
+    .card { padding: 14px 16px; gap: 12px; }
+    .card-icon { width: 38px; height: 38px; font-size: 17px; }
+    .card-title { font-size: 15px; }
+    .card-tag { font-size: 10px; padding: 2px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1 id="page-title">我的学习导航</h1>
+    <p id="page-subtitle">阅读 · 播客 · 知识整理</p>
+  </header>
+
+  <div id="content"></div>
+
+  <footer id="page-footer">设为浏览器首页 · 随时访问</footer>
+</div>
+
+<script>
+// ── 颜色循环：给不同 section 的卡片图标分配不同背景色 ──
+const iconColors = ['#e8f0fe','#fef7e0','#fce4ec','#e8f5e9','#ede7f6','#fff3e0','#e0f2f1','#f3e5f5'];
+// ── 标签颜色映射 ──
+const tagColors = [
+  { bg: '#e8f4f8', text: '#2c7a8c' },
+  { bg: '#fef3e2', text: '#b86e1c' },
+  { bg: '#e8eaf6', text: '#4a3f8c' },
+  { bg: '#e8f5e9', text: '#2e7d32' },
+];
+
+(async function load() {
+  const resp = await fetch('links.json');
+  const data = await resp.json();
+
+  document.getElementById('page-title').textContent = data.title;
+  document.getElementById('page-subtitle').textContent = data.subtitle;
+  document.getElementById('page-footer').textContent = data.footer;
+
+  const content = document.getElementById('content');
+  let colorIdx = 0;
+  const tagMap = {};
+  let tagColorIdx = 0;
+
+  data.categories.forEach(cat => {
+    const section = document.createElement('div');
+    section.className = 'section';
+
+    const title = document.createElement('div');
+    title.className = 'section-title';
+    title.textContent = cat.name;
+    section.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'card-grid';
+
+    cat.links.forEach(link => {
+      const a = document.createElement('a');
+      a.className = 'card';
+      a.href = link.url;
+      a.target = '_blank';
+
+      // icon
+      const icon = document.createElement('div');
+      icon.className = 'card-icon';
+      icon.style.background = iconColors[colorIdx % iconColors.length];
+      icon.textContent = link.emoji || '📄';
+      a.appendChild(icon);
+      colorIdx++;
+
+      // body
+      const body = document.createElement('div');
+      body.className = 'card-body';
+      const t = document.createElement('div');
+      t.className = 'card-title';
+      t.textContent = link.title;
+      body.appendChild(t);
+      const s = document.createElement('div');
+      s.className = 'card-subtitle';
+      s.textContent = link.subtitle || '';
+      body.appendChild(s);
+      a.appendChild(body);
+
+      // tag
+      if (link.tag) {
+        if (!(link.tag in tagMap)) {
+          tagMap[link.tag] = tagColors[tagColorIdx % tagColors.length];
+          tagColorIdx++;
+        }
+        const tc = tagMap[link.tag];
+        const tagEl = document.createElement('span');
+        tagEl.className = 'card-tag';
+        tagEl.textContent = link.tag;
+        tagEl.style.background = tc.bg;
+        tagEl.style.color = tc.text;
+        a.appendChild(tagEl);
+      }
+
+      // arrow
+      const arrow = document.createElement('span');
+      arrow.className = 'card-arrow';
+      arrow.textContent = '→';
+      a.appendChild(arrow);
+
+      grid.appendChild(a);
+    });
+
+    section.appendChild(grid);
+    content.appendChild(section);
+  });
+})();
+</script>
+
+</body>
+</html>

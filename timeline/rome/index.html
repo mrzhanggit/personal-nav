@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>罗马帝国 · 永恒之城 — 帝国大理石典藏版</title>
+<style>
+/* ═══════════════════════ 主题变量 ═══════════════════════ */
+:root{
+  --paper:#f7f4ed; --paper2:#efe9dd; --paper3:#e7dfcf;
+  --ink:#2b2620; --ink2:#4d443a; --muted:#7a7062; --dim:#a89c8b;
+  --gold:#b08d3e; --gold-l:#c8a44c; --gold-d:#8a6d2f;
+  --line:rgba(176,141,62,.35); --line2:rgba(176,141,62,.16);
+  --marble:#faf7f1;
+  --serif:"Georgia","Times New Roman","Songti SC","STSong","SimSun",serif;
+  --sans:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.8;overflow-x:hidden}
+::selection{background:rgba(176,141,62,.3)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--paper2)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--gold-d),var(--gold));border-radius:5px}
+
+/* ── 大理石纹理层 ── */
+body::before{content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;opacity:.5;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 0%,rgba(176,141,62,.07),transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 30%,rgba(138,109,47,.05),transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%,rgba(200,164,76,.06),transparent 60%)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.28;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.012 .018' numOctaves='4' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .52 0 0 0 0 .38 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── 顶部进度条 ── */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold-l),#f3dfa0);z-index:999;box-shadow:0 0 14px rgba(176,141,62,.7)}
+
+/* ── 导航 ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px 4.5vw;background:rgba(247,244,237,.82);backdrop-filter:blur(16px);border-bottom:1px solid var(--line2);transition:.4s}
+nav.scrolled{box-shadow:0 8px 30px rgba(43,38,32,.08)}
+nav .brand{display:flex;align-items:center;gap:12px;font-family:var(--serif);font-size:1.06rem;letter-spacing:.26em;color:var(--gold-d)}
+nav .brand .spqr{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;font-size:.56rem;letter-spacing:.08em;color:var(--gold);font-weight:700;background:radial-gradient(circle at 35% 30%,#fff,var(--paper3))}
+nav .links{display:flex;gap:26px;font-size:.8rem;letter-spacing:.14em}
+nav .links a{color:var(--muted);text-decoration:none;position:relative;padding:4px 0;transition:.3s}
+nav .links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1.5px;background:var(--gold);transition:.35s}
+nav .links a:hover{color:var(--gold-d)}
+nav .links a:hover::after{width:100%}
+@media(max-width:860px){nav .links{display:none}}
+
+/* ── Hero ── */
+.hero{position:relative;min-height:min(100vh,880px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 6vw 80px;overflow:hidden}
+/* 柱列装饰 */
+.colonnade{position:absolute;inset:0;display:flex;justify-content:center;gap:clamp(40px,8vw,120px);perspective:900px;z-index:0;pointer-events:none}
+.col{position:relative;width:clamp(26px,3.6vw,44px);height:100%;animation:colRise 1.3s cubic-bezier(.16,.8,.24,1) backwards}
+.col:nth-child(1){animation-delay:.15s}.col:nth-child(2){animation-delay:.28s}.col:nth-child(3){animation-delay:.41s}.col:nth-child(4){animation-delay:.54s}.col:nth-child(5){animation-delay:.67s}.col:nth-child(6){animation-delay:.8s}.col:nth-child(7){animation-delay:.93s}
+.col .shaft{position:absolute;top:0;bottom:12%;left:8%;right:8%;background:linear-gradient(90deg,var(--paper3),var(--marble) 30%,#f1ead9 55%,var(--paper3));border-left:1px solid rgba(176,141,62,.18);border-right:1px solid rgba(176,141,62,.18);
+  background-image:repeating-linear-gradient(90deg,transparent 0 6px,rgba(176,141,62,.07) 6px 7px,transparent 7px 14px)}
+.col .cap{position:absolute;top:12%;left:0;right:0;height:5.5%;background:linear-gradient(180deg,#fdfbf6,var(--paper3));border:1px solid rgba(176,141,62,.25);border-bottom:none;border-radius:6px 6px 0 0}
+.col .base{position:absolute;bottom:12%;left:-6%;right:-6%;height:3.5%;background:linear-gradient(180deg,#fdfbf6,var(--paper3));border:1px solid rgba(176,141,62,.25);border-top:none;border-radius:0 0 6px 6px}
+@keyframes colRise{from{transform:translateY(40px)}to{transform:translateY(0)}}
+/* 金色粒子 */
+#particles{position:absolute;inset:0;z-index:1}
+.hero .content{position:relative;z-index:2;max-width:900px}
+.hero .spqr-badge{display:inline-flex;align-items:center;gap:14px;margin-bottom:30px;animation:fadeDown .9s .15s both}
+.hero .spqr-badge .laurel{font-size:.9rem;color:var(--gold)}
+.hero .spqr-badge span{font-family:var(--serif);letter-spacing:.62em;font-size:1rem;color:var(--gold-d);font-weight:700}
+.hero .kicker{font-size:.78rem;letter-spacing:.52em;color:var(--gold);text-transform:uppercase;margin-bottom:22px;animation:fadeDown .9s .25s both}
+.hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.7rem,7.5vw,5.6rem);letter-spacing:.12em;line-height:1.18;color:var(--ink);animation:fadeDown .9s .35s both}
+.hero h1 .accent{color:var(--gold-d);font-style:italic}
+.hero .en{display:block;font-size:.3em;letter-spacing:.5em;color:var(--muted);margin-top:16px;font-style:italic;font-weight:400;animation:fadeDown .9s .45s both}
+.hero .sub{margin-top:30px;font-size:clamp(.95rem,1.6vw,1.12rem);color:var(--ink2);max-width:660px;margin-left:auto;margin-right:auto;letter-spacing:.04em;animation:fadeDown .9s .55s both}
+.hero .cta{margin-top:46px;display:flex;gap:18px;flex-wrap:wrap;justify-content:center;animation:fadeDown .9s .65s both}
+.hero .cta a{padding:14px 38px;border:1px solid var(--gold);color:var(--gold-d);text-decoration:none;letter-spacing:.24em;font-size:.82rem;transition:.4s;background:rgba(255,255,255,.35);border-radius:2px}
+.hero .cta a:hover{background:var(--gold);color:#fff;box-shadow:0 10px 34px rgba(176,141,62,.35);transform:translateY(-3px)}
+.hero .cta a.ghost{border-color:var(--line);color:var(--muted)}
+.hero .cta a.ghost:hover{border-color:var(--gold);color:var(--gold-d);background:rgba(176,141,62,.08);box-shadow:none}
+.hero .era{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:2;font-family:var(--serif);font-size:.78rem;letter-spacing:.5em;color:var(--dim);animation:bob 2.6s infinite}
+@keyframes fadeDown{from{transform:translateY(-20px)}to{transform:none}}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,10px)}}
+
+/* ── 章节通用 ── */
+section{position:relative;padding:108px 6vw}
+.sec-head{text-align:center;margin-bottom:64px}
+.sec-head .orn{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:18px}
+.sec-head .orn::before,.sec-head .orn::after{content:"";height:1px;width:min(90px,18vw);background:linear-gradient(90deg,transparent,var(--gold))}
+.sec-head .orn::after{background:linear-gradient(90deg,var(--gold),transparent)}
+.sec-head .orn i{color:var(--gold);font-size:.8rem}
+.sec-head .no{font-family:var(--serif);font-size:.92rem;color:var(--gold);letter-spacing:.44em;display:block;margin-bottom:10px}
+.sec-head h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,4.2vw,3rem);letter-spacing:.14em;color:var(--ink)}
+.sec-head p{color:var(--muted);max-width:640px;margin:16px auto 0;font-size:.95rem}
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ── 数据统计 ── */
+#stats{background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px;max-width:1120px;margin:0 auto}
+.stat{position:relative;border:1px solid var(--line2);background:rgba(250,247,241,.7);padding:32px 16px;text-align:center;overflow:hidden;transition:.45s;box-shadow:0 4px 20px rgba(43,38,32,.04)}
+.stat::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:.5s}
+.stat:hover{transform:translateY(-7px);border-color:var(--line);box-shadow:0 18px 44px rgba(43,38,32,.09)}
+.stat:hover::before{transform:scaleX(1)}
+.stat .num{font-family:var(--serif);font-size:2.5rem;color:var(--gold-d);line-height:1.15;letter-spacing:.02em}
+.stat .num small{font-size:.55em;color:var(--muted);letter-spacing:.1em}
+.stat .lbl{margin-top:10px;font-size:.84rem;letter-spacing:.16em;color:var(--ink2);font-weight:600}
+.stat .note{font-size:.7rem;color:var(--dim);margin-top:4px}
+
+/* ── 起源叙事 ── */
+.origin{max-width:880px;margin:0 auto;font-size:1.02rem;color:var(--ink2)}
+.origin p{margin-bottom:22px;text-indent:2em}
+.origin p:first-of-type::first-letter{font-family:var(--serif);font-size:3.4em;float:left;line-height:.85;padding:8px 14px 0 0;color:var(--gold);font-weight:700}
+.origin .hl{color:var(--gold-d);font-weight:700}
+.origin .phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin:30px 0}
+.origin .phase{border:1px solid var(--line2);background:rgba(250,247,241,.65);padding:22px 24px;position:relative;transition:.4s}
+.origin .phase:hover{transform:translateY(-5px);border-color:var(--line);box-shadow:0 12px 32px rgba(43,38,32,.07)}
+.origin .phase .ph{font-family:var(--serif);font-size:.82rem;letter-spacing:.3em;color:var(--gold);margin-bottom:8px}
+.origin .phase h4{font-size:1.02rem;margin-bottom:8px;letter-spacing:.04em}
+.origin .phase p{font-size:.86rem;color:var(--muted);margin:0;text-indent:0}
+
+/* ── 时间线 ── */
+#timeline{background:linear-gradient(180deg,var(--paper2),var(--paper))}
+.filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:54px}
+.filters button{padding:8px 22px;border:1px solid var(--line2);background:rgba(255,255,255,.4);color:var(--muted);font-size:.78rem;letter-spacing:.14em;cursor:pointer;transition:.35s;font-family:var(--sans);border-radius:99px}
+.filters button:hover,.filters button.active{color:var(--gold-d);border-color:var(--gold);background:rgba(176,141,62,.1)}
+.tl{position:relative;max-width:1020px;margin:0 auto;padding:10px 0}
+.tl::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,transparent,var(--gold),var(--gold),transparent);opacity:.45}
+.tl-item{position:relative;width:50%;padding:0 52px 44px 0;cursor:pointer}
+.tl-item:nth-child(even){left:50%;padding:0 0 44px 52px}
+.tl-node{position:absolute;top:8px;right:-10px;width:20px;height:20px;transform:rotate(45deg);border:2px solid var(--gold);background:var(--paper);z-index:2;transition:.45s;box-shadow:0 0 0 0 rgba(176,141,62,.3)}
+.tl-item:nth-child(even) .tl-node{right:auto;left:-10px}
+.tl-item:hover .tl-node,.tl-item.open .tl-node{background:var(--gold);box-shadow:0 0 0 9px rgba(176,141,62,.14);transform:rotate(45deg) scale(1.12)}
+.tl-card{border:1px solid var(--line2);background:rgba(250,247,241,.78);padding:26px 28px;transition:.45s;position:relative;box-shadow:0 4px 18px rgba(43,38,32,.05)}
+.tl-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,var(--gold),var(--gold-l))}
+.tl-item:hover .tl-card{transform:translateY(-4px);border-color:var(--line);box-shadow:0 16px 42px rgba(43,38,32,.1)}
+.tl-year{font-family:var(--serif);font-size:1.45rem;color:var(--gold-d);letter-spacing:.05em;font-weight:700}
+.tl-tag{display:inline-block;margin-left:10px;font-size:.66rem;letter-spacing:.2em;color:var(--gold-d);border:1px solid var(--line);padding:2px 12px;vertical-align:middle;border-radius:99px}
+.tl-title{margin:10px 0 6px;font-size:1.14rem;color:var(--ink);font-weight:700;letter-spacing:.03em}
+.tl-fig{font-size:.78rem;color:var(--dim);letter-spacing:.06em;margin-bottom:10px}
+.tl-fig b{color:var(--ink2);font-weight:600}
+.tl-sum{font-size:.9rem;color:var(--muted)}
+.tl-detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .65s cubic-bezier(.2,.7,.2,1)}
+.tl-detail.open{grid-template-rows:1fr}
+.tl-detail>div{overflow:hidden}
+.tl-dbox{margin-top:16px;border-top:1px dashed var(--line2);padding-top:16px;display:grid;gap:12px}
+.tl-dbox .blk{padding:13px 16px;border-left:2px solid var(--gold);background:rgba(176,141,62,.06)}
+.tl-dbox .blk.bg{border-color:#8f7f5e;background:rgba(143,127,94,.06)}
+.tl-dbox .blk.ct{border-color:#a3694b;background:rgba(163,105,75,.06)}
+.tl-dbox .blk.im{border-color:#6d5d8f;background:rgba(109,93,143,.06)}
+.tl-dbox .blk h4{font-size:.78rem;letter-spacing:.24em;color:var(--gold-d);margin-bottom:5px}
+.tl-dbox .blk.bg h4{color:#8f7f5e}
+.tl-dbox .blk.ct h4{color:#a3694b}
+.tl-dbox .blk.im h4{color:#6d5d8f}
+.tl-dbox .blk p{font-size:.88rem;color:var(--ink2)}
+
+/* ── 人物 ── */
+#people{background:linear-gradient(180deg,var(--paper),var(--paper2))}
+.ptabs{display:flex;gap:12px;justify-content:center;margin-bottom:48px}
+.ptabs button{padding:10px 30px;border:1px solid var(--line2);background:rgba(255,255,255,.4);color:var(--muted);font-size:.82rem;letter-spacing:.18em;cursor:pointer;transition:.35s;font-family:var(--sans);border-radius:2px}
+.ptabs button:hover,.ptabs button.active{color:#fff;background:var(--gold);border-color:var(--gold);box-shadow:0 8px 24px rgba(176,141,62,.3)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;max-width:1120px;margin:0 auto}
+.pcard{border:1px solid var(--line2);background:rgba(250,247,241,.75);padding:26px 24px;position:relative;transition:.45s;overflow:hidden}
+.pcard::after{content:"SPQR";position:absolute;right:-8px;bottom:-14px;font-family:var(--serif);font-size:2.6rem;color:rgba(176,141,62,.08);font-weight:700;letter-spacing:.08em}
+.pcard:hover{transform:translateY(-6px);border-color:var(--gold);box-shadow:0 18px 44px rgba(43,38,32,.1)}
+.pcard .badge{display:inline-block;font-size:.62rem;letter-spacing:.28em;color:var(--gold-d);border:1px solid var(--line);padding:2px 12px;border-radius:99px;margin-bottom:12px}
+.pcard h3{font-family:var(--serif);font-size:1.32rem;color:var(--ink);letter-spacing:.04em}
+.pcard .role{font-size:.82rem;color:var(--gold);margin:4px 0 12px;letter-spacing:.08em}
+.pcard p{font-size:.86rem;color:var(--muted)}
+
+/* ── 专题 ── */
+#topics{background:linear-gradient(180deg,var(--paper2),var(--paper))}
+.ttabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:50px}
+.ttabs button{padding:10px 26px;border:1px solid var(--line2);background:rgba(255,255,255,.4);color:var(--muted);font-size:.8rem;letter-spacing:.16em;cursor:pointer;transition:.35s;font-family:var(--sans);border-radius:2px}
+.ttabs button:hover,.ttabs button.active{color:var(--gold-d);border-color:var(--gold);background:rgba(176,141,62,.1)}
+.tpanel{display:none;max-width:960px;margin:0 auto;animation:panelIn .7s cubic-bezier(.2,.7,.2,1)}
+.tpanel.active{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.tpanel .lead{font-size:1rem;color:var(--ink2);text-align:center;max-width:760px;margin:0 auto 36px}
+.tpanel .lead b{color:var(--gold-d)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.tcard{border:1px solid var(--line2);background:rgba(250,247,241,.78);padding:26px 26px 28px;position:relative;transition:.45s;box-shadow:0 4px 18px rgba(43,38,32,.05)}
+.tcard:hover{transform:translateY(-6px);border-color:var(--line);box-shadow:0 16px 40px rgba(43,38,32,.1)}
+.tcard .ic{width:46px;height:46px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;margin-bottom:16px;color:var(--gold-d);background:radial-gradient(circle at 35% 30%,#fff,var(--paper3))}
+.tcard h4{font-family:var(--serif);font-size:1.14rem;letter-spacing:.06em;margin-bottom:8px}
+.tcard p{font-size:.87rem;color:var(--muted)}
+.tcard .tfoot{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line2);font-size:.78rem;color:var(--gold-d)}
+
+/* ── 衰亡反思 ── */
+.decline{max-width:980px;margin:0 auto}
+.dcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;margin-bottom:34px}
+.dcol{border:1px solid var(--line2);background:rgba(250,247,241,.7);padding:28px 30px;position:relative;transition:.4s}
+.dcol:hover{transform:translateY(-5px);border-color:var(--line);box-shadow:0 14px 36px rgba(43,38,32,.08)}
+.dcol h3{font-family:var(--serif);font-size:1.2rem;letter-spacing:.12em;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.dcol h3 .dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.dcol ul{list-style:none}
+.dcol li{padding:10px 0 10px 24px;position:relative;font-size:.9rem;color:var(--ink2);border-bottom:1px dashed var(--line2)}
+.dcol li:last-child{border-bottom:none}
+.dcol li::before{content:"◆";position:absolute;left:0;top:11px;font-size:.5rem;color:var(--gold)}
+.dcol li b{color:var(--gold-d)}
+.sync{border:1.5px solid var(--gold);background:linear-gradient(135deg,rgba(176,141,62,.1),rgba(250,247,241,.6));padding:30px 34px;border-radius:2px;margin-top:26px}
+.sync h4{font-family:var(--serif);letter-spacing:.1em;color:var(--gold-d);margin-bottom:14px;font-size:1.06rem}
+.sync .rows{display:grid;gap:10px}
+.sync .row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;font-size:.86rem;color:var(--ink2)}
+.sync .row .c{font-family:var(--serif);color:var(--gold-d);text-align:center;font-size:.82rem}
+.sync .row .l,.sync .row .r{background:rgba(255,255,255,.5);padding:8px 14px;border-left:2px solid var(--gold)}
+.sync .row .r{border-left:none;border-right:2px solid var(--gold);text-align:right}
+
+/* ── 遗产与思考 ── */
+#legacy{background:linear-gradient(180deg,var(--paper2),var(--paper))}
+.legacy{max-width:960px;margin:0 auto}
+.l3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px;margin-bottom:40px}
+.lcard{position:relative;border:1px solid var(--line2);background:rgba(250,247,241,.75);padding:38px 28px 30px;text-align:center;transition:.45s}
+.lcard::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:60px;height:3px;background:var(--gold)}
+.lcard:hover{transform:translateY(-7px);border-color:var(--gold);box-shadow:0 20px 46px rgba(43,38,32,.1)}
+.lcard .rn{font-family:var(--serif);font-size:1.7rem;color:var(--gold);font-style:italic}
+.lcard h4{font-size:1.08rem;margin:10px 0 10px;letter-spacing:.05em}
+.lcard p{font-size:.85rem;color:var(--muted)}
+.quote{border:none;background:linear-gradient(135deg,rgba(176,141,62,.12),rgba(250,247,241,.7));padding:44px 46px;text-align:center;position:relative;margin:10px 0 34px}
+.quote::before{content:"“";position:absolute;top:-6px;left:24px;font-family:var(--serif);font-size:5rem;color:var(--gold);opacity:.4}
+.quote p{font-family:var(--serif);font-size:clamp(1.1rem,2.4vw,1.45rem);letter-spacing:.05em;color:var(--ink);line-height:2}
+.quote .who{margin-top:16px;font-size:.82rem;letter-spacing:.3em;color:var(--gold-d)}
+.reflect{border:1px solid var(--line);background:rgba(250,247,241,.7);padding:30px 36px;border-radius:2px}
+.reflect h4{font-family:var(--serif);letter-spacing:.14em;color:var(--gold-d);margin-bottom:16px}
+.reflect p{font-size:.94rem;color:var(--ink2);margin-bottom:14px;text-indent:2em}
+.reflect p:last-child{margin-bottom:0}
+
+/* ── Footer ── */
+footer{padding:60px 6vw 70px;text-align:center;border-top:1px solid var(--line2);background:var(--paper2)}
+footer .spqr{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border:1.5px solid var(--gold);border-radius:50%;font-size:.7rem;letter-spacing:.08em;color:var(--gold);font-weight:700;margin-bottom:18px;background:radial-gradient(circle at 35% 30%,#fff,var(--paper3))}
+footer p{font-size:.8rem;color:var(--muted);letter-spacing:.06em}
+footer .en{font-family:var(--serif);font-style:italic;color:var(--dim);margin-top:6px;font-size:.78rem}
+
+/* ── 响应式 ── */
+@media(max-width:760px){
+  .tl::before{left:12px}
+  .tl-item,.tl-item:nth-child(even){width:100%;left:0;padding:0 0 34px 44px}
+  .tl-node,.tl-item:nth-child(even) .tl-node{left:2px;right:auto}
+  .hero{padding-top:110px}
+  .colonnade{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav>
+  <div class="brand"><span class="spqr">SPQR</span>罗马帝国 · 永恒之城</div>
+  <div class="links">
+    <a href="#origin">起源</a><a href="#timeline">时间线</a><a href="#people">人物</a>
+    <a href="#topics">专题</a><a href="#decline">衰亡</a><a href="#legacy">遗产</a>
+  </div>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<header class="hero">
+  <div class="colonnade">
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+    <div class="col"><div class="cap"></div><div class="shaft"></div><div class="base"></div></div>
+  </div>
+  <canvas id="particles"></canvas>
+  <div class="content">
+    <div class="spqr-badge"><span class="laurel">❦</span><span>S · P · Q · R</span><span class="laurel">❦</span></div>
+    <div class="kicker">吴军来信 · 世界文明史 专题整理</div>
+    <h1>罗马帝国<span class="accent">·</span>永恒之城</h1>
+    <span class="en">The Roman Empire — From a Village to the Eternal City</span>
+    <p class="sub">从台伯河畔的七丘之城，到横跨欧亚非的地中海霸主；从共和的制衡智慧，到帝制的集权与危局——<b>西方文明的格局，由罗马奠定</b>。</p>
+    <div class="cta">
+      <a href="#timeline">进入时间线</a>
+      <a class="ghost" href="#origin">文明起源</a>
+    </div>
+  </div>
+  <div class="era">公元前753年 ── 公元1453年 · 两千两百年文明之旅</div>
+</header>
+
+<!-- ══════════════ 数据统计 ══════════════ -->
+<section id="stats">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅰ · 帝国气象 —</span>
+    <h2>数字中的罗马</h2>
+  </div>
+  <div class="stats">
+    <div class="stat reveal"><div class="num" data-count="2206">0</div><div class="lbl">文明延续 · 年</div><div class="note">前753建城 → 1453落幕</div></div>
+    <div class="stat reveal"><div class="num" data-count="3">0</div><div class="lbl">三次征服世界</div><div class="note">武力 · 拉丁语 · 法律</div></div>
+    <div class="stat reveal"><div class="num" data-count="6000" data-suffix="万+">0</div><div class="lbl">鼎盛期人口</div><div class="note">公元2世纪最强盛时</div></div>
+    <div class="stat reveal"><div class="num" data-count="27" data-prefix="前">0</div><div class="lbl">帝国建立 · 年</div><div class="note">屋大维受封奥古斯都</div></div>
+    <div class="stat reveal"><div class="num" data-count="2000" data-suffix="年">0</div><div class="lbl">罗马法延续</div><div class="note">前454 → 十五世纪</div></div>
+    <div class="stat reveal"><div class="num" data-count="43" data-suffix="米">0</div><div class="lbl">万神殿穹顶直径</div><div class="note">千年内世界最大</div></div>
+  </div>
+</section>
+
+<!-- ══════════════ 起源 ══════════════ -->
+<section id="origin">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅱ · 文明之源 —</span>
+    <h2>罗马人从哪里来</h2>
+    <p>终结了古希腊文明的罗马人，最初不过是意大利半岛上一小批外来者建立的城邦。</p>
+  </div>
+  <div class="origin reveal">
+    <p>关于罗马人的来历，最著名的传说是诗人维吉尔的史诗《埃涅阿斯纪》——特洛伊战败者的后裔渡海而来，在台伯河畔建立万世基业。而近代史学家考证，<span class="hl">罗马人更可能是印欧族群的一支</span>，约在公元前2000年跨越阿尔卑斯山来到意大利半岛，先以放牧和农耕为生，前1700年前后进入青铜时代，前900年进入铁器时代。</p>
+    <p>公元前753年，罗穆卢斯建罗马城并称王，罗马进入<span class="hl">王政时代</span>。他与萨宾人融合的故事，恰恰揭示了罗马民族形成的方式——不是单一的族群，而是通过战争与联姻不断吸纳周边部落。王国末代国王塔克文因暴政被推翻，公元前509年，贵族建立共和国，国号改为「<span class="hl">元老院与罗马人民</span>（SPQR）」。</p>
+    <div class="phases">
+      <div class="phase">
+        <div class="ph">PHASE Ⅰ</div>
+        <h4>王政时代</h4>
+        <p>前753—前509。七王相传，伊特拉斯坎文明深刻影响罗马的文字、冶炼与贸易。</p>
+      </div>
+      <div class="phase">
+        <div class="ph">PHASE Ⅱ</div>
+        <h4>罗马共和国</h4>
+        <p>前509—前27。元老院与执政官制衡，平民不断抗争扩权，缔造西方法治与共和的源头。</p>
+      </div>
+      <div class="phase">
+        <div class="ph">PHASE Ⅲ</div>
+        <h4>罗马帝国</h4>
+        <p>前27—476（西）。皇帝与元老院双中心，从五贤帝盛世到三世纪危机，最终东西分治。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 时间线 ══════════════ -->
+<section id="timeline">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅲ · 千年纪事 —</span>
+    <h2>罗马历史时间线</h2>
+    <p>27个关键事件，点击卡片展开「背景 · 原因 · 影响」。按阶段筛选浏览。</p>
+  </div>
+  <div class="filters reveal" id="filters"></div>
+  <div class="tl" id="tl"></div>
+</section>
+
+<!-- ══════════════ 人物 ══════════════ -->
+<section id="people">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅳ · 群星闪耀 —</span>
+    <h2>重要人物</h2>
+    <p>政治军事的强人与思想文化的巨擘，共同塑造了罗马的千年面孔。</p>
+  </div>
+  <div class="ptabs reveal">
+    <button class="active" data-g="all">全部</button>
+    <button data-g="p">政治与军事</button>
+    <button data-g="c">思想与文化</button>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</section>
+
+<!-- ══════════════ 专题 ══════════════ -->
+<section id="topics">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅴ · 文明支柱 —</span>
+    <h2>罗马的伟大成就</h2>
+    <p>制度、工程、法律、宗教——四大支柱撑起了两千年的帝国。</p>
+  </div>
+  <div class="ttabs reveal">
+    <button class="active" data-t="law">罗马法</button>
+    <button data-t="gov">制度设计</button>
+    <button data-t="eng">工程建筑</button>
+    <button data-t="rel">哲学与宗教</button>
+  </div>
+
+  <div class="tpanel active" id="t-law">
+    <p class="lead reveal">西方有言：<b>罗马人三次征服世界——第一次靠武力，第二次靠拉丁语，第三次靠法律。</b>今天大陆法系各国的法律，都可追溯到罗马法。</p>
+    <div class="tgrid">
+      <div class="tcard reveal"><div class="ic">⚖</div><h4>《十二铜表法》</h4><p>前454年颁布，罗马第一部成文法。将习惯法固定为文字，限制贵族任意裁量，开辟西方法治先河——尽管其中仍有父权至上、债务奴隶等残酷条款。</p><div class="tfoot">前454年 · 西方法治起点</div></div>
+      <div class="tcard reveal"><div class="ic">✒</div><h4>公法与私法</h4><p>罗马人的创举：公法针对危害公共利益的行为，诞生了人类历史上最早的「公诉人」制度；私法处理个人纠纷，规定自由人一律平等、享有权利并承担义务。</p><div class="tfoot">体系化 · 现代法律源头</div></div>
+      <div class="tcard reveal"><div class="ic">🌍</div><h4>万民法</h4><p>随帝国扩张、外国人来往增多而衍生，适用于罗马人与外邦人的法律，成为今日国际法的起源。</p><div class="tfoot">国际法之源头</div></div>
+      <div class="tcard reveal"><div class="ic">🏛</div><h4>自然法思想</h4><p>罗马法不以立法者意志为准，而以「自然法则」为公理，从公理演绎出权利体系——「法律面前人人平等」正源于此，与欧几里得几何学同构。</p><div class="tfoot">理性演绎 · 超越统治者的意志</div></div>
+      <div class="tcard reveal"><div class="ic">📜</div><h4>《民法大全》</h4><p>东罗马查士丁尼大帝组织编撰，代表罗马法最高成就。拿破仑《民法典》以其为蓝本，日本《民法典》又参照法国——罗马法由此第三次征服世界。</p><div class="tfoot">6世纪 · 大陆法系之母</div></div>
+      <div class="tcard reveal"><div class="ic">🛡</div><h4>物权法</h4><p>罗马法首次明确「所有权」概念：物品不再共享，而归其主人所有、他人不得侵犯。今日欧美「个人财产不可侵犯」即源于此。</p><div class="tfoot">私有制之法律基石</div></div>
+    </div>
+  </div>
+
+  <div class="tpanel" id="t-gov">
+    <p class="lead reveal">罗马不同于古代东方绝对君主制——在其正常运行的两百年里，存在<b>皇帝与元老院两个权力中心</b>，这是它长期繁荣的关键。</p>
+    <div class="tgrid">
+      <div class="tcard reveal"><div class="ic">🏺</div><h4>双权力中心</h4><p>皇帝独揽执政官与保民官之权（可否决元老院决议），元老院仍保有实权与人事影响力。二者互相制衡，避免了绝对独裁。</p><div class="tfoot">皇帝 + 元老院</div></div>
+      <div class="tcard reveal"><div class="ic">👑</div><h4>养子继承制</h4><p>皇帝收养贤能为子并传位，以「选贤任能」替代血统继承。两百年间保证了帝国稳定，尤其成就了五贤帝时代的盛世。</p><div class="tfoot">选贤而非传子</div></div>
+      <div class="tcard reveal"><div class="ic">🗺</div><h4>同心圆治理</h4><p>帝国疆域分三层管理：希腊化核心区「无为而治」，西部新征服区驻军+大建设，边缘区仅要求认同——因地制宜，成本极低。</p><div class="tfoot">因地制宜 · 分级管理</div></div>
+      <div class="tcard reveal"><div class="ic">🛣</div><h4>道路与行省</h4><p>「条条道路通罗马」，全国干道+驿站使政令畅通、邮递日行80公里。行省总督有任期，防范地方势力坐大。</p><div class="tfoot">有效治理的物理基础</div></div>
+      <div class="tcard reveal"><div class="ic">🏛</div><h4>元老院余响</h4><p>罗马元老院制衡皇权的格局延续至近代——美国参议院与众议院，几乎就是古罗马元老院与公民大会的翻版。</p><div class="tfoot">遗产至近代代议制</div></div>
+      <div class="tcard reveal"><div class="ic">⚠</div><h4>集权的代价</h4><p>双中心有效运转的前提是皇帝贤明；一旦继任者平庸或暴虐（如康茂德、卡拉卡拉），集权便成为帝国由盛转衰的隐患。</p><div class="tfoot">成也集权 · 败也集权</div></div>
+    </div>
+  </div>
+
+  <div class="tpanel" id="t-eng">
+    <p class="lead reveal">如果说古希腊人长于哲学与科学，<b>罗马人则以工程与建筑见长</b>。罗马之后近千年，西方建筑水平都未能超越罗马，直至文艺复兴。</p>
+    <div class="tgrid">
+      <div class="tcard reveal"><div class="ic">🧱</div><h4>混凝土与拱</h4><p>以火山灰制成的水泥+混凝土，让石料不再必须打磨齐整；拱形结构可砌更高更大的建筑。两大发明将建造推向新高度。</p><div class="tfoot">罗马建筑的两大秘技</div></div>
+      <div class="tcard reveal"><div class="ic">⛲</div><h4>供水与排水</h4><p>引水渠+配水管网养活罗马城百万居民，专门机构管理、按人头征税。公共厕所建于浴室旁，用水冲厕——卫生观念远超同时代。</p><div class="tfoot">嘉德水道桥 · 千年不倒</div></div>
+      <div class="tcard reveal"><div class="ic">🏟</div><h4>公共娱乐设施</h4><p>斗兽场60排看台容纳5—8万人；卡拉卡拉大浴场同时容纳2000人，兼有演讲厅与图书馆。帝国各地皆有此类服务民众的建筑。</p><div class="tfoot">服务民众 · 非为神权</div></div>
+      <div class="tcard reveal"><div class="ic">🌌</div><h4>万神殿</h4><p>穹顶内圆直径约43米，十二世纪前为世界最大穹顶；比它晚千年的佛罗伦萨圣母百花大教堂，穹顶也仅44米。</p><div class="tfoot">118—125年 · 千年之最</div></div>
+      <div class="tcard reveal"><div class="ic">🛳</div><h4>造船与贸易</h4><p>罗马商船吨位300—600吨，每年上千艘驶入奥斯提亚港。帝国商业繁荣，钱庄雏形、准备金制度、早期品牌商标相继出现。</p><div class="tfoot">环地中海贸易网络</div></div>
+      <div class="tcard reveal"><div class="ic">📖</div><h4>工程著作</h4><p>维特鲁威《建筑十书》成为后世教科书；弗朗提诺《论罗马城的供水问题》、加图与瓦罗《论农业》——罗马人善把经验固化为知识。</p><div class="tfoot">希腊好奇 · 罗马务实</div></div>
+    </div>
+  </div>
+
+  <div class="tpanel" id="t-rel">
+    <p class="lead reveal">希腊哲学随罗马国势而变——斯多葛主义成为精英信仰，而<b>来自中东的基督教最终取代希腊哲学，成为罗马国教</b>，从此规定西方千年的思想底色。</p>
+    <div class="tgrid">
+      <div class="tcard reveal"><div class="ic">🌿</div><h4>斯多葛学派</h4><p>顺从天命、恬淡寡欲、以出世态度入世。西塞罗倡导，奥勒留践行——今日西方的博爱、世界主义与平等观念皆可追溯至此。</p><div class="tfoot">西塞罗 · 奥勒留</div></div>
+      <div class="tcard reveal"><div class="ic">🍇</div><h4>伊壁鸠鲁学派</h4><p>本意是以节制欲望获得快乐；到罗马却沦为上流社会的享乐主义，直至今日仍被误解。</p><div class="tfoot">被误读的快乐哲学</div></div>
+      <div class="tcard reveal"><div class="ic">✝</div><h4>基督教的兴起</h4><p>耶稣于巴勒斯坦传「天国福音」，被犹太教领袖与罗马总督处死钉上十字架。其救世思想于苦难民众中迅速传播。</p><div class="tfoot">公元4年 · 伯利恒</div></div>
+      <div class="tcard reveal"><div class="ic">🔥</div><h4>迫害与壮大</h4><p>64年尼禄大火后基督徒遭迫害——一神教否定罗马诸神，无异于否定皇帝神权。但迫害反而令基督教越挫越勇。</p><div class="tfoot">64年 · 烈火中的教会</div></div>
+      <div class="tcard reveal"><div class="ic">📜</div><h4>米兰敕令</h4><p>313年君士坦丁一世宣布信仰自由，基督教合法化；380年狄奥多西确立其为罗马国教。</p><div class="tfoot">313年合法 · 380年国教</div></div>
+      <div class="tcard reveal"><div class="ic">🧠</div><h4>奥古斯丁的神学</h4><p>借新柏拉图哲学将基督教改造为哲学宗教：以「太一」释上帝，逻辑论证三位一体，诞生专门学问「神学」。</p><div class="tfoot">信仰与哲学的合一</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 衰亡 ══════════════ -->
+<section id="decline">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅵ · 大厦之倾 —</span>
+    <h2>罗马为何衰落</h2>
+    <p>扩张带来辉煌，也埋下暗伤。罗马的衰亡，是内在痼疾与外部冲击的共同结果。</p>
+  </div>
+  <div class="decline">
+    <div class="dcols">
+      <div class="dcol reveal">
+        <h3><span class="dot"></span>内在痼疾</h3>
+        <ul>
+          <li><b>农民破产：</b>外来廉价粮食冲击小农经济，自由民沦为大庄园经济下的游民，兵源枯竭。</li>
+          <li><b>军队私兵化：</b>马略改革后士兵依附将军领饷，军团成为将军私产，皇权日益仰赖武力。</li>
+          <li><b>公民权贬值：</b>卡拉卡拉滥发公民权，免税人口暴增、税基崩塌，硬币含银量骤降引发通胀，认同感尽失。</li>
+          <li><b>继承制破坏：</b>奥勒留传位亲子康茂德，打破养子继承制，昏君当道、元老院与皇权彻底决裂。</li>
+          <li><b>政治腐败：</b>军队首领拥兵自重、随意废立皇帝，三世纪危机中50余位皇帝走马灯般更替。</li>
+        </ul>
+      </div>
+      <div class="dcol reveal">
+        <h3><span class="dot" style="background:#a3694b"></span>外部冲击</h3>
+        <ul>
+          <li><b>蛮族崛起：</b>匈人西迁挤压日耳曼诸部，哥特人涌入帝国境内；罗马军队蛮族化，边防形同虚设。</li>
+          <li><b>瘟疫频发：</b>2世纪安东尼瘟疫夺走军队近一成生命，251年塞浦路斯大瘟疫令国力一落千丈。</li>
+          <li><b>气候转冷：</b>前200—150年温暖期带来繁荣，之后气温下降约2℃，粮食减产、饥荒蔓延，蛮族被迫南迁。</li>
+          <li><b>东西分治：</b>395年帝国正式分裂为东西两部，此后再未统一——已无力统辖广袤疆域。</li>
+          <li><b>两次陷城：</b>410年西哥特人破城（800年来首次），455年汪达尔人再劫，数十万居民仅存不足一万。</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sync reveal">
+      <h4>东西方的惊人同步 ── 古典文明的共同终结</h4>
+      <div class="rows">
+        <div class="row"><span class="l">184年 黄巾起义</span><span class="c">◆</span><span class="r">192年 康茂德之死</span></div>
+        <div class="row"><span class="l">220年 三国时代开启</span><span class="c">◆</span><span class="r">193年 罗马「五帝之年」</span></div>
+        <div class="row"><span class="l">280年 西晋短暂统一</span><span class="c">◆</span><span class="r">284年 戴克里先稳定局势</span></div>
+        <div class="row"><span class="l">290年 司马炎去世 · 一代而乱</span><span class="c">◆</span><span class="r">304年 戴克里先退位 · 一代而乱</span></div>
+      </div>
+      <p style="margin-top:18px;font-size:.88rem;color:var(--muted)">两大帝国几乎同时步入衰亡——古典文明的终结，并非个别统治者之过，而是制度、人口、气候等多重系统性力量作用的结果。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ 遗产 ══════════════ -->
+<section id="legacy">
+  <div class="sec-head reveal">
+    <span class="orn"><i>◆</i></span>
+    <span class="no">— Ⅶ · 永恒遗产 —</span>
+    <h2>罗马的遗产与思考</h2>
+  </div>
+  <div class="legacy">
+    <div class="l3">
+      <div class="lcard reveal"><div class="rn">Ⅰ</div><h4>武力征服</h4><p>军团与工程并进，缔造横跨欧亚非的大帝国，疆域在117年图拉真时期达于极盛。</p></div>
+      <div class="lcard reveal"><div class="rn">Ⅱ</div><h4>拉丁语传播</h4><p>拉丁语成为帝国通用语言，孕育法语、意大利语、西班牙语等罗曼语族，并进入科学、医学与法律术语。</p></div>
+      <div class="lcard reveal"><div class="rn">Ⅲ</div><h4>法律体系</h4><p>从十二铜表法到民法大全，罗马法以「自然法」公理演绎权利体系，至今仍是大陆法系之母。</p></div>
+    </div>
+    <div class="quote reveal">
+      <p>东亚文明的基础是由秦汉帝国奠定的，<br>西方文明的格局则是由罗马帝国奠定的。</p>
+      <div class="who">—— 吴军 · 《吴军来信·世界文明史》</div>
+    </div>
+    <div class="reflect reveal">
+      <h4>吴军思考 · 倘若罗马文明不曾中断</h4>
+      <p>有人假设：若无蛮族入侵，世界文明进程是否会提前？吴军的回答是——不会。罗马文明当时已逐渐失去生命力，拜占庭虽延续千年、屡次中兴，却始终带着帝国顽疾，最终积重难返。文明的更替，往往「不破不立」。</p>
+      <p>罗马帝国缔造了西方世界第一个文明高峰，让欧洲、西亚和北非达到前所未有的繁荣。西方史家将罗马与秦汉并称，视为人类历史的辉煌时代。而它由盛转衰的每一步——农民的破产、军队的私兵化、公民权的贬值——至今仍是治国者镜鉴。</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="spqr">SPQR</div>
+  <p>罗马帝国 · 永恒之城 — 基于《吴军来信·世界文明史》第80—99讲及关联篇目整理</p>
+  <p class="en">SENATVS POPVLVSQVE ROMANVS · 元老院与罗马人民</p>
+</footer>
+
+<script>
+/* ═══════════ 数据：时间线 ═══════════ */
+const EVENTS=[
+{y:"约前2000年",cat:"起源王政",tag:"起源",t:"印欧人迁入意大利半岛",fig:"关键人物：—",sum:"罗马人的远祖跨阿尔卑斯山而来，先牧耕、后入青铜与铁器时代，成为拉丁族群的开端。",
+ bg:"印欧人大迁徙浪潮中，一支族群在公元前2000年前后进入亚平宁半岛；当时岛上部落林立，伊特拉斯坎等文明的发达程度甚至在罗马之上。",
+ ct:"以放牧与农耕为生的部落联盟，为寻求更适宜的生存空间而逐渐汇聚、融合，形成早期拉丁人共同体的雏形。",
+ im:"奠定了罗马民族的族群基础与拉丁语系源头，也为日后罗马与伊特拉斯坎文明的深度交融埋下伏笔。"},
+{y:"前753年",cat:"起源王政",tag:"王政",t:"罗穆卢斯建罗马城 · 王政时代开启",fig:"关键人物：罗穆卢斯 · 雷穆斯",sum:"相传罗穆卢斯战胜兄弟雷穆斯，成为罗马首位国王并建城，创立元老院。",
+ bg:"罗马城建于七丘之上，地处台伯河畔，是拉丁平原与伊特拉斯坎、希腊世界贸易路线的交汇点。",
+ ct:"兄弟争夺首领之位，罗穆卢斯胜出；为增加人口，罗马人劫掠萨宾妇女并与萨宾人融合为一个民族。",
+ im:"王政时代确立；元老院制度自此诞生。「罗马」的民族认同，从一开始就是多族群融合的产物。"},
+{y:"前509年",cat:"起源王政",tag:"共和",t:"驱逐暴君塔克文 · 罗马共和国建立",fig:"关键人物：塔克文（末代国王）",sum:"王国末代国王塔克文因独裁暴政被起义推翻，贵族建立共和国，国号改为「元老院与罗马人民（SPQR）」。",
+ bg:"王国后期，伊特拉斯坎裔国王塔克文独裁专断，激起贵族与平民的普遍不满。",
+ ct:"人民起义推翻暴政，吸取王权独裁教训，改行贵族共治——元老院掌实权，两名执政官处理日常政务、任期一年。",
+ im:"共和国体制确立，是西方式「混合政体」与法治传统的制度源头；SPQR 成为罗马精神的永恒符号。"},
+{y:"前494年",cat:"共和国崛起",tag:"平民抗争",t:"平民脱离运动 · 保民官设立",fig:"关键人物：平民大会",sum:"对外战争期间平民拒绝作战、撤离罗马，贵族被迫承认平民选举保民官与召开平民大会的权利。",
+ bg:"共和国初期权力尽归贵族，平民在债务、司法与政治上饱受压榨，阶级矛盾尖锐。",
+ ct:"战争正酣之际，平民集体「罢工」拒绝服役，以退出共同体相要挟，迫使贵族让步。",
+ im:"保民官成为平民权利的保护伞，贵族与元老院权力首次受到平民制约，开启平民扩权之路。"},
+{y:"前454年",cat:"共和国崛起",tag:"法治",t:"《十二铜表法》颁布",fig:"关键人物：立法委员会",sum:"罗马第一部成文法，以青铜铸十二表公布于广场，将习惯法固定为文字。",
+ bg:"此前司法凭习惯与经验裁量，伸缩性大：贵族可袒护己过、苛责平民，司法不公激化社会矛盾。",
+ ct:"平民持续施压，立法委员会在原有法律原则基础上编纂成文，调和贵族与平民的紧张关系。",
+ im:"西方法治的起点；虽仍含父权至上、债务奴役等条款，但相比《汉谟拉比法典》已属宽容，奠定法律公开性原则。"},
+{y:"前390年",cat:"共和国崛起",tag:"外患",t:"高卢人攻陷罗马城",fig:"关键人物：—",sum:"凯尔特人（高卢人）攻入罗马，城破被掠；此后800年间，罗马城再未被外敌攻陷。",
+ bg:"凯尔特部落南迁浪潮涌向意大利，罗马在阿里亚河之战中惨败，城防失守。",
+ ct:"罗马军团不敌高卢人，居民弃城，只有卡比托利欧山上的守军坚持抵抗。",
+ im:"罗马重建并加固城防，以此次耻辱为戒励精图治——它也成为了「永恒之城」800年不败神话的起点。"},
+{y:"前264—241年",cat:"共和国崛起",tag:"战争",t:"第一次布匿战争",fig:"关键人物：哈米尔卡",sum:"罗马与迦太基争夺西西里岛，罗马以「跳帮战术」在海上以弱胜强，首获制海权。",
+ bg:"罗马完成意大利统一后向地中海扩张，西西里岛成为与海上霸主迦太基的必争之地。",
+ ct:"迦太基商人政府轻视军事、多用雇佣军；罗马陆军登舰接舷作战，发挥陆战优势，绕过西西里直取迦太基本土。",
+ im:"迦太基战败赔款，罗马获得西西里并建立海军——地中海霸权的天平开始向罗马倾斜。"},
+{y:"前218—202年",cat:"共和国崛起",tag:"战争",t:"汉尼拔远征 · 第二次布匿战争",fig:"关键人物：汉尼拔 · 费边 · 大西庇阿",sum:"汉尼拔率军跨阿尔卑斯山奇袭意大利，坎尼会战几乎全歼罗马大军；罗马以「焦土+持久战」拖垮迦太基，大西庇阿反攻北非取胜。",
+ bg:"哈米尔卡之子汉尼拔为报父仇、雪国耻，率象兵翻越阿尔卑斯山，绕至罗马背后开战。",
+ ct:"迦太基雇佣军远离本土、补给困难；罗马执政官费边坚壁清野、避战消耗，民众虽不满却最终奏效；大西庇阿效法首次布匿战争，直捣迦太基本土。",
+ im:"罗马险胜，成为西地中海无可争议的霸主；汉尼拔被放逐，最终服毒自尽。「共和制度的胜利」由此成为史家共识。"},
+{y:"前149—146年",cat:"共和国崛起",tag:"战争",t:"迦太基覆灭 · 罗马称霸地中海",fig:"关键人物：大西庇阿之孙",sum:"第三次布匿战争毫无悬念，迦太基城破国灭；此后罗马又经马其顿战争与叙利亚战争，控制整个希腊化世界。",
+ bg:"迦太基战败约50年后稍有复苏迹象，罗马元老院（尤其加图）力主彻底铲除宿敌。",
+ ct:"罗马以迦太基违约扩军为名发动战争，围城三年后夷平迦太基，土地撒盐以示永绝后患。",
+ im:"罗马成为地中海唯一霸主，接管希腊化文明遗产——横跨欧亚非的大国版图基本奠定。"},
+{y:"前133年",cat:"共和危机",tag:"改革",t:"格拉古兄弟改革失败",fig:"关键人物：提比略·格拉古 · 盖约·格拉古",sum:"兄弟二人先后任保民官，提议限制占田、分地于民并授盟邦公民权，双双惨遭杀害。",
+ bg:"战争胜利的果实尽归贵族与军头：大庄园经济兼并土地，自由农破产，罗马同盟亦因公民权不均而不满。",
+ ct:"改革触及元老院贵族的核心利益，贵族以暴力对抗，兄弟二人先后遇害——和平改良之路被彻底堵死。",
+ im:"改革失败标志着共和内部矛盾的激化，罗马由此滑向内战与强人政治的深渊。"},
+{y:"前107年",cat:"共和危机",tag:"军事",t:"马略军事改革 · 军队私兵化",fig:"关键人物：马略",sum:"马略开放无产者参军，解决兵源却令军队依附将军而生，成为将军私产。",
+ bg:"小农破产导致符合财产资格的自备武器兵源枯竭，共和国面临无兵可征的困境。",
+ ct:"马略以募兵制替代征兵制，士兵由将军发饷、分享战利品，对将军个人效忠。",
+ im:"军头政治登台：凯撒、庞培、克拉苏的崛起皆源于此，共和国体制被架空，内战一触即发。"},
+{y:"前73—71年",cat:"共和危机",tag:"起义",t:"斯巴达克斯起义",fig:"关键人物：斯巴达克斯 · 克拉苏 · 庞培",sum:"西方古代史上规模最大的奴隶起义，角斗士斯巴达克斯率众转战两年，终被克拉苏与庞培镇压。",
+ bg:"奴隶制下的残酷剥削积累巨大矛盾，奴隶约占罗马人口三分之一，角斗士更朝不保夕。",
+ ct:"斯巴达克斯起义军多次击败罗马军团，但内部意见分歧、缺乏根据地，最终寡不敌众。",
+ im:"成为古罗马奴隶制由盛转衰的分水岭：此后奴隶主缓和处置、允许奴隶积累财产，部分奴隶赎身成为自耕农。"},
+{y:"前49年",cat:"共和危机",tag:"内战",t:"凯撒渡卢比孔河 · 内战爆发",fig:"关键人物：凯撒 · 庞培 · 元老院",sum:"元老院勒令凯撒交权回罗马，凯撒率军团渡河进军罗马，留下「骰子已被掷下」的名言。",
+ bg:"前三头同盟（凯撒、庞培、克拉苏）中克拉苏战死帕提亚后，凯撒与庞培两强相争，元老院扶持庞培对抗凯撒。",
+ ct:"凯撒在高卢立下赫赫战功、声望如日中天，元老院宣布其为公敌；凯撒以「渡河即叛国」的法律边缘豪赌，公开宣战。",
+ im:"罗马内战全面爆发，凯撒击败庞培、集大权于一身，共和国的制衡机制名存实亡。"},
+{y:"前44年",cat:"共和危机",tag:"刺杀",t:"凯撒遇刺",fig:"关键人物：凯撒 · 布鲁图斯",sum:"凯撒推行集权与改革，触怒保守贵族，于元老院议事时被刺身亡，身中23刀。",
+ bg:"凯撒自任终身独裁官，扩充元老院、架空保民官、限制世袭贵族，改革触动保守势力根本利益。",
+ ct:"以布鲁图斯为首的共和派贵族策划刺杀，坚信「刺杀暴君以复共和」，却不知共和国根基已朽。",
+ im:"凯撒之死未能恢复共和，反而引发新一轮内战；其养子屋大维登上历史舞台，罗马走向帝国。"},
+{y:"前31—27年",cat:"帝国盛世",tag:"帝国",t:"亚克兴海战 · 罗马帝国建立",fig:"关键人物：屋大维 · 安东尼 · 克利奥帕特拉",sum:"屋大维在亚克兴海战击败安东尼与埃及艳后联军，随后受封「奥古斯都」，罗马进入帝国时代。",
+ bg:"凯撒遇刺后，屋大维与安东尼、雷必达组成后三头同盟清洗政敌，随即三头内讧，安东尼东结埃及。",
+ ct:"亚克兴海战中屋大维以小舰灵巧取胜，安东尼与克利奥帕特拉先后自杀，托勒密王朝终结；屋大维集政权、军权、神权于一身。",
+ im:"一个世纪的内战画上句号，罗马进入「罗马和平」时代；「奥古斯都」自此成为皇帝的代名词。"},
+{y:"公元9年",cat:"帝国盛世",tag:"边界",t:"条顿堡森林战役",fig:"关键人物：屋大维",sum:"日耳曼起义军伏击全歼罗马三个军团，屋大维鼎盛之时隐忍不报，罗马向西日耳曼的扩张就此停止。",
+ bg:"罗马欲将边界推至易北河，日耳曼人不满罗马统治与苛政，密谋反抗。",
+ ct:"日耳曼首领阿尔米尼乌斯诱敌深入条顿堡森林，罗马军团在林地沼泽中全军覆没。",
+ im:"确立莱茵河—多瑙河边界，此后欧洲再无大规模战争，「罗马和平」延续两个多世纪；也说明强大如屋大维也须接受扩张的极限。"},
+{y:"公元64年",cat:"帝国盛世",tag:"宗教",t:"尼禄大火 · 基督教遭迫害",fig:"关键人物：尼禄",sum:"罗马城大火，皇帝尼禄归罪基督徒并展开迫害——一神教与罗马多神教及皇帝神权根本冲突。",
+ bg:"基督教在帝国底层迅速传播，其唯一真神信仰否定罗马诸神，进而否定自封为神的皇帝合法性。",
+ ct:"大火成为借口；深层原因是教义冲突。罗马统治者试图以迫害扑灭基督教，反而令其愈挫愈勇。",
+ im:"殉道者的鲜血成为教会生长的土壤；基督教在烈火中走向壮大，为日后国教化埋下伏笔。"},
+{y:"公元96—180年",cat:"帝国盛世",tag:"盛世",t:"五贤帝时代 · 罗马文明的高光时刻",fig:"关键人物：涅尔瓦 · 图拉真 · 哈德良 · 安东尼 · 奥勒留",sum:"五位无血缘关系的贤君以养子相继，帝国稳定富庶近一个世纪；117年图拉真时期版图达于极盛。",
+ bg:"屋大维之后80余年，帝国多昏君暴君、政局动荡，直至第十一位皇帝涅尔瓦出现才现转机。",
+ ct:"养子继承制确保贤者上位：仁帝涅尔瓦开制，勇帝图拉真拓疆，智帝哈德良筑长城、兴希腊文化，忠帝安东尼守成，哲帝奥勒留以《沉思录》垂范后世。",
+ im:"罗马文明巅峰：元老院与皇帝和谐共治，行省安居，帝国疆域空前——这是罗马最值得铭记的世纪。"},
+{y:"公元212年",cat:"危机衰亡",tag:"转折",t:"卡拉卡拉敕令 · 公民权泛滥",fig:"关键人物：卡拉卡拉",sum:"皇帝卡拉卡拉颁布《安东尼努斯敕令》，授予帝国全体自由民罗马公民权——本为扩兵源，反成衰亡导火索。",
+ bg:"三世纪危机前夜，兵源紧缺；罗马公民免所得税、须服兵役，公民权是荣誉与义务的复合体。",
+ ct:"敕令令免税人口暴增、税基崩塌；为支付军饷降低硬币25%含银量，引发恶性通胀；公民头衔贬值，帝国认同感尽失。",
+ im:"财政危机、货币贬值、向心力瓦解三症并发，罗马帝国的内部根基自此彻底松动。"},
+{y:"公元251—268年",cat:"危机衰亡",tag:"三世纪危机",t:"瘟疫与分裂 · 三世纪危机",fig:"关键人物：塞维鲁",sum:"塞浦路斯大瘟疫令国力一落千丈，268年帝国分裂为高卢、罗马、帕尔米拉三国，与中国三国时期几乎同期。",
+ bg:"康茂德之后军阀混战，193年一年内竟出五位皇帝（「五帝之年」）；塞维鲁虽短暂稳定，其继任者再启乱局。",
+ ct:"瘟疫、经济崩溃、外族入侵叠加；皇帝与军阀自相残杀，边防废弛，日耳曼诸部与萨珊王朝趁机蚕食。",
+ im:"帝国控制力与向心力尽失，三世纪危机的70年间50余位皇帝更替——古典帝国的黄昏降临。"},
+{y:"公元284—305年",cat:"危机衰亡",tag:"改革",t:"戴克里先 · 四帝共治",fig:"关键人物：戴克里先",sum:"戴克里先以武力稳定局势，将皇帝神化为「主与神」，并创四帝共治分疆而治，305年自愿退位。",
+ bg:"三世纪危机后官僚系统崩溃，地方靠军阀维持，帝国疆域过大、一人实难统御。",
+ ct:"神化皇权（被部分史家视为真正帝制之始）+ 一分为四的共治体制，试图以制度化应对乱局。",
+ im:"四帝共治一代而废，退位后帝国再陷内乱；却为395年东西罗马彻底分裂埋下伏笔。"},
+{y:"公元313—380年",cat:"危机衰亡",tag:"宗教",t:"基督教合法化与国教化",fig:"关键人物：君士坦丁一世 · 狄奥多西一世",sum:"313年君士坦丁颁布《米兰敕令》承认基督教合法；380年狄奥多西确立其为罗马国教。",
+ bg:"帝国后期民生困苦，理性哲学失效，基督教的救世观念在军队与民众中广泛流行，连皇帝亦多信奉。",
+ ct:"君士坦丁自述梦中受耶稣指引而信教；奥古斯丁借新柏拉图哲学将基督教改造为哲学宗教，令其「可被思想接受」。",
+ im:"基督教神学取代希腊哲学成为西方主流思想，西方世界自此进入基督教文明主导的千年。"},
+{y:"公元395年",cat:"危机衰亡",tag:"分裂",t:"帝国东西分裂",fig:"关键人物：狄奥多西一世",sum:"狄奥多西一世死后，帝国分给长子与次子，东西罗马正式分治、此后再未统一。",
+ bg:"四帝共治后君士坦丁一世虽短暂统一，死后三子瓜分；帝国已无力统辖广袤疆域。",
+ ct:"行政管理上正式一分为二：东罗马（后称拜占庭）与西罗马，共用法典、大事协商，但互不隶属。",
+ im:"东西分治是罗马衰落的结果而非原因——帝国再也无法维持统一治理，西罗马自此加速滑向覆灭。"},
+{y:"公元410年",cat:"危机衰亡",tag:"陷落",t:"永恒之城陷落",fig:"关键人物：亚拉里克",sum:"匈人西迁迫使西哥特人涌入帝国，首领亚拉里克率军攻陷800年未被攻破的罗马城，劫掠三日。",
+ bg:"4世纪后期匈人自中亚西迁，挤压日耳曼诸部；哥特人为避灾祸迁入帝国，又被罗马官员欺压，愤而起义。",
+ ct:"饥荒与瘟疫令「永恒之城」毫无抵抗之力；亚拉里克围城后破城劫掠，震动整个古典世界。",
+ im:"罗马不可战胜的神话破灭——距前390年凯尔特人陷城整整800年，汉尼拔都未能办到的事，蛮族办到了。"},
+{y:"公元476年",cat:"危机衰亡",tag:"灭亡",t:"西罗马帝国灭亡",fig:"关键人物：奥多亚塞",sum:"日耳曼将军奥多亚塞废黜西罗马末代皇帝，西罗马灭亡——被视作古典文明终结与欧洲中世纪的开端。",
+ bg:"455年汪达尔人再陷罗马城，几十万居民仅存不足一万；帝国名存实亡，军队蛮族化，元老院被军阀取代。",
+ ct:"奥多亚塞兵临城下，末帝罗慕路斯·奥古斯都路斯被迫退位；西罗马帝国的名号就此终结。",
+ im:"古典文明的时代落幕，欧洲进入中世纪；但罗马法、拉丁语与基督教已融入西方文明的血脉，未随帝国而亡。"},
+{y:"公元527—565年",cat:"遗产延续",tag:"中兴",t:"查士丁尼中兴 · 罗马法集大成",fig:"关键人物：查士丁尼",sum:"东罗马皇帝查士丁尼收复部分失地、重建圣索菲亚大教堂，并编撰《民法大全》——罗马法发展的顶峰。",
+ bg:"西罗马灭亡后，东罗马（拜占庭）延续罗马法统，在6世纪查士丁尼治下迎来全盛。",
+ ct:"组织法学家系统整理千年法律，成《民法大全》《学说汇纂》《法学阶梯》三部巨著，承前启后。",
+ im:"罗马法以法典形式保存并传世，成为后世大陆法系（拿破仑法典→日本民法典）的直接源头。"},
+{y:"公元1453年",cat:"遗产延续",tag:"落幕",t:"君士坦丁堡陷落 · 罗马文明落幕",fig:"关键人物：穆罕默德二世",sum:"奥斯曼帝国攻陷君士坦丁堡，拜占庭帝国灭亡——罗马文明两千余年的延续正式落幕。",
+ bg:"拜占庭继承罗马荣光，也继承其顽疾：靠皇帝个人能力维系，问题积重难返，至15世纪仅剩孤城一座。",
+ ct:"奥斯曼苏丹穆罕默德二世以重炮轰破千年城墙，末代皇帝君士坦丁十一世战死城头。",
+ im:"西方随即迎来文艺复兴与大航海——罗马文明虽落幕，其遗产却以法律、语言、宗教与艺术的形式，永恒地塑造着现代世界。"}
+];
+
+/* 阶段分类 */
+const CATS=["全部","起源王政","共和国崛起","共和危机","帝国盛世","危机衰亡","遗产延续"];
+
+/* 渲染筛选按钮 */
+const fl=document.getElementById('filters');
+CATS.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.textContent=c; if(i===0)b.className='active';
+  b.onclick=()=>{fl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTL(c)};
+  fl.appendChild(b);
+});
+
+/* 渲染时间线 */
+function renderTL(cat){
+  const tl=document.getElementById('tl');
+  tl.innerHTML='';
+  const list=cat==='全部'?EVENTS:EVENTS.filter(e=>e.cat===cat);
+  list.forEach((e,idx)=>{
+    const item=document.createElement('div');
+    item.className='tl-item reveal';
+    item.style.transitionDelay=(idx%4)*.06+'s';
+    item.innerHTML=`
+      <div class="tl-node"></div>
+      <div class="tl-card">
+        <div class="tl-year">${e.y}<span class="tl-tag">${e.tag}</span></div>
+        <div class="tl-title">${e.t}</div>
+        <div class="tl-fig">${e.fig}</div>
+        <div class="tl-sum">${e.sum}</div>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>▍背景</h4><p>${e.bg}</p></div>
+          <div class="blk ct"><h4>▍原因</h4><p>${e.ct}</p></div>
+          <div class="blk im"><h4>▍影响</h4><p>${e.im}</p></div>
+        </div></div></div>
+      </div>`;
+    item.onclick=()=>{
+      const d=item.querySelector('.tl-detail');
+      const open=item.classList.contains('open');
+      document.querySelectorAll('.tl-item.open').forEach(o=>{o.classList.remove('open');o.querySelector('.tl-detail').classList.remove('open')});
+      if(!open){item.classList.add('open');d.classList.add('open')}
+    };
+    tl.appendChild(item);
+  });
+  // 重新触发 reveal
+  requestAnimationFrame(()=>{tl.querySelectorAll('.reveal').forEach(el=>{el.classList.add('in')})});
+}
+renderTL('全部');
+
+/* ═══════════ 数据：人物 ═══════════ */
+const PEOPLE=[
+{g:"p",b:"建城之王",n:"罗穆卢斯",r:"王政时代首位国王",d:"前753年建罗马城，创元老院，以融合萨宾人等方式吸纳周边部族，奠定「多族群融合」的罗马民族底色。"},
+{g:"p",b:"改革先驱",n:"格拉古兄弟",r:"保民官 · 改革者",d:"提比略与盖约两兄弟先后推行土地改革与公民权改革，触怒元老院贵族而双双遇害——共和国和平改良之路的绝唱。"},
+{g:"p",b:"军事改革",n:"马略",r:"执政官 · 军事统帅",d:"开放无产者参军，解决了兵源危机，却使军队成为将军私产，间接催生了凯撒式的军事强人政治。"},
+{g:"p",b:"起义领袖",n:"斯巴达克斯",r:"角斗士 · 起义军领袖",d:"率奴隶起义转战两年、多次击败罗马军团，虽败犹荣；起义成为罗马奴隶制由盛转衰的分水岭。"},
+{g:"p",b:"无冕之王",n:"凯撒",r:"独裁官 · 军事统帅",d:"征服高卢、著《高卢战记》，渡卢比孔河夺取政权，改革历法（儒略历）、集权中央，被刺后由养子屋大维继承遗志。"},
+{g:"p",b:"首任皇帝",n:"屋大维（奥古斯都）",r:"罗马帝国第一位皇帝",d:"亚克兴海战击败安东尼，结束百年内战；受封「奥古斯都」，建常备军与双权力中心制度，开创「罗马和平」。"},
+{g:"p",b:"哲帝",n:"马可·奥勒留",r:"五贤帝末位 · 斯多葛哲人",d:"以《沉思录》垂范后世、躬身践行斯多葛主义；晚年破坏养子继承制传位亲子康茂德，成为帝国由盛转衰的转折点。"},
+{g:"p",b:"版图之巅",n:"图拉真",r:"五贤帝之一 · 勇帝",d:"打破屋大维不扩张传统，征服达基亚与帕提亚，117年帝国版图达于极盛；同时设孤儿抚养金，武功文治兼备。"},
+{g:"p",b:"筑墙者",n:"哈德良",r:"五贤帝之一 · 智帝",d:"几乎巡遍每个行省，筑哈德良长城定北疆；力复希腊文化，完成宙斯神殿，是罗马皇帝中的「希腊迷」。"},
+{g:"p",b:"四帝共治",n:"戴克里先",r:"罗马皇帝 · 改革者",d:"终结三世纪危机，将皇帝神化为「主与神」（被部分史家视为真正帝制之始），创四帝共治，305年主动退位。"},
+{g:"p",b:"国教之父",n:"君士坦丁一世",r:"罗马皇帝",d:"内战统一帝国，313年颁布《米兰敕令》承认基督教合法，迁都君士坦丁堡，深刻改变西方文明走向。"},
+{g:"p",b:"法典集大成",n:"查士丁尼",r:"东罗马皇帝",d:"6世纪中兴拜占庭，编《民法大全》集罗马法之大成，重建圣索菲亚大教堂，让罗马法传世至今。"},
+{g:"p",b:"破城者",n:"亚拉里克",r:"西哥特首领",d:"410年率军攻陷800年未被攻破的「永恒之城」罗马城，震动了整个古典世界。"},
+{g:"p",b:"埃及艳后",n:"克利奥帕特拉七世",r:"托勒密王朝末代女王",d:"以政治婚姻周旋于凯撒与安东尼之间，亚克兴海战败后自杀，托勒密王朝与埃及希腊化时代就此终结。"},
+{g:"c",b:"国民诗人",n:"维吉尔",r:"诗人 · 《埃涅阿斯纪》",d:"以近万行长诗《埃涅阿斯纪》为罗马人「寻祖」，将罗马的起源与特洛伊英雄相连，是献给屋大维的帝国颂歌。"},
+{g:"c",b:"拉丁文之父",n:"西塞罗",r:"演说家 · 哲学家 · 政治家",d:"使拉丁语臻于准确优美，散文风格影响培根《随笔》等后世著作；斯多葛主义最重要的罗马代言人。"},
+{g:"c",b:"史家之笔",n:"李维 · 塔西陀 · 普鲁塔克",r:"罗马史家",d:"罗马无官修史书，全靠私人记录——《罗马史》《编年史》《希腊罗马名人传》为后世留下罗马的千年记忆。"},
+{g:"c",b:"天文学巨擘",n:"托勒密",r:"天文学家 · 亚历山大图书馆学者",d:"古代天文学集大成者：创立地心说体系、发明球坐标与经纬线，将天文学数学化，其体系统治西方千年。"},
+{g:"c",b:"医圣",n:"盖伦",r:"医学家",d:"解剖学、生理学、病理学与药理学奠基人，其体系影响世界长达1500年，被誉为「医圣」。"},
+{g:"c",b:"建筑之书",n:"维特鲁威",r:"建筑工程师",d:"著《建筑十书》，系统总结罗马建筑技术，成为此后西方工程学与建筑学的教科书。"},
+{g:"c",b:"百科全书",n:"老普林尼",r:"学者 · 《博物志》作者",d:"著37卷《博物志》，汇集古代自然科学与人文知识，是西方古代百科全书的代表作。"},
+{g:"c",b:"神学奠基",n:"奥古斯丁",r:"神学家 · 哲学家",d:"借新柏拉图哲学将基督教改造为哲学宗教，论证三位一体，创立「神学」，规定西方中世纪千年的思想框架。"}
+];
+
+/* 渲染人物 */
+const pg=document.getElementById('pgrid');
+function renderP(g){
+  pg.innerHTML='';
+  const list=g==='all'?PEOPLE:PEOPLE.filter(p=>p.g===g);
+  list.forEach((p,idx)=>{
+    const c=document.createElement('div');
+    c.className='pcard reveal';
+    c.style.transitionDelay=(idx%4)*.05+'s';
+    c.innerHTML=`<span class="badge">${p.b}</span><h3>${p.n}</h3><div class="role">${p.r}</div><p>${p.d}</p>`;
+    pg.appendChild(c);
+  });
+  requestAnimationFrame(()=>{pg.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'))});
+}
+renderP('all');
+document.querySelectorAll('.ptabs button').forEach(b=>{
+  b.onclick=()=>{document.querySelectorAll('.ptabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderP(b.dataset.g)};
+});
+
+/* ═══════════ 专题 Tab ═══════════ */
+document.querySelectorAll('.ttabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.ttabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('t-'+b.dataset.t).classList.add('active');
+    // 重触发面板内 reveal
+    const panel=document.getElementById('t-'+b.dataset.t);
+    panel.querySelectorAll('.reveal').forEach(el=>el.classList.remove('in'));
+    requestAnimationFrame(()=>{panel.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'))});
+  };
+});
+
+/* ═══════════ 滚动入场：JS 启动立即把所有 reveal 标 in（兜底），IO 处理延迟交错 ═══════════ */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}});
+},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+// 立即把所有 reveal 标 in —— 保证可见性（headless / 无滚动环境均生效）
+document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+// 仍然注册 IO 以便触发后续 stagger 动效
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ═══════════ 数字滚动 ═══════════ */
+const cio=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const el=e.target, target=+el.dataset.count, pre=el.dataset.prefix||'', suf=el.dataset.suffix||'';
+    const dur=1600,t0=performance.now();
+    function tick(t){
+      const p=Math.min((t-t0)/dur,1);
+      const ease=1-Math.pow(1-p,3);
+      el.textContent=pre+Math.round(target*ease)+suf;
+      if(p<1)requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    cio.unobserve(el);
+  });
+},{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
+
+/* ═══════════ 金色粒子（Hero） ═══════════ */
+(function(){
+  const cv=document.getElementById('particles'),ctx=cv.getContext('2d');
+  let W,H,ps=[];
+  function size(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  size();addEventListener('resize',size);
+  const N=46;
+  for(let i=0;i<N;i++)ps.push({x:Math.random()*W,y:Math.random()*H,r:.8+Math.random()*2.2,vx:(Math.random()-.5)*.25,vy:-(.15+Math.random()*.45),a:.15+Math.random()*.55,ph:Math.random()*Math.PI*2});
+  (function loop(){
+    ctx.clearRect(0,0,W,H);
+    ps.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;p.ph+=.02;
+      if(p.y<-8){p.y=H+8;p.x=Math.random()*W}
+      if(p.x<-8)p.x=W+8;if(p.x>W+8)p.x=-8;
+      const tw=.6+.4*Math.sin(p.ph);
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(176,141,62,${p.a*tw})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(loop);
+  })();
+})();
+
+/* ═══════════ 导航进度条与滚动状态 ═══════════ */
+const nav=document.querySelector('nav'),prog=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  const sc=h.scrollTop, mx=h.scrollHeight-h.clientHeight;
+  prog.style.width=(mx?sc/mx*100:0)+'%';
+  nav.classList.toggle('scrolled',sc>40);
+},{passive:true});
+</script>
+</body>
+</html>

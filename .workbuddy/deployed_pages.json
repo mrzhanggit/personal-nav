@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "recorded_at": "2026-08-23T23:32:00+08:00",
+  "note": "F:\\Shared 已部署网页记录表，作为监控自动化去重基线。source 为源文件绝对路径；size/modified 变化视为内容更新（重新部署覆盖，URL 不变）。",
+  "pages": [
+    {
+      "source": "F:/Shared/代码法师·ClaudeCode两周通关课程.html",
+      "size": 92576,
+      "modified": "2026-08-21T10:48:00",
+      "deployed_at": "2026-08-23T00:35:00+08:00",
+      "target": "claude-code-course.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/claude-code-course.html",
+      "nav_category": "AI 工具课程",
+      "nav_title": "代码法师 · Claude Code"
+    },
+    {
+      "source": "F:/Shared/终端骑士·CLI两周通关课程.html",
+      "size": 99943,
+      "modified": "2026-08-21T10:21:00",
+      "deployed_at": "2026-08-23T00:35:00+08:00",
+      "target": "cli-course.html",
+      "url": "https://ba6018fde2a945068ae0c46d820a74f1.app.workbuddy.link/cli-course.html",
+      "nav_category": "AI 工具课程",
+      "nav_title": "终端骑士 · CLI"
+    }
+  ]
+}
