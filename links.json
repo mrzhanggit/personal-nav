@@ -108,6 +108,18 @@
       ]
     },
     {
+      "name": "文章库",
+      "links": [
+        {
+          "title": "槽边往事 · 和菜头",
+          "subtitle": "3167 篇文章离线归档 · 2014–2026",
+          "url": "https://adaecad8c359a1c70.app.workbuddy.link/",
+          "emoji": "📚",
+          "tag": "阅读"
+        }
+      ]
+    },
+    {
       "name": "英语学习",
       "links": [
         {
@@ -146,6 +158,13 @@
           "subtitle": "30 课修炼之旅 · 从新手村到大师之路",
           "url": "python-course/index.html",
           "emoji": "🐍",
+          "tag": "课程"
+        },
+        {
+          "title": "Git Quest · 代码时空管理局",
+          "subtitle": "游戏化 Git 学习 · 修复被搞乱的代码时间线",
+          "url": "https://xkxwzdkx.qwenwork.host/",
+          "emoji": "🚀",
           "tag": "课程"
         }
       ]
