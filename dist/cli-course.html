@@ -174,6 +174,12 @@
   .modal p{font-size:13.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
   .modal textarea{width:100%;height:110px;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;color:#a9f5d8;font-family:var(--mono);font-size:12px;padding:10px;outline:none;resize:vertical}
   .modal .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .modal .lab{font-size:12.5px;color:var(--gold);margin:16px 0 7px;letter-spacing:.5px}
+  .modal .hint{font-size:12px;color:var(--tx2);line-height:1.7;margin-top:7px}
+  .modal textarea.import{border-color:#2b6a52;color:#d7ffe9}
+  .modal textarea.import:focus{border-color:#3ddc97}
+  .modal .ok-tip{color:#3ddc97}
+  .modal .err-tip{color:#ff8f8f}
 
   /* victory */
   .victory{display:none;text-align:center;padding:40px 20px}
@@ -1043,6 +1049,7 @@ function nextRank(xp){ for(var i=0;i<RANKS.length;i++){ if(xp<RANKS[i].x) return
 function addXp(n,msg){
   var before=rankOf(S.xp).n;
   S.xp+=n;
+  persist();
   var after=rankOf(S.xp).n;
   showToast(msg+'  +'+n+' XP', n>=50);
   if(after!==before){ setTimeout(function(){ showToast('★ 称号晋升：'+after+' ★', true); },2600); }
@@ -1073,9 +1080,57 @@ function checkBadges(){
   if(all) award('all');
 }
 function copyCode(btn,txt){
-  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ showToast('已复制到剪贴板'); }); }
-  else{ showToast('请手动选择复制'); }
+  if(!txt){ showToast('没有可复制的内容'); return; }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(
+      function(){ showToast('已复制到剪贴板'); },
+      function(){ legacyCopy(txt); }
+    );
+  } else { legacyCopy(txt); }
 }
+function legacyCopy(txt){
+  // file:// 或非安全上下文下 clipboard API 不可用，退回 execCommand
+  try{
+    var tmp=document.createElement('textarea');
+    tmp.value=txt;
+    tmp.setAttribute('readonly','');
+    tmp.style.position='fixed'; tmp.style.top='-1000px';
+    document.body.appendChild(tmp);
+    tmp.select(); tmp.setSelectionRange(0,txt.length);
+    var ok=document.execCommand('copy');
+    document.body.removeChild(tmp);
+    showToast(ok?'已复制到剪贴板':'复制失败，请手动全选复制');
+  }catch(e){ showToast('复制失败，请手动全选复制'); }
+}
+
+/* ---------- 存档：本地自动保存 + 通关码导入导出 ---------- */
+var STORE_KEY='cli-course.save.v1';
+function normalize(s){
+  var o=(s&&typeof s==='object')?s:{};
+  return {
+    xp: typeof o.xp==='number'?o.xp:0,
+    lv: o.lv&&typeof o.lv==='object'?o.lv:{},
+    quiz: o.quiz&&typeof o.quiz==='object'?o.quiz:{},
+    chal: o.chal&&typeof o.chal==='object'?o.chal:{},
+    miss: o.miss&&typeof o.miss==='object'?o.miss:{},
+    badges: o.badges&&typeof o.badges==='object'?o.badges:{}
+  };
+}
+function persist(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){}
+}
+function restoreLocal(){
+  try{
+    var raw=localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    var s=normalize(JSON.parse(raw));
+    if(!s.xp && !Object.keys(s.lv).length) return false;
+    S=s; return true;
+  }catch(e){ return false; }
+}
+window.addEventListener('beforeunload', persist);
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='hidden') persist(); });
+setInterval(persist, 4000);
 
 /* ---------- map view ---------- */
 function renderMap(){
@@ -1229,7 +1284,7 @@ function renderLevel(id){
     var key=L.id+'_'+i;
     var mi=el('div','mission'+(S.miss[key]?' ok':''));
     mi.innerHTML='<div class="box">✓</div><div class="mt">'+m+'</div>';
-    mi.onclick=function(){ S.miss[key]=!S.miss[key]; mi.classList.toggle('ok'); };
+    mi.onclick=function(){ S.miss[key]=!S.miss[key]; mi.classList.toggle('ok'); persist(); };
     ms.appendChild(mi);
   });
   app.appendChild(ms);
@@ -1258,6 +1313,7 @@ function finishLevel(L){
   if(!S.chal[L.id]){ showToast('还差一步：先完成试炼场的任务'); return; }
   if(qd<L.quiz.length){ showToast('还差一步：自测试炼还有 '+(L.quiz.length-qd)+' 题未答对'); return; }
   S.lv[L.id]=1;
+  persist();
   var bonus=L.boss?60:20;
   addXp(bonus,'「'+L.title.split(' · ')[0]+'」通关！');
   checkBadges();
@@ -1321,6 +1377,7 @@ function checkChallenge(){
   try{
     if(L.challenge.check(vsh)){
       S.chal[L.id]=1;
+      persist();
       appendOut('<span class="hl">✦ 试炼达成！获得 30 XP</span>');
       addXp(30,'试炼达成');
       checkBadges();
@@ -1342,6 +1399,7 @@ function buildQuiz(L,Q,qi,sec){
     if(!S.quiz[L.id]) S.quiz[L.id]=[];
     if(S.quiz[L.id][qi]) return false;
     S.quiz[L.id][qi]=1;
+    persist();
     addXp(10,'答对');
     return true;
   };
@@ -1440,7 +1498,7 @@ function buildOrder(){
         if(chosen.length===G.lines.length){
           var ok=chosen.every(function(v,i){return v===i;});
           if(ok){
-            if(!S.chal[L.id]){ S.chal[L.id]=1; addXp(30,'拼图达成'); checkBadges(); }
+            if(!S.chal[L.id]){ S.chal[L.id]=1; persist(); addXp(30,'拼图达成'); checkBadges(); }
             showToast('✓ 咒文组装正确！',true);
             slots.querySelectorAll('.ord-slot').forEach(function(s){s.classList.add('ok');});
           } else {
@@ -1461,37 +1519,114 @@ function buildOrder(){
 
 /* ---------- save / load ---------- */
 function saveCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }catch(e){ return ''; } }
+
+/* 解析通关码：兼容 base64 通关码、裸 JSON，容忍换行/空格/全角空格 */
+function parseCode(raw){
+  if(!raw) throw new Error('empty');
+  var t=String(raw).replace(/[\s\u00a0\u3000]+/g,'');
+  if(!t) throw new Error('empty');
+  var obj=null;
+  if(t.charAt(0)==='{'||t.charAt(0)==='['){
+    obj=JSON.parse(t);
+  } else {
+    try{ obj=JSON.parse(decodeURIComponent(escape(atob(t)))); }
+    catch(e1){ obj=JSON.parse(decodeURIComponent(escape(atob(t.replace(/-/g,'+').replace(/_/g,'/'))))); }
+  }
+  if(!obj||typeof obj!=='object') throw new Error('bad');
+  var s=normalize(obj);
+  if(!s.xp && !Object.keys(s.lv).length && !Object.keys(s.chal).length) throw new Error('bad');
+  return s;
+}
+function codeSummary(s){
+  return 'XP '+s.xp+' · 关卡 '+Object.keys(s.lv).length+'/14 · 试炼 '+Object.keys(s.chal).length;
+}
+
 function openSave(){
   modalBox.innerHTML='';
   modalBox.appendChild(el('h3','','通关码存档'));
-  modalBox.appendChild(el('p','','本页为离线单文件、不使用浏览器存储。复制下面的通关码妥善保存（可贴进备忘录），下次回来粘贴即可恢复进度。'));
-  var ta=document.createElement('textarea');
-  ta.value=saveCode(); ta.readOnly=true;
-  modalBox.appendChild(ta);
-  var row=el('div','row');
+  modalBox.appendChild(el('p','','进度会自动保存在当前浏览器里，关掉页面也不会丢。换设备或清理浏览器缓存前，先复制通关码存到备忘录，之后粘贴回来即可恢复。'));
+
+  /* ① 导出 */
+  modalBox.appendChild(el('div','lab','① 导出：复制当前进度的通关码'));
+  var out=document.createElement('textarea');
+  out.readOnly=true;
+  out.value=saveCode();
+  modalBox.appendChild(out);
+  var row1=el('div','row');
   var cp=el('button','btn','复制通关码');
-  cp.onclick=function(){ copyCode(cp,ta.value); };
-  var ld=el('button','btn ghost','导入通关码');
-  ld.onclick=function(){ loadFromTa(ta); };
+  cp.onclick=function(){ copyCode(cp,out.value); };
+  var sel=el('button','btn ghost','全选');
+  sel.onclick=function(){ out.focus(); out.select(); showToast('已全选，按 Ctrl/Cmd+C 复制'); };
+  row1.appendChild(cp); row1.appendChild(sel);
+  modalBox.appendChild(row1);
+
+  /* ② 导入 */
+  modalBox.appendChild(el('div','lab','② 导入：把通关码粘贴到下面'));
+  var inp=document.createElement('textarea');
+  inp.className='import';
+  inp.placeholder='在这里粘贴通关码（Ctrl/Cmd + V），支持整段粘贴，含换行也能识别';
+  modalBox.appendChild(inp);
+  var tip=el('div','hint','粘贴后会自动校验；确认无误再点「导入通关码」。');
+  modalBox.appendChild(tip);
+
+  function verify(){
+    var v=inp.value.trim();
+    if(!v){ tip.className='hint'; tip.textContent='粘贴后会自动校验；确认无误再点「导入通关码」。'; return; }
+    try{
+      var s=parseCode(v);
+      tip.className='hint ok-tip';
+      tip.textContent='✓ 已识别：'+codeSummary(s)+'　—— 点「导入通关码」覆盖当前进度';
+    }catch(e){
+      tip.className='hint err-tip';
+      tip.textContent='✗ 这段通关码无法识别，请检查是否复制完整（不要只复制半段）';
+    }
+  }
+  inp.addEventListener('input', verify);
+  inp.addEventListener('paste', function(){ setTimeout(verify,0); });
+  inp.addEventListener('keydown', function(e){ if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){ e.preventDefault(); loadFromTa(inp); } });
+
+  var row2=el('div','row');
+  var ld=el('button','btn','导入通关码');
+  ld.onclick=function(){ loadFromTa(inp); };
+  var rst=el('button','btn ghost','清空本地存档');
+  rst.onclick=function(){
+    if(!window.confirm('确定清空本地存档？当前进度会归零（已有通关码不受影响）。')) return;
+    try{ localStorage.removeItem(STORE_KEY); }catch(e){}
+    S=normalize(null);
+    modalBg.classList.remove('show');
+    renderMap();
+    showToast('本地存档已清空，从头再来');
+  };
   var cl=el('button','btn ghost','关闭');
   cl.onclick=function(){ modalBg.classList.remove('show'); };
-  row.appendChild(cp); row.appendChild(ld); row.appendChild(cl);
-  modalBox.appendChild(row);
+  row2.appendChild(ld); row2.appendChild(rst); row2.appendChild(cl);
+  modalBox.appendChild(row2);
+
   modalBg.classList.add('show');
+  setTimeout(function(){ inp.focus(); },50);
 }
+
 function loadFromTa(ta){
+  var v=(ta.value||'').trim();
+  if(!v){ showToast('请先把通关码粘贴到输入框里'); ta.focus(); return; }
   try{
-    var s=JSON.parse(decodeURIComponent(escape(atob(ta.value.trim()))));
-    if(typeof s.xp!=='number') throw 0;
-    S=s;
+    S=parseCode(v);
+    persist();
     modalBg.classList.remove('show');
     renderMap();
     showToast('进度已恢复，欢迎回来，骑士',true);
-  }catch(e){ showToast('通关码无法识别，请检查是否复制完整'); }
+  }catch(e){
+    showToast('通关码无法识别，请检查是否复制完整');
+  }
 }
 modalBg.addEventListener('click',function(e){ if(e.target===modalBg) modalBg.classList.remove('show'); });
 
+/* 启动：优先恢复本地自动存档 */
+var restored=restoreLocal();
 renderMap();
+if(restored){
+  setTimeout(function(){ showToast('已自动恢复上次的进度：'+codeSummary(S), true); },600);
+}
 </script>
 </body>
 </html>
