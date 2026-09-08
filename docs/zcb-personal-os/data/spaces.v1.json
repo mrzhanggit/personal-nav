@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ai",
+    "name": "AI 工具",
+    "subtitle": "用更好的工具，创造更大的可能",
+    "icon": "Sparkles",
+    "order": 1,
+    "accent": "ice-blue"
+  },
+  {
+    "id": "work",
+    "name": "医院工作",
+    "subtitle": "把高频工作入口收拢到一个空间",
+    "icon": "BriefcaseMedical",
+    "order": 2,
+    "accent": "cyan"
+  },
+  {
+    "id": "learn",
+    "name": "阅读学习",
+    "subtitle": "让知识成为长期复利",
+    "icon": "BookOpen",
+    "order": 3,
+    "accent": "blue"
+  },
+  {
+    "id": "invest",
+    "name": "投资研究",
+    "subtitle": "理解市场，做时间的朋友",
+    "icon": "ChartNoAxesCombined",
+    "order": 4,
+    "accent": "amber"
+  },
+  {
+    "id": "create",
+    "name": "创作项目",
+    "subtitle": "把想法变成作品",
+    "icon": "PenTool",
+    "order": 5,
+    "accent": "violet"
+  },
+  {
+    "id": "life",
+    "name": "生活",
+    "subtitle": "热爱生活，保持平衡",
+    "icon": "Leaf",
+    "order": 6,
+    "accent": "green"
+  }
+]

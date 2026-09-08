@@ -1,0 +1,45 @@
+[
+  {
+    "id": "work-start",
+    "name": "开始工作",
+    "icon": "BriefcaseMedical",
+    "description": "医院行政工作的一键启动场景",
+    "links": [],
+    "note": "待补充飞书、OA、HIS/医保、公卫等真实地址"
+  },
+  {
+    "id": "learn-start",
+    "name": "开始学习",
+    "icon": "BookOpen",
+    "description": "阅读、学习、AI 辅助思考",
+    "links": [
+      "word-memory",
+      "claude-code-course",
+      "cli-course"
+    ],
+    "note": "V1 可从现有项目起步，后续加入微信读书、ChatGPT、Claude 等真实入口"
+  },
+  {
+    "id": "invest-start",
+    "name": "投资研究",
+    "icon": "ChartNoAxesCombined",
+    "description": "行情、资产与研究资料",
+    "links": [
+      "asset-dashboard",
+      "rwh-quotes",
+      "rwh-podcast"
+    ],
+    "note": "后续加入 TradingView、IBKR 等真实入口"
+  },
+  {
+    "id": "create-start",
+    "name": "AI 创作",
+    "icon": "PenTool",
+    "description": "写作、开发、设计与发布",
+    "links": [
+      "git-quest",
+      "python-course"
+    ],
+    "note": "后续加入 Claude、GitHub、设计工具等真实入口"
+  }
+]
