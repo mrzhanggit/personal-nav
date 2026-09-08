@@ -1,13 +1,15 @@
 import resources from '../../docs/zcb-personal-os/data/links.v1.json'
 import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
+import { SearchTrigger } from './CommandPalette'
+import { resourceHref } from '../lib/search'
 import { Icon } from './Icon'
 
 export function Hero() {
-  return <section className="hero" aria-labelledby="greeting"><p className="eyebrow">YOUR SPACE. YOUR PACE.</p><h1 id="greeting">下午好，今天想做什么？</h1><p className="hero-subtitle">专注当下 · 构建更好的自己</p><div className="command-search" role="search" aria-label="搜索预览"><Icon name="search" /><input aria-label="搜索网站、项目、工具或输入命令（尚未开放）" placeholder="搜索网站、项目、工具或输入命令…" disabled /><kbd>⌘ K</kbd></div><div className="space-chips" aria-label="空间预览">{spaces.map(space => <span key={space.id} className={`chip ${space.id === 'ai' ? 'is-active' : ''}`}><Icon name={space.icon} />{space.name}</span>)}</div></section>
+  return <section className="hero" aria-labelledby="greeting"><p className="eyebrow">YOUR SPACE. YOUR PACE.</p><h1 id="greeting">下午好，今天想做什么？</h1><p className="hero-subtitle">专注当下 · 构建更好的自己</p><SearchTrigger /><div className="space-chips" aria-label="空间预览">{spaces.map(space => <span key={space.id} className={`chip ${space.id === 'ai' ? 'is-active' : ''}`}><Icon name={space.icon} />{space.name}</span>)}</div></section>
 }
 
 function ResourceLink({ resource }: { resource: typeof resources[number] }) {
-  const href = resource.hostingType === 'internal-static' ? `${import.meta.env.BASE_URL}${resource.url}` : resource.url
+  const href = resourceHref(resource, import.meta.env.BASE_URL)
   return <a className="resource-link" href={href} target="_blank" rel="noopener noreferrer" title={`${resource.name}：${resource.description}（新标签页打开）`}><span className="resource-icon" aria-hidden="true">{resource.icon}</span><span className="resource-name">{resource.name}</span><Icon name="arrow" className="resource-arrow" /></a>
 }
 
