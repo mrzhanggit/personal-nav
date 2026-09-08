@@ -1,0 +1,213 @@
+{
+  "title": "我的学习导航",
+  "subtitle": "阅读 · 播客 · 知识整理",
+  "footer": "设为浏览器首页 · 随时访问",
+  "categories": [
+    {
+      "name": "吴军系列",
+      "links": [
+        {
+          "title": "财商训练",
+          "subtitle": "吴军 · 财商思维与投资智慧",
+          "url": "https://2fa3e6f1265045b7bb5f845882dccba7.bj10.agentos-app.net/",
+          "emoji": "💡",
+          "tag": "吴军"
+        },
+        {
+          "title": "世界文明史 · 第一卷",
+          "subtitle": "吴军 · 人类文明的起源与演进",
+          "url": "https://481f909fe0734fb3b070870d21c4eaa2.sh2.agentos-app.net/index.html",
+          "emoji": "📜",
+          "tag": "吴军"
+        },
+        {
+          "title": "世界文明史 · 第二卷",
+          "subtitle": "吴军 · 文明的延续与交融",
+          "url": "https://4d06450d406a4b74b97e7462bbd990d2.gz3.agentos-app.net/",
+          "emoji": "🏛️",
+          "tag": "吴军"
+        }
+      ]
+    },
+    {
+      "name": "世界历史",
+      "links": [
+        {
+          "title": "拿破仑时代",
+          "subtitle": "法国大革命与拿破仑帝国兴衰",
+          "url": "https://mrzhanggit.github.io/napoleon-era/",
+          "emoji": "⚔️",
+          "tag": "历史"
+        }
+      ]
+    },
+    {
+      "name": "历史时间线",
+      "links": [
+        {
+          "title": "日本历史 · 交互网页",
+          "subtitle": "从上古到近现代的日本文明脉络",
+          "url": "timeline/japan-history.html",
+          "emoji": "⛩️",
+          "tag": "时间线"
+        },
+        {
+          "title": "英国历史时间线",
+          "subtitle": "从王朝更迭到帝国兴衰",
+          "url": "timeline/uk-history.html",
+          "emoji": "👑",
+          "tag": "时间线"
+        },
+        {
+          "title": "拜占庭历史 · 千年兴衰",
+          "subtitle": "330–1453 · 三种风格可选",
+          "url": "timeline/byzantine/index.html",
+          "emoji": "🏺",
+          "tag": "时间线"
+        },
+        {
+          "title": "俄罗斯历史 · 交互网页",
+          "subtitle": "从基辅罗斯到帝国兴衰 · 三种风格可选",
+          "url": "timeline/russia/index.html",
+          "emoji": "⛪",
+          "tag": "时间线"
+        },
+        {
+          "title": "文艺复兴历史 · 交互网页",
+          "subtitle": "1315–1633 · 人性的觉醒 · 三种风格可选",
+          "url": "timeline/renaissance/index.html",
+          "emoji": "🎨",
+          "tag": "时间线"
+        },
+        {
+          "title": "罗马历史 · 交互网页",
+          "subtitle": "罗马帝国 · 帝国大理石风格",
+          "url": "timeline/rome/index.html",
+          "emoji": "🏛️",
+          "tag": "时间线"
+        },
+        {
+          "title": "法国历史 · 交互网页",
+          "subtitle": "从法兰克王国到共和国 · 三种风格可选",
+          "url": "timeline/france/index.html",
+          "emoji": "🗼",
+          "tag": "时间线"
+        },
+        {
+          "title": "美国历史学习地图",
+          "subtitle": "从殖民地时代到现代美国的演进脉络 · 交互时间线",
+          "url": "https://mrzhanggit.github.io/us-history-map/",
+          "emoji": "🗽",
+          "tag": "时间线"
+        }
+      ]
+    },
+    {
+      "name": "播客",
+      "links": [
+        {
+          "title": "更富有、更睿智、更快乐",
+          "subtitle": "投资大师的智慧与人生哲学",
+          "url": "https://e24a9bd3c1f445c5982c76766e968370.gz1.agentos-app.net/",
+          "emoji": "🎙️",
+          "tag": "播客"
+        },
+        {
+          "title": "RWH · 金句长图全集",
+          "subtitle": "70 期 · 1100+ 张投资大师金句卡片",
+          "url": "https://rwh.chengbin.vip",
+          "emoji": "🖼️",
+          "tag": "播客"
+        }
+      ]
+    },
+    {
+      "name": "文章库",
+      "links": [
+        {
+          "title": "槽边往事 · 和菜头",
+          "subtitle": "3167 篇文章离线归档 · 2014–2026",
+          "url": "https://adaecad8c359a1c70.app.workbuddy.link/",
+          "emoji": "📚",
+          "tag": "阅读"
+        },
+        {
+          "title": "冯唐成事学 · 素材库",
+          "subtitle": "胜者心法 × 强者破局 · 讲《资治通鉴》",
+          "url": "https://mrzhanggit.github.io/shengzhefa-library/",
+          "emoji": "📖",
+          "tag": "阅读"
+        }
+      ]
+    },
+    {
+      "name": "英语学习",
+      "links": [
+        {
+          "title": "英文图像记忆",
+          "subtitle": "图像化联想 · 高效记单词",
+          "url": "https://chengbin.vip/word-memory/",
+          "emoji": "🔤",
+          "tag": "学习"
+        }
+      ]
+    },
+    {
+      "name": "AI 工具课程",
+      "links": [
+        {
+          "title": "代码法师 · Claude Code",
+          "subtitle": "两周通关课程 · 从入门到实战",
+          "url": "claude-code-course.html",
+          "emoji": "🧙",
+          "tag": "课程"
+        },
+        {
+          "title": "终端骑士 · CLI",
+          "subtitle": "两周通关课程 · 命令行进阶",
+          "url": "cli-course.html",
+          "emoji": "🐴",
+          "tag": "课程"
+        }
+      ]
+    },
+    {
+      "name": "编程学习",
+      "links": [
+        {
+          "title": "Python 游戏化课程",
+          "subtitle": "30 课修炼之旅 · 从新手村到大师之路",
+          "url": "python-course/index.html",
+          "emoji": "🐍",
+          "tag": "课程"
+        },
+        {
+          "title": "Git Quest · 代码时空管理局",
+          "subtitle": "游戏化 Git 学习 · 修复被搞乱的代码时间线",
+          "url": "https://xkxwzdkx.qwenwork.host/",
+          "emoji": "🚀",
+          "tag": "课程"
+        }
+      ]
+    },
+    {
+      "name": "个人工具",
+      "links": [
+        {
+          "title": "个人资产看板",
+          "subtitle": "港股 / 美股 / 加密货币持仓 · ¥ 本币显示 · 每日自动刷新",
+          "url": "https://mrzhanggit.github.io/asset-dashboard/",
+          "emoji": "📊",
+          "tag": "工具"
+        },
+        {
+          "title": "习惯力 · 个人成长工作台",
+          "subtitle": "习惯打卡 · 个人成长管理",
+          "url": "https://mrzhanggit.github.io/habit-workbench/",
+          "emoji": "💪",
+          "tag": "工具"
+        }
+      ]
+    }
+  ]
+}

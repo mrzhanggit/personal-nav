@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>代码法师 · Claude Code 两周通关课程</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --bg2:#101627; --panel:#141c30; --panel2:#1a2440;
+    --line:#243050; --tx:#dbe4f5; --tx2:#8fa0c4; --mut:#5c6b8f;
+    --acc:#2ee6a8; --acc2:#7dd3fc; --gold:#fbbf24; --rose:#fb7185; --vio:#a78bfa;
+    --mono:'SF Mono','Menlo','Consolas',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:radial-gradient(1200px 800px at 70% -10%,#1a1230 0%,var(--bg) 55%) fixed;color:var(--tx);font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;min-height:100vh}
+  ::selection{background:rgba(46,230,168,.25)}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 20px 80px}
+
+  .top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+  .crest{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#331b53,#12283d);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--vio);box-shadow:0 0 24px rgba(167,139,250,.2)}
+  .title{font-size:22px;font-weight:700;letter-spacing:.5px}
+  .title small{display:block;font-size:12px;color:var(--tx2);font-weight:400;margin-top:3px;letter-spacing:2px}
+  .hud{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:13px;color:var(--tx2);display:flex;gap:7px;align-items:center}
+  .pill b{color:var(--gold);font-family:var(--mono)}
+  .rankbar{margin:16px 0 26px}
+  .rankline{display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);margin-bottom:6px}
+  .rankline b{color:var(--acc)}
+  .track{height:10px;border-radius:99px;background:var(--panel);border:1px solid var(--line);overflow:hidden}
+  .fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,var(--vio),var(--acc));transition:width .6s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 12px rgba(167,139,250,.5)}
+
+  .btn{background:linear-gradient(135deg,#5b3aa8,#3d2a7a);color:#f0eaff;border-radius:10px;padding:10px 18px;font-size:14px;font-weight:600;transition:.2s;box-shadow:0 4px 14px rgba(167,139,250,.18)}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.15)}
+  .btn.ghost{background:var(--panel);border:1px solid var(--line);color:var(--tx2)}
+  .btn.ghost:hover{color:var(--tx)}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+  .btn.small{padding:6px 12px;font-size:12px;border-radius:8px}
+
+  .weeks{display:grid;gap:26px}
+  .week{background:linear-gradient(180deg,rgba(20,28,48,.7),rgba(16,22,39,.5));border:1px solid var(--line);border-radius:18px;padding:20px 20px 8px}
+  .week h3{font-size:14px;color:var(--acc2);letter-spacing:1px;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+  .week h3 .wk-tag{font-size:11px;background:rgba(125,211,252,.12);border:1px solid rgba(125,211,252,.3);padding:2px 8px;border-radius:99px}
+  .nodes{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px;margin-bottom:14px}
+  .node{position:relative;border-radius:14px;padding:14px 10px 12px;text-align:center;border:1px solid var(--line);background:var(--panel);transition:.25s;overflow:hidden}
+  .node .dn{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:1px}
+  .node .nm{font-size:14px;font-weight:600;margin:5px 0 3px}
+  .node .st{font-size:11px;color:var(--mut)}
+  .node.open{border-color:rgba(167,139,250,.5);cursor:pointer;background:linear-gradient(160deg,var(--panel),rgba(167,139,250,.07))}
+  .node.open:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+  .node.done{border-color:rgba(46,230,168,.55);background:linear-gradient(160deg,var(--panel),rgba(46,230,168,.12))}
+  .node.done .st{color:var(--acc)}
+  .node.locked{opacity:.42;filter:grayscale(.6)}
+  .node.boss{border-color:rgba(251,191,36,.45);background:linear-gradient(160deg,var(--panel),rgba(251,191,36,.08))}
+  .node.boss .dn{color:var(--gold)}
+  .node .mark{position:absolute;top:8px;right:9px;font-size:12px}
+  .node.done .mark{color:var(--acc)}
+  .node.open .mark{color:var(--acc2)}
+
+  .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  .badge{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:8px 13px;font-size:12.5px;color:var(--mut);background:var(--panel);transition:.3s}
+  .badge .bs{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;background:#0d1424;border:1px solid var(--line);color:#3a4666}
+  .badge.won{color:#ffe9b0;border-color:rgba(251,191,36,.45);background:linear-gradient(135deg,rgba(251,191,36,.1),var(--panel))}
+  .badge.won .bs{color:var(--gold);border-color:rgba(251,191,36,.5);box-shadow:0 0 10px rgba(251,191,36,.3)}
+
+  .lv-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .back{color:var(--tx2);font-size:13px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel);transition:.2s}
+  .back:hover{color:var(--acc)}
+  .lv-tag{font-family:var(--mono);font-size:12px;color:var(--gold);letter-spacing:2px}
+  .lv-title{font-size:24px;font-weight:700;margin-top:2px}
+  .story{background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(125,211,252,.06));border:1px solid rgba(167,139,250,.28);border-radius:14px;padding:16px 18px;font-size:14.5px;line-height:1.85;color:#cfd9f2;margin-bottom:22px}
+  .story b{color:#d8c8ff}
+  .sect{margin-bottom:26px}
+  .sect>h4{font-size:15px;letter-spacing:1px;color:var(--acc2);margin-bottom:12px;display:flex;gap:8px;align-items:center}
+  .sect>h4::before{content:"◆";font-size:10px;color:var(--vio)}
+  .lesson{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:12px;transition:.2s}
+  .lesson:hover{border-color:#31416a}
+  .lesson h5{font-size:15px;margin-bottom:8px;color:#eaf4ff}
+  .lesson h5 code{color:var(--acc);font-family:var(--mono);background:rgba(46,230,168,.09);padding:2px 8px;border-radius:6px;margin-left:8px;font-size:13px}
+  .lesson p{font-size:14px;line-height:1.85;color:var(--tx2)}
+  .lesson p b{color:var(--tx)}
+  .codeblk{display:flex;align-items:center;gap:10px;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;padding:10px 14px;margin-top:10px;font-family:var(--mono);font-size:13.5px;color:#a9f5d8;overflow-x:auto}
+  .codeblk .p{color:#4a5878;user-select:none}
+  .codeblk code{white-space:pre}
+  .copy{margin-left:auto;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:3px 9px;transition:.2s;flex-shrink:0}
+  .copy:hover{color:var(--acc);border-color:var(--acc)}
+  .tip{font-size:12.5px;color:#b9a8ee;background:rgba(167,139,250,.07);border-left:3px solid var(--vio);padding:8px 12px;border-radius:0 8px 8px 0;margin-top:10px;line-height:1.7}
+
+  .vterm{background:#070b13;border:1px solid #1d2a45;border-radius:14px;overflow:hidden;box-shadow:0 10px 34px rgba(0,0,0,.45)}
+  .vt-bar{display:flex;align-items:center;gap:8px;padding:9px 14px;background:#0d1322;border-bottom:1px solid #1d2a45}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .vt-bar span.t{margin-left:6px;font-size:12px;color:var(--mut);font-family:var(--mono)}
+  .vt-bar .reset{margin-left:auto;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:3px 10px}
+  .vt-bar .reset:hover{color:var(--rose)}
+  .vt-out{height:260px;overflow-y:auto;padding:12px 14px;font-family:var(--mono);font-size:13px;line-height:1.65;color:#b8e8d2}
+  .vt-out .sys{color:#5c7a95}
+  .vt-out .err{color:#ff9d9d}
+  .vt-out .in{color:#7dd3fc}
+  .vt-out .hl{color:var(--gold)}
+  .vt-out .tool{color:#c9b8ff}
+  .vt-out .bot{color:#e8e2ff}
+  .vt-in{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #1d2a45;background:#0a0f1a}
+  .vt-in .ps{font-family:var(--mono);font-size:13px;color:var(--vio);white-space:nowrap}
+  .vt-in input{flex:1;background:none;border:none;outline:none;color:#e8f6ff;font-family:var(--mono);font-size:13px;caret-color:var(--vio)}
+  .quest{background:linear-gradient(135deg,rgba(251,191,36,.08),rgba(251,113,133,.05));border:1px solid rgba(251,191,36,.35);border-radius:14px;padding:14px 18px;margin-top:14px;font-size:14px;line-height:1.8;color:#f3e3bb}
+  .quest b{color:var(--gold)}
+  .quest .qdone{color:var(--acc);font-weight:700}
+
+  .qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .qcard .qn{font-size:12px;color:var(--mut);font-family:var(--mono);margin-bottom:8px;letter-spacing:1px}
+  .qcard .qt{font-size:15px;line-height:1.7;margin-bottom:14px}
+  .qcard .qt code, .opts code{font-family:var(--mono);background:#0a0e18;border:1px solid #1d2740;color:#a9f5d8;padding:1px 7px;border-radius:6px;font-size:13px}
+  .opts{display:grid;gap:9px}
+  .opt{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line);border-radius:10px;padding:10px 13px;font-size:13.5px;color:var(--tx2);line-height:1.6;transition:.18s;background:#101728}
+  .opt:hover:not(.off){border-color:#3a4d7d;color:var(--tx)}
+  .opt .oi{font-family:var(--mono);font-size:12px;color:var(--mut);padding-top:2px}
+  .opt.right{border-color:var(--acc);background:rgba(46,230,168,.09);color:#d9ffee}
+  .opt.wrong{border-color:var(--rose);background:rgba(251,113,133,.08);color:#ffd7dc}
+  .opt.off{pointer-events:none}
+  .typein{display:flex;gap:10px}
+  .typein input{flex:1;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;padding:11px 14px;color:#a9f5d8;font-family:var(--mono);font-size:14px;outline:none}
+  .typein input:focus{border-color:var(--vio)}
+  .exp{margin-top:12px;font-size:13px;line-height:1.75;color:#b0a4e0;background:rgba(167,139,250,.06);border-left:3px solid var(--vio);padding:9px 13px;border-radius:0 8px 8px 0;display:none}
+  .exp.show{display:block}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .mcard{perspective:900px;height:120px;cursor:pointer}
+  .mcard .inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,.9,.3,1)}
+  .mcard.flip .inner{transform:rotateY(180deg)}
+  .mface{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px;text-align:center}
+  .mf-front{background:linear-gradient(150deg,#251b45,#101a30);border:1px solid #3a2e63}
+  .mf-front .k{font-family:var(--mono);font-size:14px;color:#c9b8ff}
+  .mf-front .hint{font-size:10.5px;color:var(--mut);letter-spacing:1px}
+  .mf-back{background:linear-gradient(150deg,#123430,#0d2438);border:1px solid rgba(46,230,168,.4);transform:rotateY(180deg);font-size:12px;line-height:1.6;color:#c4e9da;overflow-y:auto}
+
+  .mission{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--panel);cursor:pointer;transition:.2s}
+  .mission:hover{border-color:#31416a}
+  .mission .box{width:19px;height:19px;border-radius:6px;border:2px solid #35436b;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:.2s}
+  .mission.ok .box{border-color:var(--acc);background:rgba(46,230,168,.15);color:var(--acc)}
+  .mission .mt{font-size:13.5px;line-height:1.7;color:var(--tx2)}
+  .mission.ok .mt{color:#7fae9b;text-decoration:line-through;text-decoration-color:rgba(46,230,168,.4)}
+
+  .ord-pool{display:flex;flex-direction:column;gap:8px}
+  .ord-item{font-family:var(--mono);font-size:13px;text-align:left;background:#101728;border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:#cfe3ff;transition:.18s}
+  .ord-item:hover:not(.used){border-color:var(--acc2)}
+  .ord-item.used{opacity:.25;pointer-events:none}
+  .ord-slots{min-height:60px;border:2px dashed #2b3a63;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+  .ord-slot{font-family:var(--mono);font-size:13px;background:rgba(125,211,252,.08);border:1px solid rgba(125,211,252,.35);border-radius:10px;padding:10px 14px;color:#dff0ff;display:flex;gap:10px}
+  .ord-slot button{margin-left:auto;color:var(--mut);font-size:11px}
+  .ord-slot button:hover{color:var(--rose)}
+  .ord-slot.ok{border-color:var(--acc);background:rgba(46,230,168,.1)}
+
+  .lv-foot{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;align-items:center}
+  .lv-foot .fin{font-size:13px;color:var(--acc)}
+
+  .toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(80px);background:#0e1a20;border:1px solid var(--acc);color:#d9ffee;padding:12px 22px;border-radius:12px;font-size:14px;z-index:99;transition:.35s cubic-bezier(.2,.9,.3,1.2);box-shadow:0 8px 30px rgba(0,0,0,.5);pointer-events:none}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .toast.gold{border-color:var(--gold);color:#ffe9b0}
+  .modal-bg{position:fixed;inset:0;background:rgba(5,8,15,.75);backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:26px;max-width:560px;width:100%;max-height:85vh;overflow-y:auto}
+  .modal h3{font-size:17px;margin-bottom:12px;color:var(--gold)}
+  .modal p{font-size:13.5px;color:var(--tx2);line-height:1.8;margin-bottom:12px}
+  .modal textarea{width:100%;height:110px;background:#0a0e18;border:1px solid #1d2740;border-radius:10px;color:#a9f5d8;font-family:var(--mono);font-size:12px;padding:10px;outline:none;resize:vertical}
+  .modal .row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+  .victory{display:none;text-align:center;padding:40px 20px}
+  .victory.show{display:block}
+  .victory .vc{font-size:60px;color:var(--gold);text-shadow:0 0 40px rgba(251,191,36,.5);margin-bottom:10px}
+  .victory h2{font-size:26px;margin-bottom:10px}
+  .victory p{color:var(--tx2);line-height:1.9;font-size:14.5px;max-width:540px;margin:0 auto 20px}
+
+  @media (max-width:640px){
+    .hud{margin-left:0}
+    .nodes{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+/* =========================================================
+   代码法师 · Claude Code 两周通关课程
+   单文件离线 HTML · 无外部依赖 · 进度通过通关码保存
+   页内沙盒：Claude Code 会话模拟器（CSim）
+   ========================================================= */
+
+var S = { xp:0, lv:{}, quiz:{}, chal:{}, miss:{}, badges:{} };
+var RANKS = [
+  {n:'麻瓜提问者', x:0},{n:'会话学徒', x:120},{n:'命令术士', x:260},{n:'模式掌控者', x:480},
+  {n:'记忆守护者', x:740},{n:'代理指挥官', x:1000},{n:'代码法师', x:1250}
+];
+var BADGES = [
+  {id:'first', n:'法杖入手', d:'完成第一关（装好 Claude Code）'},
+  {id:'week1', n:'一周之约', d:'通关第一周全部 7 关'},
+  {id:'memory', n:'记忆水晶', d:'掌握 CLAUDE.md 项目记忆（第 7 关）'},
+  {id:'cmd', n:'咒文锻造师', d:'造出第一个自定义命令（第 8 关）'},
+  {id:'mcp', n:'魔网连接者', d:'接入第一个 MCP（第 11 关）'},
+  {id:'flow', n:'流水线大师', d:'完成毕业工作流拼图（第 14 关）'},
+  {id:'all', n:'代码法师', d:'14 关全部通关'}
+];
+
+var LEVELS = [
+/* ============ DAY 1 ============ */
+{ id:1, title:'法杖锻造 · 安装与启动', area:'第一周 · 驾驭', boss:false,
+  story:'魔法学院门口，导师递给你一根未开光的法杖。「这就是 <b>Claude Code</b>——住在终端里的 AI 编程学徒。它听得懂人话，会自己读代码、跑命令、改文件。但首先，你得把它请进你的 Mac。」',
+  lessons:[
+    {t:'前置检查 —— Node.js', c:'node -v', b:'Claude Code 通过 npm 安装，需要 <b>Node 18 以上</b>。在终端敲 node -v 看版本号；没有 Node 就去 nodejs.org 下载 LTS 版，或用 Homebrew：brew install node。'},
+    {t:'铸造法杖 —— 安装', c:'npm install -g @anthropic-ai/claude-code', b:'一条命令全局安装。装完敲 <b>claude --version</b> 验证。注意包名是 <b>@anthropic-ai/claude-code</b>，别装成同名山寨包。'},
+    {t:'唤醒法杖 —— 首次启动', c:'claude', b:'在任意目录敲 claude 启动。首次运行会引导你在浏览器登录 <b>Anthropic 账号</b>（Claude Pro/Max 订阅可直接用，也可用 API 按量付费）。登录后就能对话了。'},
+    {t:'收回法杖 —— 退出', c:'/exit', b:'会话里敲 /exit 退出，或在终端按两次 Ctrl+C。退出不丢历史——明天教你恢复会话。'}
+  ],
+  challenge:{ task:'在沙盒里完成开光仪式：① 用 npm 安装 Claude Code；② 启动 claude；③ 敲 <b>/help</b> 看看它有哪些命令；④ 用 <b>/exit</b> 退出会话。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /npm\s+(install|i)\s+-g\s+@anthropic-ai\/claude-code/.test(h) && /(^|[^-\w])claude([^-\w]|$)/.test(h) && /\/help/.test(h) && /\/exit/.test(h); } },
+  quiz:[
+    {q:'安装 Claude Code 的正确命令是？', o:['npm install -g @anthropic-ai/claude-code','npm install claude-code','brew install claude','apt install claude'], a:0, e:'注意带 @anthropic-ai 作用域的官方包名。'},
+    {q:'启动前需要确认什么前置条件？', o:['Node.js 18+ 已安装','装了 Xcode','有 GitHub 账号','磁盘 100G 以上'], a:0, e:'它靠 npm 分发，Node 是硬前置。'},
+    {q:'会话内退出 Claude Code 用哪个命令？', o:['/exit','/quit','Ctrl+Q','exit claude'], a:0, e:'/exit 优雅退出；两次 Ctrl+C 也行。'},
+    {q:'亲手打出：验证安装是否成功的命令', type:'claude --version', e:'装完必验证，好习惯从第一天开始。'}
+  ],
+  cards:[{k:'npm install -g @anthropic-ai/claude-code',b:'官方安装命令'},{k:'node -v',b:'前置检查：Node 18+'},{k:'claude',b:'启动会话'},{k:'claude --version',b:'验证安装'},{k:'/exit',b:'退出会话'},{k:'更新',b:'npm update -g @anthropic-ai/claude-code'}],
+  missions:['真机：node -v 确认版本，然后 npm install -g @anthropic-ai/claude-code','启动 claude，完成浏览器登录','对它说「你好，请介绍一下你自己」，感受第一次对话，然后 /exit']
+},
+/* ============ DAY 2 ============ */
+{ id:2, title:'初次低语 · 会话之道', area:'第一周 · 驾驭', boss:false,
+  story:'导师看着你与法杖的第一次对话。「记住三件事：<b>说人话</b>——把需求讲清楚；<b>敢打断</b>——方向错了立刻按 Esc；<b>会收拾</b>——上下文塞满了就 /clear。会话是你和它共同的记忆，管理记忆就是管理魔法。」',
+  lessons:[
+    {t:'说人话 —— 自然语言指令', c:'帮我看看这个项目是做什么的\n把 utils.js 里的重复代码抽成函数', b:'不用背命令语法——直接说要什么。它会自己决定读哪些文件、跑哪些命令。描述得越具体（文件、预期行为、约束），结果越准。'},
+    {t:'敢打断 —— Esc', c:'Esc        # 打断当前输出\nEsc Esc    # 跳回历史消息重新编辑', b:'它跑偏了？按 <b>Esc</b> 立刻停下。连按两次 Esc 可以翻回你之前发过的消息修改重发——比重打一遍快得多。'},
+    {t:'会收拾 —— /clear 与 /compact', c:'/clear\n/compact', b:'上下文窗口是有限的。话题切换时 <b>/clear</b> 彻底清空重来；话题没变但聊太久时 <b>/compact</b> 把历史压缩成摘要，保住要点省出空间。'},
+    {t:'断点续传 —— 恢复会话', c:'claude --continue\nclaude --resume', b:'退出后想接着聊：<b>claude -c</b> 直接续上最近一次会话；<b>claude --resume</b> 弹出历史会话列表任你挑。昨天的思路不用重来。'}
+  ],
+  challenge:{ task:'在沙盒里练习会话管理：① 启动 claude 后随便问它一个问题（自由输入中文即可）；② 用 <b>/compact</b> 压缩历史；③ 用 <b>/clear</b> 清空；④ /exit 后用 <b>claude -c</b> 恢复会话。',
+    check:function(sim){ var h=sim.hist.join(' ; '); var free=sim.hist.some(function(l){return l && l[0]!=='/' && l[0]!=='!' && l[0]!=='#' && !/^(claude|npm|cd|ls|cat|git|mkdir|touch|echo|node|help)\b/.test(l);});
+      return free && /\/compact/.test(h) && /\/clear/.test(h) && /claude\s+(-c|--continue|--resume)/.test(h); } },
+  quiz:[
+    {q:'话题已经聊完、要开始全新任务时，该用哪个命令清空上下文？', o:['/clear','/compact','/exit','Esc'], a:0, e:'/clear 一刀两断，新任务不带旧包袱。'},
+    {q:'同一个任务聊太久上下文快满了，想保住要点继续，用？', o:['/compact','/clear','重新安装','Ctrl+L'], a:0, e:'/compact 压缩历史成摘要，要点不丢、空间腾出。'},
+    {q:'昨天退出会话，今天想接着昨天的进度聊，敲？', o:['claude -c','claude new','claude --fresh','/resume yesterday'], a:0, e:'-c = continue，直接续最近一次。--resume 可从列表挑更早的。'},
+    {q:'亲手打出：打断它输出所用的键（单按键名）', type:'Esc', e:'一个 Esc 打断，双击 Esc 还能回跳编辑历史消息。'}
+  ],
+  cards:[{k:'Esc',b:'打断当前输出'},{k:'Esc Esc',b:'回跳编辑历史消息'},{k:'/clear',b:'彻底清空上下文'},{k:'/compact',b:'压缩历史保要点'},{k:'claude -c',b:'续上最近会话'},{k:'claude --resume',b:'从列表挑会话恢复'},{k:'说人话',b:'需求越具体，结果越准'}],
+  missions:['真机：启动 claude 问它一个关于你项目的问题','中途按一次 Esc 打断它，再按两次 Esc 修改你上一条消息','用 /compact 压缩一次，退出后用 claude -c 恢复']
+},
+/* ============ DAY 3 ============ */
+{ id:3, title:'咒语书 · 斜杠命令', area:'第一周 · 驾驭', boss:false,
+  story:'图书馆的咒语书翻开在你面前。「/ 开头的是<b>咒语</b>——它们不发给 AI，而是直接指挥 Claude Code 本体。掌握十来个高频咒语，你就从『聊天的人』变成『施法的人』。」',
+  lessons:[
+    {t:'基础咒语', c:'/help\n/status\n/doctor', b:'<b>/help</b> 列出全部命令；<b>/status</b> 看当前账号、模型、工作目录；<b>/doctor</b> 体检——安装有问题、权限有异常都能查出来。'},
+    {t:'切换大脑 —— /model', c:'/model\n/model opus', b:'不带参数显示当前模型；带参数切换。<b>Opus</b> 最强最贵，适合复杂架构；<b>Sonnet</b> 均衡，日常默认；<b>Haiku</b> 最快最省，适合小改动。'},
+    {t:'钱包术 —— /cost', c:'/cost', b:'看本次会话花了多少 token、多少钱。订阅用户显示用量、API 用户显示美元。心中有数，才敢放手让它干活。'},
+    {t:'配置术 —— /config', c:'/config', b:'打开设置项：主题、通知、自动更新等都能在这里调。'}
+  ],
+  challenge:{ task:'咒语练习：① 用 <b>/model opus</b> 把模型切换到 Opus；② 用 <b>/cost</b> 查看本次会话开销；③ 用 <b>/status</b> 查看当前状态（需先启动会话）。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /\/model\s+opus/i.test(h) && /\/cost/.test(h) && /\/status/.test(h); } },
+  quiz:[
+    {q:'复杂架构设计任务，该切到哪个模型？', o:['Opus','Haiku','Sonnet','随便'], a:0, e:'Opus 推理最强，适合难活；代价是更贵更慢。'},
+    {q:'想知道这个会话花了多少 token，敲？', o:['/cost','/price','/usage','/status'], a:0, e:'/cost 直接报账。'},
+    {q:'安装出问题、想全面体检，用？', o:['/doctor','/help','/config','/repair'], a:0, e:'/doctor 诊断环境与权限问题。'},
+    {q:'亲手打出：把模型切回 Sonnet', type:'/model sonnet', e:'日常干活的性价比之王。'}
+  ],
+  cards:[{k:'/help',b:'命令总览'},{k:'/model opus|sonnet|haiku',b:'切换模型：强/衡/快'},{k:'/cost',b:'会话开销'},{k:'/status',b:'账号·模型·目录'},{k:'/doctor',b:'环境体检'},{k:'/config',b:'设置项'}],
+  missions:['真机：/status 和 /cost 各看一次','体验三种模型：/model haiku 问个小问题，再 /model opus 问个难的','/doctor 跑一次体检，确认无恙']
+},
+/* ============ DAY 4 ============ */
+{ id:4, title:'三态变身 · 模式与前缀', area:'第一周 · 驾驭', boss:false,
+  story:'导师教你法杖的三种握法。「同一根杖，握法不同威力不同：<b>默认</b>步步请示、<b>自动</b>放手让它干、<b>计划</b>先谋后动。另有两条暗语：# 记心间，! 走快捷。」',
+  lessons:[
+    {t:'Shift+Tab 循环切换', c:'Shift+Tab   # default → auto-accept → plan', b:'在输入框按 <b>Shift+Tab</b> 循环切换三种权限模式，界面左下角会显示当前模式。这是 Claude Code 最重要的一组快捷键。'},
+    {t:'三种模式', c:'default     # 每个敏感操作都询问\nauto-accept # 自动接受编辑\nplan        # 只读分析，先出计划', b:'<b>default</b> 稳妥——动文件前都问你；<b>auto-accept</b> 高效——批量小改动时用；<b>plan</b> 谋定后动——大任务先让它读懂项目、给出方案，你批准了才动手。'},
+    {t:'暗语一 —— # 记心间', c:'# 本项目统一用 pnpm，不要用 npm', b:'输入以 <b>#</b> 开头的文字，会被存进 CLAUDE.md 项目记忆——它以后每次都会记得。随口一记，胜过每次重复交代。'},
+    {t:'暗语二 —— ! 走快捷', c:'! git status', b:'输入以 <b>!</b> 开头，直接在你自己的 shell 里执行这条命令，不用退出会话。查个状态、看个文件的顺手拈来。'}
+  ],
+  challenge:{ task:'暗语试炼（沙盒支持）：① 启动会话后，用 <b>#</b> 记一条记忆（如 # 本项目用 vitest 测试）；② 用 <b>!</b> 直接跑一条命令（如 ! ls）。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /(^|; )#/.test(h) && /(^|; )!/.test(h); } },
+  quiz:[
+    {q:'想让它先分析项目、给出方案、批准后再动手，该切到？', o:['plan mode','auto-accept','default','headless'], a:0, e:'plan 模式下它只读不写，产出计划等你批准。'},
+    {q:'切换权限模式的快捷键是？', o:['Shift+Tab','Tab','Ctrl+M','Esc+M'], a:0, e:'Shift+Tab 循环：default → auto-accept → plan。'},
+    {q:'# 本项目用 tabs 缩进 这条输入的效果是？', o:['写入 CLAUDE.md 项目记忆','发消息给 AI','执行 shell 命令','注释，无作用'], a:0, e:'# 前缀 = 随手记进记忆，一劳永逸。'},
+    {q:'亲手打出：在会话内直接执行 git status 的输入', type:'! git status', e:'! 前缀，不经过 AI，直接跑。'}
+  ],
+  cards:[{k:'Shift+Tab',b:'循环切换权限模式'},{k:'default',b:'步步请示，最稳'},{k:'auto-accept',b:'自动接受编辑，最快'},{k:'plan',b:'只读分析，先出计划'},{k:'# 内容',b:'写入项目记忆'},{k:'! 命令',b:'直接执行 shell'}],
+  missions:['真机：Shift+Tab 切一遍三种模式，感受左下角变化','用 # 给你的项目记一条约定','用 ! 跑一次 git status']
+},
+/* ============ DAY 5 ============ */
+{ id:5, title:'结界之门 · 权限管理', area:'第一周 · 驾驭', boss:false,
+  story:'法杖威力越大，结界越要牢固。「默认模式下它每次读写文件、执行命令都会请示——选项里藏着『总是允许』。点多了结界就松了。今天学会<b>主动管理</b>权限，而不是被动点『是』。」',
+  lessons:[
+    {t:'每次请示的选项', c:'Yes\nYes, and don\'t ask again for this command\nNo, and tell Claude what to do differently', b:'第二个选项会把这条规则加入<b>允许清单</b>。适合 git status 这类只读命令；危险的（rm、push --force）永远手动批。'},
+    {t:'查看与编辑 —— /permissions', c:'/permissions\n/permissions allow Bash(git status:*)', b:'/permissions 查看当前允许/拒绝清单，也能在这里增删规则。规则形如 <b>工具名(模式)</b>，支持通配。'},
+    {t:'写进配置 —— settings.json', c:'.claude/settings.json\n{\n  "permissions": {\n    "allow": ["Bash(npm run test:*)", "Read"]\n  }\n}', b:'项目级配置放在 <b>.claude/settings.json</b>，团队共享；个人偏好放 ~/.claude/settings.json。allow 数组里的工具不再询问。'},
+    {t:'红色按钮 —— 跳过所有权限', c:'claude --dangerously-skip-permissions', b:'跳过一切确认，全速狂奔。仅建议在<b>容器/沙箱环境</b>里用，本机慎用——AI 失误时没有任何拦截。'}
+  ],
+  challenge:{ task:'结界管理：① 用 <b>/permissions</b> 查看当前权限清单；② 用 <b>/permissions allow Bash(git status)</b> 把只读的 git status 加入允许清单。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /(^|; )\/permissions(?!\s+allow)/.test(h) && /\/permissions\s+allow/.test(h); } },
+  quiz:[
+    {q:'哪类命令适合加入“总是允许”清单？', o:['只读命令如 git status、npm test','rm 删除类','git push --force','随机决定'], a:0, e:'只读无风险，问了也白问；破坏性命令必须人工把关。'},
+    {q:'项目级、可提交给团队共享的权限配置放在？', o:['.claude/settings.json','~/.claude/settings.json','package.json','权限无法持久化'], a:0, e:'项目目录内的 settings.json 随仓库走，团队统一。'},
+    {q:'--dangerously-skip-permissions 适合什么场景？', o:['容器或沙箱等隔离环境','日常本机开发','生产服务器','任何时候都适合'], a:0, e:'名字都在警告你了：危险。隔离环境里才敢全速。'},
+    {q:'亲手打出：把 npm test 加入允许清单', type:'/permissions allow Bash(npm test:*)', e:'通配 :* 表示带任意参数都放行。'}
+  ],
+  cards:[{k:'总是允许选项',b:'本次+加入允许清单'},{k:'/permissions',b:'查看权限清单'},{k:'/permissions allow X',b:'添加允许规则'},{k:'.claude/settings.json',b:'项目级权限配置，团队共享'},{k:'工具名(模式)',b:'规则写法，支持 :* 通配'},{k:'skip-permissions',b:'仅限沙箱环境的红按钮'}],
+  missions:['真机：让 AI 跑一次 npm test，选“总是允许”，然后用 /permissions 查看效果','把 git status、ls 这类只读命令手动加进允许清单','想想你的项目里哪些命令绝对不能进白名单——写下来']
+},
+/* ============ DAY 6 ============ */
+{ id:6, title:'周 Boss · 项目首航', area:'第一周 · Boss', boss:true,
+  story:'结界既固，导师带你来到一个真实项目前。「纸上谈兵到此为止。<b>cd 进项目、唤醒法杖、问出第一个好问题</b>——它读完全部代码再回答的样子，就是魔法的样子。战胜这一关，你出师了。」',
+  lessons:[
+    {t:'第一原则 —— 在项目根目录启动', c:'cd ~/my-project\nclaude', b:'它以<b>启动目录</b>为工作区：在这里启动，它就只碰这个项目的文件。所以永远 cd 到项目根目录再敲 claude。'},
+    {t:'黄金第一问', c:'这个项目是做什么的？\n入口在哪？核心模块怎么组织的？', b:'第一次进项目，先问概览——它会调 Read、Glob、Grep 把 README、目录结构、关键文件翻一遍再回答。这个回答同时也在帮它自己<b>建立上下文</b>。'},
+    {t:'落地记忆 —— /init', c:'/init', b:'/init 让它扫描项目并生成 <b>CLAUDE.md</b>——项目的第一份记忆文件。下次会话它开局就“记得”这个项目的架构与约定，不用重新摸索。'},
+    {t:'观察它的工具调用', c:'⏺ Read(src/app.js)\n⏺ Bash(git log --oneline -5)', b:'回答过程中屏幕上滚过的 ⏺ 行就是它的<b>工具调用</b>：读哪个文件、跑哪条命令一目了然。看得懂这些，你就看得懂它在想什么。'}
+  ],
+  challenge:{ task:'首航仪式：① cd 进 my-project 项目；② 启动 claude；③ 问它「这个项目是做什么的」；④ 用 <b>/init</b> 生成 CLAUDE.md；⑤ /exit 后用 cat CLAUDE.md 查看生成的记忆。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /cd\s+\S*my-project/.test(h) && /(^|[^-\w])claude([^-\w]|$)/.test(h) && sim.hist.some(function(l){return /项目|做什么|介绍/.test(l)&&l[0]!=='/'&&l[0]!=='!';}) && /\/init/.test(h) && /cat\s+CLAUDE\.md/.test(h); } },
+  quiz:[
+    {q:'为什么要在项目根目录启动 claude？', o:['它的文件操作以启动目录为工作区','启动更快','否则无法登录','随机'], a:0, e:'在哪儿启动，它就管哪儿——边界即安全。'},
+    {q:'第一次进入陌生项目，最好先问？', o:['项目概览和入口在哪','直接让它重构全部代码','让它删掉测试','问天气'], a:0, e:'先概览、再动手，和人类新同事入职一个道理。'},
+    {q:'/init 的作用是？', o:['扫描项目并生成 CLAUDE.md 记忆文件','初始化 git','重启会话','安装依赖'], a:0, e:'给项目建立第一份“入职笔记”。'},
+    {q:'亲手打出：查看它的记忆文件内容', type:'cat CLAUDE.md', e:'记忆不该是黑盒，常打开看看它记了什么。'}
+  ],
+  cards:[{k:'cd 项目根目录 && claude',b:'在哪儿启动就管哪儿'},{k:'黄金第一问',b:'项目是做什么的·入口在哪'},{k:'/init',b:'生成 CLAUDE.md 项目记忆'},{k:'⏺ Read/Bash 行',b:'观察工具调用=看它思考'},{k:'Glob/Grep',b:'找文件/搜内容的工具'},{k:'Boss 已倒',b:'第一周毕业，下周解锁高阶魔法'}],
+  missions:['真机：cd 进你自己的一个项目，启动 claude','问它「这个项目是做什么的」，观察 ⏺ 工具调用过程','跑 /init，打开 CLAUDE.md 看它写了什么']
+},
+/* ============ DAY 7 ============ */
+{ id:7, title:'记忆水晶 · CLAUDE.md', area:'第二周 · 高阶', boss:false,
+  story:'水晶厅里悬浮着层层叠叠的记忆水晶。「CLAUDE.md 是它的<b>长期记忆</b>——分用户级、项目级、目录级三层，还懂 @import 引用。会用记忆的法师，告别每次重复交代；不会用的，天天当新同事。」',
+  lessons:[
+    {t:'三层记忆', c:'~/.claude/CLAUDE.md      # 用户级：你的个人偏好\n./CLAUDE.md              # 项目级：项目约定\n./子模块/CLAUDE.md       # 目录级：局部规则', b:'启动时<b>从外到内全部加载</b>：你的个人习惯 + 项目约定 + 特定目录的规则，层层叠加。个人偏好（如“回复用中文”）放用户级，项目规范放项目级。'},
+    {t:'写什么 —— 四类高价值内容', c:'# 构建与测试命令\n# 代码风格约定\n# 项目架构关键决策\n# 禁止事项', b:'最值得写的四样：常用命令（省得它猜）、代码风格（一次说清）、架构决策（为什么不这么设计）、雷区（千万别碰的东西）。'},
+    {t:'组合记忆 —— @import', c:'@./docs/api-conventions.md\n@./docs/git-workflow.md', b:'CLAUDE.md 里用 <b>@路径</b> 引入其他文档——规范拆开维护，记忆自动汇总。团队 wiki 里的约定也能这样挂进来。'},
+    {t:'随时记录 —— # 前缀与 /memory', c:'# 这个项目的测试都用 vitest\n/memory', b:'会话中 <b>#</b> 开头随手追加记忆；<b>/memory</b> 打开记忆文件直接编辑。发现它又忘了什么？别骂，记下来。'}
+  ],
+  challenge:{ task:'水晶试炼：① 启动会话后（可先 cd my-project），用 <b>/memory</b> 查看当前记忆；② 用 <b>#</b> 记一条「测试框架用 vitest」；③ /exit 后 cat CLAUDE.md 确认写入。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /\/memory/.test(h) && /(^|; )#[^;]*vitest/.test(h) && /cat\s+CLAUDE\.md/.test(h); } },
+  quiz:[
+    {q:'「回复请用中文」这种个人偏好应写在？', o:['~/.claude/CLAUDE.md 用户级','项目级 CLAUDE.md','每次会话开头打一遍','写不了'], a:0, e:'个人偏好跨项目生效，放用户级；项目约定才放项目级。'},
+    {q:'CLAUDE.md 中 @./docs/style.md 的作用是？', o:['把该文档内容引入记忆','装饰','链接但不加载','注释'], a:0, e:'@import 让记忆模块化：规范分文件维护，加载时自动汇总。'},
+    {q:'会话中发现它总忘记某约定，最优雅的解法是？', o:['用 # 前缀记进 CLAUDE.md','每次都重新打一遍','放弃治疗','骂它'], a:0, e:'记一次，以后每个会话开局自动带上。'},
+    {q:'亲手打出：查看和编辑记忆文件的命令', type:'/memory', e:'记忆透明可编辑——它不是黑盒。'}
+  ],
+  cards:[{k:'~/.claude/CLAUDE.md',b:'用户级：个人偏好'},{k:'./CLAUDE.md',b:'项目级：项目约定'},{k:'@路径',b:'import 其他文档进记忆'},{k:'# 前缀',b:'会话中随手记'},{k:'/memory',b:'打开记忆文件编辑'},{k:'四类高价值',b:'命令·风格·架构·雷区'}],
+  missions:['真机：在你项目里跑 /init（若已有则打开看看）','用 # 记三条：常用命令、代码风格、一个雷区','把「回复用中文」写进 ~/.claude/CLAUDE.md 用户级记忆']
+},
+/* ============ DAY 8 ============ */
+{ id:8, title:'咒文锻造 · 自定义命令', area:'第二周 · 高阶', boss:false,
+  story:'锻造炉火光熊熊。「每天重复打的提示词，是一块块生铁。把它们<b>锻成 /命令</b>——一条咒文，千次复用。团队共享的咒文放项目里，私人咒文放家里。」',
+  lessons:[
+    {t:'第一道咒文', c:'mkdir -p .claude/commands\necho 审查参数文件的安全隐患 > .claude/commands/security.md', b:'在 <b>.claude/commands/</b> 目录下建 .md 文件，文件名就是命令名。之后会话里敲 <b>/security src/auth.js</b>，提示词自动展开。'},
+    {t:'参数占位 —— $ARGUMENTS', c:'帮我把 $ARGUMENTS 重构成更清晰的模块', b:'$ARGUMENTS 会被命令后面的参数原样替换。没有参数的固定咒文（如每日 standup 模板）也可以不带它。'},
+    {t:'两级存放', c:'.claude/commands/      # 项目级，团队共享\n~/.claude/commands/    # 用户级，只属于你', b:'项目级随 git 提交，全团队统一咒文；用户级是私人工具箱，走到哪个项目都带着。'},
+    {t:'魔咒进阶 —— frontmatter', c:'---\nallowed-tools: Bash(git diff:*)\n---\n审查 $ARGUMENTS 的改动，按严重度输出问题清单', b:'命令文件支持 frontmatter（声明可用工具等），正文就是完整提示词——可以写得很长很讲究，一次锻造，永久受益。'}
+  ],
+  challenge:{ task:'锻造你的第一道咒文：① mkdir 建出 .claude/commands 目录；② 用 echo 创建 <b>review.md</b>（内容含「审查」字样即可）；③ 启动会话，用 <b>/review src/app.js</b> 施放它。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /mkdir\s+-p\s+\.claude\/commands/.test(h) && /(echo|touch)[^;]*\.claude\/commands\/review\.md/.test(h) && /\/review\b/.test(h); } },
+  quiz:[
+    {q:'.claude/commands/review.md 会注册成什么命令？', o:['/review','review.md','/commands review','无效果'], a:0, e:'文件名即命令名，自动出现在 /help 里。'},
+    {q:'$ARGUMENTS 的作用是？', o:['替换为命令后跟的参数','环境变量','随机参数','固定文本'], a:0, e:'/review src/app.js 中的 src/app.js 会填进 $ARGUMENTS。'},
+    {q:'想让全团队都能用的命令放在？', o:['.claude/commands/（项目级）','~/.claude/commands/（用户级）','桌面','任何位置'], a:0, e:'项目级随仓库走，团队共享；用户级是私人工具箱。'},
+    {q:'亲手打出：创建 deploy 命令文件的路径', type:'.claude/commands/deploy.md', e:'路径对了，命令就活了。'}
+  ],
+  cards:[{k:'.claude/commands/*.md',b:'文件名=命令名'},{k:'~/.claude/commands/',b:'用户级私人咒文'},{k:'$ARGUMENTS',b:'参数占位符'},{k:'frontmatter',b:'声明 allowed-tools 等'},{k:'/命令 参数',b:'施放自定义咒文'},{k:'锻造思维',b:'重复三次的提示词就该锻成命令'}],
+  missions:['真机：给你最常打的提示词建一个 /命令','建一个 /explain 命令：用大白话解释 $ARGUMENTS 指定的文件','想想团队可以共享哪三道咒文，写下来']
+},
+/* ============ DAY 9 ============ */
+{ id:9, title:'技能卷轴 · Skills', area:'第二周 · 高阶', boss:false,
+  story:'卷轴塔中，每幅卷轴只在被需要时展开。「<b>Skill</b> 是带说明书的完整流程——部署 SOP、发版流程、代码审查清单。平时只占一行描述，被需要时才展开全卷。这叫<b>按需加载</b>。」',
+  lessons:[
+    {t:'卷轴的结构', c:'.claude/skills/deploy/SKILL.md\n---\nname: deploy\ndescription: 部署到生产环境时使用，含回滚步骤\n---\n# 部署流程\n1. 跑测试\n2. 构建镜像', b:'每个技能是一个目录，内含 <b>SKILL.md</b>：frontmatter 写 name 和 description，正文是完整流程。description 写得越准，它越知道<b>何时</b>该用这张卷轴。'},
+    {t:'按需加载的智慧', c:'description 一行常驻 → 需要时才读全文', b:'所有技能的 description 常驻上下文（很便宜），正文只在触发时读取（不浪费）。哪怕你有 50 个技能，日常开销也只是 50 行描述。'},
+    {t:'触发方式', c:'「帮我部署」  → 自动匹配 deploy 技能\n「按 deploy 技能部署」 → 显式点名', b:'自然说出需求，它看描述自动展开对应卷轴；也可以显式点名。当它问“要不要用某技能”时大方说好。'},
+    {t:'技能 vs 命令 vs 记忆', c:'CLAUDE.md：永远在场的事实\n/命令：你主动施放的固定提示词\nSkill：按需展开的完整流程', b:'三件套分工：记忆管“要知道”，命令管“你让它做”，技能管“怎么做才对”。复杂 SOP 全都值得沉淀成技能。'}
+  ],
+  challenge:{ task:'卷轴试炼：① mkdir 建出 .claude/skills/deploy 目录；② 用 echo 创建其中的 <b>SKILL.md</b>；③ 启动会话，对它说「帮我部署到生产环境」，看它展开卷轴。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /mkdir\s+-p\s+\.claude\/skills\/deploy/.test(h) && /(echo|touch)[^;]*SKILL\.md/.test(h) && sim.hist.some(function(l){return /部署/.test(l)&&l[0]!=='/'&&l[0]!=='!';}); } },
+  quiz:[
+    {q:'Skill 与自定义命令最大的区别是？', o:['Skill 按需自动触发，命令需主动施放','Skill 更贵','命令不能带参数','没有区别'], a:0, e:'命令是你点火，技能是它自己判断何时点火。'},
+    {q:'SKILL.md 的 description 为什么重要？', o:['它常驻上下文，决定技能何时被触发','纯装饰','用于排序','法律要求'], a:0, e:'描述写得准，触发的时机才准——这是技能设计的核心。'},
+    {q:'「部署流程」这种多步骤 SOP 最适合沉淀成？', o:['Skill','CLAUDE.md 里一段话','自定义命令','不用沉淀'], a:0, e:'流程长、按需用——正是 Skill 的主场。'},
+    {q:'亲手打出：技能文件的固定文件名', type:'SKILL.md', e:'目录名随意，文件名必须是 SKILL.md。'}
+  ],
+  cards:[{k:'.claude/skills/X/SKILL.md',b:'技能=目录+固定文件名'},{k:'description',b:'常驻上下文，决定何时触发'},{k:'按需加载',b:'描述常驻，正文用时才读'},{k:'CLAUDE.md',b:'永远在场的事实'},{k:'/命令',b:'你主动施放'},{k:'Skill',b:'它按需展开的流程'}],
+  missions:['真机：把你工作里某个 SOP（发版/审查/部署）写成 Skill','写完后对它说出对应需求，验证能否触发','对比体验：同一流程分别用 CLAUDE.md、命令、Skill 实现，感受差异']
+},
+/* ============ DAY 10 ============ */
+{ id:10, title:'谋定后动 · 计划与子代理', area:'第二周 · 高阶', boss:false,
+  story:'导师展开一张巨大的作战地图。「大任务有两种死法：不动脑子就开干，或者一个人扛到死。<b>Plan 模式</b>治前者——先出方案再动手；<b>子代理</b>治后者——派出分身并行探索，主阵不受干扰。」',
+  lessons:[
+    {t:'Plan 模式工作流', c:'Shift+Tab ×2        # 切到 plan\n「给项目加上用户登录功能」\n# 它只读代码、产出计划\n# 你回复批准或修改意见\n# 批准后它开始执行', b:'plan 模式下它<b>只读不写</b>：翻代码、查依赖、输出一份分步计划。你审阅后说“批准”或“第 3 步改成…”。大改动走这个流程，返工率断崖式下降。'},
+    {t:'子代理 —— 分身术', c:'「用子代理并行调查：\n  ① 前端哪些组件用了旧 API\n  ② 后端接口变更影响面」', b:'它会派出独立<b>子代理</b>：各自带着任务读代码，干完只交回结论。两大妙处：<b>并行</b>（多路同时探索）和<b>隔离</b>（翻了一堆文件的脏上下文留在分身里，不污染主线）。'},
+    {t:'何时用分身', c:'探索性大范围搜索\n多个独立子任务\n上下文很贵的场景', b:'经验法则：要“翻很多文件只为找答案”的活，交给子代理；需要精耕细作的编辑，主线亲自来。'},
+    {t:'无人值守 —— headless', c:'claude -p "跑一遍测试并修复失败项" --allowedTools "Bash(npm test)"', b:'<b>-p</b> 模式：发一句、答一句、退出，全程无交互。放进 shell 脚本、CI 流水线，让它值夜班。'}
+  ],
+  orderGame:{ title:'拼出 Plan 模式的完整工作流',
+    lines:['Shift+Tab 切到 plan 模式','描述要实现的需求','阅读它产出的分步计划','回复批准或修改意见','它开始执行并逐步汇报','检查结果并验收'] },
+  challenge:null, orderCheck:true,
+  quiz:[
+    {q:'Plan 模式下它会做什么？', o:['只读分析并产出计划，不改任何文件','直接改代码','只聊天','删除文件'], a:0, e:'谋定：读遍代码出方案；后动：你批准了才动手。'},
+    {q:'子代理最大的两个好处是？', o:['并行探索 + 上下文隔离','更便宜 + 更快联网','免费 + 无限','加密 + 压缩'], a:0, e:'多个分身同时干活；脏活读的大量文件不进主线上下文。'},
+    {q:'想在 CI 里无人值守跑它，用？', o:['claude -p "任务"','claude --interactive','/background','做不到'], a:0, e:'-p = print 模式，一问一答即退出，天生为自动化而生。'},
+    {q:'亲手打出：无人值守模式跑一句话任务', type:'claude -p "跑测试"', e:'可搭配 --allowedTools 精确限定它能做什么。'}
+  ],
+  cards:[{k:'Shift+Tab ×2',b:'切到 plan 模式'},{k:'批准/修改',b:'对计划的两类回应'},{k:'子代理',b:'并行+隔离的分身'},{k:'探索交给分身',b:'精耕留给主线'},{k:'claude -p',b:'headless 无人值守'},{k:'--allowedTools',b:'无人模式下精确授权'}],
+  missions:['真机：挑一个中等功能，走完整 plan 流程','给它一个需要大范围搜索的任务，明确要求“用子代理并行”','体验 claude -p "用一句话总结 git 状态" 的即问即答']
+},
+/* ============ DAY 11 ============ */
+{ id:11, title:'魔网插槽 · MCP', area:'第二周 · 高阶', boss:false,
+  story:'塔顶矗立着一圈空插槽。「MCP（Model Context Protocol）是<b>魔网标准接口</b>——插上 GitHub 插槽，它能管 issue；插上数据库插槽，它能查数；插上浏览器插槽，它能看网页。法杖从此不止是一根杖。」',
+  lessons:[
+    {t:'接入第一个 MCP', c:'claude mcp add github -- npx -y @modelcontextprotocol/server-github', b:'格式：<b>claude mcp add 名字 -- 启动命令</b>。名字自定义，-- 后面是运行这个 MCP 服务器（通常是个 npx 进程）的命令。'},
+    {t:'管理与查看', c:'claude mcp list\nclaude mcp remove github', b:'list 列出所有已接入的 MCP 及连接状态；remove 拔掉插槽。会话内用 <b>/mcp</b> 也能随时查看。'},
+    {t:'三个作用域', c:'claude mcp add X --scope user -- ...\nclaude mcp add X --scope project -- ...', b:'默认 <b>local</b>（只在本机此项目）；<b>user</b> 级走到哪带到哪；<b>project</b> 级写进 .mcp.json 随仓库共享，团队一致。'},
+    {t:'常见插槽', c:'GitHub · 文件系统 · Postgres\nPlaywright(浏览器) · Slack', b:'生态里有现成的：管仓库、查数据库、操作浏览器、发消息……装上后它的新工具会出现在权限请示里——结界规则对 MCP 工具同样生效。'}
+  ],
+  challenge:{ task:'魔网试炼：① 用 <b>claude mcp add github</b> 接入 GitHub 插槽（-- 后命令随意）；② 用 <b>claude mcp list</b> 查看；③ 启动会话，用 <b>/mcp</b> 确认连接状态。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /claude\s+mcp\s+add\s+\S+/.test(h) && /claude\s+mcp\s+list/.test(h) && /(^|; )\/mcp(?!\s+add)/.test(h); } },
+  quiz:[
+    {q:'MCP 的本质作用是？', o:['给 Claude 接入外部工具和数据的标准协议','一种数据库','网络加速器','新模型'], a:0, e:'统一插槽标准：任何服务封装成 MCP server 即插即用。'},
+    {q:'想让团队所有人共享同一个 MCP 配置，用什么作用域？', o:['project（写入 .mcp.json 随仓库走）','local','user','scope all'], a:0, e:'project 级配置提交进仓库，克隆即得。'},
+    {q:'会话内查看 MCP 连接状态的命令是？', o:['/mcp','/status','/doctor','/config'], a:0, e:'/mcp 列出各插槽及连接健康度。'},
+    {q:'亲手打出：接入一个名叫 fs 的 MCP', type:'claude mcp add fs -- npx -y @modelcontextprotocol/server-filesystem', e:'结构：add 名字 -- 启动命令。'}
+  ],
+  cards:[{k:'claude mcp add 名 -- 命令',b:'接入 MCP 插槽'},{k:'claude mcp list',b:'列出与状态'},{k:'/mcp',b:'会话内查看插槽'},{k:'--scope user|project',b:'随身带 / 团队共享'},{k:'.mcp.json',b:'project 级配置文件'},{k:'权限请示',b:'MCP 工具同样受结界管理'}],
+  missions:['真机：接入一个你用得上的 MCP（GitHub/文件系统等）','会话内 /mcp 确认绿灯后，让它用新工具干一件小事','体验 project 作用域：把配置提交给团队']
+},
+/* ============ DAY 12 ============ */
+{ id:12, title:'自动符阵 · Hooks', area:'第二周 · 高阶', boss:false,
+  story:'符阵工坊的地板刻满发光纹路。「<b>Hook</b> 是埋在它行动路径上的符阵：工具调用<b>前</b>拦截检查、调用<b>后</b>自动善后。它每次改完文件，prettier 自动格式化——这不是它自觉，是符阵在发光。」',
+  lessons:[
+    {t:'符阵的触发点', c:'PreToolUse    # 工具调用前：拦截/放行\nPostToolUse   # 工具调用后：自动善后\nUserPromptSubmit / Stop / SubagentStop', b:'最常用两个：<b>PreToolUse</b> 在它动手前把关（如拦截危险命令），<b>PostToolUse</b> 在它动手后收尾（如自动格式化、自动跑 lint）。'},
+    {t:'经典符阵 —— 保存即格式化', c:'.claude/settings.json\n{\n  "hooks": {\n    "PostToolUse": [{\n      "matcher": "Edit|Write",\n      "hooks": [{ "type": "command",\n        "command": "npx prettier --write $FILE" }]\n    }]\n  }\n}', b:'含义：每当它用 Edit/Write 改完文件，自动跑 prettier。从此<b>不存在</b>不格式化的提交——约束写在符阵里，而不是写进它的良心。'},
+    {t:'把关符阵 —— 拦截危险操作', c:'PreToolUse + matcher "Bash"\n# 检查命令，含 rm -rf 则拒绝', b:'PreToolUse 的脚本检查将执行的命令，返回非零即拦截。团队红线（禁 force push、禁动生产配置）从“口头约定”升级为“物理结界”。'},
+    {t:'配置方式', c:'/hooks        # 会话内交互式配置\n.claude/settings.json  # 文件配置', b:'会话内 <b>/hooks</b> 引导式添加最省心；进阶直接编辑 settings.json。符阵和权限清单一样可以随项目共享给团队。'}
+  ],
+  challenge:{ task:'符阵试炼：① 用 echo 创建 <b>.claude/settings.json</b>（内容含 hooks 与 PostToolUse 字样）；② 启动会话让它「修复一个 bug」，观察符阵在它改完文件后自动发光（沙盒会展示 hook 触发）。',
+    check:function(sim){ var h=sim.hist.join(' ; ');
+      return /(echo|touch)[^;]*\.claude\/settings\.json/.test(h) && sim.hist.some(function(l){return /bug|修复/.test(l)&&l[0]!=='/'&&l[0]!=='!';}); } },
+  quiz:[
+    {q:'每次它编辑完文件都自动跑 prettier，该用哪个 hook？', o:['PostToolUse','PreToolUse','Stop','UserPromptSubmit'], a:0, e:'善后=事后：PostToolUse 在工具调用完成后触发。'},
+    {q:'想拦截它执行危险命令，用哪个触发点？', o:['PreToolUse','PostToolUse','SubagentStop','没有'], a:0, e:'事前把关：PreToolUse 检查并决定放行或拦截。'},
+    {q:'hook 配置写在哪个文件？', o:['.claude/settings.json','package.json','.hooksrc','CLAUDE.md'], a:0, e:'settings.json 里的 hooks 字段，可随项目共享。'},
+    {q:'亲手打出：会话内交互式配置 hook 的命令', type:'/hooks', e:'不想手写 JSON 时的友好入口。'}
+  ],
+  cards:[{k:'PreToolUse',b:'调用前：拦截/放行'},{k:'PostToolUse',b:'调用后：自动善后'},{k:'matcher',b:'只对匹配的工具生效'},{k:'/hooks',b:'会话内引导式配置'},{k:'.claude/settings.json',b:'符阵配置，团队共享'},{k:'约束进符阵',b:'别写进良心，写进系统'}],
+  missions:['真机：配置“改完自动格式化”的 PostToolUse hook','想一条团队红线，用 PreToolUse 符阵物理拦截','观察一次 hook 触发的输出，确认符阵生效']
+},
+/* ============ DAY 13 ============ */
+{ id:13, title:'Git 战友 · 提交与审查', area:'第二周 · 高阶', boss:false,
+  story:'导师引你来到版本圣殿。「git 不只是你的工具，更是它与你<b>协作的语言</b>。改动让它提交、代码让它审查、PR 让它创建——它比你更会写 commit message，因为 diff 它全都读过。」',
+  lessons:[
+    {t:'让它提交', c:'把刚才的改动提交了，\nmessage 遵循项目的约定式提交规范', b:'它会自己 git diff 读全部改动，归纳出一条语义准确的 commit message，再执行 commit。多文件改动、跨模块修改，它总结得比人快且稳——<b>前提是把提交规范写进 CLAUDE.md</b>。'},
+    {t:'让它审查', c:'审查这个 PR 的 diff，\n按严重度列出问题：安全、逻辑、风格', b:'把 diff 或 PR 编号丢给它，它能逐块审查：逻辑漏洞、边界条件、风格偏离。AI 审查不替代人审，但能先滤掉一层低级问题。'},
+    {t:'端到端 —— PR 流水线', c:'「基于这些改动创建 PR，\n标题和描述按团队模板」', b:'配好 gh CLI 后它能直接 gh pr create——从改代码到开 PR 一条龙。分支策略、PR 模板这类约定，照旧写进 CLAUDE.md。'},
+    {t:'分工的艺术', c:'它：机械、大面积、记忆型工作\n你：判断、取舍、拍板', b:'最优分工：它扫 diff 找遍所有问题，你做最终裁决；它写第一版 commit message，你审一眼放行。人机各展所长，而不是谁替代谁。'}
+  ],
+  challenge:{ task:'圣殿试炼：① 启动会话后让它「提交这次的改动」；② 再让它「创建 PR」。观察它调用 git 工具的完整流程。',
+    check:function(sim){ return sim.hist.some(function(l){return /提交|commit/i.test(l)&&l[0]!=='/'&&l[0]!=='!';}) && sim.hist.some(function(l){return /PR|pull request/i.test(l)&&l[0]!=='/'&&l[0]!=='!';}); } },
+  quiz:[
+    {q:'它的 commit message 为什么常比人写得好？', o:['它 git diff 读过全部改动，归纳准确','它更聪明','随机生成','它抄网上'], a:0, e:'先读全部改动再总结——这是它的信息优势。'},
+    {q:'想让提交信息稳定符合团队规范，最好？', o:['把提交规范写进 CLAUDE.md','每次口头交代','不写 message','祈祷'], a:0, e:'约定进记忆，每次自动生效。'},
+    {q:'AI 审查 PR 的正确定位是？', o:['人审之前先滤掉一层低级问题','完全替代人审','装饰','只看风格'], a:0, e:'它扫得全，你拍得准——互补而非替代。'},
+    {q:'亲手打出：让它端到端创建 PR 的指令', type:'创建 PR', e:'自然语言即可——它知道调 gh。真机上需先装好 gh 并登录。'}
+  ],
+  cards:[{k:'「提交改动」',b:'它读 diff 归纳 message'},{k:'「审查这个 PR」',b:'按严重度列问题'},{k:'gh pr create',b:'端到端开 PR'},{k:'规范进 CLAUDE.md',b:'message 风格才稳定'},{k:'它扫全 你拍板',b:'人机分工的艺术'},{k:'gh auth login',b:'真机用前先登录 gh'}],
+  missions:['真机：让它提交一次改动，审查它写的 message','贴一段 diff 让它审查，看它能找出什么','把你的 commit 规范写进 CLAUDE.md 再提交一次，对比效果']
+},
+/* ============ DAY 14 ============ */
+{ id:14, title:'毕业 Boss · 完整功能流', area:'第二周 · Boss', boss:true,
+  story:'毕业考没有巨兽，只有一个真实需求：「给项目加一个导出功能」——从理解需求到合并进主干，<b>两周所学全部用上</b>。拼出完整的作战流程，法杖即为己用。国王在王座上等你加冕。',
+  lessons:[
+    {t:'完整功能流总览', c:'', b:'一个成熟的功能开发循环：进项目启动 → plan 模式出方案 → 批准后实现并测试 → 它提交并开 PR → 人审合并 → 新约定沉淀进记忆。每一环都是这两周里你亲手练过的。'},
+    {t:'全流程咒文（真机示范）', c:'cd my-project && claude\n# (Shift+Tab ×2 进 plan)\n「加一个导出 CSV 功能，先给我计划」\n# 批准 → 它实现+测试 → 「提交并创建 PR」\n# 合并后：# 导出功能在 src/export.ts', b:'注意节奏：先谋（plan）、后动（实现）、再收（提交/PR）、终沉淀（记忆）。中间任何一步不满意都可以 Esc 打断重来——流程是你的，不是它的。'},
+    {t:'你的法杖清单', c:'会话: /clear /compact /model -c\n模式: plan / auto-accept / # !\n记忆: CLAUDE.md /init /memory\n锻造: commands/ skills/\n扩展: MCP / hooks / 子代理 / -p', b:'两周的成果清单。它们不是知识点，是你接下来每天真实使用的<b>工具箱</b>。用得越狠，法杖越亮。'},
+    {t:'毕业后方向', c:'Agents 多会话编排\nCI 里跑 claude -p\n自建 MCP server\n团队级 .claude 配置沉淀', b:'更远处：让多个 agent 协作跑大工程；把它嵌进 CI 自动修 lint；为自家系统写 MCP server；把团队的 .claude 目录做成知识资产。魔法才刚开始。'}
+  ],
+  orderGame:{ title:'终极拼图：排出完整功能开发流',
+    lines:['cd 进项目根目录并启动 claude','Shift+Tab 切到 plan 模式描述需求','审阅并批准它产出的计划','它实现功能并跑测试','让它写 commit 并提交','让它用 gh 创建 PR','人工 review 后合并','用 # 把新约定沉淀进 CLAUDE.md'] },
+  challenge:null, orderCheck:true,
+  quiz:[
+    {q:'成熟功能流的正确顺序是？', o:['计划 → 批准 → 实现 → 提交 → PR → 沉淀','直接改 → 出事再说','先 PR 再写代码','先沉淀再理解需求'], a:0, e:'先谋后动、动完收尾、收完沉淀——闭环才算完。'},
+    {q:'整个流程中“人工不可省”的环节是？', o:['最终 review 与合并','写代码','写 commit message','跑测试'], a:0, e:'它可以代劳执行，但判断与拍板永远是你的。'},
+    {q:'功能合并后，最值得做的收尾是？', o:['把新约定沉淀进 CLAUDE.md','立刻删掉分支就完事','什么都不做','开庆功会'], a:0, e:'每个功能都应留下记忆增量——项目智慧这样复利。'},
+    {q:'亲手打出：进入 plan 模式的快捷键', type:'Shift+Tab', e:'按两次循环到 plan。毕业快乐，代码法师。'}
+  ],
+  cards:[{k:'计划→批准→实现→提交→PR→沉淀',b:'功能开发六拍'},{k:'Esc 随时打断',b:'流程是你的，不是它的'},{k:'判断与拍板',b:'永远留给人类'},{k:'记忆复利',b:'每个功能留下增量'},{k:'claude -p 进 CI',b:'让它值夜班'},{k:'毕业不是终点',b:'Agents·自建MCP·团队资产在等你'}],
+  missions:['真机：挑一个小功能，走完六拍完整流程','把过程中发现的新约定 # 进 CLAUDE.md','复盘：哪一拍你最生疏？回去重做那一关']
+}
+];
+
+/* ---------- Claude Code 会话模拟器 ---------- */
+function CSim(){
+  this.hist=[];
+  this.st={installed:false,started:false,model:'Sonnet',cwd:'~',project:false,claudemd:'',memory:[],cmds:{},skills:{},mcp:[],allowed:['Read','Glob','Grep'],hook:false,commits:0};
+}
+CSim.prototype.reset=function(){
+  this.hist=[];
+  this.st={installed:false,started:false,model:'Sonnet',cwd:'~',project:false,claudemd:'',memory:[],cmds:{},skills:{},mcp:[],allowed:['Read','Glob','Grep'],hook:false,commits:0};
+};
+CSim.prototype.prompt=function(){
+  return this.st.started? '> ' : 'shell $ ';
+};
+CSim.prototype.run=function(line){
+  this.hist.push(line);
+  line=(line||'').trim();
+  if(!line) return '';
+  if(!this.st.started) return this.shellCmd(line);
+  return this.sessionCmd(line);
+};
+CSim.prototype.shellCmd=function(c){
+  var st=this.st, m;
+  if(/^npm\s+(install|i)\s+-g\s+@anthropic-ai\/claude-code(\s|$)/.test(c)){
+    st.installed=true;
+    return 'added 1 package in 12s\n\n✦ Claude Code 安装完成。敲 claude --version 验证，或直接敲 claude 启动。';
+  }
+  if(/^claude\s+--version/.test(c)) return st.installed? '2.1.0 (Claude Code)' : 'claude: command not found（先 npm install 安装）';
+  if(/^npm\s+update\s+-g\s+@anthropic-ai/.test(c)) return 'updated to the latest version.';
+  if(/^claude\s+update/.test(c)) return 'Already up to date.';
+  if((m=c.match(/^claude\s+mcp\s+add\s+(\S+)/))){
+    st.mcp.push(m[1]);
+    return '已连接 MCP 服务器「'+m[1]+'」。用 claude mcp list 查看，或启动会话后用 /mcp 查看状态。';
+  }
+  if(/^claude\s+mcp\s+list/.test(c)){
+    if(!st.mcp.length) return '（暂无 MCP 服务器。用 claude mcp add 名字 -- 命令 接入）';
+    return st.mcp.map(function(n){return n+': ✓ 已连接';}).join('\n');
+  }
+  if(/^claude\s+(-c|--continue|--resume)/.test(c)){
+    if(!st.installed) return 'claude: command not found（先 npm install 安装）';
+    st.started=true;
+    return '✓ 会话已恢复（1 条历史消息）\n\n接着聊即可，上下文还在。';
+  }
+  if((m=c.match(/^claude\s+-p\s+/))){
+    if(!st.installed) return 'claude: command not found（先 npm install 安装）';
+    return '(headless 模式)\n⏺ Bash(git status)\n  工作区干净\n答：当前没有未提交的改动。';
+  }
+  if(/^claude$/.test(c)){
+    if(!st.installed) return 'claude: command not found —— 先 npm install -g @anthropic-ai/claude-code';
+    st.started=true;
+    return '╭──────────────────────────────╮\n│ ✻ Claude Code   (模拟沙盒)   │\n╰──────────────────────────────╯\n工作目录: '+st.cwd+'   模型: '+st.model+'\n输入消息与它对话；/help 查看命令；/exit 退出。';
+  }
+  if((m=c.match(/^cd\s+(\S+)/))){
+    if(/my-project/.test(m[1])){ st.project=true; st.cwd='~/my-project'; return '已进入 ~/my-project（一个 Node 项目：README.md, src/, package.json …）'; }
+    st.cwd=m[1];
+    return '已进入 '+st.cwd;
+  }
+  if((m=c.match(/^mkdir\s+-p\s+(\S+)/))){
+    var d=m[1];
+    if(/\.claude\/commands/.test(d)) return '目录已创建：'+d+'（.md 文件放这里即成自定义命令）';
+    if(/\.claude\/skills\//.test(d)) return '目录已创建：'+d+'（放入 SKILL.md 即成技能）';
+    return '目录已创建：'+d;
+  }
+  if((m=c.match(/^(?:touch|echo)[^;]*?\.claude\/commands\/(\w+)\.md/))){
+    st.cmds[m[1]]=true;
+    return '已创建 .claude/commands/'+m[1]+'.md —— 命令 /'+m[1]+' 已注册（会话中可用 /'+m[1]+' 参数 施放）。';
+  }
+  if(/^(?:touch|echo)[^;]*?\.claude\/skills\/\w+\/SKILL\.md/.test(c)){
+    var sk=c.match(/\.claude\/skills\/(\w+)\//)[1];
+    st.skills[sk]=true;
+    return '已创建技能 '+sk+'（description 常驻上下文，说出相关需求即可触发）。';
+  }
+  if(/^(?:touch|echo)[^;]*\.claude\/settings\.json/.test(c)){
+    if(/hook|PostToolUse|PreToolUse/i.test(c)){ st.hook=true; return '已写入 .claude/settings.json —— PostToolUse 符阵生效：它每次编辑文件后将自动格式化。'; }
+    return '已写入 .claude/settings.json。';
+  }
+  if(/^cat\s+CLAUDE\.md/.test(c)){
+    if(!st.claudemd) return 'cat: CLAUDE.md: No such file（先在会话里 /init 生成）';
+    return st.claudemd + (st.memory.length? '\n'+st.memory.join('\n') : '');
+  }
+  if(/^cat\s+/.test(c)) return 'cat: '+c.slice(4).trim()+': 沙盒中没有这个文件';
+  if(/^ls/.test(c)) return st.project? 'README.md  src/  package.json'+(st.claudemd?'  CLAUDE.md':'') : '（空目录。cd my-project 进入示例项目）';
+  if(/^git\s+/.test(c)) return 'On branch main\nnothing to commit（沙盒：让会话里的它帮你提交）';
+  if(/^node\s+-v/.test(c)) return 'v22.11.0';
+  if(/^help$/.test(c)) return '沙盒支持：npm install… / claude / claude -c / claude -p / claude mcp add|list / cd / mkdir / touch / echo>文件 / cat / ls / git / node -v';
+  return '（沙盒 shell 未收录该命令。试试 claude、claude mcp list，或先启动 claude 进入会话）';
+};
+CSim.prototype.sessionCmd=function(c){
+  var st=this.st;
+  if(c==='exit'){ st.started=false; return '会话已结束。用 claude -c 可恢复。'; }
+  if(c[0]==='/') return this.slash(c);
+  if(c[0]==='#'){
+    var note=c.slice(1).trim();
+    st.memory.push('# '+note);
+    return '✓ 已记入项目记忆 CLAUDE.md：'+note+'\n（以后每个会话开局自动带上这条）';
+  }
+  if(c[0]==='!'){
+    return '（直接在你的 shell 执行）\n'+this.shellCmd(c.slice(1).trim());
+  }
+  return this.botReply(c);
+};
+CSim.prototype.slash=function(c){
+  var st=this.st, m;
+  if((m=c.match(/^\/model(?:\s+(\S+))?/))){
+    if(!m[1]) return '当前模型: '+st.model+'（可用: opus / sonnet / haiku）';
+    var want=m[1].toLowerCase();
+    if(['opus','sonnet','haiku'].indexOf(want)<0) return '未知模型。可用: opus / sonnet / haiku';
+    st.model=want[0].toUpperCase()+want.slice(1);
+    return '✓ 模型已切换为 '+st.model+'。';
+  }
+  if(/^\/exit$/.test(c)){ st.started=false; return '会话已结束。用 claude -c 可恢复。'; }
+  if(/^\/cost/.test(c)) return '本次会话: ~$0.42（输入 5.6k · 输出 8.1k tokens · 缓存命中 71%）';
+  if(/^\/status/.test(c)) return '账号: you@example.com (Pro)\n模型: '+st.model+'\n工作目录: '+st.cwd+'\nMCP: '+st.mcp.length+' 个已连接\n上下文: 约 23%（建议 80% 时 /compact）';
+  if(/^\/help/.test(c)){
+    var custom=Object.keys(st.cmds);
+    return ['命令一览：','  /help /status /cost /doctor /config','  /model [opus|sonnet|haiku]   切换模型','  /clear /compact              上下文管理','  /init /memory                记忆管理','  /permissions [allow X]       权限管理','  /mcp /hooks                  扩展管理','  /exit                        退出'].concat(custom.length?['自定义命令：'+custom.map(function(n){return '/'+n;}).join(' ')]:[]).join('\n');
+  }
+  if(/^\/clear/.test(c)) return '✓ 上下文已清空。新任务，新开始。';
+  if(/^\/compact/.test(c)) return '✓ 历史已压缩为摘要（保留任务目标与关键决策，释放约 60% 上下文）。';
+  if(/^\/doctor/.test(c)) return '✓ 体检通过：安装正常 · 权限配置正常 · 网络正常 · 无版本更新';
+  if(/^\/config/.test(c)) return '设置面板（沙盒）：主题/通知/自动更新 均为默认值。';
+  if(/^\/init/.test(c)){
+    st.claudemd=['# CLAUDE.md（/init 生成）','','## 项目','Node.js CLI 工具，入口 src/app.js，测试框架 vitest。','','## 常用命令','- npm test   跑测试','- npm run build   构建','','## 约定','- 提交信息遵循约定式提交（feat/fix/…）'].join('\n');
+    return '⏺ Read(package.json)\n⏺ Glob(src/**)\n⏺ Read(src/app.js)\n✓ 已生成 CLAUDE.md：包含项目概览、常用命令与代码约定。\n（cat CLAUDE.md 可查看；/memory 可编辑）';
+  }
+  if(/^\/memory/.test(c)){
+    return ['记忆文件：','  ~/.claude/CLAUDE.md  （用户级，暂空）','  '+st.cwd+'/CLAUDE.md  '+(st.claudemd?'（已生成）':'（未生成，用 /init 创建）'),'会话内追加：# 内容'+(st.memory.length? '\n本会话已追加：\n'+st.memory.join('\n'):''),'（/exit 后可 cat CLAUDE.md 查看完整内容）'].join('\n');
+  }
+  if((m=c.match(/^\/permissions\s+allow\s+(\S+)/))){
+    st.allowed.push(m[1]);
+    return '✓ 已加入允许清单：'+m[1]+'\n当前清单: '+st.allowed.join('、');
+  }
+  if(/^\/permissions/.test(c)) return '权限模式: default（Shift+Tab 切换）\n允许清单:\n  '+st.allowed.join('\n  ')+'\n拒绝清单: （空）\n用法: /permissions allow 工具名(模式)';
+  if(/^\/mcp/.test(c)){
+    if(!st.mcp.length) return '未连接任何 MCP 服务器。\n（退出会话后: claude mcp add 名字 -- 命令）';
+    return st.mcp.map(function(n){return n+': ✓ connected';}).join('\n');
+  }
+  if(/^\/hooks/.test(c)) return st.hook? '已配置 hooks:\n  PostToolUse (Edit|Write) → npx prettier --write $FILE' : '暂无 hooks。\n（把 hooks 写进 .claude/settings.json，或按课程用 echo 创建）';
+  if(/^\/agents/.test(c)) return '子代理（Task 工具）：Explore（快速检索）· Plan（规划）· general-purpose（通用）。\n让它「用子代理并行调查 X」即可召唤。';
+  if((m=c.match(/^\/(\w+)\s*(.*)$/)) && st.cmds[m[1]]){
+    return '（展开自定义命令 /'+m[1]+(m[2]?' → 参数: '+m[2]:'')+'）\n'+this.botReply('执行命令 '+m[1]+' '+(m[2]||''), true);
+  }
+  return '未知命令 /'+c.slice(1).split(/\s/)[0]+'。输入 /help 查看全部命令。';
+};
+CSim.prototype.botReply=function(text,isCmd){
+  var st=this.st, out=[], t=text||'';
+  if(isCmd){
+    out.push('⏺ Read('+((t.match(/参数:\s*(\S+)/)||[])[1]||'目标文件')+')');
+    out.push('⏺ Grep(安全风险模式)');
+    out.push('✓ 咒文执行完成：审查发现 2 个中危问题（空值检查缺失、未捕获的异步异常），已按严重度列出修复建议。');
+    return out.join('\n');
+  }
+  if(/项目|做什么|介绍|概览|入口/.test(t) && !isCmd){
+    out.push('⏺ Glob(**/*)');
+    out.push('⏺ Read(README.md)');
+    if(st.project){
+      out.push('⏺ Read(src/app.js)');
+      out.push('');
+      out.push('这是一个 Node.js CLI 工具项目：');
+      out.push('- 入口 src/app.js，核心逻辑在 src/ 下分模块组织');
+      out.push('- 测试用 vitest，npm test 一键运行');
+      out.push('- 依赖很少，结构清晰，适合小步重构');
+    } else {
+      out.push('');
+      out.push('当前目录似乎不是代码项目（沙盒）。试试先 cd my-project 再问我，或者我可以 /init 建立记忆。');
+    }
+    return out.join('\n');
+  }
+  if(/bug|修复|fix/i.test(t)){
+    out.push('⏺ Grep("TODO|FIXME")');
+    out.push('⏺ Read(src/utils.js)');
+    out.push('⏺ Edit(src/utils.js)');
+    if(st.hook) out.push('✦ PostToolUse hook 触发: prettier --write src/utils.js ✓ 已自动格式化');
+    out.push('✓ 修复完成：空值检查缺失导致的崩溃，已补上防御并加了测试。');
+    out.push('（建议运行 npm test 验证；需要我提交这次改动吗？）');
+    return out.join('\n');
+  }
+  if(/部署|deploy/i.test(t)){
+    var keys=Object.keys(st.skills);
+    if(keys.length){
+      out.push('✦ 展开技能卷轴: '+keys[0]);
+      out.push('⏺ Bash(npm test)');
+      out.push('⏺ Bash(docker build -t app:latest .)');
+      out.push('✓ 已按技能流程部署完成（含回滚预案）。');
+    } else {
+      out.push('我还没有部署流程的技能卷轴。');
+      out.push('（提示：建 .claude/skills/deploy/SKILL.md 把部署 SOP 沉淀成技能，之后我就能照卷施法）');
+    }
+    return out.join('\n');
+  }
+  if(/提交|commit/i.test(t)){
+    out.push('⏺ Bash(git diff)');
+    out.push('⏺ Bash(git log --oneline -5)');
+    st.commits++;
+    out.push('⏺ Bash(git commit -m "fix: 补上 utils 空值检查，修复崩溃")');
+    out.push('✓ 已提交: fix: 补上 utils 空值检查，修复崩溃');
+    out.push('（message 已遵循 CLAUDE.md 里的约定式提交规范）');
+    return out.join('\n');
+  }
+  if(/PR|pull request/i.test(t)){
+    out.push('⏺ Bash(git push -u origin fix/null-check)');
+    out.push('⏺ Bash(gh pr create --title "fix: 空值检查")');
+    out.push('✓ PR 已创建：#42 fix: 空值检查');
+    out.push('（沙盒模拟。真机需先安装并登录 gh CLI）');
+    return out.join('\n');
+  }
+  if(/计划|plan|方案/i.test(t)){
+    out.push('（plan 模式 · 只读分析）');
+    out.push('⏺ Read(src/app.js)  ⏺ Glob(src/**)');
+    out.push('');
+    out.push('计划：');
+    out.push('1. 在 src/export.ts 新建导出模块');
+    out.push('2. 处理 CSV 转义与 BOM（Excel 兼容）');
+    out.push('3. 加 vitest 单测 3 个用例');
+    out.push('4. 更新 README 用法说明');
+    out.push('');
+    out.push('回复「批准」开始执行，或提出修改意见。');
+    return out.join('\n');
+  }
+  if(/你好|hello|hi|你是谁|介绍你自己/i.test(t)){
+    out.push('你好！我是 Claude Code——住在终端里的编程学徒。');
+    out.push('把需求用人话告诉我就行：读代码、改文件、跑命令、提交 git 都可以代劳。');
+    out.push('（沙盒提示：试试问我「这个项目是做什么的」，或输入 /help）');
+    return out.join('\n');
+  }
+  out.push('（沙盒的它想了想）');
+  out.push('收到：'+t.slice(0,40)+(t.length>40?'…':''));
+  out.push('沙盒只演示了几类典型响应：问项目、修 bug、部署、提交、创建 PR、出计划。');
+  out.push('真机上我会调用真实工具来完成它。');
+  return out.join('\n');
+};
+
+/* ---------- UI ---------- */
+var app=document.getElementById('app');
+var toast=document.getElementById('toast');
+var modalBg=document.getElementById('modalBg');
+var modalBox=document.getElementById('modalBox');
+var view='map', curLevel=null, csim=null;
+
+function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!==undefined)e.innerHTML=html; return e; }
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function showToast(msg,gold){
+  toast.textContent=msg; toast.className='toast show'+(gold?' gold':'');
+  clearTimeout(showToast._t); showToast._t=setTimeout(function(){toast.className='toast';},2400);
+}
+function rankOf(xp){ var r=RANKS[0]; RANKS.forEach(function(k){ if(xp>=k.x)r=k; }); return r; }
+function nextRank(xp){ for(var i=0;i<RANKS.length;i++){ if(xp<RANKS[i].x) return RANKS[i]; } return null; }
+function addXp(n,msg){
+  var before=rankOf(S.xp).n;
+  S.xp+=n;
+  var after=rankOf(S.xp).n;
+  showToast(msg+'  +'+n+' XP', n>=50);
+  if(after!==before){ setTimeout(function(){ showToast('★ 称号晋升：'+after+' ★', true); },2600); }
+}
+function quizDoneCount(L){ var d=S.quiz[L.id]||[]; return d.filter(Boolean).length; }
+function levelUnlocked(L){
+  if(L.id===1) return true;
+  return !!S.lv[LEVELS[L.id-2].id];
+}
+function award(id){
+  if(S.badges[id]) return;
+  var b=BADGES.filter(function(x){return x.id===id;})[0];
+  if(!b) return;
+  S.badges[id]=1;
+  setTimeout(function(){ showToast('🏅 徽章解锁：'+b.n+' —— '+b.d, true); },300);
+}
+function checkBadges(){
+  if(S.lv[1]) award('first');
+  var w1=true,i; for(i=1;i<=7;i++){ if(!S.lv[i]) w1=false; }
+  if(w1) award('week1');
+  if(S.lv[7]) award('memory');
+  if(S.lv[8]) award('cmd');
+  if(S.lv[11]) award('mcp');
+  if(S.lv[14]) award('flow');
+  var all=true; LEVELS.forEach(function(L){ if(!S.lv[L.id]) all=false; });
+  if(all) award('all');
+}
+function copyCode(btn,txt){
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){ showToast('已复制到剪贴板'); }); }
+  else{ showToast('请手动选择复制'); }
+}
+
+/* ---------- map view ---------- */
+function renderMap(){
+  view='map'; curLevel=null;
+  app.innerHTML='';
+  var top=el('div','top');
+  top.appendChild(el('div','crest','✦'));
+  top.appendChild(el('div','title','代码法师<small>CLAUDE CODE · 两周通关 · 终端骑士续作</small>'));
+  var hud=el('div','hud');
+  hud.appendChild(el('div','pill','XP <b>'+S.xp+'</b>'));
+  hud.appendChild(el('div','pill','称号 <b style="color:var(--acc)">'+rankOf(S.xp).n+'</b>'));
+  hud.appendChild(el('div','pill','关卡 <b>'+Object.keys(S.lv).length+'</b>/14'));
+  var saveBtn=el('button','btn ghost small','存档');
+  saveBtn.onclick=openSave;
+  hud.appendChild(saveBtn);
+  top.appendChild(hud);
+  app.appendChild(top);
+
+  var rk=rankOf(S.xp), nx=nextRank(S.xp);
+  var rb=el('div','rankbar');
+  var pct = nx? Math.min(100,Math.round((S.xp-rk.x)/(nx.x-rk.x)*100)) : 100;
+  rb.appendChild(el('div','rankline','<span>当前称号：<b>'+rk.n+'</b></span><span>'+(nx?('距离「'+nx.n+'」还差 '+(nx.x-S.xp)+' XP'):'已至巅峰')+'</span>'));
+  var track=el('div','track'), fill=el('div','fill'); fill.style.width=pct+'%';
+  track.appendChild(fill); rb.appendChild(track);
+  app.appendChild(rb);
+
+  var weeks=el('div','weeks');
+  [['第一周 · 驾驭法杖',1,7,'7关 · 安装到项目首航'],['第二周 · 高阶魔法',8,14,'7关 · 记忆到毕业流']].forEach(function(w){
+    var wk=el('div','week');
+    wk.appendChild(el('h3','','<span class="wk-tag">'+w[3]+'</span> '+w[0]));
+    var nodes=el('div','nodes');
+    LEVELS.slice(w[1]-1,w[2]).forEach(function(L){
+      var done=!!S.lv[L.id], open=levelUnlocked(L);
+      var n=el('div','node'+(done?' done':open?' open':' locked')+(L.boss?' boss':''));
+      n.appendChild(el('div','dn',L.boss?'BOSS':'DAY '+L.id));
+      n.appendChild(el('div','nm',L.title.split(' · ')[0]));
+      n.appendChild(el('div','st',done?'已通关':open?(L.boss?'决战':'进入'):'未解锁'));
+      n.appendChild(el('div','mark',done?'✓':(open?'▶':'')));
+      if(open) n.onclick=function(){ renderLevel(L.id); };
+      nodes.appendChild(n);
+    });
+    wk.appendChild(nodes);
+    weeks.appendChild(wk);
+  });
+  app.appendChild(weeks);
+
+  var h4=el('h4'); h4.style.cssText='color:var(--gold);font-size:14px;margin:22px 0 10px;letter-spacing:1px';
+  h4.textContent='徽 章 殿';
+  app.appendChild(h4);
+  var badges=el('div','badges');
+  BADGES.forEach(function(b){
+    var w=S.badges[b.id];
+    badges.appendChild(el('div','badge'+(w?' won':''),'<span class="bs">'+(w?'★':'✧')+'</span>'+b.n+'<span style="color:var(--mut);font-size:11px">· '+b.d+'</span>'));
+  });
+  app.appendChild(badges);
+
+  var v=el('div','victory'+(Object.keys(S.lv).length>=14?' show':''));
+  v.innerHTML='<div class="vc">✦</div><h2>代码法师 · 加冕</h2><p>从没装过 Node 到指挥 AI 提交 PR——两周，你把法杖焊进了手里。<br>更远处：Agents 编排、CI 值夜班、自建 MCP、团队知识资产。<br>「法杖已认主，魔法才刚开始。」</p>';
+  app.appendChild(v);
+}
+
+/* ---------- level view ---------- */
+function renderLevel(id){
+  view='level'; curLevel=LEVELS[id-1];
+  app.innerHTML='';
+  var L=curLevel;
+
+  var head=el('div','lv-head');
+  var back=el('button','back','← 返回地图');
+  back.onclick=renderMap;
+  head.appendChild(back);
+  var ht=el('div');
+  ht.appendChild(el('div','lv-tag',(L.boss?'◆ BOSS 战 · ':'DAY '+L.id+' · ')+L.area));
+  ht.appendChild(el('div','lv-title',L.title));
+  head.appendChild(ht);
+  app.appendChild(head);
+
+  app.appendChild(el('div','story',L.story));
+
+  var sec=el('div','sect');
+  sec.appendChild(el('h4','','知识讲坛'));
+  L.lessons.forEach(function(ls){
+    var card=el('div','lesson');
+    var first=ls.c? ls.c.split('\n')[0] : '';
+    card.appendChild(el('h5','',ls.t+(first?'<code>'+esc(first.length>44?first.slice(0,44)+'…':first)+'</code>':'')));
+    card.appendChild(el('p','',ls.b));
+    if(ls.c){
+      var cb=el('div','codeblk');
+      cb.appendChild(el('span','p','$ '));
+      cb.appendChild(el('code','',esc(ls.c)));
+      var cp=el('button','copy','复制');
+      cp.onclick=function(){ copyCode(cp,ls.c); };
+      cb.appendChild(cp);
+      card.appendChild(cb);
+    }
+    sec.appendChild(card);
+  });
+  app.appendChild(sec);
+
+  if(L.challenge){
+    var cs=el('div','sect');
+    cs.appendChild(el('h4','','试炼场 · Claude Code 沙盒'));
+    cs.appendChild(buildTerm());
+    cs.appendChild(el('div','quest',(S.chal[L.id]?'<span class="qdone">✓ 试炼已完成</span> · ':'')+'<b>任务：</b>'+L.challenge.task));
+    app.appendChild(cs);
+  }
+
+  if(L.orderGame){
+    var os=el('div','sect');
+    os.appendChild(el('h4','','试炼场 · 逻辑拼图'));
+    os.appendChild(el('div','quest','<b>任务：</b>'+L.orderGame.title+(S.chal[L.id]?'　<span class="qdone">✓ 已完成</span>':'')));
+    os.appendChild(buildOrder());
+    app.appendChild(os);
+  }
+
+  var qs=el('div','sect');
+  qs.appendChild(el('h4','','自测试炼 · '+quizDoneCount(L)+'/'+L.quiz.length+' 已答对'));
+  L.quiz.forEach(function(Q,qi){
+    qs.appendChild(buildQuiz(L,Q,qi));
+  });
+  app.appendChild(qs);
+
+  var cds=el('div','sect');
+  cds.appendChild(el('h4','','记忆卡片 · 点击翻面'));
+  var grid=el('div','cards');
+  L.cards.forEach(function(c){
+    var mc=el('div','mcard');
+    mc.innerHTML='<div class="inner"><div class="mface mf-front"><div class="k">'+esc(c.k)+'</div><div class="hint">点击查看</div></div><div class="mface mf-back">'+esc(c.b)+'</div></div>';
+    mc.onclick=function(){ mc.classList.toggle('flip'); };
+    grid.appendChild(mc);
+  });
+  cds.appendChild(grid);
+  app.appendChild(cds);
+
+  var ms=el('div','sect');
+  ms.appendChild(el('h4','','真机任务 · 到你的终端里去'));
+  L.missions.forEach(function(m,i){
+    var key=L.id+'_'+i;
+    var mi=el('div','mission'+(S.miss[key]?' ok':''));
+    mi.innerHTML='<div class="box">✓</div><div class="mt">'+m+'</div>';
+    mi.onclick=function(){ S.miss[key]=!S.miss[key]; mi.classList.toggle('ok'); };
+    ms.appendChild(mi);
+  });
+  app.appendChild(ms);
+
+  var ft=el('div','lv-foot');
+  var fin=el('div','fin','');
+  var finBtn=el('button','btn','完成本关 ✦');
+  finBtn.onclick=function(){ finishLevel(L); };
+  var nxt=el('button','btn ghost','下一关 →');
+  nxt.onclick=function(){ if(L.id<14) renderLevel(L.id+1); else renderMap(); };
+  ft.appendChild(finBtn);
+  ft.appendChild(nxt);
+  ft.appendChild(fin);
+  app.appendChild(ft);
+  updateFin(fin,L);
+  window.scrollTo(0,0);
+}
+function updateFin(fin,L){
+  var qd=quizDoneCount(L), cd=!!S.chal[L.id];
+  fin.textContent='进度：试炼'+(cd?'✓':'✗')+' / 答题 '+qd+'/'+L.quiz.length;
+}
+function finishLevel(L){
+  if(S.lv[L.id]){ showToast('本关已通关过'); return; }
+  var qd=quizDoneCount(L);
+  if(!S.chal[L.id]){ showToast('还差一步：先完成试炼场的任务'); return; }
+  if(qd<L.quiz.length){ showToast('还差一步：自测试炼还有 '+(L.quiz.length-qd)+' 题未答对'); return; }
+  S.lv[L.id]=1;
+  var bonus=L.boss?60:20;
+  addXp(bonus,'「'+L.title.split(' · ')[0]+'」通关！');
+  checkBadges();
+  if(L.id===14){ setTimeout(function(){ renderMap(); },1200); }
+  else showToast('关卡完成，地图上点亮下一关', false);
+  renderLevel(L.id);
+}
+
+/* ---------- terminal widget (CSim) ---------- */
+function buildTerm(){
+  csim=new CSim();
+  if(curLevel && curLevel.id>1){ csim.st.installed=true; }
+  var box=el('div','vterm');
+  var bar=el('div','vt-bar');
+  ['#ff5f57','#febc2e','#28c840'].forEach(function(c){ var d=el('span','dot'); d.style.background=c; bar.appendChild(d); });
+  bar.appendChild(el('span','t','claude-code 沙盒 · 页内模拟，放心乱敲'));
+  var rst=el('button','reset','重置');
+  rst.onclick=function(){ csim.reset(); renderTermOut(); updatePs(); };
+  bar.appendChild(rst);
+  box.appendChild(bar);
+  var out=el('div','vt-out');
+  out.id='vtOut';
+  var inrow=el('div','vt-in');
+  var ps=el('span','ps','');
+  ps.id='vtPs';
+  var inp=document.createElement('input');
+  inp.id='vtInp'; inp.placeholder='先敲 claude 启动会话（help 看沙盒命令）';
+  inrow.appendChild(ps); inrow.appendChild(inp);
+  box.appendChild(out); box.appendChild(inrow);
+  renderTermOut();
+  updatePs();
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){
+      var line=inp.value.trim();
+      inp.value='';
+      if(!line) return;
+      var p0=csim.prompt();
+      var res=csim.run(line);
+      appendOut('<span class="in">'+esc(p0+' '+line)+'</span>');
+      appendOut(esc(res===''?'':String(res))||'<span class="sys">（无输出）</span>');
+      updatePs();
+      checkChallenge();
+    }
+  });
+  return box;
+}
+function updatePs(){
+  var ps=document.getElementById('vtPs');
+  if(ps) ps.textContent=csim.prompt();
+}
+function renderTermOut(){
+  var out=document.getElementById('vtOut'); if(!out)return;
+  out.innerHTML='<span class="sys">欢迎来到 Claude Code 沙盒（页内模拟，怎么敲都伤不到真机）。'+(csim.st.installed?'\n法杖已就绪。':'\n第一步：npm install -g @anthropic-ai/claude-code')+'\n启动会话：敲 claude → 用自然语言或 /命令 与它互动。\n</span>';
+}
+function appendOut(html){
+  var out=document.getElementById('vtOut'); if(!out)return;
+  var pre=document.createElement('div');
+  pre.style.whiteSpace='pre-wrap';
+  pre.innerHTML=html.replace(/\n/g,'<br>');
+  out.appendChild(pre);
+  out.scrollTop=out.scrollHeight;
+}
+function checkChallenge(){
+  var L=curLevel;
+  if(!L.challenge||S.chal[L.id]) return;
+  try{
+    if(L.challenge.check(csim)){
+      S.chal[L.id]=1;
+      appendOut('<span class="hl">✦ 试炼达成！获得 30 XP</span>');
+      addXp(30,'试炼达成');
+      checkBadges();
+    }
+  }catch(e){}
+}
+
+/* ---------- quiz widget ---------- */
+function buildQuiz(L,Q,qi){
+  var card=el('div','qcard');
+  card.appendChild(el('div','qn','QUESTION '+(qi+1)+(Q.type?' · 亲手打出来':'')));
+  card.appendChild(el('div','qt',Q.q));
+  var exp=el('div','exp','<b>解析：</b>'+Q.e);
+  var solved=function(){
+    if(!S.quiz[L.id]) S.quiz[L.id]=[];
+    if(S.quiz[L.id][qi]) return false;
+    S.quiz[L.id][qi]=1;
+    addXp(10,'答对');
+    return true;
+  };
+  if(Q.type){
+    var row=el('div','typein');
+    var inp=document.createElement('input');
+    inp.placeholder='在这里敲出答案…';
+    var btn=el('button','btn small','提交');
+    var submit=function(){
+      var v=inp.value.trim().replace(/\s+/g,' ');
+      var ans=Q.type.replace(/\s+/g,' ');
+      if(v===ans||v.toLowerCase()===ans.toLowerCase()){
+        solved();
+        card.style.borderColor='rgba(46,230,168,.6)';
+        exp.classList.add('show'); updateLevelHead(L);
+        showToast('✓ 正确');
+      } else {
+        exp.classList.add('show');
+        showToast('再想想，注意拼写和空格');
+      }
+    };
+    btn.onclick=submit;
+    inp.addEventListener('keydown',function(e){ if(e.key==='Enter') submit(); });
+    row.appendChild(inp); row.appendChild(btn);
+    card.appendChild(row);
+  } else {
+    var opts=el('div','opts');
+    Q.o.forEach(function(o,oi){
+      var b=el('button','opt');
+      b.innerHTML='<span class="oi">'+String.fromCharCode(65+oi)+'</span><span>'+o+'</span>';
+      b.onclick=function(){
+        if(S.quiz[L.id]&&S.quiz[L.id][qi]){ return; }
+        var all=opts.querySelectorAll('.opt');
+        all.forEach(function(x){x.classList.add('off');});
+        if(oi===Q.a){
+          b.classList.add('right');
+          solved();
+          updateLevelHead(L);
+          showToast('✓ 正确');
+        } else {
+          b.classList.add('wrong');
+          all[Q.a].classList.add('right');
+          showToast('答错了，看解析');
+        }
+        exp.classList.add('show');
+      };
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+  }
+  card.appendChild(exp);
+  return card;
+}
+function updateLevelHead(L){
+  var h4s=app.querySelectorAll('.sect h4');
+  h4s.forEach(function(h){
+    if(h.textContent.indexOf('自测试炼')===0){
+      h.textContent='自测试炼 · '+quizDoneCount(L)+'/'+L.quiz.length+' 已答对';
+    }
+  });
+  var fin=app.querySelector('.lv-foot .fin');
+  if(fin) updateFin(fin,L);
+}
+
+/* ---------- ordering puzzle ---------- */
+function buildOrder(){
+  var L=curLevel, G=L.orderGame;
+  var pool=el('div','ord-pool');
+  var slots=el('div','ord-slots');
+  var chosen=[];
+  var idx=G.lines.map(function(_,i){return i;});
+  var shuffled=idx.slice();
+  do{
+    for(var i=shuffled.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=shuffled[i]; shuffled[i]=shuffled[j]; shuffled[j]=t; }
+  }while(shuffled.every(function(v,i){return v===i;}));
+  function refresh(){
+    slots.innerHTML='';
+    chosen.forEach(function(ci,pos){
+      var s=el('div','ord-slot');
+      s.innerHTML='<span style="color:var(--mut)">'+(pos+1)+'</span><code style="white-space:pre-wrap">'+esc(G.lines[ci])+'</code>';
+      var x=el('button','','移除');
+      x.onclick=function(){ chosen.splice(pos,1); refresh(); };
+      s.appendChild(x);
+      slots.appendChild(s);
+    });
+    if(!chosen.length) slots.appendChild(el('div','','<span style="color:var(--mut);font-size:12px">按顺序点击下方条目，组装你的流程：</span>'));
+    pool.innerHTML='';
+    shuffled.forEach(function(ci){
+      var used=chosen.indexOf(ci)>=0;
+      var it=el('button','ord-item'+(used?' used':''));
+      it.innerHTML=esc(G.lines[ci]);
+      it.onclick=function(){
+        if(used) return;
+        chosen.push(ci); refresh();
+        if(chosen.length===G.lines.length){
+          var ok=chosen.every(function(v,i){return v===i;});
+          if(ok){
+            if(!S.chal[L.id]){ S.chal[L.id]=1; addXp(30,'拼图达成'); checkBadges(); }
+            showToast('✓ 流程组装正确！',true);
+            slots.querySelectorAll('.ord-slot').forEach(function(s){s.classList.add('ok');});
+          } else {
+            showToast('顺序不对——回想每一步的依赖关系');
+          }
+        }
+      };
+      pool.appendChild(it);
+    });
+  }
+  refresh();
+  var wrap=el('div');
+  wrap.appendChild(slots);
+  wrap.appendChild(pool);
+  return wrap;
+}
+
+/* ---------- save / load ---------- */
+function saveCode(){ try{ return btoa(unescape(encodeURIComponent(JSON.stringify(S)))); }catch(e){ return ''; } }
+function openSave(){
+  modalBox.innerHTML='';
+  modalBox.appendChild(el('h3','','通关码存档'));
+  modalBox.appendChild(el('p','','本页为离线单文件、不使用浏览器存储。复制下面的通关码妥善保存（可贴进备忘录），下次回来粘贴即可恢复进度。'));
+  var ta=document.createElement('textarea');
+  ta.value=saveCode(); ta.readOnly=true;
+  modalBox.appendChild(ta);
+  var row=el('div','row');
+  var cp=el('button','btn','复制通关码');
+  cp.onclick=function(){ copyCode(cp,ta.value); };
+  var ld=el('button','btn ghost','导入通关码');
+  ld.onclick=function(){ loadFromTa(ta); };
+  var cl=el('button','btn ghost','关闭');
+  cl.onclick=function(){ modalBg.classList.remove('show'); };
+  row.appendChild(cp); row.appendChild(ld); row.appendChild(cl);
+  modalBox.appendChild(row);
+  modalBg.classList.add('show');
+}
+function loadFromTa(ta){
+  try{
+    var s=JSON.parse(decodeURIComponent(escape(atob(ta.value.trim()))));
+    if(typeof s.xp!=='number') throw 0;
+    S=s;
+    modalBg.classList.remove('show');
+    renderMap();
+    showToast('进度已恢复，欢迎回来，法师',true);
+  }catch(e){ showToast('通关码无法识别，请检查是否复制完整'); }
+}
+modalBg.addEventListener('click',function(e){ if(e.target===modalBg) modalBg.classList.remove('show'); });
+
+renderMap();
+</script>
+</body>
+</html>

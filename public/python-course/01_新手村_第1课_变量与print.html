@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1课 · 变量与print —— 英雄召唤术</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(74,222,128,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4ade80,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--green),var(--cyan));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#9fe8b8;margin-top:-4px;margin-bottom:12px;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 魔法盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:22px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;
+  }
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--green),var(--cyan));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(74,222,128,.3);}
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  .hero-card .quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(74,222,128,.15);color:var(--green);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(74,222,128,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 新手村 · <b>第 1 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 1 · NEWBIE VILLAGE</div>
+    <h1>变量与 print —— 英雄召唤术</h1>
+    <div class="subtitle">今日目标：让程序记住你的数据，并开口说话</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解「变量 = 贴了标签的魔法盒子」</li>
+      <li>学会用 <span class="hl">print()</span> 输出、用 <span class="hl">=</span> 赋值</li>
+      <li>认识四大数据类型：整数、小数、文字、真假</li>
+      <li>通关实验室「英雄名片生成器」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 变量 -->
+  <section>
+    <h2><span class="num">1</span>变量：给数据一个家</h2>
+    <p>想象你在打 RPG，背包里有一瓶血药、300 金币。程序也需要地方存放这些数据——这就是<b>变量</b>。</p>
+    <p>你可以把变量理解为：<span class="hl">一个贴了名字标签的魔法盒子</span>。往盒子里放东西叫「赋值」，看盒子里有什么叫「读取」。</p>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">hero_name</div><div class="val">"阿呆"</div><div class="tip">文字 · str</div></div>
+      <div class="mbox"><div class="tag">gold</div><div class="val">300</div><div class="tip">整数 · int</div></div>
+      <div class="mbox"><div class="tag">hp</div><div class="val">99.5</div><div class="tip">小数 · float</div></div>
+      <div class="mbox"><div class="tag">is_alive</div><div class="val">True</div><div class="tip">真假 · bool</div></div>
+    </div>
+
+    <p>把鼠标移到上面的盒子上看看。在 Python 里，创建一个变量只需要一行：</p>
+    <div class="code"><span class="v">hero_name</span> = <span class="s">"阿呆"</span>   <span class="c"># 把文字 "阿呆" 装进名叫 hero_name 的盒子</span>
+<span class="v">gold</span> = <span class="n">300</span>        <span class="c"># 把整数 300 装进名叫 gold 的盒子</span></div>
+
+    <p>注意 <span class="hl-c">=</span> 不是数学的"等于"，而是<span class="hl">赋值动作</span>：把右边的东西，放进左边的盒子。盒子里的东西随时可以换：</p>
+    <div class="code"><span class="v">gold</span> = <span class="n">300</span>     <span class="c"># 开局 300 金</span>
+<span class="v">gold</span> = <span class="v">gold</span> + <span class="n">100</span>  <span class="c"># 打怪赚了 100：先算右边 300+100=400，再放回盒子</span></div>
+
+    <p>🧠 记忆口诀：<span class="hl">先算右边，再放左边。</span></p>
+  </section>
+
+  <!-- 2 print -->
+  <section>
+    <h2><span class="num">2</span>print()：让程序开口说话</h2>
+    <p>盒子里的东西藏在地牢里，怎么让玩家看见？用 <span class="hl">print()</span>——它会把括号里的内容「说」到屏幕上。</p>
+    <div class="code"><span class="v">hero_name</span> = <span class="s">"阿呆"</span>
+<span class="v">gold</span> = <span class="n">300</span>
+<span class="k">print</span>(<span class="v">hero_name</span>)      <span class="c"># 说出盒子里的东西</span>
+<span class="k">print</span>(<span class="s">"金币："</span>, <span class="v">gold</span>)  <span class="c"># 文字和数据可以一起说，逗号隔开</span></div>
+    <div class="out">阿呆
+金币： 300</div>
+
+    <p>三个新手必踩的坑：</p>
+    <p>① <span class="hl">引号很关键</span>：<code class="hl-c">print("gold")</code> 输出的是字母 gold，而 <code class="hl-c">print(gold)</code> 输出的是盒子里的 300。带引号是"念台词"，不带引号是"看盒子"。</p>
+    <p>② <span class="hl">引号要成对</span>：中文引号 <code>"阿呆"</code> 和英文引号 <code>"阿呆"</code> 长得像但不是一回事，Python 只认英文的 <code>' '</code> 或 <code>" "</code>。</p>
+    <p>③ <span class="hl">print 要小写</span>：写成 <code>Print</code> 会直接报错——Python 大小写敏感。</p>
+  </section>
+
+  <!-- 3 数据类型 -->
+  <section>
+    <h2><span class="num">3</span>四大种族：数据类型</h2>
+    <p>魔法盒子里的东西分四大种族，种族不同、脾气不同：</p>
+    <div class="code"><span class="v">level</span> = <span class="n">10</span>          <span class="c"># int · 整数 —— 能加减乘除</span>
+<span class="v">hp</span> = <span class="n">99.5</span>         <span class="c"># float · 小数 —— 带小数点</span>
+<span class="v">name</span> = <span class="s">"阿呆"</span>       <span class="c"># str · 字符串 —— 一串文字，必须带引号</span>
+<span class="v">is_alive</span> = <span class="k">True</span>     <span class="c"># bool · 布尔 —— 只有 True / False 两种，注意首字母大写</span></div>
+
+    <p>想查看任意盒子的种族？用 <span class="hl-c">type()</span>：</p>
+    <div class="code"><span class="k">print</span>(<span class="k">type</span>(<span class="n">99.5</span>))</div>
+    <div class="out">&lt;class 'float'&gt;</div>
+
+    <p>⚠️ 最经典的坑：<span class="hl">数字和文字不能直接相加</span>。</p>
+    <div class="code"><span class="k">print</span>(<span class="s">"等级："</span> + <span class="n">10</span>)   <span class="c"># 💥 报错！文字+整数，种族不通婚</span>
+<span class="k">print</span>(<span class="s">"等级："</span> + <span class="k">str</span>(<span class="n">10</span>))  <span class="c"># ✅ 先用 str() 把 10 变成文字 "10"</span></div>
+    <p>万物皆可转：<span class="hl-c">str()</span> 转文字、<span class="hl-c">int()</span> 转整数、<span class="hl-c">float()</span> 转小数。这个技能下一课接 input 时会天天用。</p>
+  </section>
+
+  <!-- 4 实验室 -->
+  <section>
+    <h2><span class="num">4</span>🎮 实验室 · 英雄名片生成器</h2>
+    <p>这是你写的第一个"程序"。下面输入你的英雄名（这里我们替你执行了 Python 代码——课后你会亲手在电脑上跑同样的逻辑）。对应代码就写在名片下方。</p>
+    <div class="lab-input">
+      <input id="hero-name" maxlength="10" placeholder="输入你的英雄名，如：暗夜刀客">
+      <button class="btn" onclick="summon()">⚡ 召唤英雄</button>
+    </div>
+    <div class="hero-card" id="hero-card">
+      <h3 id="hc-name">—</h3>
+      <div class="rarity" id="hc-rarity">—</div>
+      <div class="attr">
+        <div><b id="hc-str">—</b><span>力量 STR</span></div>
+        <div><b id="hc-agi">—</b><span>敏捷 AGI</span></div>
+        <div><b id="hc-int">—</b><span>智力 INT</span></div>
+        <div><b id="hc-luk">—</b><span>幸运 LUK</span></div>
+      </div>
+      <div class="quote" id="hc-quote">—</div>
+    </div>
+    <div class="code" id="lab-code" style="display:none"><span class="c"># 你刚刚运行的等价 Python 代码 ↓</span>
+<span class="v">hero_name</span> = <span class="k">input</span>(<span class="s">"输入英雄名："</span>)
+<span class="v">strength</span> = <span class="k">len</span>(<span class="v">hero_name</span>) * <span class="n">10</span>          <span class="c"># 名字越长力量越强</span>
+<span class="v">agi</span>, <span class="v">luk</span> = <span class="n">42</span>, <span class="n">7</span>
+<span class="k">print</span>(<span class="s">"召唤成功："</span>, <span class="v">hero_name</span>, <span class="s">"| 力量"</span>, <span class="v">strength</span>)</div>
+  </section>
+
+  <!-- 5 预言机 -->
+  <section>
+    <h2><span class="num">5</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 6 记忆卡片 -->
+  <section>
+    <h2><span class="num">6</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 7 Quiz -->
+  <section>
+    <h2><span class="num">7</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 8 课后 -->
+  <section class="homework">
+    <h2><span class="num">8</span>🌙 今晚的修炼（真实上机 · 约 15 分钟）</h2>
+    <li>① 在电脑上安装 Python（python.org 下载，一路下一步），打开 IDLE 或终端输入 <code>python</code> 进入交互模式</li>
+    <li>② 逐行敲一遍上面所有代码块，<b>亲手打字，不要复制粘贴</b>——手指记忆也是记忆</li>
+    <li>③ 小挑战：用 3 个变量 <code>movie</code>、<code>score</code>、<code>year</code> 存你最喜欢的电影信息，用一句 <code>print</code> 输出成一句话</li>
+    <li>④ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>数据类型与 input —— 装备鉴定</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：英雄名片 ============ */
+var rarities = [
+  {name:"★ 传说 · 龙裔血统", cls:"var(--gold)"},
+  {name:"★★ 史诗 · 星辰之子", cls:"var(--purple)"},
+  {name:"★★★ 神话 · 创世余晖", cls:"var(--pink)"},
+  {name:"★ 稀有 · 荒野行者", cls:"var(--cyan)"}
+];
+var quotes = [
+  "「代码即魔法，bug 即心魔。」",
+  "「十步 debug 一步 run。」",
+  "「不怕报错，就怕不报错。」",
+  "「今天的 print，是明天的大项目。」"
+];
+function summon(){
+  var name = document.getElementById('hero-name').value.trim();
+  if(!name){ alert('先给英雄取个名字吧！'); return; }
+  var seed = 0;
+  for(var i=0;i<name.length;i++){ seed += name.charCodeAt(i); }
+  var r = rarities[seed % rarities.length];
+  var str = name.length * 10 + (seed % 7);
+  var agi = 30 + (seed % 40);
+  var intel = 30 + ((seed*3) % 40);
+  var luk = seed % 21;
+  document.getElementById('hc-name').textContent = '⚔ ' + name;
+  var rar = document.getElementById('hc-rarity');
+  rar.textContent = r.name; rar.style.color = r.cls;
+  document.getElementById('hc-str').textContent = str;
+  document.getElementById('hc-agi').textContent = agi;
+  document.getElementById('hc-int').textContent = intel;
+  document.getElementById('hc-luk').textContent = luk;
+  document.getElementById('hc-quote').textContent = quotes[seed % quotes.length];
+  var card = document.getElementById('hero-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  document.getElementById('lab-code').style.display = 'block';
+}
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 看盒子还是念台词？',
+    code:'gold = 300\nprint("gold")',
+    opts:['300','gold','报错'],
+    ans:1,
+    exp:'带引号的 "gold" 是一段台词（字符串），print 只是把它念出来；不带引号才是去盒子里取值。'
+  },
+  {
+    title:'第 2 预言 · 先算右边',
+    code:'gold = 300\ngold = gold + 100\ngold = gold - 50\nprint(gold)',
+    opts:['350','300','400','250'],
+    ans:0,
+    exp:'300 → +100 变 400 → -50 变 350。每次赋值都会覆盖盒子里旧的值，盒子永远只有最新的一份。'
+  },
+  {
+    title:'第 3 预言 · 逗号连接',
+    code:'name = "阿呆"\nlevel = 10\nprint("英雄", name, "等级", level)',
+    opts:['英雄阿呆等级10','英雄 阿呆 等级 10','英雄,阿呆,等级,10','报错'],
+    ans:1,
+    exp:'print 里用逗号隔开的多个内容，输出时会用空格连接。想不带空格要用第 8 课的字符串格式化。'
+  },
+  {
+    title:'第 4 预言 · 类型侦探',
+    code:'print(type(42))',
+    opts:["<class 'int'>","<class 'str'>","<class 'number'>","int"],
+    ans:0,
+    exp:'42 是整数，类型是 int（integer 的缩写）。type() 是侦探工具，任何数据都能查出种族。'
+  },
+  {
+    title:'第 5 预言 · 种族通婚危机',
+    code:'score = 99\nprint("得分：" + score)',
+    opts:['得分：99','99','报错 TypeError','得分：+99'],
+    ans:2,
+    exp:'字符串 + 整数 = TypeError！必须先用 str(score) 把数字转成文字才能拼接。这是新手报错排行榜第一名。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l.replace(/("[^"]*")/g,'<span style="color:var(--green)">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|type|input|str|int|float|len)/g,'<span style="color:var(--pink)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['变量是什么？','贴了名字标签的魔法盒子，用来存放数据'],
+  ['赋值符号 = 的含义','把右边算好的结果，放进左边的盒子（不是数学等于）'],
+  ['print() 的作用','把括号里的内容输出到屏幕上'],
+  ['print("gold") 和 print(gold) 区别','前者念台词输出 gold 四个字母；后者读盒子输出里面的值'],
+  ['四大数据类型','int 整数 · float 小数 · str 字符串 · bool 真假(True/False)'],
+  ['字符串怎么写？','用英文引号包起来：\'阿呆\' 或 "阿呆"（中英文引号不可混用）'],
+  ['type(x) 干嘛的','查出 x 的数据类型'],
+  ['str(10) 的结果','把整数 10 变成字符串 "10"，用于和文字拼接'],
+  ['"等级" + 10 会怎样？','报错 TypeError！字符串不能直接加整数，要先 str(10)'],
+  ['True 和 true 哪个对？','True 对。Python 大小写敏感，布尔值首字母必须大写']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'下面哪一行能正确创建变量并赋值？',
+   opts:['hero_name == "阿呆"','hero_name = "阿呆"','"阿呆" = hero_name','hero_name: "阿呆"'], ans:1,
+   exp:'赋值用单个 =，且盒子名（变量名）必须在左边。'},
+  {q:'gold = 300 执行后，print(gold) 输出什么？',
+   opts:['gold','300','"300"','报错'], ans:1,
+   exp:'不带引号 = 读盒子，输出盒子里的 300。'},
+  {q:'print("我有", 5, "个技能") 的输出是？',
+   opts:['我有5个技能','我有 5 个技能','我有, 5, 个技能','报错'], ans:1,
+   exp:'逗号分隔的多个内容用空格连接输出。'},
+  {q:'type(3.14) 的结果是？',
+   opts:["<class 'int'>","<class 'float'>","<class 'str'>","<class 'bool'>"], ans:1,
+   exp:'带小数点的数字是 float（浮点数）。'},
+  {q:'下面哪个是合法的字符串写法？',
+   opts:['\'阿呆\'',"\"阿呆\"",'"阿呆"','（前两项都对）'], ans:3,
+   exp:'英文单引号或双引号都可以，但必须配对。第三项是中文引号，不合法。'},
+  {q:'执行 x = 5 后再执行 x = x * 2，此时 x 是？',
+   opts:['5','10','25','报错'], ans:1,
+   exp:'先算右边 5*2=10，再放回盒子，覆盖旧值。'},
+  {q:'print("年龄：" + 18) 会发生什么？',
+   opts:['输出 年龄：18','输出 18','报错 TypeError','输出 年龄：+18'], ans:2,
+   exp:'字符串不能和整数相加，要写成 "年龄：" + str(18)。'},
+  {q:'以下哪个是 bool 值？',
+   opts:['true','TRUE','True','yes'], ans:2,
+   exp:'Python 的布尔值只有 True 和 False，首字母大写。'},
+  {q:'age = "20"（注意带引号），type(age) 是？',
+   opts:["<class 'int'>","<class 'str'>","<class 'float'>","<class 'bool'>"], ans:1,
+   exp:'带引号就是字符串，哪怕内容长得像数字。想变成数字要用 int(age)。'},
+  {q:'变量名的命名，下面哪个最好？',
+   opts:['a = 99','player_hp = 99','my variable = 99','99hp = 99'], ans:1,
+   exp:'变量名要见名知意；不能有空格，不能以数字开头。player_hp 这种"蛇形命名"是 Python 惯例。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！预言家本家，下一课已为你解锁 🔓' : '通关成功！第 2 课「装备鉴定」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

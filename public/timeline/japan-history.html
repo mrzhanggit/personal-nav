@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本 · 世界文明史中的日出之国 | 交互式历史时间线</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Noto+Sans+SC:wght@300;400;500&family=Shippori+Mincho:wght@600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2B2A26;
+  --ink-soft:#4A473F;
+  --indigo:#1B2A4A;
+  --indigo-deep:#111B33;
+  --cinnabar:#C9362B;
+  --cinnabar-deep:#9E2720;
+  --gold:#C9A227;
+  --gold-light:#E5C76B;
+  --paper:#F6F0E2;
+  --paper-deep:#EDE3CD;
+  --paper-light:#FBF7EE;
+  --wash:#E8DCC2;
+  --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --mincho:"Shippori Mincho","Noto Serif SC","Songti SC",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:var(--sans);
+  color:var(--ink);
+  background:var(--paper);
+  overflow-x:hidden;
+  line-height:1.85;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(201,162,39,0.10), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 100% 30%, rgba(201,54,43,0.06), transparent 60%),
+    var(--paper);
+}
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+}
+::selection{background:var(--cinnabar);color:#fff;}
+#progress{
+  position:fixed;top:0;left:0;height:3px;width:0;z-index:1000;
+  background:linear-gradient(90deg,var(--cinnabar),var(--gold));
+  box-shadow:0 0 8px rgba(201,54,43,.5);
+}
+#sakura{position:fixed;inset:0;z-index:998;pointer-events:none;}
+
+/* ============ HERO ============ */
+.hero{
+  position:relative;min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;overflow:hidden;
+  padding:60px 20px 40px;
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 38%, rgba(27,42,74,0.08), transparent 65%);
+}
+.hero-waves{position:absolute;inset:0;z-index:-1;}
+.hero-waves svg{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:130%;min-width:1200px;height:44vh;opacity:.85;}
+.wave-path{animation:waveDrift 12s ease-in-out infinite alternate;}
+.wave-path.w2{animation-duration:9s;animation-delay:-4s;}
+.wave-path.w3{animation-duration:15s;animation-delay:-8s;}
+@keyframes waveDrift{
+  from{transform:translateX(-2.5%);}
+  to{transform:translateX(2.5%);}
+}
+.hero-sun{
+  position:absolute;top:9vh;left:50%;transform:translateX(-50%);
+  width:180px;height:180px;border-radius:50%;opacity:0;
+  background:radial-gradient(circle, rgba(229,199,107,.55), rgba(201,162,39,.18) 55%, transparent 75%);
+  animation:sunRise 2.4s cubic-bezier(.2,.8,.2,1) .3s forwards;
+}
+@keyframes sunRise{from{opacity:0;transform:translateX(-50%) scale(.4);}to{opacity:1;transform:translateX(-50%) scale(1);}}
+.hero-kanji{
+  font-family:var(--mincho);font-size:clamp(90px,20vw,230px);font-weight:800;
+  color:var(--indigo);line-height:1;letter-spacing:.12em;position:relative;
+  text-shadow:0 2px 0 rgba(201,162,39,.25);
+  opacity:0;animation:fadeUp 1.2s ease .5s forwards;
+}
+.hero-kanji::after{
+  content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);
+  width:78%;height:3px;background:linear-gradient(90deg,transparent,var(--cinnabar),transparent);
+}
+.hero-romaji{
+  margin-top:18px;font-family:var(--mincho);letter-spacing:.55em;text-indent:.55em;
+  font-size:clamp(13px,2vw,20px);color:var(--cinnabar);font-weight:600;
+  opacity:0;animation:fadeUp 1.2s ease .9s forwards;
+}
+.hero-sub{
+  margin-top:26px;max-width:640px;font-size:clamp(13px,1.6vw,16px);color:var(--ink-soft);
+  opacity:0;animation:fadeUp 1.2s ease 1.2s forwards;
+}
+.hero-sub em{font-style:normal;color:var(--cinnabar-deep);font-weight:500;}
+.hero-hanko{
+  position:absolute;top:16vh;right:max(6vw,24px);width:76px;height:76px;border-radius:12px;
+  background:var(--cinnabar);color:#F6EBD8;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mincho);font-weight:800;font-size:22px;writing-mode:vertical-rl;letter-spacing:.2em;
+  box-shadow:inset 0 0 0 2px rgba(246,235,216,.55);
+  opacity:0;transform:rotate(8deg) scale(1.6);
+  animation:stamp .7s cubic-bezier(.2,1.4,.4,1) 1.7s forwards;
+}
+@keyframes stamp{0%{opacity:0;transform:rotate(8deg) scale(2.2);}55%{opacity:1;transform:rotate(-4deg) scale(.92);}100%{opacity:1;transform:rotate(8deg) scale(1);}}
+.hero-scroll{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  font-size:12px;letter-spacing:.35em;text-indent:.35em;color:var(--ink-soft);
+  display:flex;flex-direction:column;align-items:center;gap:8px;opacity:0;animation:fadeUp 1s ease 2.2s forwards;
+}
+.hero-scroll .line{width:1px;height:44px;background:linear-gradient(var(--cinnabar),transparent);animation:drip 1.8s ease-in-out infinite;}
+@keyframes drip{0%{transform:scaleY(0);transform-origin:top;}55%{transform:scaleY(1);transform-origin:top;}56%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============ NAV ============ */
+.era-nav{
+  position:sticky;top:0;z-index:900;background:rgba(246,240,226,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid rgba(27,42,74,.14);
+}
+.era-nav-inner{
+  max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:4px;
+  overflow-x:auto;padding:10px 16px;scrollbar-width:none;
+}
+.era-nav-inner::-webkit-scrollbar{display:none;}
+.nav-logo{
+  flex-shrink:0;font-family:var(--mincho);font-weight:800;color:var(--cinnabar);
+  font-size:16px;letter-spacing:.2em;margin-right:14px;padding:4px 10px 4px 0;border-right:2px solid var(--cinnabar);
+}
+.nav-link{
+  flex-shrink:0;font-size:13px;color:var(--ink-soft);text-decoration:none;letter-spacing:.08em;
+  padding:6px 12px;border-radius:999px;transition:all .3s;white-space:nowrap;
+}
+.nav-link:hover{color:var(--cinnabar);background:rgba(201,54,43,.08);}
+.nav-link.active{color:#F6EBD8;background:var(--indigo);}
+
+/* ============ SECTION HEADINGS ============ */
+.section{max-width:1180px;margin:0 auto;padding:90px 24px 30px;position:relative;}
+.sec-tag{
+  display:inline-flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.4em;text-indent:.4em;
+  color:var(--cinnabar);font-weight:500;margin-bottom:14px;
+}
+.sec-tag::before{content:"";width:34px;height:1px;background:var(--cinnabar);}
+.sec-title{
+  font-family:var(--serif);font-size:clamp(26px,4vw,42px);font-weight:900;color:var(--indigo);
+  letter-spacing:.06em;line-height:1.35;
+}
+.sec-title .jp{
+  font-family:var(--mincho);font-weight:600;font-size:.5em;color:var(--gold);
+  letter-spacing:.3em;margin-left:12px;vertical-align:middle;
+}
+.sec-lead{max-width:760px;margin-top:16px;color:var(--ink-soft);font-size:15px;}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+.reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+
+/* ============ OVERVIEW CARDS ============ */
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:40px;}
+.ov-card{
+  position:relative;background:var(--paper-light);border:1px solid rgba(27,42,74,.12);
+  border-radius:14px;padding:26px 22px 20px;cursor:pointer;overflow:hidden;
+  transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .45s,border-color .3s;
+  text-decoration:none;color:var(--ink);
+}
+.ov-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--card-color,var(--cinnabar));transform:scaleY(0);transform-origin:top;transition:transform .45s ease;
+}
+.ov-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(27,42,74,.14);border-color:rgba(201,162,39,.5);}
+.ov-card:hover::before{transform:scaleY(1);}
+.ov-num{font-family:var(--mincho);font-weight:800;font-size:34px;color:var(--gold);line-height:1;}
+.ov-years{font-size:12px;color:var(--ink-soft);letter-spacing:.08em;margin-top:6px;}
+.ov-name{font-family:var(--serif);font-weight:900;font-size:19px;color:var(--indigo);margin-top:8px;letter-spacing:.04em;}
+.ov-desc{font-size:13px;color:var(--ink-soft);margin-top:8px;line-height:1.7;}
+
+/* ============ TIMELINE ============ */
+.timeline{position:relative;margin-top:20px;}
+.era{
+  position:relative;padding:0 0 30px;max-width:1180px;margin:0 auto;
+}
+.era-head{
+  position:relative;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;
+  padding:44px 24px 8px;
+}
+.era-head::before{
+  content:"";position:absolute;left:24px;right:24px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(27,42,74,.28),transparent);
+}
+.era-orb{
+  position:absolute;left:0;top:-10px;width:18px;height:18px;border-radius:50%;
+  background:var(--cinnabar);border:3px solid var(--paper);
+  box-shadow:0 0 0 2px var(--cinnabar);animation:orbPulse 3s ease-in-out infinite;
+}
+@keyframes orbPulse{0%,100%{box-shadow:0 0 0 2px var(--cinnabar);}50%{box-shadow:0 0 0 7px rgba(201,54,43,.18);}}
+.era-num{font-family:var(--mincho);font-weight:800;font-size:clamp(34px,5vw,56px);color:transparent;-webkit-text-stroke:1.5px var(--gold);line-height:1;}
+.era-title{font-family:var(--serif);font-weight:900;font-size:clamp(20px,3.4vw,30px);color:var(--indigo);letter-spacing:.05em;}
+.era-title .jp{font-family:var(--mincho);font-weight:600;font-size:.52em;color:var(--cinnabar);letter-spacing:.25em;margin-left:10px;vertical-align:middle;}
+.era-years{font-size:13px;color:var(--gold);font-weight:600;letter-spacing:.1em;background:rgba(201,162,39,.12);padding:3px 12px;border-radius:999px;}
+.era-intro{
+  margin:14px 24px 26px;padding:16px 20px;border-left:3px solid var(--gold);
+  background:rgba(201,162,39,.07);border-radius:0 10px 10px 0;
+  font-size:14.5px;color:var(--ink-soft);
+}
+
+/* events */
+.events{display:grid;grid-template-columns:1fr;gap:16px;padding:0 24px;}
+.event{
+  position:relative;background:var(--paper-light);border:1px solid rgba(27,42,74,.12);
+  border-radius:14px;overflow:hidden;transition:box-shadow .4s,border-color .3s,transform .4s;
+}
+.event:hover{box-shadow:0 14px 34px rgba(27,42,74,.12);border-color:rgba(201,54,43,.35);transform:translateY(-3px);}
+.event-head{
+  display:flex;align-items:center;gap:16px;padding:18px 22px;cursor:pointer;flex-wrap:wrap;
+}
+.event-year{
+  font-family:var(--mincho);font-weight:800;font-size:20px;color:var(--cinnabar);
+  background:rgba(201,54,43,.08);padding:4px 14px;border-radius:8px;white-space:nowrap;
+  position:relative;
+}
+.event-head h3{font-family:var(--serif);font-weight:900;font-size:18px;color:var(--indigo);flex:1;min-width:200px;letter-spacing:.03em;}
+.event-toggle{
+  width:30px;height:30px;border-radius:50%;border:1.5px solid var(--gold);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;
+  transition:transform .4s,background .3s,color .3s;flex-shrink:0;
+}
+.event.open .event-toggle{transform:rotate(45deg);background:var(--cinnabar);border-color:var(--cinnabar);color:#fff;}
+.event-body{
+  max-height:0;overflow:hidden;transition:max-height .6s cubic-bezier(.3,.8,.3,1);
+}
+.event-body-inner{padding:2px 22px 22px;display:grid;gap:12px;}
+.factor{
+  display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;
+  background:rgba(27,42,74,.045);border-radius:10px;padding:12px 16px;
+}
+.factor .k{
+  font-family:var(--serif);font-weight:900;font-size:13px;letter-spacing:.15em;
+  padding:4px 0;text-align:center;border-radius:6px;color:#F6EBD8;
+}
+.factor.bg .k{background:var(--indigo);}
+.factor.why .k{background:var(--cinnabar);}
+.factor.fx .k{background:var(--gold);color:var(--indigo);}
+.factor p{font-size:13.8px;color:var(--ink-soft);}
+.factor p strong{color:var(--ink);font-weight:500;}
+.event-quote{
+  margin:4px 0 0;padding:12px 16px;border-radius:10px;
+  background:rgba(27,42,74,.06);border-left:3px solid var(--cinnabar);
+  font-family:var(--serif);font-size:13.5px;color:var(--indigo);
+}
+.event-quote cite{display:block;margin-top:6px;font-style:normal;font-size:12px;color:var(--ink-soft);letter-spacing:.05em;}
+
+/* ============ PEOPLE ============ */
+.people-filter{display:flex;gap:8px;flex-wrap:wrap;margin:30px 0 6px;}
+.pf-btn{
+  font-size:13px;padding:6px 16px;border-radius:999px;border:1px solid rgba(27,42,74,.2);
+  background:transparent;color:var(--ink-soft);cursor:pointer;transition:all .3s;font-family:var(--sans);
+}
+.pf-btn:hover{border-color:var(--cinnabar);color:var(--cinnabar);}
+.pf-btn.on{background:var(--indigo);border-color:var(--indigo);color:#F6EBD8;}
+.people-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px;margin-top:26px;}
+.person{
+  position:relative;background:var(--paper-light);border:1px solid rgba(27,42,74,.12);
+  border-radius:14px;padding:24px 20px;transition:all .4s;overflow:hidden;
+}
+.person:hover{transform:translateY(-6px);box-shadow:0 16px 36px rgba(27,42,74,.13);}
+.person::after{
+  content:attr(data-era);position:absolute;right:-8px;top:10px;transform:rotate(0);
+  font-family:var(--mincho);font-weight:800;font-size:13px;color:rgba(201,54,43,.16);letter-spacing:.1em;
+}
+.person-avatar{
+  width:52px;height:52px;border-radius:12px;background:var(--indigo);color:var(--gold-light);
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-weight:900;font-size:22px;
+  margin-bottom:14px;transition:transform .4s;
+}
+.person:hover .person-avatar{transform:rotate(-6deg) scale(1.08);}
+.person h3{font-family:var(--serif);font-weight:900;font-size:18px;color:var(--indigo);}
+.person .years{font-size:12px;color:var(--gold);font-weight:600;letter-spacing:.08em;margin-top:2px;}
+.person .role{display:inline-block;margin-top:8px;font-size:12px;color:var(--cinnabar);background:rgba(201,54,43,.08);padding:2px 10px;border-radius:999px;letter-spacing:.05em;}
+.person p.desc{font-size:13px;color:var(--ink-soft);margin-top:10px;line-height:1.75;}
+
+/* ============ EXCHANGE ============ */
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:36px;}
+.ex-card{
+  background:var(--paper-light);border:1px solid rgba(27,42,74,.12);border-radius:14px;
+  padding:24px 22px;position:relative;overflow:hidden;transition:all .4s;
+}
+.ex-card:hover{transform:translateY(-5px);box-shadow:0 16px 34px rgba(27,42,74,.12);}
+.ex-card .en{position:absolute;top:14px;right:16px;font-family:var(--mincho);font-weight:800;font-size:13px;color:rgba(201,162,39,.4);letter-spacing:.2em;}
+.ex-card h3{font-family:var(--serif);font-weight:900;font-size:17px;color:var(--indigo);}
+.ex-card .ex-year{display:inline-block;font-size:12px;color:var(--cinnabar);font-weight:600;letter-spacing:.06em;margin-top:6px;}
+.ex-card p{font-size:13.5px;color:var(--ink-soft);margin-top:10px;}
+
+/* ============ ESSENCE ============ */
+.essence-wrap{
+  margin-top:36px;background:var(--indigo-deep);border-radius:20px;padding:44px 34px;color:#E8DCC2;
+  position:relative;overflow:hidden;
+}
+.essence-wrap::before{
+  content:"";position:absolute;inset:0;opacity:.12;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='20' cy='20' r='2' fill='%23C9A227'/%3E%3Ccircle cx='80' cy='60' r='1.4' fill='%23E5C76B'/%3E%3Ccircle cx='50' cy='100' r='1.6' fill='%23C9362B'/%3E%3C/svg%3E");
+}
+.essence-wrap h3{font-family:var(--serif);font-weight:900;font-size:24px;color:var(--gold-light);position:relative;}
+.essence-list{margin-top:20px;display:grid;gap:14px;position:relative;}
+.essence-list li{
+  list-style:none;display:flex;gap:14px;font-size:14.5px;line-height:1.8;
+}
+.essence-list .dot{flex-shrink:0;width:8px;height:8px;border-radius:50%;background:var(--cinnabar);margin-top:11px;box-shadow:0 0 8px rgba(201,54,43,.8);}
+.essence-list strong{color:var(--gold-light);font-weight:600;}
+
+/* ============ SOURCES ============ */
+.src-list{margin-top:32px;display:grid;gap:10px;}
+.src-item{
+  display:flex;gap:14px;align-items:flex-start;background:var(--paper-light);
+  border:1px solid rgba(27,42,74,.12);border-radius:12px;padding:14px 18px;
+  transition:all .3s;
+}
+.src-item:hover{border-color:rgba(201,54,43,.4);transform:translateX(6px);}
+.src-no{font-family:var(--mincho);font-weight:800;color:var(--gold);font-size:15px;flex-shrink:0;}
+.src-item p{font-size:13.5px;color:var(--ink-soft);}
+.src-item p strong{color:var(--indigo);}
+
+/* ============ FOOTER ============ */
+footer{
+  margin-top:80px;background:var(--indigo-deep);color:#B9C0CE;text-align:center;
+  padding:46px 20px 40px;position:relative;overflow:hidden;
+}
+footer::before{
+  content:"";position:absolute;top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(201,162,39,.6),transparent);
+}
+footer .f-kanji{font-family:var(--mincho);font-weight:800;font-size:34px;color:var(--gold);letter-spacing:.3em;}
+footer p{font-size:12.5px;margin-top:12px;letter-spacing:.06em;}
+footer .credit{margin-top:6px;font-size:12px;opacity:.75;}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:760px){
+  .section{padding:60px 16px 20px;}
+  .era-intro{margin-left:16px;margin-right:16px;}
+  .events{padding:0 16px;}
+  .event-body-inner{padding:2px 16px 18px;}
+  .factor{grid-template-columns:44px 1fr;padding:10px 12px;}
+  .era-head{padding-left:16px;padding-right:16px;}
+  .era-head::before{left:16px;right:16px;}
+  .essence-wrap{padding:32px 22px;}
+  .hero-hanko{width:60px;height:60px;font-size:17px;top:12vh;right:5vw;}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<canvas id="sakura"></canvas>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="hero-sun"></div>
+  <div class="hero-waves">
+    <svg viewBox="0 0 1440 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sea1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1B2A4A" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#1B2A4A" stop-opacity="0.20"/>
+        </linearGradient>
+        <linearGradient id="sea2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#C9362B" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#C9362B" stop-opacity="0.14"/>
+        </linearGradient>
+      </defs>
+      <path class="wave-path" d="M0,224 C240,160 480,300 720,240 C960,180 1200,280 1440,210 L1440,320 L0,320 Z" fill="url(#sea1)"/>
+      <path class="wave-path w2" d="M0,260 C220,200 500,320 740,250 C980,180 1240,300 1440,240 L1440,320 L0,320 Z" fill="url(#sea2)"/>
+      <path class="wave-path w3" d="M0,290 C260,240 520,320 760,270 C1000,220 1260,310 1440,260 L1440,320 L0,320 Z" fill="#1B2A4A" opacity="0.10"/>
+    </svg>
+  </div>
+  <div class="hero-hanko">倭国<br>源流</div>
+  <h1 class="hero-kanji">日本</h1>
+  <div class="hero-romaji">NIHON · にほん</div>
+  <p class="hero-sub">
+    从《吴军来信 · 世界文明史》中梳理的日出之国历史 ——<br>
+    三万五千年前渡海的智人，<em>大化改新</em>的中央集权，<em>源平合战</em>的武士登场，<em>德川幕府</em>的秩序重塑。
+    一个吸收中华文明、却走出独特道路的东方文明。
+  </p>
+  <div class="hero-scroll"><span>捲軸を開く</span><div class="line"></div></div>
+</header>
+
+<!-- ================= NAV ================= -->
+<nav class="era-nav">
+  <div class="era-nav-inner">
+    <span class="nav-logo">日本史</span>
+    <a class="nav-link" href="#overview">总览</a>
+    <a class="nav-link" href="#era-1">黎明·起源</a>
+    <a class="nav-link" href="#era-2">飞鸟·大化改新</a>
+    <a class="nav-link" href="#era-3">奈良·律令国家</a>
+    <a class="nav-link" href="#era-4">平安·贵族与武士</a>
+    <a class="nav-link" href="#era-5">幕府·武家天下</a>
+    <a class="nav-link" href="#era-6">江户·武士道</a>
+    <a class="nav-link" href="#era-7">开国·近代化</a>
+    <a class="nav-link" href="#people">人物</a>
+    <a class="nav-link" href="#exchange">中日交往</a>
+    <a class="nav-link" href="#essence">文明密码</a>
+    <a class="nav-link" href="#sources">资料出处</a>
+  </div>
+</nav>
+
+<main>
+<!-- ================= OVERVIEW ================= -->
+<section class="section" id="overview">
+  <div class="sec-tag reveal">SANJŪMAN-NEN NO NAGARE</div>
+  <h2 class="sec-title reveal">日本历史总览<span class="jp">歴史の俯瞰</span></h2>
+  <p class="sec-lead reveal d1">以世界文明史的视角俯瞰日本：它不是一条直线，而是一圈又一圈「学习—独立—再学习」的螺旋。点击进入各时代。</p>
+  <div class="overview-grid">
+    <a class="ov-card reveal d1" href="#era-1" style="--card-color:#1B2A4A;">
+      <div class="ov-num">01</div><div class="ov-years">约3.5万年前 — 公元3世纪</div>
+      <div class="ov-name">黎明 · 日本人的起源</div>
+      <div class="ov-desc">两批智人渡海而来，绳纹与弥生在此交融，水稻与铁器开启农耕文明。</div>
+    </a>
+    <a class="ov-card reveal d2" href="#era-2" style="--card-color:#C9362B;">
+      <div class="ov-num">02</div><div class="ov-years">645年 — 710年</div>
+      <div class="ov-name">飞鸟 · 大化改新</div>
+      <div class="ov-desc">乙巳之变刺杀权臣苏我氏，仿唐建制，「日本帝制自此开始」。</div>
+    </a>
+    <a class="ov-card reveal d3" href="#era-3" style="--card-color:#C9A227;">
+      <div class="ov-num">03</div><div class="ov-years">710年 — 794年</div>
+      <div class="ov-name">奈良 · 律令国家</div>
+      <div class="ov-desc">户籍与租庸调、遣唐使与鉴真东渡；土地国有难以为继，庄园制萌生。</div>
+    </a>
+    <a class="ov-card reveal d1" href="#era-4" style="--card-color:#1B2A4A;">
+      <div class="ov-num">04</div><div class="ov-years">794年 — 1185年</div>
+      <div class="ov-name">平安 · 贵族与武士</div>
+      <div class="ov-desc">京都仿洛阳而建；摄关政治架空天皇，志愿军催生武士阶层。</div>
+    </a>
+    <a class="ov-card reveal d2" href="#era-5" style="--card-color:#C9362B;">
+      <div class="ov-num">05</div><div class="ov-years">1185年 — 1603年</div>
+      <div class="ov-name">幕府 · 武家天下</div>
+      <div class="ov-desc">源赖朝开镰仓幕府；应仁之乱引爆战国百年混战。</div>
+    </a>
+    <a class="ov-card reveal d3" href="#era-6" style="--card-color:#C9A227;">
+      <div class="ov-num">06</div><div class="ov-years">1603年 — 1868年</div>
+      <div class="ov-name">江户 · 武士道的塑造</div>
+      <div class="ov-desc">德川家康统一日本，用神道、儒学与禅宗教化武士，武士道成文化标签。</div>
+    </a>
+    <a class="ov-card reveal d1" href="#era-7" style="--card-color:#1B2A4A;">
+      <div class="ov-num">07</div><div class="ov-years">1868年 — 近代</div>
+      <div class="ov-name">开国 · 近代化之路</div>
+      <div class="ov-desc">外来文化冲击幕府；明治维新全面学习西方，一度超越同时代的中国。</div>
+    </a>
+    <a class="ov-card reveal d2" href="#exchange" style="--card-color:#C9362B;">
+      <div class="ov-num">捌</div><div class="ov-years">专题</div>
+      <div class="ov-name">中日交往 · 渡海之桥</div>
+      <div class="ov-desc">遣唐使、鉴真、宁波之乱与倭寇——一衣带水之间的交流与摩擦。</div>
+    </a>
+  </div>
+</section>
+
+<!-- ================= TIMELINE ================= -->
+<div class="timeline">
+
+  <!-- ERA 1 -->
+  <section class="era" id="era-1">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">01</div>
+      <h2 class="era-title">黎明 · 日本人的起源<span class="jp">民族の黎明</span></h2>
+      <span class="era-years">约3.5万年前 — 公元3世纪</span>
+    </div>
+    <p class="era-intro reveal d1">
+      今天的日本人并非单一族群的后代。考古与基因证据表明，先后两批现代智人渡海而来，之后又有弥生人跨海迁入。
+      所谓「民族」，更多时候是一种文化认同，而非纯粹的血缘概念。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">约3.5万年前</div>
+          <h3>第一批现代智人抵达日本</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>彼时处于冰河期，海平面较低，日本诸岛与亚洲大陆相连。这批智人从东北亚地区、靠近中国黑龙江入海口的库页岛一路走到日本，成为列岛最早的主人。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>人类自非洲走出后的持续迁徙与扩散；东亚大陆人口沿陆桥东移，追逐更宜居的环境。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>开始使用打制石器，留下今天考古学家所称的「小刀型石器」遗迹，确立了日本最早的人类文化层。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">约2万年前</div>
+          <h3>第二批移民与细石刀片文化</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>又一批人群自西伯利亚出发，经朝鲜半岛渡海抵达日本东部地区，或与当地居民融合，或主导了当地社会。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>他们掌握了更先进的石器技术——细石刀片，在工具效率上形成代差优势。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本东部进入细石刀片文化时期；两种石器文化并存数千年后，更先进的细石刀片逐渐扩散到西日本，两批智人共同构成今天日本人最早的祖先。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d3">
+        <div class="event-head">
+          <div class="event-year">约1万年前</div>
+          <h3>绳纹时代：隔绝与融合</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>最近一次大冰川覆盖时期结束，全球变暖、海平面上升，日本逐渐与亚洲大陆隔绝，进入绳纹时代。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>绳纹人身材较矮小、肤色较黑，与今天的日本人差异较大——基因上反而与青藏高原人群、台湾南岛民族有一定相似性。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>说明「绳纹人」更多是一个文化概念而非血缘概念：不同族群在民族形成过程中早已发生血缘融合，一个现代民族的祖先往往并不来自单一族群。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">约前1000年 — 前5世纪</div>
+          <h3>弥生时代：水稻、铁器与渡海者</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>此时东亚文明已足够发达，能造出横跨朝鲜海峡与对马海峡的船只。一批被称为「弥生人」的人群自朝鲜半岛或长江三角洲地区渡海而来——时值中国春秋战国，或为逃避战乱。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>水稻自古代中国传入，至公元前5世纪已从九州北部普及到整个九州、四国与本州；同时弥生时代出现了铁器——日本几乎直接从石器时代「跳跃」进入铁器时代，未经历青铜时代。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本最早的农业社会由此开始，约公元前1000年即已出现；但此时尚无文字、无复杂社会结构、无城市，部落仍以母系血缘为纽带，居住在竖穴式房屋中，尚不能算文明的开始。</p></div>
+          <blockquote class="event-quote">关于「徐福东渡」的传说：弥生时代结束于公元前3世纪，正值传说中徐福生活的秦朝。当时大批中国农民渡海而来，与徐福传说嫁接，成为今天一些日本人「文化认同」的符号——这与其说是认祖，不如说是认同东亚共同文化。<cite>——《谁是韩国人和日本人的祖先？》</cite></blockquote>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">公元3世纪</div>
+          <h3>古坟时代：日本进入文明社会</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>弥生时代之后，日本出现贵族营建的大型古坟，时代由此得名。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>人口增长与农业发展推动社会分层，阶级分化日益明显。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>通过考古可以断定，日本当时已进入复杂的阶级社会——这是日本正式进入文明社会的时间点，为随后大和政权的崛起与飞鸟时代的改革奠定基础。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 2 -->
+  <section class="era" id="era-2">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">02</div>
+      <h2 class="era-title">飞鸟 · 大化改新<span class="jp">大化の改新</span></h2>
+      <span class="era-years">645年 — 710年</span>
+    </div>
+    <p class="era-intro reveal d1">
+      飞鸟时代得名于奈良附近的飞鸟地方（飞鸟京 / 藤原京，今奈良县明日香村）。这一时代最大的事件，就是大化改新——
+      它终结了豪族垄断政权的旧格局，把日本带上仿唐的中央集权之路。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">645年6月</div>
+          <h3>乙巳之变：刺杀苏我入鹿</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>大化改新之前，日本朝廷里权臣苏我氏垄断政权，天皇家族反而没有太多实权。苏我入鹿是当时实际掌政的权臣。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>中大兄皇子联合另一派贵族发动政变，决意夺回皇室的权力。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>苏我入鹿被刺杀，皇室重掌大权；随后中大兄皇子等人拥立孝德天皇继位，大化改新由此拉开序幕。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">646年 —</div>
+          <h3>大化改新：仿唐的中央集权改革</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>唐朝强盛的中央集权制度成为日本的改革蓝本；孝德天皇是大化改新的主导者。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>要建立强有力的中央政权，就必须打破豪族对土地与百姓的私人占有。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>土地制度上，废除豪族对土地和百姓的私有，将「私地私民」改为「公地公民」：土地不可继承、死后归还国家；国家对受田农民征收谷物，农民还需服劳役与兵役。「如果说中国的帝制始于秦始皇，那么日本的帝制则始于大化改新。」不过，这次改革并未彻底根除地方豪强与世家贵族的影响，为日后庄园制与武士崛起埋下伏笔。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 3 -->
+  <section class="era" id="era-3">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">03</div>
+      <h2 class="era-title">奈良 · 律令国家<span class="jp">奈良時代</span></h2>
+      <span class="era-years">710年 — 794年</span>
+    </div>
+    <p class="era-intro reveal d1">
+      迁都平城京（奈良）后，日本加强中央集权、建立户籍制度、推行租庸调。这一时期中日关系极好——
+      遣唐使的友谊故事与鉴真东渡都发生在这个时代；但律令体制的裂痕也在同期显现。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">710年 —</div>
+          <h3>户籍、租庸调与土地国有的极限</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>奈良时代，农民被固定在土地上，国家对农民课以租庸调或其他徭役，土地国有制度全面运转。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>到了奈良时代后期，以土地国有为基础的土地制度难以为继，寺院和地方豪族开始占有越来越多土地。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本逐渐进入庄园制时代。吴军提醒：不同的国家在同一个经济发展阶段，遇到的问题和出现的社会现象具有相似性——从某种意义上讲，这个时期的日本相当于罗马和中国古典文明时期。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">754年</div>
+          <h3>鉴真东渡：六次渡海终成功</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>奈良时代中日关系非常好，遣唐使往来频繁；大海是当时难以逾越的天险，唐朝僧人鉴真为东渡日本努力了十年。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>前五次或因朝廷干预、或因船只沉没与漂流失败，直到第六次东渡（754年）才终于成功。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>鉴真带去的不只是佛法，还有唐朝的医学——今天日本的「汉方医学」正是以鉴真带去的唐朝医学为基础的。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d3">
+        <div class="event-head">
+          <div class="event-year">奈良后期</div>
+          <h3>近亲婚姻与皇嗣断绝</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>当时的天皇为维持自身神圣性，通常采用近亲结婚。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>近亲婚配导致在任天皇的直系皇子大多病弱，相继早夭，最终天皇的直系子嗣断绝。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>奈良时代后期各种政治斗争频发，皇位继承危机成为平安时代权力格局变化的导火索之一。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 4 -->
+  <section class="era" id="era-4">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">04</div>
+      <h2 class="era-title">平安 · 贵族与武士<span class="jp">平安時代</span></h2>
+      <span class="era-years">794年 — 1185年</span>
+    </div>
+    <p class="era-intro reveal d1">
+      794年桓武天皇迁都平安京（京都）。京都按中国洛阳的格局和建筑风格修建，「洛」一度成为首都的代名词。律令制在此走向瓦解，
+      天皇虚位化，摄关政治登场——而一个新的阶层「武士」在时代转折中诞生。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">794年</div>
+          <h3>迁都平安京：「洛」与「上洛」</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>桓武天皇将都城从奈良迁往平安京（京都）。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>京都按照中国洛阳的格局和建筑风格修建，当时日本常用「洛」字代表首都。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>后来日本地方贵族到京都觐见天皇，被称为「上洛」；直到今天，京都附近仍保留「洛东」「洛西」「洛南」「洛北」「洛中」等地名。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">平安中期</div>
+          <h3>律令制瓦解与武士阶层诞生</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>平安时代，日本的律令制已难以为继：自耕农经济解体，税收征收不上来。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>朝廷指派地方豪族代表担任国司为政府筹税，地方权力增加、中央权力被削弱；同时自耕农越来越少，桓武天皇不得不废除以农民服兵役构成军队的军事制度，改为以志愿军组成军队。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本出现了一个全新的阶层——武士阶层。中央军事力量从此掌握在地方贵族手中，中央经济负担减轻但力量也被削弱。吴军对比指出：日本这一时期与古罗马后期颇为相似。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d3">
+        <div class="event-head">
+          <div class="event-year">10—11世纪</div>
+          <h3>摄关政治：藤原北家的世袭</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>平安中期以后，中央官职开始被特定家族世袭。当继任天皇年幼时，往往由某个贵族担任辅佐天皇的摄政与关白（关白大致相当于中国的宰相）。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>10到11世纪，藤原北家开始世袭摄政与关白之位。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>此时的天皇已有点像后来的虚位君主，而藤原北家则有点像后来的幕府——贵族政治发展到极致，也为武家政治的登场铺平了道路。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">平安后期</div>
+          <h3>源平合战：武家时代的先声</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>平安时代后期，军事贵族平氏与源氏两大世家开始争夺日本的实际权力，一开始平氏占上风。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>两大武士集团围绕中央政权与地方利益展开长期博弈。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>在源平合战中源氏获胜。最终源赖朝在镰仓建立幕府，并于1192年就任征夷大将军——日本自此进入幕府时代，武士正式登上政治舞台的中心。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 5 -->
+  <section class="era" id="era-5">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">05</div>
+      <h2 class="era-title">幕府 · 武家天下<span class="jp">幕府時代</span></h2>
+      <span class="era-years">1185年 — 1603年</span>
+    </div>
+    <p class="era-intro reveal d1">
+      从镰仓幕府到室町幕府，武家统治延续数百年。1467年应仁之乱后，日本进入战国时代——
+      一个多世纪的封建主混战，把武士阶层推向了历史的聚光灯下。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">1192年</div>
+          <h3>镰仓幕府：征夷大将军的时代</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>源平合战中源氏获胜，源赖朝掌握天下实权。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>源赖朝在镰仓建立幕府，于1192年就任征夷大将军。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本进入幕府时代——由将军与武士主导的武家政权取代了以天皇为核心的贵族朝廷，武士阶级成为日本政治的主角，此格局延续近七百年。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">武士的兴起</div>
+          <h3>从「家丁」到「雇佣兵」的武士</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>日本最早的武士出现在645年大化改新之后。最初他们只是封建主的护从，类似中国看家护院的家丁，数量不多、未成阶层。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>后来天皇成为虚君、地方势力崛起，地方贵族为巩固权力纷纷雇佣武士作为私人武装——职业雇佣兵逐渐出现在日本社会中，形成了一个特殊的「劳动力市场」，只是从事的职业是打仗。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>与欧洲骑士不同：欧洲骑士自己也是贵族，而日本武士大多没有田地财产，只是受雇于领主，对领主依赖性更强。由于日本政治长期被武将左右，军人地位不低，一些武士凭战功成为将军和大名（封建主）。但早期武士粗鲁、残暴、缺乏教养，与后世文学形象相去甚远。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d3">
+        <div class="event-head">
+          <div class="event-year">1467年</div>
+          <h3>应仁之乱与战国时代</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>室町幕府时期，两位掌握实权的大名发生武装冲突。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>幕府内部权力斗争激化，战火遍及日本全境。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>日本进入战国时代——此后一个多世纪封建主混战不休。战争让武士成为「香饽饽」，哪边给的好处多就投靠哪一方，武士地位不断提高。战国时期著名武士藤堂高虎一生投靠过多个家族、跟随过十几位主人——换主在当时是家常便饭。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 6 -->
+  <section class="era" id="era-6">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">06</div>
+      <h2 class="era-title">江户 · 武士道的塑造<span class="jp">武士道の形成</span></h2>
+      <span class="era-years">1603年 — 1868年</span>
+    </div>
+    <p class="era-intro reveal d1">
+      德川家康统一日本、建立德川幕府后，为政权的稳定开始「教化」武士——武士道其实从那时才真正出现。
+      它借助神道教、儒学与禅宗，把刀尖上的战士塑造成忠、义、勇、仁、礼、诚、克己的荣誉阶层。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">1603年 —</div>
+          <h3>德川幕府：以教化驯服武士</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>战国混战之后，德川家康统一日本，建立德川幕府（江户时代）。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>为了政权与社会的稳定，幕府开始约束武士的行为，以免他们犯上作乱。这与中世纪欧洲教会约束骑士的做法相似——利用宗教作为工具来管教曾经无法无天的武士。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>武士道由此登场，成为日本文化中非常鲜明的标签。宗教工具包括日本自己的神道教（忠于主君、尊敬祖先）、从中国传去的佛教与儒家思想，以及禅宗的「专注、看淡生死、遇事平静沉着」。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">江户时代</div>
+          <h3>《叶隐闻书》：武士的《论语》</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>江户时代对武士道的约束不仅是传统，还有配套著作作为武士学习的行为规范。武士道最初被称为「叶隐」，正来源于《叶隐闻书》。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>「叶隐」一词出自日本诗人西行之诗，意为如叶荫为领主提供庇护，要求武士在主人看不见的地方主动「舍身奉公」；书中更言「武士道者，死之谓也」——强调为忠义毫不犹豫地献身。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>书中为武士提出四条基本要求：行事绝不迟疑；对主公唯命是从（只服从直接上级）；孝敬长辈亲人；大慈大悲、不恃强凌弱方可为人。并规定了武士的基本美德——忠、义、勇、仁、礼、诚、克己。切腹仅是地位很高的武士才能采用的手段，对武士而言，很多惩罚比死还可怕。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d3">
+        <div class="event-head">
+          <div class="event-year">江户后期</div>
+          <h3>吉田松阴：武士道的新解读</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>江户后期、明治维新之前，著名思想家吉田松阴出于「尊王攘夷、废除幕藩制」的目的，重新解读武士道。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>他把武士道强调的对领主的忠诚，解释为对天皇的效忠：「今之士名为武士，其本职在于平祸乱、夷贼。」而这件事只有奉天皇的命令才能做到。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>这种新解释造就了日本上下对天皇的忠诚；吉田松阴的国家观成为后来日本国家主义的重要组成部分。武士道中忠诚、勇敢、奉献的美德对日本国家的稳定乃至民族精神的塑造起到了积极作用——但也应警惕其中不符合当代价值观的糟粕部分。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ERA 7 -->
+  <section class="era" id="era-7">
+    <div class="era-head reveal">
+      <div class="era-orb"></div>
+      <div class="era-num">07</div>
+      <h2 class="era-title">开国 · 近代化之路<span class="jp">明治維新</span></h2>
+      <span class="era-years">1868年 — 近代</span>
+    </div>
+    <p class="era-intro reveal d1">
+      德川幕府的倒台，最重要的原因是外来文化与制度的影响。明治维新之后，日本全面学习西方——
+      接受西方文明，一度超越同时代的中国。这印证了吴军的判断：日本的超越来自「接受」，而非原生文明的自我演化。
+    </p>
+    <div class="events">
+      <article class="event reveal d1">
+        <div class="event-head">
+          <div class="event-year">幕末</div>
+          <h3>德川幕府的倒台：外来冲击</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>江户幕府长期锁国，维持着以武士阶层为核心的封建秩序。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>吴军在课程中明确指出：日本德川幕府的倒台，最重要的原因就是外来文化和制度的影响——这与基督教传入动摇罗马帝国、法国先进思想颠覆欧洲君主专制，是同一类历史模式。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>幕藩体制瓦解，尊王攘夷运动演变为倒幕运动，为明治维新铺平道路。</p></div>
+        </div></div>
+      </article>
+      <article class="event reveal d2">
+        <div class="event-head">
+          <div class="event-year">1868年 —</div>
+          <h3>明治维新：全面学习西方</h3>
+          <div class="event-toggle">+</div>
+        </div>
+        <div class="event-body"><div class="event-body-inner">
+          <div class="factor bg"><span class="k">背景</span><p>明治政府建立后，日本以前所未有的速度吸收西方文明成果。</p></div>
+          <div class="factor why"><span class="k">原因</span><p>在东亚地区自然条件最好的地方是中国的黄河流域与长江流域，周边国家很难发展出比中华文明更先进的文明形态——「到了近代，日本曾经一度超越中国，也是因为接受了西方文明，而不是它的原生文明实现了超越」。</p></div>
+          <div class="factor fx"><span class="k">影响</span><p>饮食结构上学习西方引入肉蛋奶，全民族身体发育程度与智力水平提高；经济上部分采用重商主义政策——18、19世纪的美国、19世纪的德国和日本在崛起时都采用了这一策略，重商主义几乎成为各国工业化初期的共同路径。启蒙思想家福泽谕吉等坚决反对封建制度，推动近代思想解放。</p></div>
+        </div></div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<!-- ================= PEOPLE ================= -->
+<section class="section" id="people">
+  <div class="sec-tag reveal">JINBUTSU</div>
+  <h2 class="sec-title reveal">重要人物<span class="jp">人物群像</span></h2>
+  <p class="sec-lead reveal d1">他们站在日本历史的转折点上——改革者、枭雄、思想家与传说。按时代筛选。</p>
+  <div class="people-filter reveal d2">
+    <button class="pf-btn on" data-f="all">全部</button>
+    <button class="pf-btn" data-f="起源">起源</button>
+    <button class="pf-btn" data-f="飞鸟奈良">飞鸟·奈良</button>
+    <button class="pf-btn" data-f="平安幕府">平安·幕府</button>
+    <button class="pf-btn" data-f="江户">江户</button>
+    <button class="pf-btn" data-f="近代">近代</button>
+    <button class="pf-btn" data-f="中日交往">中日交往</button>
+  </div>
+  <div class="people-grid">
+    <figure class="person reveal" data-era="飞鸟·奈良">
+      <div class="person-avatar">天</div>
+      <h3>中大兄皇子</h3>
+      <p class="years">626—672 · 天智天皇</p>
+      <span class="role">乙巳之变主导者</span>
+      <p class="desc">645年联合贵族刺杀权臣苏我入鹿，皇室重掌大权，是大化改新得以展开的核心推手。</p>
+    </figure>
+    <figure class="person reveal" data-era="飞鸟·奈良">
+      <div class="person-avatar">苏</div>
+      <h3>苏我入鹿</h3>
+      <p class="years">？—645</p>
+      <span class="role">权臣</span>
+      <p class="desc">大化改新前实际掌政的权臣，苏我氏垄断政权的代表，在乙巳之变中被刺杀。</p>
+    </figure>
+    <figure class="person reveal" data-era="飞鸟·奈良">
+      <div class="person-avatar">孝</div>
+      <h3>孝德天皇</h3>
+      <p class="years">596—654</p>
+      <span class="role">大化改新主导者</span>
+      <p class="desc">被中大兄皇子等拥立继位，主导仿唐的中央集权改革——「日本的帝制始于大化改新」。</p>
+    </figure>
+    <figure class="person reveal" data-era="平安·幕府">
+      <div class="person-avatar">桓</div>
+      <h3>桓武天皇</h3>
+      <p class="years">737—806</p>
+      <span class="role">迁都平安京</span>
+      <p class="desc">794年迁都平安京（京都），开创平安时代；废除农民兵役制改为志愿军，间接催生武士阶层。</p>
+    </figure>
+    <figure class="person reveal" data-era="飞鸟·奈良">
+      <div class="person-avatar">鉴</div>
+      <h3>鉴真</h3>
+      <p class="years">688—763 · 唐朝高僧</p>
+      <span class="role">六次东渡</span>
+      <p class="desc">为东渡日本努力十年、第六次才成功；带去佛法与唐朝医学，奠定日本汉方医学的基础。</p>
+    </figure>
+    <figure class="person reveal" data-era="平安·幕府">
+      <div class="person-avatar">源</div>
+      <h3>源赖朝</h3>
+      <p class="years">1147—1199</p>
+      <span class="role">镰仓幕府创建者</span>
+      <p class="desc">源平合战胜利后于1192年在镰仓就任征夷大将军，开启绵延近七百年的幕府时代。</p>
+    </figure>
+    <figure class="person reveal" data-era="平安·幕府">
+      <div class="person-avatar">德</div>
+      <h3>德川家康</h3>
+      <p class="years">1543—1616</p>
+      <span class="role">江户幕府建立者</span>
+      <p class="desc">战国末期统一日本，建立德川幕府；为稳定政权开始教化武士，武士道由此成型。</p>
+    </figure>
+    <figure class="person reveal" data-era="江户">
+      <div class="person-avatar">吉</div>
+      <h3>吉田松阴</h3>
+      <p class="years">1830—1859</p>
+      <span class="role">尊王攘夷思想家</span>
+      <p class="desc">把武士道对领主的忠诚重新解释为对天皇的效忠，其国家观成为日本国家主义的重要组成部分。</p>
+    </figure>
+    <figure class="person reveal" data-era="近代">
+      <div class="person-avatar">福</div>
+      <h3>福泽谕吉</h3>
+      <p class="years">1835—1901</p>
+      <span class="role">明治启蒙思想家</span>
+      <p class="desc">明治时期的启蒙思想家，坚决反对封建制度，主张以近代文明改造日本社会。</p>
+    </figure>
+    <figure class="person reveal" data-era="中日交往">
+      <div class="person-avatar">汪</div>
+      <h3>汪直</h3>
+      <p class="years">？—1559</p>
+      <span class="role">武装海商·倭寇之患</span>
+      <p class="desc">以日本长崎为基地的大型武装海商集团首领，东南亚海盗皆受其约束，是明朝倭寇之患的代表人物。</p>
+    </figure>
+    <figure class="person reveal" data-era="平安·幕府">
+      <div class="person-avatar">藤</div>
+      <h3>藤堂高虎</h3>
+      <p class="years">1556—1630</p>
+      <span class="role">战国武士</span>
+      <p class="desc">战国时期著名武士，一生投靠多个家族、跟随十几位主人——武士「换主如家常便饭」的缩影。</p>
+    </figure>
+    <figure class="person reveal" data-era="起源">
+      <div class="person-avatar">徐</div>
+      <h3>徐福（传说）</h3>
+      <p class="years">秦朝方士</p>
+      <span class="role">文化认同符号</span>
+      <p class="desc">传说中奉秦王之命东渡的方士。今天一些日本人认可自己是徐福后人，更多是一种对东亚共同文化的认同。</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= EXCHANGE ================= -->
+<section class="section" id="exchange">
+  <div class="sec-tag reveal">NICCHŪ KŌRYŪ</div>
+  <h2 class="sec-title reveal">中日交往 · 渡海之桥<span class="jp">一衣帯水</span></h2>
+  <p class="sec-lead reveal d1">日本在中世纪基本是「接受中国文化，但对中国本身没有施加什么政治影响」——但渡海而来的交流从未中断：从遣唐使到瓷器，从宁波之乱到浮世绘。</p>
+  <div class="ex-grid">
+    <div class="ex-card reveal d1">
+      <span class="en">SHITŌSHI</span>
+      <h3>遣唐使与唐日贸易</h3>
+      <p class="ex-year">奈良时代（710—794）</p>
+      <p>日本主要向唐朝输出白银、少量布料，从唐朝进口丝绸、香料、中药、经典书籍和佛像。安史之乱前，唐日贸易伴随遣唐使的朝贡顺带进行，属官方贸易——唐朝商人在鸿胪馆停留三到六个月，货物「官司先买」，之后才轮到贵族和寺院。</p>
+    </div>
+    <div class="ex-card reveal d2">
+      <span class="en">KAISEKI</span>
+      <h3>文化东传：佛经与医学</h3>
+      <p class="ex-year">唐代</p>
+      <p>玄奘翻译的七十余部佛经后来传到朝鲜、日本和越南；唐朝医学也传往日本与新罗，日本汉方医学以鉴真带去的唐朝医学为基础。9世纪起《论语》等儒家经典成为日本人学习的启蒙经典，孔庙至今在日本保留十余座。</p>
+    </div>
+    <div class="ex-card reveal d3">
+      <span class="en">GŌTOKU</span>
+      <h3>宁波之乱与倭寇之患</h3>
+      <p class="ex-year">明代</p>
+      <p>明朝实行海禁后，走私贸易反而兴盛。华人宋素卿在日本长大成为幕府家臣，其船队与另一日本船队争夺对明贸易发生纠纷，史称「宁波之乱」。此后对日官方贸易大门关闭，海盗首领雇佣日本浪人（倭寇）袭扰东南沿海，汪直是其中代表。</p>
+    </div>
+    <div class="ex-card reveal d1">
+      <span class="en">NAGASAKI</span>
+      <h3>澳门—长崎航线与白银</h3>
+      <p class="ex-year">16—17世纪</p>
+      <p>澳门成为连接欧洲、印度、日本、东南亚与中国贸易的枢纽，葡萄牙人开辟澳门到长崎的航线。大量白银流入让明朝成为银本位王朝，中晚明白银的货币化反过来又刺激了西班牙和日本开采更多白银。</p>
+    </div>
+    <div class="ex-card reveal d2">
+      <span class="en">JIKI</span>
+      <h3>瓷器：打破中国的垄断</h3>
+      <p class="ex-year">17世纪</p>
+      <p>在17世纪日本人掌握瓷器制作技术之前，朝鲜是中国以外唯一能自造瓷器的国家。荷兰东印度公司因多年无法从中国获得瓷器、库存告罄，转而向日本订购——中国对瓷器的垄断就此结束。</p>
+    </div>
+    <div class="ex-card reveal d3">
+      <span class="en">UKIYO-E</span>
+      <h3>浮世绘：套色雕版之美</h3>
+      <p class="ex-year">江户时代</p>
+      <p>中国的雕版印刷技术传至周边国家，今天日本在世界上很受欢迎的浮世绘，正是套色雕版印刷的产物——这是中日技术交流结出的艺术果实。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ESSENCE ================= -->
+<section class="section" id="essence">
+  <div class="sec-tag reveal">BUNMEI NO HIMITSU</div>
+  <h2 class="sec-title reveal">文明密码<span class="jp">日本の独自性</span></h2>
+  <p class="sec-lead reveal d1">《吴军来信 · 世界文明史》对日本文明的四点核心判断。</p>
+  <div class="essence-wrap reveal d1">
+    <h3>「相似却不相同」的独特文明</h3>
+    <ul class="essence-list">
+      <li><span class="dot"></span><p><strong>学习的文明。</strong>日本受到中华文明的极大影响，却在后来的发展中逐渐产生与中华文明相似、却不相同的独特文明——它没有被中华文明取代，反而极大丰富了世界文明。</p></li>
+      <li><span class="dot"></span><p><strong>地理的孤岛。</strong>大海是当时难以逾越的天险（鉴真六次东渡才成功），日本与中原王朝各自独立发展——如同喜马拉雅山两侧的古中国与古印度。</p></li>
+      <li><span class="dot"></span><p><strong>未完成的集权。</strong>大化改新学习唐朝中央集权，却没有像中原王朝那样再度走向统一；相反，地方豪强建立自己的武装，名义上拥戴共主、实际上各自为政，与天皇分享权力，天皇逐渐变为虚位君主——庄园制与封建贵族制延续到近代。</p></li>
+      <li><span class="dot"></span><p><strong>超越来自接受。</strong>「到了近代，日本曾经一度超越中国，也是因为接受了西方文明，而不是它的原生文明实现了超越。」明治维新后引入肉蛋奶改善体质、采用重商主义崛起——接受外来文明，是日本实现跨越的根本方式。</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= SOURCES ================= -->
+<section class="section" id="sources">
+  <div class="sec-tag reveal">SHIRYŌ</div>
+  <h2 class="sec-title reveal">资料出处<span class="jp">出典</span></h2>
+  <p class="sec-lead reveal d1">本页内容全部梳理自《吴军来信 · 世界文明史》课程文本（吴军 著），主要来源章节如下：</p>
+  <div class="src-list">
+    <div class="src-item reveal d1"><span class="src-no">01</span><p><strong>周五专题13 · 谁是韩国人和日本人的祖先？</strong>——日本人起源、绳纹与弥生时代、徐福传说与民族认同</p></div>
+    <div class="src-item reveal d2"><span class="src-no">02</span><p><strong>44 · 东亚文明：最早的农耕社会何时出现？</strong>——弥生时代、水稻与铁器传入、古坟时代进入文明社会</p></div>
+    <div class="src-item reveal d3"><span class="src-no">03</span><p><strong>142 · 东亚之东：日本和韩国的中世纪</strong>——飞鸟、奈良、平安三时代，大化改新、庄园制、武士诞生、源平合战与镰仓幕府</p></div>
+    <div class="src-item reveal d1"><span class="src-no">04</span><p><strong>周五专题36 · 日本的武士道精神是如何被塑造的？</strong>——武士阶级兴起、战国时代、德川幕府教化、叶隐闻书、吉田松阴</p></div>
+    <div class="src-item reveal d2"><span class="src-no">05</span><p><strong>答读者问27 · 修辞学和修辞手法有何不同？</strong>——日本为何保留封建贵族制、庄园制与天皇虚位化</p></div>
+    <div class="src-item reveal d3"><span class="src-no">06</span><p><strong>答读者问37 · 草原政权为什么会帮助唐王朝维持统治？</strong>——大海天险与日本文明的独立性</p></div>
+    <div class="src-item reveal d1"><span class="src-no">07</span><p><strong>周五专题46 · 民间海上贸易：明朝海盗盛行带来什么影响？</strong>——宁波之乱、倭寇之患与汪直</p></div>
+    <div class="src-item reveal d2"><span class="src-no">08</span><p><strong>其他相关章节</strong>——德川幕府倒台的外来冲击（11 · 破坏力与离心力）、明治维新饮食与重商主义（01 · 地缘 / 173 · 欧洲重商主义）、瓷器与浮世绘（133 · 技术与美 / 134 · 活字雕版之争 / 答读者问35）、澳门—长崎航线与白银（174 · 全球贸易）、福泽谕吉（终章）等</p></div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="f-kanji">日本</div>
+  <p>世界文明史中的日出之国 · 交互式历史时间线</p>
+  <p class="credit">内容梳理自《吴军来信 · 世界文明史》（吴军 著）｜浮世绘和风主题</p>
+</footer>
+
+<script>
+/* ============ 滚动进度条 ============ */
+const progress=document.getElementById('progress');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  progress.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+},{passive:true});
+
+/* ============ 滚动显现 ============ */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ============ 事件展开 ============ */
+document.querySelectorAll('.event').forEach(ev=>{
+  const head=ev.querySelector('.event-head');
+  const body=ev.querySelector('.event-body');
+  head.addEventListener('click',()=>{
+    const open=ev.classList.toggle('open');
+    body.style.maxHeight=open?body.scrollHeight+'px':'0';
+    if(open)setTimeout(()=>{body.style.maxHeight=body.scrollHeight+'px';},0);
+  });
+  if(ev.classList.contains('open')){
+    body.style.maxHeight=body.scrollHeight+'px';
+  }
+});
+window.addEventListener('resize',()=>{
+  document.querySelectorAll('.event.open').forEach(ev=>{
+    ev.querySelector('.event-body').style.maxHeight=ev.querySelector('.event-body').scrollHeight+'px';
+  });
+});
+
+/* ============ 人物筛选 ============ */
+const pfBtns=document.querySelectorAll('.pf-btn');
+pfBtns.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    pfBtns.forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const f=btn.dataset.f;
+    document.querySelectorAll('.person').forEach(p=>{
+      const show=f==='all'||p.dataset.era.includes(f);
+      p.style.display=show?'':'none';
+      if(show&&!p.classList.contains('in')){p.classList.add('in');}
+    });
+  });
+});
+
+/* ============ 导航高亮 ============ */
+const navLinks=[...document.querySelectorAll('.nav-link')];
+const sections=navLinks.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const navIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));
+    }
+  });
+},{rootMargin:'-40% 0px -55% 0px'});
+sections.forEach(s=>navIO.observe(s));
+
+/* ============ 樱花瓣飘落 ============ */
+const cv=document.getElementById('sakura');
+const ctx=cv.getContext('2d');
+let petals=[],W,H;
+function size(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+size();addEventListener('resize',size);
+const COLORS=['rgba(201,54,43,','rgba(201,162,39,','rgba(229,199,107,'];
+function Petal(){
+  this.reset(true);
+}
+Petal.prototype.reset=function(init){
+  this.x=Math.random()*W;
+  this.y=init?-Math.random()*H:H+20;
+  this.r=4+Math.random()*6;
+  this.s=.6+Math.random()*1.4;
+  this.w=Math.random()*Math.PI*2;
+  this.ws=(Math.random()-.5)*.04;
+  this.drift=(Math.random()-.5)*1.2;
+  this.c=COLORS[Math.floor(Math.random()*COLORS.length)]+(.25+Math.random()*.45).toFixed(2)+')';
+};
+for(let i=0;i<34;i++)petals.push(new Petal());
+let t=0;
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  t+=.016;
+  petals.forEach(p=>{
+    p.y+=p.s;
+    p.w+=p.ws;
+    p.x+=Math.sin(p.w)*1.2+p.drift;
+    if(p.y>H+20)p.reset(false);
+    ctx.save();
+    ctx.translate(p.x,p.y);
+    ctx.rotate(p.w);
+    ctx.fillStyle=p.c;
+    ctx.beginPath();
+    ctx.ellipse(0,0,p.r,p.r*.62,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  });
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+</body>
+</html>

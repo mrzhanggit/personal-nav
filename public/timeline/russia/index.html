@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄罗斯 · 千年之路 — 选择展示风格</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#f6f5f2;color:#1c1a17;font-family:-apple-system,"Inter","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.7;overflow-x:hidden}
+header{text-align:center;padding:96px 6vw 40px;position:relative}
+header .tag{display:inline-block;font-size:.72rem;letter-spacing:.34em;color:#7a1626;font-weight:700;margin-bottom:18px;border:1px solid rgba(122,22,38,.3);padding:6px 18px;border-radius:99px}
+header h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:800;letter-spacing:-.01em}
+header h1 span{color:#7a1626}
+header p{color:#6b675f;max-width:680px;margin:16px auto 0;font-size:.98rem}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 6vw 80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;align-items:stretch}
+.card{border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 8px 34px rgba(28,26,23,.08);transition:.45s;display:flex;flex-direction:column;border:1px solid #e8e5de}
+.card:hover{transform:translateY(-10px);box-shadow:0 26px 60px rgba(28,26,23,.16)}
+.preview{height:230px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* A 预览：帝国金黑 */
+.pv-a{background:radial-gradient(ellipse at 50% 30%,rgba(212,175,55,.22),transparent 60%),#0d0b16}
+.pv-a .dome{position:absolute;bottom:-70px;left:50%;transform:translateX(-50%);width:210px;height:150px;border-radius:50% 50% 0 0;border:1.5px solid rgba(212,175,55,.7);border-bottom:none}
+.pv-a .dome::before{content:"";position:absolute;top:-24px;left:50%;transform:translateX(-50%);width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(212,175,55,.8);background:radial-gradient(circle,rgba(212,175,55,.35),transparent 70%)}
+.pv-a .t{font-family:Georgia,"Songti SC",serif;color:#f3d27a;font-size:1.5rem;letter-spacing:.34em;text-shadow:0 0 30px rgba(212,175,55,.5);z-index:2}
+.pv-a .s{position:absolute;top:14px;right:18px;font-size:.6rem;letter-spacing:.3em;color:#a89f8a;border:1px solid rgba(212,175,55,.4);padding:3px 10px}
+.pv-a .dots{position:absolute;inset:0;background-image:radial-gradient(rgba(212,175,55,.4) 1px,transparent 1px);background-size:24px 24px;opacity:.35}
+/* B 预览：圣像金辉 */
+.pv-b{background:radial-gradient(circle at 50% 20%,rgba(214,170,60,.35),transparent 55%),radial-gradient(circle at 80% 90%,rgba(122,22,38,.18),transparent 60%),#f4e8cd}
+.pv-b .halo{position:absolute;top:34px;left:50%;transform:translateX(-50%);width:86px;height:86px;border-radius:50%;border:2px solid rgba(122,22,38,.55);background:radial-gradient(circle,rgba(214,170,60,.4),transparent 70%)}
+.pv-b .cross{position:absolute;top:78px;left:50%;transform:translateX(-50%);color:#7a1626;font-size:1.3rem}
+.pv-b .t{font-family:"Kaiti SC","STKaiti",KaiTi,serif;color:#3a2d1e;font-size:1.22rem;letter-spacing:.24em;position:absolute;bottom:48px}
+.pv-b .border{position:absolute;inset:12px;border:1px solid rgba(122,22,38,.5);pointer-events:none}
+.pv-b .border::after{content:"";position:absolute;inset:5px;border:1px solid rgba(122,22,38,.28)}
+.pv-b .seal{position:absolute;top:-22px;right:-14px;width:52px;height:52px;border-radius:50%;border:3px double #7a1626;display:flex;align-items:center;justify-content:center;color:#7a1626;font-size:.48rem;letter-spacing:.12em;line-height:1.5;text-align:center;background:#f2e0c0}
+/* C 预览：极简现代 */
+.pv-c{background:#fafafa;position:relative}
+.pv-c .t{font-weight:800;font-size:2rem;letter-spacing:-.02em;color:#1c1a17}
+.pv-c .t i{font-style:normal;color:#b3243a}
+.pv-c .yr{display:block;font-size:.62rem;font-weight:500;color:#9a958a;letter-spacing:.4em;margin-top:8px}
+.pv-c .bar{position:absolute;bottom:0;left:0;right:0;height:4px;display:flex}
+.pv-c .bar span{flex:1}
+.pv-c .bar .w{background:#f5f5f5}.pv-c .bar .b{background:#4a7fc1}.pv-c .bar .r{background:#b3243a}
+.pv-c::before{content:"";position:absolute;top:26px;left:26px;width:8px;height:8px;border-radius:50%;background:#b3243a}
+.pv-c::after{content:"";position:absolute;top:26px;left:42px;width:8px;height:8px;border-radius:50%;background:#4a7fc1}
+.card .body{padding:26px 26px 30px;display:flex;flex-direction:column;flex:1}
+.card .body h3{font-size:1.18rem;font-weight:800}
+.card .body .en{font-size:.72rem;color:#9a958a;letter-spacing:.2em;margin-top:4px;text-transform:uppercase}
+.card .body .desc{font-size:.88rem;color:#6b675f;margin-top:12px;flex:1}
+.card .body .feats{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.card .body .feats span{font-size:.66rem;color:#5c574e;background:#f1efe9;padding:3px 10px;border-radius:99px}
+.card .body a{margin-top:22px;display:inline-block;text-align:center;padding:12px 20px;border-radius:12px;text-decoration:none;font-size:.88rem;font-weight:700;transition:.3s}
+.card.a a{background:#0d0b16;color:#f3d27a}
+.card.a a:hover{background:#1c1830}
+.card.b a{background:#7a1626;color:#f2e0c0}
+.card.b a:hover{background:#5a0f1c}
+.card.c a{background:#1c1a17;color:#fff}
+.card.c a:hover{background:#3a362f}
+.note{max-width:780px;margin:56px auto 0;text-align:center;font-size:.82rem;color:#9a958a;line-height:2}
+footer{text-align:center;padding:0 6vw 60px;color:#9a958a;font-size:.76rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tag">吴军来信 · 世界文明史 专题整理</div>
+  <h1>俄罗斯 · <span>千年之路</span></h1>
+  <p>基于《吴军来信·世界文明史》第 145、149、178 讲及七年战争、拿破仑战争、文明冲突等十余篇相关信件的交叉梳理，从基辅罗斯的起源讲到蒙古金帐汗国的统治、莫斯科公国的崛起，直至近代沙皇俄国与当代北极航道。同一套内容，三种展示风格——请选择你最喜欢的一款。</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+    <div class="card a">
+      <div class="preview pv-a">
+        <div class="dots"></div>
+        <div class="dome"></div>
+        <span class="s">862 — 当代</span>
+        <div class="t">沙皇宫阙</div>
+      </div>
+      <div class="body">
+        <h3>风格 A · 沙皇宫阙</h3>
+        <div class="en">Imperial Noir — Dark Luxe</div>
+        <p class="desc">冬夜底色之上，金箔勾勒圣瓦西里洋葱顶意象。金色粒子如雪飘落、深色玻璃拟态卡片、菱形节点编年——庄严、凛冽、浓烈的帝国气质，致敬从基辅到莫斯科的权力之路。</p>
+        <div class="feats"><span>金色粒子动效</span><span>深色玻璃拟态</span><span>洋葱顶剪影</span><span>数字滚动</span></div>
+        <a href="style-a.html">进入风格 A →</a>
+      </div>
+    </div>
+
+    <div class="card b">
+      <div class="preview pv-b">
+        <div class="border"></div>
+        <div class="halo"></div>
+        <div class="cross">☦</div>
+        <div class="t">古罗斯编年</div>
+        <div class="seal">东正<br>之光</div>
+      </div>
+      <div class="body">
+        <h3>风格 B · 圣像金辉</h3>
+        <div class="en">Orthodox Chronicle — Icon</div>
+        <p class="desc">米金圣像底色与墨色楷体，圣像光环、双线花框与火漆印章，如展开一部古罗斯手抄本。展卷动效与楷体首字下沉，讲述 988 年罗斯受洗以来的信仰与文化血脉。</p>
+        <div class="feats"><span>圣像金辉</span><span>火漆印章</span><span>卷轴展阅动效</span><span>编年体例</span></div>
+        <a href="style-b.html">进入风格 B →</a>
+      </div>
+    </div>
+
+    <div class="card c">
+      <div class="preview pv-c">
+        <div class="t">俄罗斯<i>·</i>千年之路</div>
+        <div class="yr">FROM KIEVAN RUS TO THE ARCTIC ROUTE</div>
+        <div class="bar"><span class="w"></span><span class="b"></span><span class="r"></span></div>
+      </div>
+      <div class="body">
+        <h3>风格 C · 极简现代</h3>
+        <div class="en">Modern Minimal — Data Story</div>
+        <p class="desc">大量留白与三色旗点缀（白·蓝·红），数据图表与计数动画直给信息。清爽克制、信息密度高，以"东方还是西方"之问为线索，适合快速通读与展示汇报。</p>
+        <div class="feats"><span>留白美学</span><span>三色旗点缀</span><span>数据图表</span><span>轻量动效</span></div>
+        <a href="style-c.html">进入风格 C →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    三种风格内容完全一致，均含：千年时间线（20 个关键事件，逐条展开背景 / 原因 / 影响）· 14 位重要人物 · 文明起源 · 东方与西方之问 · 吴军的思考。<br>
+    建议使用 Chrome / Edge 浏览器打开以获得最佳动效体验。
+  </div>
+</div>
+
+<footer>俄罗斯 · 千年之路 — 基于《吴军来信·世界文明史》资料整理 · 内容据课程原文提炼</footer>
+
+<script>
+document.querySelectorAll('.card').forEach((c,i)=>{
+  c.style.opacity='0';c.style.transform='translateY(26px)';
+  c.style.transition='opacity .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, transform .8s cubic-bezier(.2,.7,.2,1) '+(i*.14)+'s, box-shadow .45s, border-color .45s';
+  requestAnimationFrame(()=>{c.style.opacity='1';c.style.transform='none';});
+});
+</script>
+</body>
+</html>

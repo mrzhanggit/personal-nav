@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文艺复兴 · 人性的觉醒 — 湿壁画金辉 · 暗夜穹顶</title>
+<style>
+:root{
+  --bg:#141019; --bg2:#1a1424; --bg3:#221a30;
+  --card:rgba(255,255,255,.04); --card2:rgba(255,255,255,.07);
+  --line:rgba(212,175,55,.35); --line2:rgba(212,175,55,.13);
+  --gold:#d4af37; --gold-l:#f0d27c; --gold-d:#8a6d1a;
+  --text:#efe9db; --muted:#b3a88e; --dim:#8a8070;
+  --lapis:#5b7fae; --terra:#c96f4a; --cypress:#7a9a5b; --rose:#c98a9a;
+  --serif:Georgia,"Cormorant Garamond","Songti SC","STSong",serif;
+  --sans:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;line-height:1.75}
+::selection{background:rgba(212,175,55,.35)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#141019}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8a6d1a,#d4af37);border-radius:5px}
+
+/* ── 装饰：希腊回纹 ── */
+.meander{height:14px;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'%3E%3Cpath d='M2 12h12v-8h-8v4h4' fill='none' stroke='%23d4af37' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:repeat-x}
+
+/* ── 进度条 ── */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#8a6d1a,#f0d27c);z-index:999;box-shadow:0 0 12px rgba(212,175,55,.8)}
+
+/* ── 导航 ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px 4vw;background:rgba(20,16,25,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line2);transition:.4s}
+nav .brand{font-family:var(--serif);font-size:1.15rem;letter-spacing:.28em;color:var(--gold-l)}
+nav .links{display:flex;gap:26px;font-size:.82rem;letter-spacing:.12em}
+nav .links a{color:var(--muted);text-decoration:none;transition:.3s}
+nav .links a:hover{color:var(--gold-l)}
+@media(max-width:820px){nav .links{display:none}}
+
+/* ── Hero ── */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6vw;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 50% at 50% 30%,rgba(212,175,55,.14),transparent 60%),
+  radial-gradient(ellipse 40% 40% at 82% 78%,rgba(201,111,74,.1),transparent 60%),
+  radial-gradient(ellipse 45% 45% at 14% 80%,rgba(91,127,174,.14),transparent 60%)}
+#particles{position:absolute;inset:0;z-index:1}
+.hero .arch{position:absolute;bottom:-120px;left:50%;transform:translateX(-50%);width:min(560px,80vw);height:300px;border:1.5px solid rgba(212,175,55,.35);border-bottom:none;border-radius:300px 300px 0 0;opacity:.5;z-index:1}
+.hero .arch::before{content:"";position:absolute;top:54px;left:50%;transform:translateX(-50%);width:min(300px,44vw);height:150px;border:1.5px solid rgba(212,175,55,.22);border-bottom:none;border-radius:150px 150px 0 0}
+.hero .content{position:relative;z-index:2}
+.hero .kicker{font-size:.8rem;letter-spacing:.5em;color:var(--gold);text-transform:uppercase;margin-bottom:26px;animation:fadeDown 1.2s .2s both}
+.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.6rem,7vw,5.2rem);letter-spacing:.14em;line-height:1.18;color:var(--gold-l);text-shadow:0 0 40px rgba(212,175,55,.35)}
+.hero h1 .en{display:block;font-size:.38em;letter-spacing:.5em;color:var(--muted);margin-top:18px;font-style:italic}
+.hero .sub{margin-top:28px;font-size:clamp(.95rem,1.6vw,1.15rem);color:var(--muted);max-width:680px;letter-spacing:.06em}
+.hero .cta{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.hero .cta a{padding:13px 34px;border:1px solid var(--line);color:var(--gold-l);text-decoration:none;letter-spacing:.2em;font-size:.82rem;transition:.4s;background:rgba(212,175,55,.06)}
+.hero .cta a:hover{background:rgba(212,175,55,.18);box-shadow:0 0 30px rgba(212,175,55,.25);transform:translateY(-2px)}
+.hero .scroll-hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:2;color:var(--dim);font-size:.72rem;letter-spacing:.4em;animation:bob 2.4s infinite}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,10px)}}
+
+/* ── 章节通用 ── */
+section{position:relative;padding:110px 6vw}
+.sec-head{text-align:center;margin-bottom:70px}
+.sec-head .meander{margin:0 auto 20px}
+.sec-head .no{font-family:var(--serif);font-size:1rem;color:var(--gold);letter-spacing:.4em;display:block;margin-bottom:10px}
+.sec-head h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,4vw,3rem);letter-spacing:.16em;color:var(--text)}
+.sec-head p{color:var(--muted);max-width:640px;margin:16px auto 0;font-size:.95rem}
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ── 数据统计 ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:18px;max-width:1100px;margin:0 auto}
+.stat{border:1px solid var(--line2);background:var(--card);padding:30px 18px;text-align:center;position:relative;transition:.4s;overflow:hidden}
+.stat::after{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:.4s}
+.stat:hover{transform:translateY(-6px);border-color:var(--line);background:var(--card2)}
+.stat:hover::after{opacity:1}
+.stat .num{font-family:var(--serif);font-size:2.5rem;color:var(--gold-l);line-height:1.1}
+.stat .lbl{margin-top:8px;font-size:.82rem;letter-spacing:.16em;color:var(--muted)}
+.stat .note{font-size:.7rem;color:var(--dim);margin-top:4px}
+
+/* ── 背景叙事 ── */
+.origin{max-width:880px;margin:0 auto;font-size:1.02rem;color:#d9d2c2}
+.origin p{margin-bottom:22px;text-indent:2em}
+.origin p:first-of-type::first-letter{font-family:var(--serif);font-size:3.2em;float:left;line-height:.85;padding:6px 12px 0 0;color:var(--gold)}
+.origin .hl{color:var(--gold-l);font-weight:600}
+.origin .reasons{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:26px 0}
+.origin .reason{border-left:2px solid var(--gold);background:var(--card);padding:20px 22px}
+.origin .reason b{color:var(--gold-l);font-weight:600;display:block;margin-bottom:8px;letter-spacing:.08em}
+.origin .reason p{font-size:.9rem;color:var(--muted);text-indent:0;margin:0}
+
+/* ── 时间线 ── */
+#timeline{background:linear-gradient(180deg,var(--bg),var(--bg2))}
+.filters{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.filters button{padding:8px 22px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-size:.78rem;letter-spacing:.12em;cursor:pointer;transition:.35s;font-family:var(--sans)}
+.filters button:hover,.filters button.active{color:var(--gold-l);border-color:var(--gold);background:rgba(212,175,55,.1)}
+.tl{position:relative;max-width:1020px;margin:0 auto;padding:10px 0}
+.tl::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,transparent,var(--gold),var(--gold),transparent);opacity:.6}
+.tl-item{position:relative;width:50%;padding:0 46px 46px 0;cursor:pointer}
+.tl-item:nth-child(even){left:50%;padding:0 0 46px 46px}
+.tl-node{position:absolute;top:6px;right:-9px;width:18px;height:18px;transform:rotate(45deg);border:2px solid var(--gold);background:var(--bg);z-index:2;transition:.4s;box-shadow:0 0 0 0 rgba(212,175,55,.35)}
+.tl-item:nth-child(even) .tl-node{right:auto;left:-9px}
+.tl-item:hover .tl-node{background:var(--gold);box-shadow:0 0 0 8px rgba(212,175,55,.15)}
+.tl-card{border:1px solid var(--line2);background:var(--card);padding:26px 28px;transition:.4s;position:relative}
+.tl-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:var(--ec,var(--gold))}
+.tl-item:hover .tl-card{transform:translateY(-4px);border-color:var(--line);background:var(--card2);box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.tl-year{font-family:var(--serif);font-size:1.5rem;color:var(--gold-l);letter-spacing:.06em}
+.tl-tag{display:inline-block;margin-left:10px;font-size:.66rem;letter-spacing:.18em;color:var(--ec,var(--gold));border:1px solid var(--ec,var(--gold));padding:2px 10px;vertical-align:middle;opacity:.85}
+.tl-title{margin:10px 0 6px;font-size:1.12rem;color:var(--text);font-weight:600;letter-spacing:.04em}
+.tl-fig{font-size:.78rem;color:var(--dim);letter-spacing:.08em;margin-bottom:10px}
+.tl-fig b{color:var(--muted);font-weight:600}
+.tl-sum{font-size:.9rem;color:var(--muted)}
+.tl-detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.7,.2,1)}
+.tl-detail.open{grid-template-rows:1fr}
+.tl-detail>div{overflow:hidden}
+.tl-dbox{margin-top:16px;border-top:1px dashed var(--line2);padding-top:16px;display:grid;gap:14px}
+.tl-dbox .blk{padding:14px 16px;border-left:2px solid var(--gold);background:rgba(212,175,55,.05)}
+.tl-dbox .blk.bg{border-color:var(--lapis);background:rgba(91,127,174,.06)}
+.tl-dbox .blk.ct{border-color:var(--terra);background:rgba(201,111,74,.06)}
+.tl-dbox .blk.im{border-color:var(--rose);background:rgba(201,138,154,.06)}
+.tl-dbox .blk h4{font-size:.78rem;letter-spacing:.22em;color:var(--gold-l);margin-bottom:6px}
+.tl-dbox .blk.bg h4{color:var(--lapis)}
+.tl-dbox .blk.ct h4{color:var(--terra)}
+.tl-dbox .blk.im h4{color:var(--rose)}
+.tl-dbox .blk p{font-size:.86rem;color:var(--muted);margin:0;text-indent:0;line-height:1.8}
+.hint{text-align:center;color:var(--dim);font-size:.78rem;letter-spacing:.2em;margin-bottom:26px}
+
+/* ── 人物 ── */
+#figures{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;max-width:1180px;margin:0 auto}
+.fig{border:1px solid var(--line2);background:var(--card);padding:28px 24px;transition:.4s;position:relative;overflow:hidden}
+.fig::before{content:"";position:absolute;left:-30px;top:-30px;width:110px;height:110px;border-radius:50%;border:1px solid rgba(212,175,55,.18);transition:.5s}
+.fig:hover{transform:translateY(-6px);border-color:var(--line);background:var(--card2)}
+.fig:hover::before{transform:scale(1.35);border-color:rgba(212,175,55,.4)}
+.fig .role{font-size:.66rem;letter-spacing:.24em;color:var(--gold);text-transform:uppercase}
+.fig h3{font-family:var(--serif);font-size:1.5rem;font-weight:500;color:var(--gold-l);margin:10px 0 2px;letter-spacing:.08em}
+.fig .years{font-size:.76rem;color:var(--dim);letter-spacing:.1em}
+.fig .deed{margin-top:12px;font-size:.85rem;color:var(--muted);line-height:1.8}
+.fig .deed b{color:var(--text);font-weight:600}
+
+/* ── 艺术四重境 ── */
+.stages{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;max-width:1120px;margin:0 auto}
+.stage{border:1px solid var(--line2);background:var(--card);padding:30px 26px;position:relative;transition:.45s;overflow:hidden}
+.stage:hover{transform:translateY(-8px);border-color:var(--line);box-shadow:0 18px 44px rgba(0,0,0,.5)}
+.stage .idx{font-family:var(--serif);font-size:3.4rem;color:transparent;-webkit-text-stroke:1px rgba(212,175,55,.5);position:absolute;top:14px;right:18px;line-height:1}
+.stage h3{font-size:1.28rem;color:var(--gold-l);font-weight:600;letter-spacing:.1em;margin-bottom:10px}
+.stage .en{font-size:.66rem;letter-spacing:.26em;color:var(--dim);text-transform:uppercase;margin-bottom:14px}
+.stage p{font-size:.88rem;color:var(--muted);line-height:1.85}
+.stage .ex{margin-top:14px;padding:12px 14px;background:rgba(212,175,55,.05);border-left:2px solid var(--gold);font-size:.82rem;color:#d9d2c2;font-style:italic}
+
+/* ── 影响 ── */
+.impact{max-width:880px;margin:0 auto;font-size:1rem;color:#d9d2c2}
+.impact p{margin-bottom:20px;text-indent:2em}
+.impact .quote{margin:34px 0;padding:28px 34px;border:1px solid var(--line2);border-left:3px solid var(--gold);background:var(--card);text-indent:0;font-family:var(--serif);font-size:1.12rem;color:var(--gold-l);letter-spacing:.06em}
+.impact .quote small{display:block;margin-top:12px;font-family:var(--sans);font-size:.78rem;color:var(--dim);letter-spacing:.14em}
+.impact .hl{color:var(--gold-l);font-weight:600}
+
+/* ── 页脚 ── */
+footer{text-align:center;padding:70px 6vw 80px;border-top:1px solid var(--line2);color:var(--dim);font-size:.78rem;letter-spacing:.1em}
+footer a{color:var(--gold);text-decoration:none;margin:0 12px}
+footer a:hover{color:var(--gold-l)}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<nav>
+  <div class="brand">RINASCIMENTO · 文艺复兴</div>
+  <div class="links">
+    <a href="#prelude">爆发前夜</a>
+    <a href="#timeline">三百年时间线</a>
+    <a href="#figures">重要人物</a>
+    <a href="#art">艺术四重境</a>
+    <a href="#impact">影响与回响</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <canvas id="particles"></canvas>
+  <div class="arch"></div>
+  <div class="content">
+    <div class="kicker">The Renaissance · 1300s — 1600s</div>
+    <h1>文艺复兴<span class="en">HUMANITY AWAKENS</span></h1>
+    <p class="sub">从黑死病的废墟与教会的黄昏中，欧洲人重新发现了"人"的尊严。三百年间，文学、艺术、科学与信仰被逐层重铸——这是世界文明史上，人性第一次以如此宏大的规模觉醒。</p>
+    <div class="cta">
+      <a href="#timeline">展开三百年时间线 ↓</a>
+      <a href="00-风格选择.html">返回风格选择</a>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL · 卷动</div>
+</header>
+
+<!-- 数据统计 -->
+<section style="padding-top:80px">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">PROLOGUE · 序</span>
+    <h2>三个世纪的文明转身</h2>
+    <p>一组数字，先看清文艺复兴的体量。</p>
+  </div>
+  <div class="stats">
+    <div class="stat reveal"><div class="num" data-count="300" data-suffix="年">0</div><div class="lbl">时间跨度</div><div class="note">14–16 世纪</div></div>
+    <div class="stat reveal"><div class="num" data-count="19" data-suffix="">0</div><div class="lbl">关键节点</div><div class="note">本页时间线</div></div>
+    <div class="stat reveal"><div class="num" data-count="16" data-suffix="位">0</div><div class="lbl">重要人物</div><div class="note">从但丁到伽利略</div></div>
+    <div class="stat reveal"><div class="num" data-count="30" data-suffix="%">0</div><div class="lbl">黑死病死亡人口</div><div class="note">欧洲人口锐减的起点</div></div>
+    <div class="stat reveal"><div class="num" data-count="140" data-suffix="年">0</div><div class="lbl">圣母百花大教堂</div><div class="note">1296 → 1436</div></div>
+    <div class="stat reveal"><div class="num" data-count="2" data-suffix="亿册">0</div><div class="lbl">16 世纪图书</div><div class="note">印刷术引爆知识</div></div>
+  </div>
+</section>
+
+<!-- 爆发前夜 -->
+<section id="prelude">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">I · THE EVE</span>
+    <h2>爆发前的欧洲：危机如何分娩黎明</h2>
+    <p>文艺复兴并非凭空降临。14 世纪的一连串危机，先瓦解了旧世界，才为新文明腾出了空间。</p>
+  </div>
+  <div class="origin reveal">
+    <p>13 世纪的西欧，政治上已经稳定，经济得到恢复，人口增加、城市繁荣。然而进入 14 世纪后，<span class="hl">大饥荒、黑死病、百年战争、教会分裂</span>在同一时间重叠爆发，相互纠缠，冲击了从经济、政治到人口的所有领域。</p>
+    <p><span class="hl">1315–1317 年的大饥荒</span>，源于降雨剧增、冬季严寒，当时欧洲人口比两百年前翻了一番，耕地已难养活那么多人，至少十分之一的人因此丧生。<span class="hl">14 世纪中叶的黑死病</span>更为致命，夺去欧洲三分之一甚至过半的人口，也让丝绸之路的贸易锐减。与此同时，东方有奥斯曼帝国崛起，西方有英法百年战争（1337–1453），战火烧焦了法兰西的农田；法国国王腓力四世与教宗对抗，制造了"阿维尼翁之囚"与教会大分裂，教权的威信一落千丈。</p>
+    <p>危机加速了旧秩序的瓦解：农民逃亡城市，领主被迫接受更灵活的地租制；劳动力短缺使雇工工资上涨，一个相对富裕的<span class="hl">市民阶层（中产阶级）</span>浮出水面；行会开始瓦解，自由雇工形成。城市重新成为社会中心，城市商人——后来的资产阶级——成了国王和贵族的债主，开始要求政治权力。正是在这样的土壤上，一场被称为文艺复兴的深刻变革，开始了。</p>
+    <div class="reasons">
+      <div class="reason"><b>旧秩序瓦解</b><p>大饥荒、黑死病、战争、教会分裂四重危机，让僵化的封建制度与神权体系同时松动。</p></div>
+      <div class="reason"><b>人性复苏</b><p>面对生命的脆弱与明天的不确定，人们从"禁欲苦行"转向"活在当下"，追求现世幸福。</p></div>
+      <div class="reason"><b>资产阶级登场</b><p>城市商人积累财富、控制贸易与金融，成为新的政治与经济力量，也成了艺术的赞助者。</p></div>
+      <div class="reason"><b>古典的火种</b><p>中世纪后期，但丁已写下《神曲》，阿奎那重拾亚里士多德——古希腊罗马的智慧从未真正熄灭。</p></div>
+    </div>
+    <p style="text-align:right;color:var(--dim);font-size:.9rem">—— 据 154 讲《文艺复兴：爆发前的欧洲社会什么样？》</p>
+  </div>
+</section>
+
+<!-- 时间线 -->
+<section id="timeline">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">II · CHRONICLE</span>
+    <h2>三百年时间线</h2>
+    <p>19 个关键节点，串联从危机到启蒙的完整弧线。点击任一事件，展开其背景、原因与影响。</p>
+  </div>
+  <div class="hint reveal">▼ 点击事件卡片展开详情 ▼</div>
+  <div class="filters reveal" id="filters">
+    <button data-f="all" class="active">全部</button>
+    <button data-f="crisis">危机</button>
+    <button data-f="lit">文学</button>
+    <button data-f="art">艺术·建筑</button>
+    <button data-f="power">政治·宗教</button>
+    <button data-f="tech">技术</button>
+    <button data-f="sci">科学</button>
+  </div>
+
+  <div class="tl" id="tl">
+    <div class="tl-item reveal" data-c="crisis">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c96f4a">
+        <div class="tl-year">1315 – 1317<span class="tl-tag">危机</span></div>
+        <div class="tl-title">欧洲大饥荒</div>
+        <div class="tl-fig">关键词：<b>气候异常 · 人口压力 · 旧秩序松动</b></div>
+        <p class="tl-sum">降雨剧增、冬季严寒，农作物减产、牲畜冻毙；饥荒自东欧蔓延至英国，至少十分之一欧洲人死亡。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>13 世纪欧洲人口比两百年前翻番，耕地承载力已达极限；小冰期气候波动初现端倪。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>1314 年秋起连续多雨寒潮，粮食连续歉收，中世纪农业技术无力应对。</p></div>
+          <div class="blk im"><h4>影响</h4><p>人口锐减、国库空虚，领主将负担转嫁农民，催生逃亡潮与地租制变革——封建制解体的第一道裂缝。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="lit">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#f0d27c">
+        <div class="tl-year">1307 – 1321<span class="tl-tag">文学</span></div>
+        <div class="tl-title">但丁创作《神曲》</div>
+        <div class="tl-fig">人物：<b>但丁（1265–1321）</b></div>
+        <p class="tl-sum">流亡中的但丁以游历地狱、炼狱、天堂的宏大长诗，评判历史人物、阐述"以人为本"的价值观——人文主义的开篇号角。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>佛罗伦萨政坛分裂（教皇派 vs 皇帝派），但丁被流放，终身未能返乡；中世纪后期思想已开始松动。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>但丁借《神曲》站在历史高度评判人物：能否进天堂看其对人类文明的贡献，而非教会地位；贪婪的教宗被他写进地狱。</p></div>
+          <div class="blk im"><h4>影响</h4><p>被誉为"意大利人的史诗"，恩格斯称但丁是"旧世纪的最后一位诗人、新世纪的第一位诗人"；开启人文主义时代。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="lit">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#f0d27c">
+        <div class="tl-year">1341 / 1348<span class="tl-tag">文学</span></div>
+        <div class="tl-title">彼特拉克加冕桂冠诗人 · 薄伽丘写《十日谈》</div>
+        <div class="tl-fig">人物：<b>彼特拉克（1304–1374）· 薄伽丘（1313–1375）</b></div>
+        <p class="tl-sum">彼特拉克以十四行诗吟咏人最自然的情感；薄伽丘以一百个故事赞美人间、讽刺教会——文坛三杰齐聚佛罗伦萨。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>佛罗伦萨地处交通要道、金融中心，纺织业与丝绸业带来财富；黑死病后人们开始追求世俗幸福。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>彼特拉克遍寻古希腊罗马典籍，以诗歌表达对劳拉的爱恋；薄伽丘虚构十位青年躲避瘟疫讲故事，讽刺教会的虚伪。</p></div>
+          <div class="blk im"><h4>影响</h4><p>文坛三杰用笔瓦解神权、倡导人文主义，为后世留下 14 世纪社会最生动的写照。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="crisis">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c96f4a">
+        <div class="tl-year">1347 – 1351<span class="tl-tag">危机</span></div>
+        <div class="tl-title">黑死病席卷欧洲</div>
+        <div class="tl-fig">数据：<b>约 7500 万 – 2 亿人死亡，占欧洲人口 30–60%</b></div>
+        <p class="tl-sum">人类史上最严重的瘟疫。当主教与修士同样成批倒下，教会的绝对权威第一次遭到根本动摇。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>14 世纪中叶，欧亚商路与战争将鼠疫从东方传入欧洲；当时最有效的"防范"只有逃离，而逃离又加速传播。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>教会对瘟疫无能为力，"离上帝更近的人"也大量死亡，信仰的根基出现裂缝。</p></div>
+          <div class="blk im"><h4>影响</h4><p>人性复苏、"活在当下"成为普遍心态；劳动力短缺推高工资，中产阶级兴起；薄伽丘《十日谈》正是黑死病的产物。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="power">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#5b7fae">
+        <div class="tl-year">1305 – 1417<span class="tl-tag">政治·宗教</span></div>
+        <div class="tl-title">阿维尼翁之囚与教会大分裂</div>
+        <div class="tl-fig">关键词：<b>王权 vs 教权 · 教廷威信扫地</b></div>
+        <p class="tl-sum">法王腓力四世逼迫教宗迁往阿维尼翁，教宗沦为傀儡七十年；罗马又另立教宗，基督教世界陷入分裂。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>中世纪最强组织教会长期干涉世俗事务；随着王权强化，法国国王开始挑战教权。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>腓力四世削减教会收入，教廷发布通谕强调教权至上，国王随即逮捕教宗——权力斗争白热化。</p></div>
+          <div class="blk im"><h4>影响</h4><p>教廷威信大不如前，宗教权威的裂痕为日后宗教改革埋下伏笔；也让世俗力量获得更大空间。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="power">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#5b7fae">
+        <div class="tl-year">1337 – 1453<span class="tl-tag">政治</span></div>
+        <div class="tl-title">英法百年战争</div>
+        <div class="tl-fig">关键词：<b>法国统一 · 英国转向海洋</b></div>
+        <p class="tl-sum">一个多世纪的战争让法国许多农庄化为焦土，却也让法国借此实现统一；英国退出欧洲大陆，走向海洋。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>英法王室的领土与王位争端，加上王权扩张的野心。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>大量贵族骑士死于战争，地方诸侯再也无力与主权抗衡；战争也强化了君主集权。</p></div>
+          <div class="blk im"><h4>影响</h4><p>法国统一、议会体系演变（下议院权力上升）；英国退回不列颠岛，逐步成为海洋大国——为日后大航海蓄力。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="art">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c98a9a">
+        <div class="tl-year">1296 – 1436<span class="tl-tag">艺术·建筑</span></div>
+        <div class="tl-title">圣母百花大教堂圆顶落成</div>
+        <div class="tl-fig">人物：<b>布鲁内莱斯基（1377–1446）· 科西莫·美第奇</b></div>
+        <p class="tl-sum">历经 140 年、以 400 多万块红砖砌成世界上最大的砖结构拱顶——被认为是文艺复兴开始的标志。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>佛罗伦萨人为上帝建一座空前雄伟的教堂，建好四围墙壁后却无人敢造那么大的屋顶。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>科西莫·美第奇出资支持布鲁内莱斯基：两人考察罗马万神殿，发明内外双层拱顶结构，用小砖替代巨石。</p></div>
+          <div class="blk im"><h4>影响</h4><p>科西莫以"复兴"一词描述落成典礼；大教堂成为文艺复兴第一座标志性建筑，透视画法也随之诞生。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="power">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#5b7fae">
+        <div class="tl-year">1434 – 1464<span class="tl-tag">政治·赞助</span></div>
+        <div class="tl-title">科西莫·美第奇执掌佛罗伦萨</div>
+        <div class="tl-fig">人物：<b>科西莫·美第奇（1389–1464）</b></div>
+        <p class="tl-sum">"骑在驴子上的人最安全。"科西莫以金融帝国为后盾低调掌权，将财富投向古典学问与艺术。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>美第奇家族几代经营银行业，连教宗的财产都交由他们管理；祖上出过"江湖郎中"，行事低调。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>科西莫痴迷古希腊罗马科学艺术，四处收集手稿，出资供养学者、建筑师和艺术家——资助额相当于佛罗伦萨税收的六倍。</p></div>
+          <div class="blk im"><h4>影响</h4><p>他支持的艺术家包括布鲁内莱斯基、多纳泰罗等；1464 年去世时被尊为"祖国之父"。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="power">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#5b7fae">
+        <div class="tl-year">1453<span class="tl-tag">历史节点</span></div>
+        <div class="tl-title">拜占庭陷落 · 中世纪结束</div>
+        <div class="tl-fig">关键词：<b>君士坦丁堡陷落 · 古典文献西流</b></div>
+        <p class="tl-sum">奥斯曼帝国攻陷君士坦丁堡，千年拜占庭覆灭。人们通常以此作为中世纪正式结束的时间点。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>拜占庭帝国存在近千年，文明发展动力已衰退；奥斯曼帝国在整个 14 世纪不断蚕食其领土。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>帝国长期停滞、军事上节节败退，最终被新兴的奥斯曼力量终结。</p></div>
+          <div class="blk im"><h4>影响</h4><p>大量希腊学者携带古典手稿西迁意大利，为文艺复兴注入古希腊罗马的直接养分。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="tech">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#7a9a5b">
+        <div class="tl-year">约 1455<span class="tl-tag">技术</span></div>
+        <div class="tl-title">古腾堡印出四十二行《圣经》</div>
+        <div class="tl-fig">人物：<b>古腾堡（约 1398–1468）</b></div>
+        <p class="tl-sum">铅活字 + 手摇印刷机 + 流水线工序，世界第一套印刷《圣经》问世——知识的复制从此不再靠手抄。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>欧洲图书全靠手抄，一部《圣经》要抄写一两年；古腾堡早年制作金银器、摆弄过压印工艺。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>古腾堡发明字母库（模具浇铸铅字）、手摇印刷机，并把工序分工为流水线，大幅提升效率、降低成本。</p></div>
+          <div class="blk im"><h4>影响</h4><p>欧洲图书从 15 世纪千万册增至 16 世纪两亿册；人文主义与科学成果借印刷术传遍全欧，也助推了宗教改革。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="art">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c98a9a">
+        <div class="tl-year">1469 – 1492<span class="tl-tag">艺术</span></div>
+        <div class="tl-title">"豪华者"洛伦佐时代</div>
+        <div class="tl-fig">人物：<b>洛伦佐·美第奇（1449–1492）</b></div>
+        <p class="tl-sum">洛伦佐以高明手腕经营家族与城邦，更以非凡眼光"培养"而非"收藏"艺术——文艺复兴进入黄金时代。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>科西莫打下基础，但家族一度遭流放；洛伦佐吸取教训，将家族成员安插到政治要害位置。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>与一般君主"收购古董装点宫殿"不同，洛伦佐要用艺术品培养出更好的艺术家，再创造更辉煌的作品。</p></div>
+          <div class="blk im"><h4>影响</h4><p>培养出波提切利、达·芬奇、米开朗基罗；米开朗基罗十几岁即住进美第奇家。佛罗伦萨成为西方文明的象征。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="art">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c98a9a">
+        <div class="tl-year">1506 – 1626<span class="tl-tag">艺术·建筑</span></div>
+        <div class="tl-title">圣彼得大教堂：罗马复兴</div>
+        <div class="tl-fig">人物：<b>尤里乌斯二世 · 米开朗基罗 · 拉斐尔</b></div>
+        <p class="tl-sum">继佛罗伦萨之后，罗马在两位人文主义教宗治下成为文艺复兴的新中心，历时 120 年建成世界最大教堂。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>洛伦佐去世后佛罗伦萨动荡，艺术家纷纷出走；此时罗马正由尤里乌斯二世治理、走向复苏。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>尤里乌斯二世为圣彼得修建空前大教堂，请来米开朗基罗与拉斐尔设计、绘制；利奥十世（美第奇家族）延续赞助。</p></div>
+          <div class="blk im"><h4>影响</h4><p>圣彼得大教堂至今保持"世界最大教堂"纪录；罗马接棒佛罗伦萨成为文艺复兴中心。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="art">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#c98a9a">
+        <div class="tl-year">1508 – 1512<span class="tl-tag">艺术</span></div>
+        <div class="tl-title">米开朗基罗绘制西斯廷天顶画《创世纪》</div>
+        <div class="tl-fig">人物：<b>米开朗基罗（1475–1564）</b></div>
+        <p class="tl-sum">神的形象凡人化：中世纪头顶的圣光消失，耶稣是人间"大胖小子"，圣母是慈母——"天上人间"的艺术高峰。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>文艺复兴初期的绘画仍带忧郁（如波提切利《维纳斯的诞生》）；随着经济复苏，艺术家开始表现"人的地位"。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>米开朗基罗借用《圣经》人物表现人间生活，神像凡人化——这是人文主义对美术的直接影响。</p></div>
+          <div class="blk im"><h4>影响</h4><p>与《大卫》《摩西》共同奠定米开朗基罗的不朽地位；艺术从"天上"正式走入"天上人间"。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="power">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#5b7fae">
+        <div class="tl-year">1517 – 1555<span class="tl-tag">宗教</span></div>
+        <div class="tl-title">马丁·路德与宗教改革</div>
+        <div class="tl-fig">人物：<b>马丁·路德（1483–1546）</b></div>
+        <p class="tl-sum">《九十五条论纲》贴上维滕贝格教堂大门，"因信称义"撕开千年教廷的精神垄断；印刷术让这场改革席卷全欧。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>文艺复兴高潮期，罗马教宗们是享乐主义者；利奥十世为建圣彼得大教堂敛财，恢复出售"赎罪券"。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>路德研读《圣经》发现教会言行与经义不符，主张信徒凭信仰直接与上帝对话；论纲被译成德文、借印刷术传遍欧洲。</p></div>
+          <div class="blk im"><h4>影响</h4><p>1555 年《奥格斯堡和约》承认新教与天主教并存，基督教在西欧一分为二；"上帝还在，罗马教廷威信扫地"。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="sci">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#7a9a5b">
+        <div class="tl-year">1543<span class="tl-tag">科学</span></div>
+        <div class="tl-title">哥白尼出版《天体运行论》</div>
+        <div class="tl-fig">人物：<b>哥白尼（1473–1543）</b></div>
+        <p class="tl-sum">把宇宙的原点从地球移到太阳——日心说诞生。一位"业余"天文学家，掀开了近代科学的序幕。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>托勒密地心说累积误差已相当大，模型复杂到无法改进；哥白尼本职是教士，天文学只是副业。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>长期推算后他发现：把坐标原点移到太阳，问题更简单也更符合观测——直到临终前才敢出版。</p></div>
+          <div class="blk im"><h4>影响</h4><p>问世之初反响平平，但为伽利略等科学家提供了革命性框架；日心说最终彻底颠覆基督教化的宇宙观。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="sci">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#7a9a5b">
+        <div class="tl-year">1609 – 1633<span class="tl-tag">科学</span></div>
+        <div class="tl-title">伽利略：逻辑与实验</div>
+        <div class="tl-fig">人物：<b>伽利略（1564–1642）</b></div>
+        <p class="tl-sum">望远镜看见木星卫星与金星盈亏，为日心说找到铁证；他确立的"逻辑+实验"方法，是现代科学的基石。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>伽利略出生医学世家却转攻数学与自然哲学；美第奇家族科西莫二世请他为子侄授课，全力庇护。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>他发明天文望远镜与空气温度计，观测到木星卫星（以美第奇命名）与金星盈亏——地心说无法解释，日心说迎刃而解。</p></div>
+          <div class="blk im"><h4>影响</h4><p>1633 年《对话》触怒教廷，伽利略被终身软禁；霍金评价：近代自然科学诞生归功于他确立的方法——逻辑和实验。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="sci">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#7a9a5b">
+        <div class="tl-year">1642 →<span class="tl-tag">科学</span></div>
+        <div class="tl-title">伽利略逝世 · 牛顿诞生</div>
+        <div class="tl-fig">关键词：<b>科学时代的交接</b></div>
+        <p class="tl-sum">伽利略在佛罗伦萨家中去世，一年后牛顿在英国出生——近代科学革命的火炬，完成了第一次交接。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>伽利略被软禁期间仍继续研究；文艺复兴确立的"逻辑与实验"方法已深入人心。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>科学方法从意大利传到英国，牛顿将总结出惯性定律（即牛顿第一定律），完成伽利略未竟的工作。</p></div>
+          <div class="blk im"><h4>影响</h4><p>文艺复兴的科学种子在牛顿手中长成参天大树——近代科学与启蒙运动由此展开。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="tech">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#7a9a5b">
+        <div class="tl-year">15–16 世纪<span class="tl-tag">技术·传播</span></div>
+        <div class="tl-title">印刷术引爆知识革命</div>
+        <div class="tl-fig">数据：<b>图书量 千万册 → 两亿册</b></div>
+        <p class="tl-sum">印刷术传到意大利（1463 年）、威尼斯的 150 家印刷厂星罗棋布；古腾堡的徒弟们把技术带向全欧洲。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>古腾堡晚年因官司失去专利；他的徒弟纽梅斯特等人印出《神曲》，让人文主义思想迅速传播。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>印刷术与意大利文艺复兴的科学艺术碰撞：古代贤哲著作重见天日，成果得以高效发表与传播。</p></div>
+          <div class="blk im"><h4>影响</h4><p>彻底改变人们对书籍的观念，欧洲走出中世纪停滞；知识的大规模复制，是近代文明的基础设施。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <div class="tl-item reveal" data-c="lit">
+      <div class="tl-node"></div>
+      <div class="tl-card" style="--ec:#f0d27c">
+        <div class="tl-year">16 世纪<span class="tl-tag">文学·艺术</span></div>
+        <div class="tl-title">北方文艺复兴：市场催生的艺术</div>
+        <div class="tl-fig">人物：<b>凡·艾克 · 提香 · 丢勒 · 鲁本斯</b></div>
+        <p class="tl-sum">威尼斯画派大胆用色；尼德兰的凡·艾克被誉为"油画之父"。南方的艺术靠贵族赞助，北方则靠市场机制催生。</p>
+        <div class="tl-detail"><div><div class="tl-dbox">
+          <div class="blk bg"><h4>背景</h4><p>15 世纪中期威尼斯成为另一中心；尼德兰商业繁荣、市民富裕，富商愿出钱购画与工艺品。</p></div>
+          <div class="blk ct"><h4>原因</h4><p>佛罗伦萨罗马的艺术家为教会与宫廷作宏大题材；尼德兰艺术家为市场作画，催生肖像画与市民生活题材。</p></div>
+          <div class="blk im"><h4>影响</h4><p>"地理环境与经济特点决定文化特色"；北方文艺复兴孕育了 17 世纪荷兰黄金时代（伦勃朗、维米尔）。</p></div>
+        </div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 重要人物 -->
+<section id="figures">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">III · MASTERS</span>
+    <h2>重要人物</h2>
+    <p>十六位塑造文艺复兴的灵魂——诗人、艺术家、赞助人与科学家。</p>
+  </div>
+  <div class="fig-grid">
+    <div class="fig reveal"><div class="role">文学 · 先驱</div><h3>但丁</h3><div class="years">1265 – 1321</div><p class="deed"><b>《神曲》</b>的作者，站在历史高度评判人物与政治；恩格斯称他为"旧世纪最后一位、新世纪第一位诗人"。</p></div>
+    <div class="fig reveal"><div class="role">文学 · 桂冠诗人</div><h3>彼特拉克</h3><div class="years">1304 – 1374</div><p class="deed">以<b>十四行诗</b>吟咏人最自然的情感，遍寻古希腊罗马典籍，推动古典学复兴。</p></div>
+    <div class="fig reveal"><div class="role">文学 · 故事家</div><h3>薄伽丘</h3><div class="years">1313 – 1375</div><p class="deed"><b>《十日谈》</b>以一百个故事赞美人间、讽刺教会，是黑死病时代人性复苏的写照。</p></div>
+    <div class="fig reveal"><div class="role">赞助人 · 祖国之父</div><h3>科西莫·美第奇</h3><div class="years">1389 – 1464</div><p class="deed">资助布鲁内莱斯基完成<b>圣母百花大教堂圆顶</b>，出巨资供养学者与艺术家，被誉为"祖国之父"。</p></div>
+    <div class="fig reveal"><div class="role">赞助人 · 豪华者</div><h3>洛伦佐·美第奇</h3><div class="years">1449 – 1492</div><p class="deed">文艺复兴的<b>"教父"</b>：用艺术培养更好的艺术家，发掘波提切利、达·芬奇与米开朗基罗。</p></div>
+    <div class="fig reveal"><div class="role">建筑 · 透视法之父</div><h3>布鲁内莱斯基</h3><div class="years">1377 – 1446</div><p class="deed">以<b>双层拱顶</b>解决大教堂难题，发明透视画法——西方近代建筑学鼻祖。</p></div>
+    <div class="fig reveal"><div class="role">艺术 · 画师</div><h3>波提切利</h3><div class="years">1445 – 1510</div><p class="deed"><b>《维纳斯的诞生》</b>取材希腊神话，人体之美与一丝忧郁并存，是早期文艺复兴的代表。</p></div>
+    <div class="fig reveal"><div class="role">艺术 · 全才</div><h3>达·芬奇</h3><div class="years">1452 – 1519</div><p class="deed"><b>《蒙娜丽莎》</b>与《最后的晚餐》；画家、工程师、解剖学家，文艺复兴"全才"的化身。</p></div>
+    <div class="fig reveal"><div class="role">艺术 · 巨人</div><h3>米开朗基罗</h3><div class="years">1475 – 1564</div><p class="deed"><b>《大卫》</b>与西斯廷天顶画《创世纪》，将神凡人化，是人文主义美术的巅峰。</p></div>
+    <div class="fig reveal"><div class="role">艺术 · 和谐者</div><h3>拉斐尔</h3><div class="years">1483 – 1520</div><p class="deed"><b>《雅典学院》</b>把古希腊哲人齐聚一堂，画中圣母温馨可亲，尽显和谐之美。</p></div>
+    <div class="fig reveal"><div class="role">绘画 · 色彩大师</div><h3>提香</h3><div class="years">1490 – 1576</div><p class="deed">威尼斯画派代表，大胆用色，承前启后，影响鲁本斯等后世画家。</p></div>
+    <div class="fig reveal"><div class="role">绘画 · 油画之父</div><h3>凡·艾克</h3><div class="years">约 1390 – 1441</div><p class="deed">尼德兰画派先驱，改进<b>油画</b>材料与技法，代表作《阿尔诺菲尼夫妇》。</p></div>
+    <div class="fig reveal"><div class="role">技术 · 印刷革命</div><h3>古腾堡</h3><div class="years">约 1398 – 1468</div><p class="deed">发明<b>活字印刷术</b>与印刷机，印出四十二行《圣经》，被德国人选为史上最有影响力人物第八位。</p></div>
+    <div class="fig reveal"><div class="role">科学 · 日心说</div><h3>哥白尼</h3><div class="years">1473 – 1543</div><p class="deed">提出<b>日心说</b>：把宇宙原点从地球移到太阳，《天体运行论》开启近代天文学。</p></div>
+    <div class="fig reveal"><div class="role">科学 · 方法论</div><h3>伽利略</h3><div class="years">1564 – 1642</div><p class="deed">以<b>逻辑与实验</b>确立科学方法，用望远镜证实日心说；霍金称近代自然科学诞生归功于他。</p></div>
+    <div class="fig reveal"><div class="role">宗教 · 改革者</div><h3>马丁·路德</h3><div class="years">1483 – 1546</div><p class="deed"><b>"因信称义"</b>与《九十五条论纲》，借印刷术瓦解教廷精神垄断，基督教一分为二。</p></div>
+  </div>
+</section>
+
+<!-- 艺术四重境 -->
+<section id="art" style="background:linear-gradient(180deg,var(--bg),var(--bg3))">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">IV · FOUR REALMS</span>
+    <h2>艺术四重境：天上 · 人间</h2>
+    <p>吴军把 13–18 世纪的绘画史概括为四个阶段——题材与风格，就是人文主义渗透程度的温度计。</p>
+  </div>
+  <div class="stages">
+    <div class="stage reveal"><div class="idx">I</div><h3>天上</h3><div class="en">HEAVEN · 中世纪后期</div><p>题材全是宗教，神被抬到至高无上，人成了神的奴隶。神的表情严肃呆滞，为区别神与人，画家在神头顶画上一圈圣光。</p><div class="ex">"这个时期的绘画，无论题材还是手法，都是宗教性的。"</div></div>
+    <div class="stage reveal"><div class="idx">II</div><h3>天上人间</h3><div class="en">HEAVEN-HUMAN · 文艺复兴初期</div><p>题材突破宗教，维纳斯从贝壳中诞生；但画中人的表情仍带忧郁——那是时代心灵尚未舒展的写照。</p><div class="ex">波提切利《维纳斯的诞生》《三美神》：忧郁的美丽。</div></div>
+    <div class="stage reveal"><div class="idx">III</div><h3>人间天上</h3><div class="en">HUMAN-HEAVEN · 文艺复兴中后期</div><p>艺术家仍用《圣经》题材，却借神表现人间：圣光消失，圣母是慈母，耶稣是"大胖小子"——神的形象凡人化。</p><div class="ex">米开朗基罗《圣家族》、达·芬奇与拉斐尔的圣母子。</div></div>
+    <div class="stage reveal"><div class="idx">IV</div><h3>人间</h3><div class="en">HUMAN · 文艺复兴之后</div><p>画家抛开宗教神话，直接描绘人间生活，既表现美好，也鞭挞人性的丑恶——绘画真正进入"人间"阶段。</p><div class="ex">题材愈加丰富，艺术与生活完全交融。</div></div>
+  </div>
+</section>
+
+<!-- 影响 -->
+<section id="impact">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">V · ECHOES</span>
+    <h2>影响与回响</h2>
+    <p>文艺复兴如何重塑世界文明？</p>
+  </div>
+  <div class="impact reveal">
+    <p>文艺复兴不只是艺术运动，更是<span class="hl">人类文明的一次系统升级</span>。在思想上，人文主义让"人"重新成为万物的尺度，从追求来世转向珍惜现世；在艺术上，透视法、油画与对人体美的重新发现，奠定了此后五百年的西方审美；在科学上，从哥白尼到伽利略，"逻辑与实验"的方法让自然科学挣脱神学束缚，走向近代化。</p>
+    <p>它的传播依赖印刷术：图书从千万册跃升至两亿册，知识第一次可以大规模复制。它又点燃了宗教改革：马丁·路德借印刷术让"因信称义"传遍德意志，基督教世界一分为二，教廷的精神霸权彻底瓦解。此后，大航海、科学革命、启蒙运动依次展开——近代文明的每一个引擎，都在这三百年里完成了点火。</p>
+    <div class="quote">"人类走出中世纪的原因很多，但最重要的是文明本身的进步，或者说源于人类自身的发展动力。"<small>—— 吴军 · 151 讲《走出中世纪》</small></div>
+    <p>值得注意的是，从文艺复兴直到科学革命，知识精英们反对的<span class="hl">都是教会而非宗教本身</span>，许多人甚至认为自己的先进思想来自上帝的启发。人文主义不是与信仰决裂，而是重新安放人与神的位置——这正是文艺复兴最深刻的遗产：<span class="hl">它证明了，文明的光芒不会永远黯淡，而人的觉醒，是历史最强大的引擎。</span></p>
+  </div>
+</section>
+
+<footer>
+  <p>文艺复兴 · 人性的觉醒 — 基于《吴军来信·世界文明史》151、154–161 讲及周五专题 39、40 等整理</p>
+  <p style="margin-top:14px"><a href="#timeline">↑ 回到时间线</a> <a href="00-风格选择.html">返回风格选择</a></p>
+  <p style="margin-top:10px;color:#6e6557">内容据课程原文提炼 · 建议使用 Chrome / Edge 浏览</p>
+</footer>
+
+<script>
+/* 进度条 */
+const prog=document.getElementById('progress');
+addEventListener('scroll',()=>{const h=document.documentElement;prog.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';});
+
+/* 粒子 Canvas */
+const c=document.getElementById('particles'),x=c.getContext('2d');
+let W,H,ps=[];
+function size(){W=c.width=innerWidth;H=c.height=innerHeight;}
+size();addEventListener('resize',size);
+const N=innerWidth<768?36:70;
+for(let i=0;i<N;i++){ps.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2.2+.4,s:Math.random()*.5+.15,o:Math.random()*.6+.15,v:Math.random()<.5?1:-1});}
+function draw(){x.clearRect(0,0,W,H);ps.forEach(p=>{p.y-=p.s;p.x+=Math.sin(p.y*.008)*.3;if(p.y<-10)p.y=H+10;if(p.x<0)p.x=W;if(p.x>W)p.x=0;x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fillStyle='rgba(212,175,55,'+p.o+')';x.shadowColor='rgba(212,175,55,.8)';x.shadowBlur=8;x.fill();});requestAnimationFrame(draw);}
+draw();
+
+/* 滚动揭示 */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* 数字滚动 */
+const numIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;numIO.unobserve(e.target);
+  const el=e.target,t=parseFloat(el.dataset.count),suf=el.dataset.suffix||'',st=performance.now(),dur=1600;
+  (function tick(n){const p=Math.min((n-st)/dur,1),ease=1-Math.pow(1-p,3);el.textContent=Math.round(t*ease)+(p===1?suf:'');if(p<1)requestAnimationFrame(tick);})(st);
+}),{threshold:.5});
+document.querySelectorAll('[data-count]').forEach(el=>numIO.observe(el));
+
+/* 时间线筛选 */
+const btns=document.querySelectorAll('#filters button');
+btns.forEach(b=>b.addEventListener('click',()=>{
+  btns.forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  const f=b.dataset.f;
+  document.querySelectorAll('.tl-item').forEach(it=>{
+    const show=f==='all'||it.dataset.c===f;
+    it.style.display=show?'':'none';
+    if(show){it.classList.remove('in');requestAnimationFrame(()=>io.observe(it));}
+  });
+}));
+
+/* 卡片展开 */
+document.querySelectorAll('.tl-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    const d=card.querySelector('.tl-detail');
+    d.classList.toggle('open');
+  });
+});
+document.querySelectorAll('.tl-item').forEach(item=>{
+  const t=item.querySelector('.tl-title');
+  if(t)t.style.cursor='pointer';
+});
+</script>
+</body>
+</html>

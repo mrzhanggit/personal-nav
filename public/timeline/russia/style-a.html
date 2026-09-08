@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>俄罗斯 · 千年之路 — 沙皇宫阙 · 帝国金黑</title>
+<style>
+:root{
+  --bg:#0d0b16; --bg2:#131022; --bg3:#1a1530;
+  --card:rgba(255,255,255,.035); --card2:rgba(255,255,255,.06);
+  --line:rgba(212,175,55,.32); --line2:rgba(212,175,55,.13);
+  --gold:#d4af37; --gold-l:#f3d27a; --gold-d:#8a6d1a;
+  --text:#efe9db; --muted:#a89f8a; --dim:#7d7666;
+  --steel:#8fb3d9; --amber:#e0a458; --crimson:#d96a6a; --purple:#b98ad9;
+  --serif:"Cormorant Garamond","Georgia","Songti SC","STSong","SimSun",serif;
+  --sans:"PingFang SC","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;line-height:1.75}
+::selection{background:rgba(212,175,55,.35)}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:#0d0b16}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8a6d1a,#d4af37);border-radius:5px}
+
+/* ── 装饰：拜占庭式花饰 ── */
+.meander{height:14px;opacity:.5;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='14' viewBox='0 0 24 14'%3E%3Cpath d='M2 12h12v-8h-8v4h4' fill='none' stroke='%23d4af37' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:repeat-x}
+
+/* ── 进度条 ── */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,#8a6d1a,#f3d27a);z-index:999;box-shadow:0 0 12px rgba(212,175,55,.8)}
+
+/* ── 导航 ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;padding:14px 4vw;background:rgba(13,11,22,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line2);transition:.4s}
+nav .brand{font-family:var(--serif);font-size:1.15rem;letter-spacing:.28em;color:var(--gold-l)}
+nav .links{display:flex;gap:26px;font-size:.82rem;letter-spacing:.12em}
+nav .links a{color:var(--muted);text-decoration:none;transition:.3s}
+nav .links a:hover{color:var(--gold-l)}
+@media(max-width:820px){nav .links{display:none}}
+
+/* ── Hero ── */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6vw;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(ellipse 60% 50% at 50% 30%,rgba(212,175,55,.15),transparent 60%),
+  radial-gradient(ellipse 40% 40% at 80% 75%,rgba(139,90,43,.12),transparent 60%),
+  radial-gradient(ellipse 45% 45% at 15% 80%,rgba(74,54,122,.2),transparent 60%)}
+#particles{position:absolute;inset:0;z-index:1}
+.hero .dome{position:absolute;bottom:-120px;left:50%;transform:translateX(-50%);width:min(560px,80vw);height:320px;border-radius:50% 50% 0 0;border:1.5px solid rgba(212,175,55,.35);border-bottom:none;opacity:.5;z-index:1}
+.hero .dome::before{content:"";position:absolute;top:-52px;left:50%;transform:translateX(-50%);width:74px;height:74px;border-radius:50%;border:1.5px solid rgba(212,175,55,.5);background:radial-gradient(circle,rgba(212,175,55,.2),transparent 70%)}
+.hero .content{position:relative;z-index:2}
+.hero .kicker{font-size:.8rem;letter-spacing:.5em;color:var(--gold);text-transform:uppercase;margin-bottom:26px;animation:fadeDown 1.2s .2s both}
+.hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(2.6rem,7vw,5.4rem);letter-spacing:.16em;line-height:1.15;color:var(--gold-l);text-shadow:0 0 40px rgba(212,175,55,.35)}
+.hero h1 .en{display:block;font-size:.4em;letter-spacing:.58em;color:var(--muted);margin-top:16px;font-style:italic}
+.hero .sub{margin-top:28px;font-size:clamp(.95rem,1.6vw,1.15rem);color:var(--muted);max-width:680px;letter-spacing:.06em}
+.hero .cta{margin-top:44px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.hero .cta a{padding:13px 34px;border:1px solid var(--line);color:var(--gold-l);text-decoration:none;letter-spacing:.2em;font-size:.82rem;transition:.4s;background:rgba(212,175,55,.06)}
+.hero .cta a:hover{background:rgba(212,175,55,.18);box-shadow:0 0 30px rgba(212,175,55,.25);transform:translateY(-2px)}
+.hero .scroll-hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:2;color:var(--dim);font-size:.72rem;letter-spacing:.4em;animation:bob 2.4s infinite}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-22px)}to{opacity:1;transform:none}}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,10px)}}
+
+/* ── 章节通用 ── */
+section{position:relative;padding:110px 6vw}
+.sec-head{text-align:center;margin-bottom:70px}
+.sec-head .meander{margin:0 auto 20px}
+.sec-head .no{font-family:var(--serif);font-size:1rem;color:var(--gold);letter-spacing:.4em;display:block;margin-bottom:10px}
+.sec-head h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,4vw,3rem);letter-spacing:.18em;color:var(--text)}
+.sec-head p{color:var(--muted);max-width:640px;margin:16px auto 0;font-size:.95rem}
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ── 数据统计 ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:18px;max-width:1100px;margin:0 auto}
+.stat{border:1px solid var(--line2);background:var(--card);padding:30px 18px;text-align:center;position:relative;transition:.4s;overflow:hidden}
+.stat::after{content:"";position:absolute;left:0;top:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:.4s}
+.stat:hover{transform:translateY(-6px);border-color:var(--line);background:var(--card2)}
+.stat:hover::after{opacity:1}
+.stat .num{font-family:var(--serif);font-size:2.6rem;color:var(--gold-l);line-height:1.1}
+.stat .lbl{margin-top:8px;font-size:.82rem;letter-spacing:.18em;color:var(--muted)}
+.stat .note{font-size:.7rem;color:var(--dim);margin-top:4px}
+
+/* ── 起源叙事 ── */
+.origin{max-width:860px;margin:0 auto;font-size:1.02rem;color:#d6cebc}
+.origin p{margin-bottom:22px;text-indent:2em}
+.origin p:first-of-type::first-letter{font-family:var(--serif);font-size:3.2em;float:left;line-height:.85;padding:6px 12px 0 0;color:var(--gold)}
+.origin .hl{color:var(--gold-l);font-weight:600}
+.origin .reasons{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:26px 0}
+.origin .reason{border-left:2px solid var(--gold);background:var(--card);padding:20px 22px}
+.origin .reason b{color:var(--gold-l);font-weight:600;display:block;margin-bottom:8px;letter-spacing:.08em}
+
+/* ── 时间线 ── */
+#timeline{background:linear-gradient(180deg,var(--bg),var(--bg2))}
+.filters{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.filters button{padding:9px 24px;border:1px solid var(--line2);background:transparent;color:var(--muted);font-size:.8rem;letter-spacing:.14em;cursor:pointer;transition:.35s;font-family:var(--sans)}
+.filters button:hover,.filters button.active{color:var(--gold-l);border-color:var(--gold);background:rgba(212,175,55,.1)}
+.tl{position:relative;max-width:1000px;margin:0 auto;padding:10px 0}
+.tl::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:2px;transform:translateX(-50%);background:linear-gradient(180deg,transparent,var(--gold),var(--gold),transparent);opacity:.6}
+.tl-item{position:relative;width:50%;padding:0 46px 46px 0;cursor:pointer}
+.tl-item:nth-child(even){left:50%;padding:0 0 46px 46px}
+.tl-node{position:absolute;top:6px;right:-9px;width:18px;height:18px;transform:rotate(45deg);border:2px solid var(--gold);background:var(--bg);z-index:2;transition:.4s;box-shadow:0 0 0 0 rgba(212,175,55,.35)}
+.tl-item:nth-child(even) .tl-node{right:auto;left:-9px}
+.tl-item:hover .tl-node{background:var(--gold);box-shadow:0 0 0 8px rgba(212,175,55,.15)}
+.tl-card{border:1px solid var(--line2);background:var(--card);padding:26px 28px;transition:.4s;position:relative}
+.tl-card::before{content:"";position:absolute;top:0;left:0;width:4px;height:100%;background:var(--ec,var(--gold))}
+.tl-item:hover .tl-card{transform:translateY(-4px);border-color:var(--line);background:var(--card2);box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.tl-year{font-family:var(--serif);font-size:1.5rem;color:var(--gold-l);letter-spacing:.06em}
+.tl-tag{display:inline-block;margin-left:10px;font-size:.68rem;letter-spacing:.2em;color:var(--ec,var(--gold));border:1px solid var(--ec,var(--gold));padding:2px 10px;vertical-align:middle;opacity:.85}
+.tl-title{margin:10px 0 6px;font-size:1.12rem;color:var(--text);font-weight:600;letter-spacing:.04em}
+.tl-fig{font-size:.78rem;color:var(--dim);letter-spacing:.08em;margin-bottom:10px}
+.tl-fig b{color:var(--muted);font-weight:600}
+.tl-sum{font-size:.9rem;color:var(--muted)}
+.tl-detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.7,.2,1)}
+.tl-detail.open{grid-template-rows:1fr}
+.tl-detail>div{overflow:hidden}
+.tl-dbox{margin-top:16px;border-top:1px dashed var(--line2);padding-top:16px;display:grid;gap:14px}
+.tl-dbox .blk{padding:14px 16px;border-left:2px solid var(--gold);background:rgba(212,175,55,.05)}
+.tl-dbox .blk.bg{border-color:var(--steel);background:rgba(143,179,217,.05)}
+.tl-dbox .blk.ct{border-color:var(--amber);background:rgba(224,164,88,.05)}
+.tl-dbox .blk.im{border-color:var(--crimson);background:rgba(217,106,106,.05)}
+.tl-dbox .blk h4{font-size:.8rem;letter-spacing:.22em;color:var(--gold-l);margin-bottom:6px}
+.tl-dbox .blk.bg h4{color:var(--steel)}
+.tl-dbox .blk.ct h4{color:var(--amber)}
+.tl-dbox .blk.im h4{color:var(--crimson)}
+.tl-dbox .blk p{font-size:.88rem;color:#cfc7b4}
+.tl-toggle{margin-top:14px;font-size:.74rem;letter-spacing:.2em;color:var(--gold);border-bottom:1px dashed var(--line);display:inline-block;padding-bottom:2px;transition:.3s;user-select:none}
+.tl-toggle:hover{color:var(--gold-l)}
+@media(max-width:820px){
+  .tl::before{left:9px}
+  .tl-item,.tl-item:nth-child(even){width:100%;left:0;padding:0 0 36px 44px}
+  .tl-node,.tl-item:nth-child(even) .tl-node{left:0;right:auto}
+}
+
+/* ── 东方与西方 ── */
+#question{background:linear-gradient(180deg,var(--bg2),var(--bg))}
+.q-card{max-width:900px;margin:0 auto;border:1px solid var(--line);background:var(--card);padding:52px 48px;position:relative;text-align:center}
+.q-card::before{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:180px;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.q-card .q{font-family:var(--serif);font-size:clamp(1.6rem,3.4vw,2.4rem);letter-spacing:.12em;color:var(--gold-l);line-height:1.5}
+.q-card .a{margin-top:26px;font-size:1rem;color:#d6cebc;line-height:2}
+.q-card .a b{color:var(--gold-l)}
+.q-card .pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:36px;text-align:left}
+.q-card .pillar{border-top:1px solid var(--line2);padding:20px 6px 6px}
+.q-card .pillar h4{color:var(--gold);font-size:.84rem;letter-spacing:.24em;margin-bottom:10px}
+.q-card .pillar p{font-size:.88rem;color:var(--muted)}
+
+/* ── 人物 ── */
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;max-width:1160px;margin:0 auto}
+.fig{border:1px solid var(--line2);background:var(--card);padding:28px 24px;position:relative;transition:.4s;cursor:pointer}
+.fig::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transform:scaleX(0);transition:.5s}
+.fig:hover{transform:translateY(-5px);border-color:var(--line);background:var(--card2)}
+.fig:hover::after{transform:scaleX(1)}
+.fig .portrait{width:62px;height:62px;border:1px solid var(--line);transform:rotate(45deg);display:flex;align-items:center;justify-content:center;margin:8px auto 26px;background:radial-gradient(circle,rgba(212,175,55,.14),transparent)}
+.fig .portrait span{transform:rotate(-45deg);font-family:var(--serif);font-size:1.5rem;color:var(--gold-l)}
+.fig .name{text-align:center;font-family:var(--serif);font-size:1.28rem;letter-spacing:.14em;color:var(--gold-l)}
+.fig .period{text-align:center;font-size:.7rem;color:var(--dim);letter-spacing:.26em;margin-top:4px;text-transform:uppercase}
+.fig .role{text-align:center;font-size:.78rem;color:var(--amber);letter-spacing:.1em;margin-top:8px}
+.fig .desc{margin-top:14px;font-size:.86rem;color:var(--muted);border-top:1px dashed var(--line2);padding-top:14px}
+
+/* ── 吴军思考 ── */
+.think{max-width:860px;margin:0 auto}
+.tk{display:grid;grid-template-columns:auto 1fr;gap:26px;border:1px solid var(--line2);background:var(--card);padding:30px 34px;margin-bottom:18px;transition:.4s}
+.tk:hover{border-color:var(--line);background:var(--card2);transform:translateX(6px)}
+.tk .no{font-family:var(--serif);font-size:2.4rem;color:var(--gold);line-height:1}
+.tk h4{font-size:1.02rem;color:var(--gold-l);letter-spacing:.06em;margin-bottom:8px}
+.tk p{font-size:.9rem;color:var(--muted)}
+
+/* ── 结语 ── */
+.outro{text-align:center;padding:120px 6vw;position:relative;overflow:hidden}
+.outro::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 50% 50%,rgba(212,175,55,.1),transparent 65%)}
+.outro h2{font-family:var(--serif);font-weight:500;font-size:clamp(1.8rem,4vw,3rem);letter-spacing:.16em;color:var(--gold-l);position:relative}
+.outro p{max-width:620px;margin:22px auto 0;color:var(--muted);font-size:.98rem;position:relative;line-height:2}
+
+footer{text-align:center;padding:40px 6vw 60px;border-top:1px solid var(--line2);color:var(--dim);font-size:.76rem;letter-spacing:.14em}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<nav>
+  <div class="brand">沙皇宫阙 · РУСЬ</div>
+  <div class="links">
+    <a href="#overview">数据</a>
+    <a href="#origin">起源</a>
+    <a href="#timeline">编年</a>
+    <a href="#question">东与西</a>
+    <a href="#figures">人物</a>
+    <a href="#think">吴军思考</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<header class="hero">
+  <canvas id="particles"></canvas>
+  <div class="dome"></div>
+  <div class="content">
+    <div class="kicker">吴军来信 · 世界文明史 专题</div>
+    <h1>俄罗斯 · 千年之路
+      <span class="en">FROM KIEVAN RUS TO THE ARCTIC</span>
+    </h1>
+    <p class="sub">从第聂伯河畔的斯拉夫部落，到金帐汗国阴影下的莫斯科崛起，再到拿破仑的败退与十二月党人的觉醒——一部「带有亚洲元素的欧洲文明」如何长成。</p>
+    <div class="cta">
+      <a href="#timeline">开启编年史</a>
+      <a href="#question">东方还是西方？</a>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL</div>
+</header>
+
+<!-- 数据统计 -->
+<section id="overview">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">I · OVERVIEW</span>
+    <h2>千年之数</h2>
+    <p>吴军把俄罗斯列为汤因比分类中的「派生文明」——军事上强大，文明上自成一体。</p>
+  </div>
+  <div class="stats">
+    <div class="stat reveal"><div class="num" data-n="862">0</div><div class="lbl">基辅罗斯肇始</div><div class="note">留里克受聘之年</div></div>
+    <div class="stat reveal"><div class="num" data-n="988">0</div><div class="lbl">罗斯受洗</div><div class="note">皈依东正教</div></div>
+    <div class="stat reveal"><div class="num" data-n="240">0</div><div class="lbl">金帐汗国统治</div><div class="note">蒙古统治两个多世纪</div></div>
+    <div class="stat reveal"><div class="num" data-n="33">0</div><div class="lbl">东欧平原占欧 %</div><div class="note">欧洲约 1/3 面积</div></div>
+    <div class="stat reveal"><div class="num" data-n="20">0</div><div class="lbl">关键事件</div><div class="note">逐条展开背景原因影响</div></div>
+    <div class="stat reveal"><div class="num" data-n="14">0</div><div class="lbl">重要人物</div><div class="note">帝王 · 征服者 · 思想者</div></div>
+  </div>
+</section>
+
+<!-- 起源叙事 -->
+<section id="origin" style="background:linear-gradient(180deg,var(--bg),var(--bg2))">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">II · ORIGIN</span>
+    <h2>文明从哪里来</h2>
+    <p>要回答「俄罗斯属于东方还是西方」，得先从东欧中世纪的历史说起。</p>
+  </div>
+  <div class="origin reveal">
+    <p>东欧广袤的平原地区，占了欧洲大约 <span class="hl">1/3</span> 的面积，一直是欧洲的粮仓。在远古时期，人类一些重要的文明节点都和那里有关——比如印欧部落的诞生、马匹的驯化。东欧大平原一直有人类居住，但直到公元 1 世纪，文明世界才对那里有了简单的了解。</p>
+    <p>沿着第聂伯河、奥得河、维斯瓦河、布格河，住着一个个斯拉夫人的部落。根据在东欧的位置，他们分为<span class="hl">东斯拉夫人、西斯拉夫人和南斯拉夫人</span>——东斯拉夫人，正是后来俄罗斯人的祖先。</p>
+    <p>一个看似偶然的插曲改变了这一切：<span class="hl">9 世纪中后期，斯拉夫部落纷争不断，找不到解决办法，于是商议从外面邀请一位主公来调停</span>。他们看中了常年经商、文明水平较高的瓦良格人（维京人），邀请首领留里克前来执政。此后，维京统治者南下定都基辅，统一东斯拉夫各部——基辅罗斯诞生了。</p>
+    <div class="reasons">
+      <div class="reason"><b>对土地的野心</b>莫斯科能从小镇长成世界最大国家，第一要素是对土地的不断渴求——扩张、继承、购买、联姻，无所不用其极。</div>
+      <div class="reason"><b>运气</b>地处东北内陆、避开蒙古铁骑的直接蹂躏，又恰逢金帐汗国不擅理财——莫斯科成了蒙古人统治罗斯的「财务管家」而暴富。</div>
+      <div class="reason"><b>文化的转向</b>中断与拜占庭的接触、接受蒙古的文化，俄罗斯最终进化出一种「带有亚洲元素的欧洲文化」。</div>
+    </div>
+  </div>
+</section>
+
+<!-- 时间线 -->
+<section id="timeline">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">III · CHRONICLE</span>
+    <h2>千年编年史</h2>
+    <p>20 个关键节点，从印欧人迁徙到北极航道。点击任意节点展开背景 / 原因 / 影响。</p>
+  </div>
+  <div class="filters reveal" id="filters"></div>
+  <div class="tl" id="tl"></div>
+</section>
+
+<!-- 东方与西方 -->
+<section id="question">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">IV · EAST OR WEST</span>
+    <h2>东方，还是西方？</h2>
+  </div>
+  <div class="q-card reveal">
+    <div class="q">俄罗斯到底属于东方，还是西方？</div>
+    <p class="a">政治文化中心都在欧洲、自居欧洲文明，国土却大部分在亚洲——吴军的答案是：<b>俄罗斯最终进化出了一种带有亚洲元素的欧洲文化</b>。</p>
+    <div class="pillars">
+      <div class="pillar"><h4>欧洲的血脉</h4><p>皈依东正教、学习拜占庭科学与艺术，以罗马的继承者自居；宫廷长期模仿法国生活、以讲法语为荣。</p></div>
+      <div class="pillar"><h4>蒙古的烙印</h4><p>金帐汗国两个多世纪的统治中断了与拜占庭的学习，莫斯科借蒙古权威崛起——「没有蒙古人，就没有以莫斯科为中心的俄罗斯」。</p></div>
+      <div class="pillar"><h4>独特的混合</h4><p>东正教信仰 + 亚洲式专制传统 + 对土地的野心，造就了既不同于西欧、也不同于东方的第三条道路。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 人物 -->
+<section id="figures" style="background:linear-gradient(180deg,var(--bg),var(--bg2))">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">V · FIGURES</span>
+    <h2>重要人物</h2>
+    <p>留里克王朝的奠基者、莫斯科的崛起者、与帝国命运交错的征服者与思想者。</p>
+  </div>
+  <div class="fig-grid" id="figuresGrid"></div>
+</section>
+
+<!-- 吴军思考 -->
+<section id="think">
+  <div class="sec-head reveal">
+    <div class="meander"></div>
+    <span class="no">VI · REFLECTION</span>
+    <h2>吴军的思考</h2>
+    <p>课程原文中的核心判断与文明史观。</p>
+  </div>
+  <div class="think">
+    <div class="tk reveal"><div class="no">壹</div><div><h4>军事强大 ≠ 文明贡献大</h4><p>蒙古帝国、奥斯曼帝国以及沙皇俄国，虽然都是军事上很强大的政权，但按照今天的标准，或许古希腊、荷兰和英国这样的国家对文明的贡献要更大。</p></div></div>
+    <div class="tk reveal"><div class="no">贰</div><div><h4>没有蒙古人，就没有莫斯科的俄罗斯</h4><p>蒙古人摧毁了以基辅为中心的基辅罗斯，并一手扶植起莫斯科公国，把莫斯科打造成后来俄罗斯的政治、军事和经济中心。</p></div></div>
+    <div class="tk reveal"><div class="no">叁</div><div><h4>文明的转向不可逆</h4><p>如果基辅罗斯的文明进程未被蒙古人中断，东欧可能会产生和西欧或南欧更接近的文化；但历史没有如果——它走向了另一条发展道路。</p></div></div>
+    <div class="tk reveal"><div class="no">肆</div><div><h4>战争的另一面：思想的传播</h4><p>作为征服者的俄罗斯军人和贵族，在欧洲打败法国后接触到启蒙思想，转而对自己的专制落后不满——十二月党人起义虽败，启蒙的火种却在俄国贵族与知识分子中流传。</p></div></div>
+    <div class="tk reveal"><div class="no">伍</div><div><h4>派生的文明，独立的路径</h4><p>汤因比把俄罗斯列为「派生文明」——受拜占庭影响而生，却在东正教与蒙古统治的双重塑造下，长成了世界上面积最大的国家。</p></div></div>
+  </div>
+</section>
+
+<!-- 结语 -->
+<div class="outro">
+  <h2>从基辅罗斯到北极航道</h2>
+  <p>「罗斯诸城之母」基辅、金帐汗国的阴影、莫斯科的野心与运气——千年的历史层层叠加，最终塑造出一个以欧洲文明自居、却带着亚洲烙印的帝国。这或许正是理解俄罗斯文明的一把钥匙。</p>
+</div>
+
+<footer>俄罗斯 · 千年之路 — 基于《吴军来信·世界文明史》第145、149、178讲及七年战争、拿破仑战争、文明冲突等篇目整理 · 内容据课程原文提炼</footer>
+
+<script>
+/* ═══════════ 数据 ═══════════ */
+const CATS = {
+  origin:'起源', rule:'建国', faith:'信仰', mongol:'蒙古统治',
+  moscow:'莫斯科崛起', modern:'近代风云', arctic:'当代'
+};
+const CAT_COLORS = {
+  origin:'#b98ad9', rule:'#d4af37', faith:'#f3d27a', mongol:'#d96a6a',
+  moscow:'#8fb3d9', modern:'#e0a458', arctic:'#7fcfc0'
+};
+const EVENTS = [
+  {y:'约前3000年', c:'origin', t:'印欧人的诞生与迁徙', f:'东欧大平原 · 印欧语系', s:'古印欧人生活在东欧大平原一带，驯化了马匹；此后大迁徙遍布欧亚，斯拉夫人是留守的一支。',
+   bg:'东欧大平原占欧洲约 1/3 面积，是欧洲粮仓，人类重要文明节点（印欧部落诞生、马匹驯化）都与此相关。',
+   ct:'公元前 3000 年左右，环境变化与人口压力驱动古印欧人大规模迁徙；语言与基因研究揭示了各族群的同源关系。',
+   im:'印欧语系遍布世界（如今全球近一半人口是古印欧人后裔），斯拉夫人作为一支留居东欧，成为后来俄罗斯人的祖先。'},
+  {y:'公元1世纪', c:'origin', t:'文明世界初识东欧', f:'第聂伯河 · 奥得河 · 维斯瓦河', s:'斯拉夫人沿东欧大河居住，以农业、畜牧业和狩猎为生，文明世界这时才对其有简单了解。',
+   bg:'东欧大平原长期有人居住，但地处偏远、缺乏文字记录，与地中海文明接触有限。',
+   ct:'斯拉夫部落沿河流定居，形成农耕、畜牧与狩猎的混合生计方式。',
+   im:'斯拉夫人分为东、西、南三支——东斯拉夫人是俄罗斯人的直接祖先。'},
+  {y:'7–8世纪', c:'origin', t:'东斯拉夫部落联盟', f:'基辅 · 诺夫哥罗德', s:'东斯拉夫人建立库雅巴（基辅）与斯拉维亚（诺夫哥罗德）两个邦国，尚属部落联盟。',
+   bg:'部落聚居形成中心，但尚未达到真正意义上的国家形态。',
+   ct:'农业定居发展催生组织需求，需要聚居中心来管理生产与防卫。',
+   im:'形成基辅与诺夫哥罗德两大中心，奠定未来国家的雏形。'},
+  {y:'9世纪中后期', c:'origin', t:'留里克受聘而来', f:'瓦良格人（维京人）', s:'斯拉夫各部落纷争不断，商议邀请瓦良格人首领留里克作主公，调停纠纷。',
+   bg:'维京人沿欧洲海岸经商、深入内陆，与斯拉夫人早有来往；在斯拉夫人眼中他们文明水平较高。',
+   ct:'部落间无法自行解决纷争，遂沿袭「求外部仲裁」的传统，邀请外来主公执政。',
+   im:'维京人入主罗斯，与斯拉夫人通婚融合，开启留里克王朝的统治。'},
+  {y:'879–882年', c:'rule', t:'奥列格定都基辅', f:'基辅罗斯建立', s:'留里克去世后奥列格继任，率兵南下占领基辅定都，统一东斯拉夫各部，史称基辅罗斯。',
+   bg:'诺夫哥罗德位置偏僻，不利于进一步发展。',
+   ct:'奥列格的扩张战略——基辅地处第聂伯河商路要冲，更具发展潜力。',
+   im:'奥列格称基辅为「罗斯诸城之母」；此后统治者是维京—斯拉夫融合民族，罗斯文明由此奠基。'},
+  {y:'10世纪末', c:'rule', t:'弗拉基米尔扩张成大国', f:'乌拉尔山脉 · 沃里尼亚', s:'弗拉基米尔大公不断扩张，东至乌拉尔山脉（欧亚分界）、西至沃里尼亚，基辅罗斯成为东欧大国。',
+   bg:'基辅罗斯建立后持续扩张，疆域与实力同步增长。',
+   ct:'军事扩张与继承制度的双重推动。',
+   im:'奠定俄罗斯辽阔疆域的雏形——虽然地盘大，但罗斯仍被欧洲视为「不开化的民族」。'},
+  {y:'988年', c:'faith', t:'罗斯受洗：皈依东正教', f:'拜占庭 · 安娜公主', s:'弗拉基米尔迎娶拜占庭公主安娜，基辅罗斯皈依东正教，进入文明进程。',
+   bg:'罗斯被视为不开化民族，弗拉基米尔欲借联姻提升地位；拜占庭则想利用罗斯军力，联姻一度生变，弗拉基米尔陈兵边境才促成婚事。',
+   ct:'为发展与拜占庭关系、被欧洲接受；据编年史记载，考察团被君士坦丁堡「人间天堂」般的宏伟所震撼。',
+   im:'东正教成为俄罗斯文化核心；罗斯以罗马继承者自居；宫廷学校、拜占庭科学艺术随之而来。'},
+  {y:'10–12世纪', c:'faith', t:'文明发展期', f:'基辅 · 弗拉基米尔-苏兹达尔', s:'开办宫廷学校，贵族学习拉丁语、希腊语与拜占庭科学艺术；12 世纪基辅已是欧洲名城。',
+   bg:'皈依东正教后，罗斯与拜占庭全面交往，教会派遣大量修道士赴君士坦丁堡学习。',
+   ct:'教会与宫廷共同推动文化教育。',
+   im:'若照此轨迹发展，东欧本可产生接近西欧或南欧的文化——然而这个进程将被蒙古人中断。'},
+  {y:'1238年', c:'mongol', t:'蒙古铁骑西征', f:'长子西征 · 莫斯科陷落', s:'蒙古西征军占领莫斯科，随后横扫东欧，欧洲精锐部队接连败退。',
+   bg:'成吉思汗之孙拔都率军西征（1236–1242 长子西征），蒙古帝国进入鼎盛扩张期。',
+   ct:'蒙古人全民皆兵的军事组织与机动战术；罗斯诸公国分裂割据、无力统一抵抗。',
+   im:'莫斯科首次陷落；罗斯各公国面临覆灭命运。'},
+  {y:'1240年', c:'mongol', t:'基辅陷落', f:'基辅罗斯瓦解', s:'拔都攻占基辅，毁坏当地一切文明，基辅罗斯在被占领后瓦解。',
+   bg:'蒙古大军攻占基辅罗斯城市时非常残忍，最大的两个城市基辅与弗拉基米尔几乎被毁。',
+   ct:'罗斯分裂割据、缺乏统一领导，无法组织有效抵抗。',
+   im:'原有教育文化遭到严重破坏，中断了向拜占庭和西欧学习的进程。'},
+  {y:'1242年', c:'mongol', t:'金帐汗国建立', f:'伏尔加河下游', s:'拔都在伏尔加河下游定都，建立金帐汗国（钦察汗国），统治罗斯两个多世纪。',
+   bg:'蒙古帝国分为元朝与四大汗国，金帐汗国是其中之一。',
+   ct:'蒙古帝国分封体制的产物。',
+   im:'罗斯中断与拜占庭联系、接受蒙古文化；东正教文化仅在少数修道院得到传承。'},
+  {y:'14世纪', c:'moscow', t:'莫斯科公国崛起', f:'克里姆林宫 · 伊凡一世', s:'丹尼尔奠基、尤里与金帐汗国联姻；伊凡一世充当蒙古「财务管家」致富，建克里姆林宫，1327 年将东正教主教从基辅迁至莫斯科。',
+   bg:'金帐汗国不擅理财；莫斯科地处东北内陆，躲过蒙古铁骑的直接蹂躏。',
+   ct:'对土地的野心加运气——借蒙古权威收税、买地、联姻、镇压反叛，一步步做大。',
+   im:'莫斯科取代基辅，成为俄罗斯的政治与宗教中心。'},
+  {y:'1380年', c:'moscow', t:'库里科沃战役', f:'金帐汗国式微', s:'罗斯人在莫斯科公国领导下打败金帐汗国，后者基本退出东欧。',
+   bg:'金帐汗国到 14 世纪后期逐渐解体。',
+   ct:'莫斯科积蓄力量、联合各罗斯公国反抗蒙古统治。',
+   im:'奠定莫斯科在罗斯诸公国中的领导地位，为俄罗斯独立铺平道路。'},
+  {y:'16–17世纪', c:'modern', t:'吞并乌克兰与白罗斯', f:'波兰-立陶宛联合王国', s:'俄罗斯打败波兰-立陶宛联合王国，将乌克兰、白罗斯并入版图。',
+   bg:'此前立陶宛击败蒙古人，占据白俄罗斯与乌克兰，并与波兰组成天主教联合王国。',
+   ct:'俄罗斯的扩张野心；乌克兰、白罗斯语言文化与俄罗斯不尽相同，保持一定独立性。',
+   im:'形成「大罗斯 / 小罗斯 / 白罗斯」格局；乌克兰靠近波兰一侧至今信奉天主教。'},
+  {y:'1618–1648年', c:'modern', t:'三十年战争与主权国家', f:'威斯特伐利亚体系', s:'俄罗斯沙皇国加入新教阵营，意在占据神圣罗马帝国在东欧的土地。',
+   bg:'欧洲两大阵营对峙：哈布斯堡王朝 vs 新教联盟；俄罗斯为扩张势力加入后者。',
+   ct:'世俗政治考量胜过宗教立场——俄罗斯想借战争谋取东欧土地。',
+   im:'三十年战争确立「主权国家」概念，俄罗斯开始融入欧洲国际体系。'},
+  {y:'1756–1763年', c:'modern', t:'七年战争中的俄国转向', f:'彼得三世 · 叶卡捷琳娜', s:'俄国女皇伊丽莎白病逝；亲普鲁士的彼得三世与腓特烈议和；随后叶卡捷琳娜政变推翻彼得三世。',
+   bg:'俄国本属奥地利阵营，与法奥联合对抗普鲁士腓特烈二世；普鲁士一度濒临崩溃。',
+   ct:'彼得三世本是德国人、腓特烈的崇拜者，上台即倒戈议和；次年其皇后叶卡捷琳娜发动政变夺权。',
+   im:'俄国退出战争，普鲁士保住西里西亚；叶卡捷琳娜开启俄国「开明专制」时代。'},
+  {y:'1805年', c:'modern', t:'三皇会战', f:'奥斯特里茨战役', s:'拿破仑大败俄奥联军（三皇会战），第三次反法同盟瓦解。',
+   bg:'拿破仑崛起后横扫欧洲，俄国与奥地利联合对抗法国。',
+   ct:'拿破仑的军事天才；俄奥联军协同失误。',
+   im:'奥地利失去「神圣罗马皇帝」称号；俄国在欧洲的势力受到重创。'},
+  {y:'1812年', c:'modern', t:'拿破仑远征莫斯科之败', f:'严寒 · 补给线', s:'拿破仑倾全国之力远征俄国，因物资补充不继而输给俄国严寒的冬天，仓皇败退。',
+   bg:'拿破仑已控制大部分西欧，俄国是欧洲大陆上最后的强敌。',
+   ct:'俄军坚壁清野、俄国严寒冬季、法军补给线过长——三大因素叠加。',
+   im:'拿破仑帝国由盛转衰，此后接连败于反法同盟；俄国以「欧洲宪兵」自居，随后主导维也纳会议。'},
+  {y:'1825年', c:'modern', t:'十二月党人起义', f:'圣彼得堡 · 启蒙思想', s:'远征欧洲的俄国贵族军官接触法国自由平等思想，发动起义失败，但启蒙思想开始在俄国流传。',
+   bg:'俄军打败拿破仑、驻扎欧洲期间，军官与贵族亲眼目睹法国革命后的社会面貌；对照本国专制落后，不满日增。',
+   ct:'启蒙思想与俄国专制现实的激烈冲突。',
+   im:'起义虽败，源于法国的启蒙思想却在俄国贵族和知识分子中流传，开启俄国解放运动序幕。'},
+  {y:'当代', c:'arctic', t:'北极航道与亚马尔', f:'亚马尔半岛 · 北极航线', s:'中远海运与日本三井的破冰船从俄罗斯亚马尔出发抵达中国江苏，北极航道比传统航线节省约 20 天。',
+   bg:'全球变暖使北冰洋冰冻时间变短，北极航线的商业价值被重新提出。',
+   ct:'北极航道路途更短；俄罗斯坐拥亚马尔等北极圈港口，地缘优势凸显。',
+   im:'北极地缘经济价值上升；但恶劣气候、破冰船高成本与航线安全仍是现实制约。'}
+];
+
+const FIGURES = [
+  {n:'留里克', p:'9世纪中后期', r:'罗斯王朝开创者', d:'瓦良格人（维京人）首领。斯拉夫部落纷争难解，邀请他执政调停——罗斯的历史由此翻开第一页。'},
+  {n:'奥列格', p:'879–912 前后', r:'基辅罗斯奠基者', d:'留里克之后继任诺夫哥罗德大公，率兵南下占领基辅并定都，统一东斯拉夫各部，称基辅为「罗斯诸城之母」。'},
+  {n:'弗拉基米尔', p:'10世纪末', r:'「罗斯受洗」推动者', d:'将基辅罗斯扩张为东欧大国，疆域直抵乌拉尔山脉；988 年迎娶拜占庭公主安娜，率罗斯皈依东正教，开启文明进程。'},
+  {n:'丹尼尔·亚历山德罗维奇', p:'13世纪末', r:'首任莫斯科大公', d:'诺夫哥罗德大公的幼子，受封莫斯科。通过战争与继承扩大公国疆土——莫斯科崛起的第一块基石。'},
+  {n:'尤里·丹尼洛维奇', p:'14世纪初', r:'莫斯科扩张者', d:'与金帐汗国结盟并迎娶大汗之妹，宣称成为诺夫哥罗德大公，开始干涉周边公国事务，把莫斯科带入蒙古体系。'},
+  {n:'伊凡一世', p:'14世纪', r:'「钱袋」· 莫斯科奠基人', d:'借金帐汗国权威取得弗拉基米尔大公头衔，充当蒙古人的财务管家而暴富，购买土地、修建克里姆林宫，1327 年将东正教主教从基辅迁至莫斯科。'},
+  {n:'拔都', p:'13世纪', r:'金帐汗国建立者', d:'成吉思汗之孙。率军西征，1238 年占莫斯科、1240 年攻陷基辅，1242 年在伏尔加河下游建立金帐汗国，统治罗斯两个多世纪。'},
+  {n:'彼得三世', p:'1762 在位', r:'七年战争的转折', d:'本是德国人、腓特烈二世的崇拜者。即位后立即与普鲁士议和，把军队交予腓特烈指挥——战争天平因此倒转。'},
+  {n:'叶卡捷琳娜二世', p:'1762–1796', r:'女皇 · 开明专制', d:'发动宫廷政变推翻丈夫彼得三世。俄国随即退出七年战争，她开启了俄国「开明专制」时代，将帝国推向鼎盛。'},
+  {n:'腓特烈二世', p:'1740–1786', r:'普鲁士「大帝」', d:'七年战争中以军事天才对抗法奥俄三国围攻，靠俄国女皇更迭与英国军费援助绝境翻盘，保住西里西亚，被后人尊为「大帝」。'},
+  {n:'拿破仑', p:'1769–1821', r:'1812 远征者', d:'三皇会战大败俄奥联军后，1812 年倾全国之力远征俄国，却败给严寒与补给——这场失败成为帝国由盛转衰的转折点。'},
+  {n:'十二月党人', p:'1825 年', r:'觉醒的贵族军官', d:'远征欧洲的俄国军官贵族接触法国启蒙思想，起义反对专制虽告失败，却让自由平等的思想在俄国贵族与知识分子中流传开来。'},
+  {n:'柴可夫斯基', p:'1840–1893', r:'俄罗斯音乐家', d:'《第二交响曲》因使用三首乌克兰民歌而被称为《小俄罗斯交响曲》——「小俄罗斯」正是历史上对乌克兰的称呼，见证大罗斯与小罗斯的同源与分野。'},
+  {n:'汤因比', p:'1889–1975', r:'历史学家 · 文明史观', d:'在其文明分类中把「俄罗斯」列为派生文明——受拜占庭影响而生，与希腊、波斯等文明并列，构成观察俄罗斯的一把尺子。'}
+];
+
+/* ═══════════ 渲染 ═══════════ */
+const tl = document.getElementById('tl');
+const filtersEl = document.getElementById('filters');
+const cats = ['all', ...new Set(EVENTS.map(e=>e.c))];
+filtersEl.innerHTML = '<button class="active" data-c="all">全部</button>' + cats.filter(c=>c!=='all').map(c=>`<button data-c="${c}">${CATS[c]}</button>`).join('');
+filtersEl.querySelectorAll('button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    filtersEl.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const c = b.dataset.c;
+    tl.querySelectorAll('.tl-item').forEach(item=>{
+      const show = c==='all' || item.dataset.c===c;
+      item.style.display = show ? '' : 'none';
+      if(show) item.style.animation = 'none';
+    });
+  });
+});
+EVENTS.forEach((e,i)=>{
+  const el = document.createElement('div');
+  el.className = 'tl-item reveal';
+  el.dataset.c = e.c;
+  el.style.setProperty('--ec', CAT_COLORS[e.c]);
+  el.style.transitionDelay = (i%6)*.05+'s';
+  el.innerHTML = `
+    <div class="tl-node"></div>
+    <div class="tl-card">
+      <div class="tl-year">${e.y}<span class="tl-tag">${CATS[e.c]}</span></div>
+      <div class="tl-title">${e.t}</div>
+      <div class="tl-fig"><b>${e.f}</b></div>
+      <div class="tl-sum">${e.s}</div>
+      <div class="tl-detail"><div><div class="tl-dbox">
+        <div class="blk bg"><h4>背 景</h4><p>${e.bg}</p></div>
+        <div class="blk ct"><h4>原 因</h4><p>${e.ct}</p></div>
+        <div class="blk im"><h4>影 响</h4><p>${e.im}</p></div>
+      </div></div></div>
+      <div class="tl-toggle">展开详情 ▾</div>
+    </div>`;
+  const det = el.querySelector('.tl-detail');
+  const tog = el.querySelector('.tl-toggle');
+  const flip = ()=>{
+    const open = det.classList.toggle('open');
+    tog.textContent = open ? '收起详情 ▴' : '展开详情 ▾';
+  };
+  el.querySelector('.tl-card').addEventListener('click', flip);
+  tl.appendChild(el);
+});
+
+/* 人物 */
+const fg = document.getElementById('figuresGrid');
+FIGURES.forEach(f=>{
+  const el = document.createElement('div');
+  el.className = 'fig reveal';
+  el.innerHTML = `
+    <div class="portrait"><span>${f.n[0]}</span></div>
+    <div class="name">${f.n}</div>
+    <div class="period">${f.p}</div>
+    <div class="role">${f.r}</div>
+    <div class="desc">${f.d}</div>`;
+  fg.appendChild(el);
+});
+
+/* ═══════════ 动效 ═══════════ */
+/* 进度条 */
+addEventListener('scroll',()=>{
+  const h = document.documentElement;
+  const p = h.scrollTop/(h.scrollHeight-h.clientHeight);
+  document.getElementById('progress').style.width = p*100+'%';
+});
+
+/* Reveal */
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* 数字滚动 */
+const numIO = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el = e.target, target = +el.dataset.n;
+    const dur = 1600, t0 = performance.now();
+    const tick = t=>{
+      const k = Math.min((t-t0)/dur,1), ease = 1-Math.pow(1-k,3);
+      el.textContent = Math.round(target*ease);
+      if(k<1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    numIO.unobserve(el);
+  });
+},{threshold:.6});
+document.querySelectorAll('.stat .num').forEach(el=>numIO.observe(el));
+
+/* 粒子（金色雪尘） */
+const cv = document.getElementById('particles');
+const ctx = cv.getContext('2d');
+let W, H, P = [];
+function size(){ W=cv.width=innerWidth; H=cv.height=innerHeight; }
+size();
+addEventListener('resize', size);
+for(let i=0;i<70;i++) P.push({x:Math.random()*innerWidth, y:Math.random()*innerHeight, r:Math.random()*1.8+.4, vx:(Math.random()-.5)*.25, vy:Math.random()*.35+.1, a:Math.random()*.5+.2});
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  P.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.y>H){p.y=-4;p.x=Math.random()*W;}
+    if(p.x>W+4)p.x=-4; if(p.x<-4)p.x=W+4;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle = `rgba(212,175,55,${p.a})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* 时间线交错入场 */
+document.querySelectorAll('#tl .tl-item').forEach((el,i)=>{
+  el.style.opacity = '0'; el.style.transform = 'translateY(30px)';
+  const ob = new IntersectionObserver(es=>{
+    es.forEach(x=>{
+      if(x.isIntersecting){
+        setTimeout(()=>{ el.style.transition='opacity .8s, transform .8s'; el.style.opacity='1'; el.style.transform='none'; }, (i%4)*90);
+        ob.unobserve(el);
+      }
+    });
+  },{threshold:.15});
+  ob.observe(el);
+});
+</script>
+</body>
+</html>

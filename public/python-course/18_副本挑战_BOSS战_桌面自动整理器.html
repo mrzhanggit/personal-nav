@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOSS 战 · 桌面自动整理器 —— 副本挑战毕业试炼</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#f5c542; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(244,114,182,.07), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fb923c 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#ffe0a0;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out i{color:var(--gold);font-style:italic;}
+  /* 通用输入与按钮 */
+  .lab-input{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  /* BOSS 宣言 */
+  .boss-face{
+    text-align:center;font-size:52px;margin:6px 0 10px;
+    filter:drop-shadow(0 0 18px rgba(245,197,66,.45));animation:breathe 2.6s ease-in-out infinite;
+  }
+  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  .req{
+    background:var(--card);border:1px solid rgba(245,197,66,.4);border-radius:14px;
+    padding:16px 22px;font-size:14px;
+  }
+  .req h3{color:var(--gold);font-size:16px;margin-bottom:8px;letter-spacing:1px;}
+  .req li{margin:6px 0 6px 18px;}
+  /* 作战计划 */
+  .plan{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;}
+  .plan-item{
+    flex:1;min-width:140px;background:var(--card);border-radius:12px;padding:12px 14px;
+    border-top:3px solid var(--gold);font-size:13px;transition:all .25s;
+  }
+  .plan-item:hover{transform:translateY(-4px);box-shadow:0 8px 22px rgba(245,197,66,.15);}
+  .plan-item b{display:block;font-size:15px;margin-bottom:4px;color:var(--gold);}
+  .plan-item small{color:var(--muted);line-height:1.5;display:block;}
+  /* 分步搭建 */
+  .step{
+    margin:20px 0;padding:18px 20px;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;
+  }
+  .step-head{font-weight:700;font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+  .step-no{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border-radius:8px;
+    padding:2px 10px;font-size:12px;font-weight:800;letter-spacing:1px;flex-shrink:0;
+  }
+  .step pre{margin:0;}
+  /* 验收清单 */
+  .check-item{
+    display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:10px 16px;cursor:pointer;margin:8px 0;transition:all .2s;user-select:none;
+  }
+  .check-item:hover{border-color:var(--cyan);}
+  .ckbox{
+    width:20px;height:20px;border-radius:6px;border:2px solid var(--muted);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#0d1021;font-size:14px;font-weight:900;
+    transition:all .2s;
+  }
+  .check-item.done{border-color:var(--gold);background:rgba(245,197,66,.08);}
+  .check-item.done .ckbox{background:var(--gold);border-color:var(--gold);}
+  .check-item.done .ck-text{color:var(--gold);text-decoration:line-through;}
+  .progress-bar{height:10px;background:#0a0d1e;border-radius:999px;margin:14px 0 6px;overflow:hidden;border:1px solid var(--line);}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:999px;transition:width .4s;}
+  #check-msg{font-size:13px;color:var(--muted);}
+  /* 打分表 */
+  table.score{width:100%;border-collapse:collapse;font-size:14px;margin:14px 0;}
+  table.score th, table.score td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;}
+  table.score th{color:var(--gold);font-size:13px;}
+  table.score select{
+    background:#0a0d1e;border:1px solid var(--cyan);border-radius:8px;color:var(--text);
+    padding:6px 10px;font-family:inherit;font-size:14px;outline:none;
+  }
+  #score-result{margin-top:10px;padding:14px;border-radius:12px;background:var(--card);border:1px solid var(--line);text-align:center;font-size:14px;}
+  #score-result b{font-size:30px;color:var(--gold);display:block;}
+  /* 进阶挑战 */
+  .challenge{
+    background:var(--card);border:1px solid rgba(167,139,250,.4);border-left:4px solid var(--purple);
+    border-radius:12px;padding:14px 18px;margin:10px 0;font-size:14px;
+  }
+  .challenge b{color:var(--purple);}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 通关认证 */
+  .cert-card{
+    display:none;margin-top:16px;text-align:center;padding:30px 26px;border-radius:18px;
+    background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .cert-card.show{display:block;}
+  .cert-title{font-size:15px;color:var(--muted);letter-spacing:6px;}
+  .cert-name{font-size:34px;font-weight:900;color:var(--gold);margin:10px 0;letter-spacing:3px;}
+  .cert-rank{
+    display:inline-block;padding:6px 22px;border-radius:999px;font-size:16px;font-weight:700;letter-spacing:2px;
+    background:rgba(245,197,66,.14);color:var(--gold);border:1px solid rgba(245,197,66,.5);margin:8px 0;
+  }
+  .cert-desc{font-size:13px;color:var(--muted);margin-top:8px;}
+  .cert-locked{margin-top:16px;padding:16px;border-radius:14px;background:var(--card);border:1px dashed var(--line);font-size:13px;color:var(--muted);text-align:center;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>BOSS 战 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 3 · DUNGEON CHALLENGE · FINAL BOSS</div>
+    <h1>★ BOSS 战 · 桌面自动整理器</h1>
+    <div class="subtitle">副本挑战毕业试炼 —— 综合运用 os / shutil / 字典 / json / 异常处理，驯服你的乱糟糟桌面</div>
+    <div class="mission">
+      <h3>📜 试炼说明</h3>
+      <li>这不是新课，是<b>毕业项目</b>：第 11～15 课的文件操作、模块、字典、json、异常处理全部用上</li>
+      <li>跟着 6 个步骤搭出约 <span class="hl">105 行</span>的完整自动整理脚本，并亲手跑两遍</li>
+      <li>通过功能验收 + 设计决策 Quiz → 获得<span class="hl">「自动化法师」</span>称号，进入进阶秘境</li>
+    </div>
+  </header>
+
+  <!-- 1 BOSS 宣言 -->
+  <section>
+    <h2><span class="num">1</span>👹 BOSS 宣言 · 项目需求书</h2>
+    <div class="boss-face">🗿</div>
+    <p>副本最深处，BOSS「文件巨像」从堆积如山的桌面上缓缓站起，每走一步都有几十个散落的文件哗啦啦往下掉：</p>
+    <div class="req">
+      <h3>「想通过副本？先写一个能替我收拾桌面的脚本！」</h3>
+      <li>① 做一个<span class="hl">自动整理脚本</span>：监控一个指定文件夹，把里面的文件<span class="hl">按扩展名归类移动</span>到子文件夹（图片进 图片/、文档进 文档/……）</li>
+      <li>② 每次整理都要<span class="hl">生成整理日志</span>：什么时候整理的、移动了几个、跳过了几个，全部记录在案</li>
+      <li>③ 运行结束要<span class="hl">打印统计</span>：各分类移动数量一目了然</li>
+      <li>④ <span class="hl">运行不许报错</span>：单个文件出问题不能让整个整理中断（异常处理）</li>
+      <li>⑤ 不认识的文件<span class="hl">不许乱动</span>——白名单思维，宁可跳过不可误删</li>
+      <li>⑥ <b>进阶要求</b>：用 <span class="hl-c">schedule</span> 让它定时自动运行，用 <span class="hl-c">watchdog</span> 监控文件夹一举一动</li>
+    </div>
+    <p style="margin-top:12px">别慌——这头 BOSS 看着吓人，其实就是把第 11～15 课的技能串成一条龙。下面这页就是你的攻略，<span class="hl-c">一步一步把它拆了</span>。</p>
+  </section>
+
+  <!-- 2 作战计划 -->
+  <section>
+    <h2><span class="num">2</span>🗺️ 作战计划 · 大项目拆解术</h2>
+    <p>职业开发者的秘密：<span class="hl">再大的项目也是拆成小块，一块一块写、一块一块测</span>。我们的作战计划分 5 个阶段：</p>
+    <div class="plan">
+      <div class="plan-item"><b>① 配置区</b><small>用字典定义「分类 → 扩展名列表」规则，改规则只改一处</small></div>
+      <div class="plan-item"><b>② 扫描</b><small>os.listdir 列出文件夹内容，只挑出文件、跳过子文件夹</small></div>
+      <div class="plan-item"><b>③ 分类规则</b><small>os.path.splitext 拿扩展名，查字典定归属</small></div>
+      <div class="plan-item"><b>④ 移动</b><small>shutil.move 搬家，移动前 exists 检查防覆盖</small></div>
+      <div class="plan-item"><b>⑤ 日志与统计</b><small>追加模式写日志、字典计数、运行结束打印统计</small></div>
+    </div>
+    <p>每个阶段写完都<span class="hl-c">立刻运行一次</span>，确认没问题再写下一块——这叫"小步快跑"。整理脚本最怕"顺手把重要文件搬丢了"，所以每一步我们都带安全检查。</p>
+  </section>
+
+  <!-- 3 分步搭建 -->
+  <section>
+    <h2><span class="num">3</span>🔨 分步搭建 · 跟着敲就对了</h2>
+    <p>先在电脑上建一个练习文件夹（比如 <span class="hl-c">模拟桌面</span>），往里面随便丢几个不同类型的文件（.jpg、.txt、.pdf……）。然后<span class="hl">亲手逐行敲出</span>下面的代码（不要复制粘贴！）。每一步都接在上一步后面，累计起来就是完整项目。</p>
+
+    <!-- STEP 1 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 1</span>配置区 —— 规则写进字典，建房用 makedirs</div>
+      <p>整理器的灵魂是<span class="hl">分类规则</span>。用什么存？「分类名 → 一堆扩展名」正好是<span class="hl-c">字典</span>的形状：键是分类名，值是扩展名列表。以后想加新分类，只改这一处。</p>
+      <div class="code"><span class="k">import</span> <span class="v">os</span>
+
+<span class="v">RULES</span> = {
+    <span class="s">"图片"</span>: [<span class="s">".jpg"</span>, <span class="s">".png"</span>, <span class="s">".gif"</span>],
+    <span class="s">"文档"</span>: [<span class="s">".pdf"</span>, <span class="s">".txt"</span>, <span class="s">".docx"</span>],
+}
+<span class="k">for</span> <span class="v">category</span> <span class="k">in</span> <span class="v">RULES</span>:                       <span class="c"># 遍历字典的键：图片、文档</span>
+    <span class="v">folder</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="s">"./模拟桌面"</span>, <span class="v">category</span>)  <span class="c"># 拼出 ./模拟桌面/图片</span>
+    <span class="k">if</span> <span class="k">not</span> <span class="v">os</span>.path.<span class="k">exists</span>(<span class="v">folder</span>):          <span class="c"># 不存在才建，存在的跳过</span>
+        <span class="v">os</span>.<span class="k">makedirs</span>(<span class="v">folder</span>)
+        <span class="k">print</span>(<span class="s">"[建房]"</span>, <span class="v">category</span> + <span class="s">"/"</span>)</div>
+      <div class="out">[建房] 图片/
+[建房] 文档/</div>
+      <p>两个要点：① <span class="hl-c">os.path.join()</span> 自动处理路径分隔符，比手写字符串拼接稳妥（Windows 和 Mac 的分隔符还不一样呢）；② <span class="hl">先 exists 再创建</span>，第二次运行就不会对着已存在的文件夹报错——这也是后面 Quiz 的考点。</p>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 2</span>扫描文件夹 —— 只挑文件，别碰子文件夹</div>
+      <p><span class="hl-c">os.listdir()</span> 会列出文件夹里的<b>一切</b>——文件和子文件夹混在一起。我们只要散落的文件（子文件夹是刚建的"房间"，当然不能整理它自己），用 <span class="hl-c">os.path.isfile()</span> 过滤。</p>
+      <div class="code"><span class="k">import</span> <span class="v">os</span>
+
+<span class="v">files</span> = []
+<span class="k">for</span> <span class="v">name</span> <span class="k">in</span> <span class="v">os</span>.listdir(<span class="s">"./模拟桌面"</span>):
+    <span class="k">if</span> <span class="v">os</span>.path.<span class="k">isfile</span>(<span class="v">os</span>.path.<span class="k">join</span>(<span class="s">"./模拟桌面"</span>, <span class="v">name</span>)):
+        <span class="v">files</span>.append(<span class="v">name</span>)        <span class="c"># 只要文件，子文件夹不要</span>
+<span class="k">print</span>(<span class="s">"扫到"</span>, <span class="k">len</span>(<span class="v">files</span>), <span class="s">"个文件："</span>)
+<span class="k">print</span>(<span class="v">files</span>)</div>
+      <div class="out">扫到 3 个文件：
+['笔记.txt', '头像.png', '神秘文件.xyz']</div>
+      <p>注意 <span class="hl-c">isfile</span> 判断时传的是<span class="hl">完整路径</span>（join 拼出来的），只传文件名的话，Python 不知道去哪个文件夹找它。另外输出顺序因系统而异——<span class="hl">listdir 不保证顺序</span>，做统计时别依赖它。</p>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 3</span>分类与移动 —— splitext 查户口，shutil.move 搬家</div>
+      <p>文件叫 <span class="hl-c">"头像.PNG"</span>，扩展名是大写怎么办？先 <span class="hl">.lower()</span> 统一成小写再比对，规则就百发百中。拿扩展名用 <span class="hl-c">os.path.splitext</span>：它把 "头像.png" 拆成 ("头像", ".png")，取第 [1] 位。</p>
+      <div class="code"><span class="k">import</span> <span class="v">os</span>, <span class="v">shutil</span>
+
+<span class="v">RULES</span> = {
+    <span class="s">"图片"</span>: [<span class="s">".jpg"</span>, <span class="s">".png"</span>, <span class="s">".gif"</span>],
+    <span class="s">"文档"</span>: [<span class="s">".pdf"</span>, <span class="s">".txt"</span>, <span class="s">".docx"</span>],
+}
+
+<span class="k">def</span> <span class="v">classify</span>(<span class="v">filename</span>, <span class="v">rules</span>):
+    <span class="v">ext</span> = <span class="v">os</span>.path.splitext(<span class="v">filename</span>)[<span class="n">1</span>].lower()   <span class="c"># ".PNG" → ".png"</span>
+    <span class="k">for</span> <span class="v">category</span>, <span class="v">ext_list</span> <span class="k">in</span> <span class="v">rules</span>.items():      <span class="c"># 键值对一起遍历</span>
+        <span class="k">if</span> <span class="v">ext</span> <span class="k">in</span> <span class="v">ext_list</span>:
+            <span class="k">return</span> <span class="v">category</span>                      <span class="c"># 命中：返回分类名</span>
+    <span class="k">return</span> <span class="k">None</span>                                    <span class="c"># 没规则匹配 → None</span>
+
+<span class="k">print</span>(<span class="v">classify</span>(<span class="s">"头像.PNG"</span>, <span class="v">RULES</span>))       <span class="c"># 大小写也难不倒它</span>
+<span class="k">print</span>(<span class="v">classify</span>(<span class="s">"神秘文件.xyz"</span>, <span class="v">RULES</span>))    <span class="c"># 未知扩展名 → None</span>
+
+<span class="v">src</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="s">"./模拟桌面"</span>, <span class="s">"头像.png"</span>)
+<span class="v">dst</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="s">"./模拟桌面"</span>, <span class="s">"图片"</span>, <span class="s">"头像.png"</span>)
+<span class="k">if</span> <span class="v">os</span>.path.<span class="k">exists</span>(<span class="v">dst</span>):                 <span class="c"># 目标已有同名文件！</span>
+    <span class="k">print</span>(<span class="s">"[警告] 目标已有同名文件，改名再移！"</span>)
+<span class="k">else</span>:
+    <span class="v">shutil</span>.move(<span class="v">src</span>, <span class="v">dst</span>)               <span class="c"># 真正的搬家</span>
+    <span class="k">print</span>(<span class="s">"[移动] 头像.png → 图片/"</span>)</div>
+      <div class="out">图片
+None
+[移动] 头像.png → 图片/</div>
+      <p>再运行一遍试试（文件已经在 图片/ 里了）：这次会走到警告分支——</p>
+      <div class="out">图片
+None
+[警告] 目标已有同名文件，改名再移！</div>
+      <p>⚠️ <span class="hl">为什么移动前必须 exists 检查？</span>因为 <span class="hl-c">shutil.move</span> 在目标已有同名文件时可能<span class="hl">直接覆盖</span>——两个"简历.pdf"只有一份能活下来。安全做法：同名就改名（加个"重命名_"前缀）再搬。完整代码里就是这么干的。</p>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 4</span>日志与规则文件 —— 追加模式 + json + 异常处理</div>
+      <p>整理日志要用<span class="hl">追加模式 "a"</span> 打开：每次运行的结果接在文件末尾，历史记录一条不丢（用 "w" 会把上次的记录抹掉！）。规则也可以存成 json 文件，想改规则不用改代码——这就是<span class="hl">配置与代码分离</span>的思想。</p>
+      <div class="code"><span class="k">import</span> <span class="v">json</span>
+<span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> <span class="v">datetime</span>
+
+<span class="v">log_path</span> = <span class="s">"./整理日志.txt"</span>
+<span class="k">with</span> <span class="k">open</span>(<span class="v">log_path</span>, <span class="s">"a"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:   <span class="c"># "a" = 追加，不覆盖</span>
+    <span class="v">f</span>.write(<span class="s">"===== "</span> + <span class="v">datetime</span>.now().strftime(<span class="s">"%Y-%m-%d %H:%M:%S"</span>) + <span class="s">" 整理记录 =====\n"</span>)
+    <span class="v">f</span>.write(<span class="s">"成功移动：9 个，跳过：2 个\n\n"</span>)
+
+<span class="k">try</span>:
+    <span class="k">with</span> <span class="k">open</span>(<span class="s">"./规则.json"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+        <span class="v">rules</span> = <span class="v">json</span>.load(<span class="v">f</span>)          <span class="c"># json 文件 → 字典</span>
+    <span class="k">print</span>(<span class="s">"规则读取成功："</span>, <span class="v">rules</span>)
+<span class="k">except</span> <span class="v">FileNotFoundError</span>:          <span class="c"># 文件不存在？不崩，降级处理</span>
+    <span class="k">print</span>(<span class="s">"[提示] 没有规则文件，等会儿用内置默认规则"</span>)</div>
+      <div class="out">[提示] 没有规则文件，等会儿用内置默认规则</div>
+      <p>连跑两遍，打开 整理日志.txt 看看——<span class="hl">两份记录都在</span>，这就是追加模式的功劳：</p>
+      <div class="out">===== 2026-08-23 21:57:35 整理记录 =====
+成功移动：9 个，跳过：2 个
+
+===== 2026-08-23 21:57:35 整理记录 =====
+成功移动：9 个，跳过：2 个</div>
+      <p>想把规则导出成 json？一行 <span class="hl-c">json.dump</span> 搞定（<span class="hl">ensure_ascii=False</span> 让中文原样保存）：</p>
+      <div class="code"><span class="k">import</span> <span class="v">json</span>
+
+<span class="v">rules</span> = {<span class="s">"图片"</span>: [<span class="s">".jpg"</span>, <span class="s">".png"</span>, <span class="s">".gif"</span>], <span class="s">"文档"</span>: [<span class="s">".pdf"</span>, <span class="s">".txt"</span>]}
+<span class="k">with</span> <span class="k">open</span>(<span class="s">"./规则.json"</span>, <span class="s">"w"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">json</span>.dump(<span class="v">rules</span>, <span class="v">f</span>, ensure_ascii=<span class="k">False</span>, indent=<span class="n">2</span>)</div>
+      <p>异常处理是这一步的主角：<span class="hl">json 文件被手滑删了？格式写坏了？</span>try/except 一接，程序不崩、降级到内置默认规则——这才配叫"自动化"。</p>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 5</span>统计与主流程 —— 字典计数，一环扣一环</div>
+      <p>统计各分类移动了几个，最适合的还是字典：<span class="hl-c">stats.get(分类, 0) + 1</span> 一行搞定"有则加一、无则从零开始"。最后把所有环节串进 main() 主流程。</p>
+      <div class="code"><span class="v">stats</span> = {}
+
+<span class="k">def</span> <span class="v">count</span>(<span class="v">stats</span>, <span class="v">category</span>):
+    <span class="v">stats</span>[<span class="v">category</span>] = <span class="v">stats</span>.<span class="k">get</span>(<span class="v">category</span>, <span class="n">0</span>) + <span class="n">1</span>   <span class="c"># 没有 key 就当 0</span>
+
+<span class="v">count</span>(<span class="v">stats</span>, <span class="s">"图片"</span>)
+<span class="v">count</span>(<span class="v">stats</span>, <span class="s">"图片"</span>)
+<span class="v">count</span>(<span class="v">stats</span>, <span class="s">"文档"</span>)
+<span class="k">print</span>(<span class="v">stats</span>)
+<span class="k">print</span>(<span class="s">"图片"</span> <span class="k">in</span> <span class="v">stats</span>)                    <span class="c"># 成员检查</span>
+<span class="k">for</span> <span class="v">category</span> <span class="k">in</span> <span class="k">sorted</span>(<span class="v">stats</span>):              <span class="c"># 排序后遍历，输出稳定</span>
+    <span class="k">print</span>(<span class="v">category</span>, <span class="s">"："</span>, <span class="v">stats</span>[<span class="v">category</span>], <span class="s">"个"</span>)</div>
+      <div class="out">{'图片': 2, '文档': 1}
+True
+图片 ： 2 个
+文档 ： 1 个</div>
+      <p>主流程的骨架长这样（完整版在下一步）：检查目标文件夹存在 → 读规则 → 建房 → 扫描 → 逐个分类移动（<span class="hl">每个文件单独 try/except，一个失败不影响其他</span>）→ 打印统计 → 写日志。用 <span class="hl-c">if __name__ == "__main__":</span> 收尾——被 import 时不自动运行，直接运行才执行。</p>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="step">
+      <div class="step-head"><span class="step-no">STEP 6</span>合体！完整代码（约 105 行）与实测</div>
+      <p>把前 5 步按规则合并，就是最终项目。完整代码如下（也可以从上往下逐块对照，确认你写的和它一致）：</p>
+      <div class="code"><span class="k">import</span> <span class="v">os</span>
+<span class="k">import</span> <span class="v">shutil</span>
+<span class="k">import</span> <span class="v">json</span>
+<span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> <span class="v">datetime</span>
+
+<span class="c"># ========== 配置区：想改规则只改这里 ==========</span>
+<span class="v">DEFAULT_RULES</span> = {
+    <span class="s">"图片"</span>: [<span class="s">".jpg"</span>, <span class="s">".jpeg"</span>, <span class="s">".png"</span>, <span class="s">".gif"</span>, <span class="s">".bmp"</span>],
+    <span class="s">"文档"</span>: [<span class="s">".doc"</span>, <span class="s">".docx"</span>, <span class="s">".pdf"</span>, <span class="s">".txt"</span>, <span class="s">".md"</span>, <span class="s">".pptx"</span>],
+    <span class="s">"表格"</span>: [<span class="s">".xls"</span>, <span class="s">".xlsx"</span>, <span class="s">".csv"</span>],
+    <span class="s">"安装包"</span>: [<span class="s">".exe"</span>, <span class="s">".dmg"</span>, <span class="s">".zip"</span>, <span class="s">".rar"</span>, <span class="s">".7z"</span>],
+    <span class="s">"视频"</span>: [<span class="s">".mp4"</span>, <span class="s">".mov"</span>, <span class="s">".avi"</span>, <span class="s">".mkv"</span>],
+}
+<span class="v">TARGET_DIR</span> = <span class="s">"./模拟桌面"</span>
+<span class="v">SAFE_MODE</span> = <span class="k">True</span>   <span class="c"># 白名单模式：不在规则里的文件一律不动</span>
+
+<span class="k">def</span> <span class="v">load_rules</span>(<span class="v">path</span>=<span class="s">"./规则.json"</span>):
+    <span class="s">"""优先从 json 配置文件读规则，读不到就用内置默认规则"""</span>
+    <span class="k">if</span> <span class="v">os</span>.path.<span class="k">exists</span>(<span class="v">path</span>):
+        <span class="k">try</span>:
+            <span class="k">with</span> <span class="k">open</span>(<span class="v">path</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+                <span class="k">return</span> <span class="v">json</span>.load(<span class="v">f</span>)
+        <span class="k">except</span> (<span class="v">json</span>.JSONDecodeError, <span class="v">OSError</span>) <span class="k">as</span> <span class="v">e</span>:
+            <span class="k">print</span>(<span class="s">"[警告] 规则文件读取失败，使用内置规则："</span>, <span class="v">e</span>)
+    <span class="k">return</span> <span class="v">DEFAULT_RULES</span>
+
+<span class="k">def</span> <span class="v">scan_files</span>(<span class="v">target_dir</span>):
+    <span class="s">"""扫描目录，返回文件名列表（跳过子文件夹）"""</span>
+    <span class="v">files</span> = []
+    <span class="k">for</span> <span class="v">name</span> <span class="k">in</span> <span class="v">os</span>.listdir(<span class="v">target_dir</span>):
+        <span class="k">if</span> <span class="v">os</span>.path.<span class="k">isfile</span>(<span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">name</span>)):
+            <span class="v">files</span>.append(<span class="v">name</span>)
+    <span class="k">return</span> <span class="v">files</span>
+
+<span class="k">def</span> <span class="v">classify</span>(<span class="v">filename</span>, <span class="v">rules</span>):
+    <span class="s">"""根据扩展名返回分类名；没有匹配的规则返回 None"""</span>
+    <span class="v">ext</span> = <span class="v">os</span>.path.splitext(<span class="v">filename</span>)[<span class="n">1</span>].lower()
+    <span class="k">for</span> <span class="v">category</span>, <span class="v">ext_list</span> <span class="k">in</span> <span class="v">rules</span>.items():
+        <span class="k">if</span> <span class="v">ext</span> <span class="k">in</span> <span class="v">ext_list</span>:
+            <span class="k">return</span> <span class="v">category</span>
+    <span class="k">return</span> <span class="k">None</span>
+
+<span class="k">def</span> <span class="v">make_rooms</span>(<span class="v">target_dir</span>, <span class="v">rules</span>):
+    <span class="s">"""为每个分类创建子文件夹，已存在就跳过"""</span>
+    <span class="k">for</span> <span class="v">category</span> <span class="k">in</span> <span class="v">rules</span>:
+        <span class="v">folder</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">category</span>)
+        <span class="k">if</span> <span class="k">not</span> <span class="v">os</span>.path.<span class="k">exists</span>(<span class="v">folder</span>):
+            <span class="v">os</span>.<span class="k">makedirs</span>(<span class="v">folder</span>)
+            <span class="k">print</span>(<span class="s">"[建房] 创建分类文件夹："</span>, <span class="v">category</span> + <span class="s">"/"</span>)
+
+<span class="k">def</span> <span class="v">move_file</span>(<span class="v">target_dir</span>, <span class="v">filename</span>, <span class="v">category</span>):
+    <span class="s">"""把文件移动进分类文件夹，成功返回 True"""</span>
+    <span class="v">src</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">filename</span>)
+    <span class="v">dst</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">category</span>, <span class="v">filename</span>)
+    <span class="k">if</span> <span class="v">os</span>.path.<span class="k">exists</span>(<span class="v">dst</span>):          <span class="c"># 目标已有同名文件：改名保平安</span>
+        <span class="v">dst</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">category</span>, <span class="s">"重命名_"</span> + <span class="v">filename</span>)
+    <span class="k">try</span>:
+        <span class="v">shutil</span>.move(<span class="v">src</span>, <span class="v">dst</span>)
+        <span class="k">return</span> <span class="k">True</span>
+    <span class="k">except</span> <span class="v">OSError</span> <span class="k">as</span> <span class="v">e</span>:
+        <span class="k">print</span>(<span class="s">"[失败]"</span>, <span class="v">filename</span>, <span class="s">"移动出错："</span>, <span class="v">e</span>)
+        <span class="k">return</span> <span class="k">False</span>
+
+<span class="k">def</span> <span class="v">write_log</span>(<span class="v">target_dir</span>, <span class="v">moved</span>, <span class="v">skipped</span>, <span class="v">stats</span>):
+    <span class="s">"""把本次整理结果追加写进日志文件"""</span>
+    <span class="v">log_path</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="s">"整理日志.txt"</span>)
+    <span class="v">time_str</span> = <span class="v">datetime</span>.now().strftime(<span class="s">"%Y-%m-%d %H:%M:%S"</span>)
+    <span class="k">with</span> <span class="k">open</span>(<span class="v">log_path</span>, <span class="s">"a"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+        <span class="v">f</span>.write(<span class="s">"===== "</span> + <span class="v">time_str</span> + <span class="s">" 整理记录 =====\n"</span>)
+        <span class="v">f</span>.write(<span class="s">"成功移动："</span> + <span class="k">str</span>(<span class="v">moved</span>) + <span class="s">" 个，跳过："</span> + <span class="k">str</span>(<span class="v">skipped</span>) + <span class="s">" 个\n"</span>)
+        <span class="k">for</span> <span class="v">category</span> <span class="k">in</span> <span class="k">sorted</span>(<span class="v">stats</span>):
+            <span class="v">f</span>.write(<span class="s">"  "</span> + <span class="v">category</span> + <span class="s">"："</span> + <span class="k">str</span>(<span class="v">stats</span>[<span class="v">category</span>]) + <span class="s">" 个\n"</span>)
+        <span class="v">f</span>.write(<span class="s">"\n"</span>)
+
+<span class="k">def</span> <span class="v">main</span>():
+    <span class="k">if</span> <span class="k">not</span> <span class="v">os</span>.path.<span class="k">isdir</span>(<span class="v">TARGET_DIR</span>):
+        <span class="k">print</span>(<span class="s">"[错误] 目标文件夹不存在："</span>, <span class="v">TARGET_DIR</span>)
+        <span class="k">return</span>
+    <span class="v">rules</span> = <span class="v">load_rules</span>()
+    <span class="k">print</span>(<span class="s">"[开始] 整理目标："</span>, <span class="v">TARGET_DIR</span>)
+    <span class="v">make_rooms</span>(<span class="v">TARGET_DIR</span>, <span class="v">rules</span>)
+
+    <span class="v">stats</span> = {}
+    <span class="v">moved</span>, <span class="v">skipped</span> = <span class="n">0</span>, <span class="n">0</span>
+    <span class="k">for</span> <span class="v">filename</span> <span class="k">in</span> <span class="v">scan_files</span>(<span class="v">TARGET_DIR</span>):
+        <span class="k">if</span> <span class="v">filename</span>.startswith(<span class="s">"整理日志"</span>):   <span class="c"># 别把日志自己整理走</span>
+            <span class="k">continue</span>
+        <span class="v">category</span> = <span class="v">classify</span>(<span class="v">filename</span>, <span class="v">rules</span>)
+        <span class="k">if</span> <span class="v">category</span> <span class="k">is</span> <span class="k">None</span>:
+            <span class="v">skipped</span> += <span class="n">1</span>
+            <span class="k">print</span>(<span class="s">"[跳过]"</span>, <span class="v">filename</span>, <span class="s">"（没有匹配的分类规则）"</span>)
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="v">move_file</span>(<span class="v">TARGET_DIR</span>, <span class="v">filename</span>, <span class="v">category</span>):
+            <span class="v">stats</span>[<span class="v">category</span>] = <span class="v">stats</span>.<span class="k">get</span>(<span class="v">category</span>, <span class="n">0</span>) + <span class="n">1</span>
+            <span class="v">moved</span> += <span class="n">1</span>
+            <span class="k">print</span>(<span class="s">"[移动]"</span>, <span class="v">filename</span>, <span class="s">"→"</span>, <span class="v">category</span> + <span class="s">"/"</span>)
+
+    <span class="k">print</span>(<span class="s">"[统计] 共处理文件"</span>, <span class="v">moved</span> + <span class="v">skipped</span>, <span class="s">"个：移动"</span>, <span class="v">moved</span>, <span class="s">"个，跳过"</span>, <span class="v">skipped</span>, <span class="s">"个"</span>)
+    <span class="k">for</span> <span class="v">category</span> <span class="k">in</span> <span class="k">sorted</span>(<span class="v">stats</span>):
+        <span class="k">print</span>(<span class="s">"   -"</span>, <span class="v">category</span>, <span class="s">"："</span>, <span class="v">stats</span>[<span class="v">category</span>], <span class="s">"个"</span>)
+    <span class="v">write_log</span>(<span class="v">TARGET_DIR</span>, <span class="v">moved</span>, <span class="v">skipped</span>, <span class="v">stats</span>)
+    <span class="k">print</span>(<span class="s">"[完成] 日志已追加到"</span>, <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">TARGET_DIR</span>, <span class="s">"整理日志.txt"</span>))
+
+<span class="k">if</span> <span class="v">__name__</span> == <span class="s">"__main__"</span>:
+    <span class="v">main</span>()</div>
+      <p>实测来了！往 模拟桌面 里丢 11 个文件（.jpg / .png / .pdf / .txt / .xlsx / .csv / .exe / .zip / .mp4 / .xyz / 无扩展名的 readme），运行第一遍——</p>
+      <div class="out">[开始] 整理目标： ./模拟桌面
+[建房] 创建分类文件夹： 图片/
+[建房] 创建分类文件夹： 文档/
+[建房] 创建分类文件夹： 表格/
+[建房] 创建分类文件夹： 安装包/
+[建房] 创建分类文件夹： 视频/
+[移动] 笔记.txt → 文档/
+[移动] 头像.png → 图片/
+[跳过] 神秘文件.xyz （没有匹配的分类规则）
+[移动] 旅行照片.jpg → 图片/
+[移动] 课程表.xlsx → 表格/
+[移动] 安装包.exe → 安装包/
+[移动] 简历.pdf → 文档/
+[移动] 电影.mp4 → 视频/
+[移动] 游戏.zip → 安装包/
+[跳过] readme （没有匹配的分类规则）
+[移动] 数据.csv → 表格/
+[统计] 共处理文件 11 个：移动 9 个，跳过 2 个
+   - 图片 ： 2 个
+   - 安装包 ： 2 个
+   - 文档 ： 2 个
+   - 表格 ： 2 个
+   - 视频 ： 1 个
+[完成] 日志已追加到 ./模拟桌面/整理日志.txt</div>
+      <p>马上再运行第二遍——<span class="hl">什么都没重复移动</span>：文件已归位、房间已存在、日志被跳过，只剩两个不认识的文件继续被白名单保护：</p>
+      <div class="out">[开始] 整理目标： ./模拟桌面
+[跳过] 神秘文件.xyz （没有匹配的分类规则）
+[跳过] readme （没有匹配的分类规则）
+[统计] 共处理文件 2 个：移动 0 个，跳过 2 个
+[完成] 日志已追加到 ./模拟桌面/整理日志.txt</div>
+      <p>第二遍零移动零报错，说明脚本是<span class="hl">可重复运行</span>的（行话叫"幂等"）——这是自动化脚本的基本修养。再看一眼 整理日志.txt，两份整理记录整整齐齐地追加在一起。BOSS，卒。🎉</p>
+    </div>
+  </section>
+
+  <!-- 4 验收清单 -->
+  <section>
+    <h2><span class="num">4</span>✅ 功能验收清单 · 逐项打勾</h2>
+    <p>拿你自己写的版本逐项验收。点击条目即可打勾（本页用内存变量记录，刷新后重新验收）。</p>
+    <div id="checklist"></div>
+    <div class="progress-bar"><div class="progress-fill" id="check-fill"></div></div>
+    <div id="check-msg">已验收 0 / 8 项</div>
+  </section>
+
+  <!-- 5 自评打分表 -->
+  <section>
+    <h2><span class="num">5</span>📊 自评打分表 · 满分 100</h2>
+    <p>像真正的开发者一样给自己的项目打分。诚实一点——分数低不是坏事，它就是你的升级路线图。每个维度 0～20 分，下拉选择。</p>
+    <table class="score">
+      <tr><th>维度</th><th>评分要点</th><th>打分</th></tr>
+      <tr><td>🧩 功能完整</td><td>需求书的①～⑤是否全部实现（归类/日志/统计/不中断/白名单）</td><td><select id="sc-0" onchange="calcScore()"><option value="0">0 分</option><option value="5">5 分</option><option value="10">10 分</option><option value="15">15 分</option><option value="20">20 分</option></select></td></tr>
+      <tr><td>🛡️ 安全健壮</td><td>exists 防覆盖、try/except 兜底、未知文件不乱动</td><td><select id="sc-1" onchange="calcScore()"><option value="0">0 分</option><option value="5">5 分</option><option value="10">10 分</option><option value="15">15 分</option><option value="20">20 分</option></select></td></tr>
+      <tr><td>📝 日志与统计</td><td>追加模式保历史、统计数字和真实移动数一致</td><td><select id="sc-2" onchange="calcScore()"><option value="0">0 分</option><option value="5">5 分</option><option value="10">10 分</option><option value="15">15 分</option><option value="20">20 分</option></select></td></tr>
+      <tr><td>🏗️ 代码结构</td><td>配置区集中、函数各司其职、变量名见名知意</td><td><select id="sc-3" onchange="calcScore()"><option value="0">0 分</option><option value="5">5 分</option><option value="10">10 分</option><option value="15">15 分</option><option value="20">20 分</option></select></td></tr>
+      <tr><td>🔁 实测表现</td><td>连跑两遍都无报错、第二遍零重复移动（幂等）</td><td><select id="sc-4" onchange="calcScore()"><option value="0">0 分</option><option value="5">5 分</option><option value="10">10 分</option><option value="15">15 分</option><option value="20">20 分</option></select></td></tr>
+    </table>
+    <div id="score-result">选择每个维度的分数，看看总评</div>
+  </section>
+
+  <!-- 6 进阶挑战 -->
+  <section>
+    <h2><span class="num">6</span>🚀 进阶挑战 · 让 BOSS 刮目相看</h2>
+    <p>基础版通关只是及格线。下面三个进阶方向，任选其一都能让项目亮起来：</p>
+    <div class="challenge"><b>挑战一 · 定时任务 schedule：</b>手动运行算什么自动化？装好第三方库（终端执行 <span class="hl-c">pip install schedule</span>）后，几行代码让它自己定时跑——</div>
+    <div class="code"><span class="k">import</span> <span class="v">schedule</span>
+<span class="k">import</span> <span class="v">time</span>
+
+<span class="k">def</span> <span class="v">job</span>():
+    <span class="k">print</span>(<span class="s">"开始整理桌面……"</span>)
+    <span class="c"># 这里调用你的 main() 即可（把上面的完整代码存成 整理器.py，</span>
+    <span class="c"># 然后 from 整理器 import main）</span>
+
+<span class="v">schedule</span>.every(<span class="n">10</span>).minutes.<span class="k">do</span>(<span class="v">job</span>)        <span class="c"># 每 10 分钟一次</span>
+<span class="v">schedule</span>.every().day.at(<span class="s">"09:00"</span>).<span class="k">do</span>(<span class="v">job</span>)  <span class="c"># 每天早上 9 点</span>
+
+<span class="k">while</span> <span class="k">True</span>:
+    <span class="v">schedule</span>.run_pending()          <span class="c"># 到点就触发任务</span>
+    <span class="v">time</span>.sleep(<span class="n">1</span>)                <span class="c"># 不然 CPU 会被跑满</span></div>
+    <div class="challenge"><b>挑战二 · 按日期归档：</b>文件多的时候，"图片/"里也会挤成一锅粥。给每个分类再套一层日期子文件夹（<span class="hl">图片/2026-08-23/xxx.jpg</span>），用 datetime 动态生成文件夹名——</div>
+    <div class="code"><span class="k">from</span> <span class="v">datetime</span> <span class="k">import</span> <span class="v">datetime</span>
+<span class="k">import</span> <span class="v">os</span>
+
+<span class="v">subfolder</span> = <span class="v">datetime</span>.now().strftime(<span class="s">"%Y-%m-%d"</span>)   <span class="c"># "2026-08-23"</span>
+<span class="v">dst</span> = <span class="v">os</span>.path.<span class="k">join</span>(<span class="v">target_dir</span>, <span class="v">category</span>, <span class="v">subfolder</span>)
+<span class="v">os</span>.<span class="k">makedirs</span>(<span class="v">dst</span>, exist_ok=<span class="k">True</span>)              <span class="c"># exist_ok=True：存在也不报错</span></div>
+    <div class="challenge"><b>挑战三 · 白名单保护再升级 + watchdog：</b>给绝对不能动的文件加"护盾"清单（比如 <span class="hl-c">PROTECTED = {"重要配置.ini"}</span>，扫描时跳过它们）；再进一步，装 <span class="hl-c">pip install watchdog</span> 监控文件夹——有新文件掉进来<span class="hl">立刻</span>自动归类，连定时都不用等。watchdog 涉及事件回调，正好是<span class="hl">第 16 课「类与对象」</span>之后才能完全看懂的东西，先混个眼熟。</div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 第 11～15 课核心考点</h2>
+    <p>毕业试炼前，把副本挑战 5 课的看家本领全部翻一遍。点击卡片翻面看答案。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 设计决策 Quiz -->
+  <section>
+    <h2><span class="num">8</span>🧠 设计决策 Quiz · 5 题 · 答对 4 题解锁认证</h2>
+    <p>这几题考的不是"代码是什么"，而是<span class="hl">"为什么这么设计"</span>——这才是从抄代码到自己写代码的分水岭。</p>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 通关认证 -->
+  <section>
+    <h2><span class="num">9</span>🏆 通关认证</h2>
+    <p>完成两个条件即颁发毕业认证：① <span class="hl">功能验收清单 8 项全部打勾</span>；② <span class="hl">设计决策 Quiz 答对至少 4 题</span>。</p>
+    <div class="lab-input" style="margin-top:14px">
+      <input id="cert-name" maxlength="10" placeholder="输入你想印在证书上的名字">
+      <button class="btn" onclick="checkCert()">🎖️ 领取认证</button>
+    </div>
+    <div class="cert-locked" id="cert-locked">尚未满足条件：验收清单 0/8 ｜ Quiz 0/5 正确</div>
+    <div class="cert-card" id="cert-card">
+      <div class="cert-title">副 本 挑 战 毕 业 试 炼 · 认 证</div>
+      <div class="cert-name" id="cert-holder">阿呆</div>
+      <div>成功完成 BOSS 战项目《桌面自动整理器》</div>
+      <div class="cert-rank">★ 自动化法师 ★</div>
+      <div class="cert-desc">称号已登记在案。进阶秘境的大门已为你开启——下一课：类与对象 · 创建种族</div>
+    </div>
+  </section>
+
+  <footer>
+    通关条件：验收清单 8/8 + 设计决策 Quiz ≥ 4/5 ｜ 获得称号：<b>「自动化法师」</b> ｜ 下一站：进阶秘境 · 第 16 课<b>类与对象 —— 创建种族</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 验收清单（内存变量记录勾选状态） ============ */
+var checkItems = [
+  '建好了"模拟桌面"练习文件夹，并放入多种类型的测试文件',
+  '脚本能把 .jpg/.png 归入图片、.pdf/.txt 归入文档……各归各位',
+  '每个分类的子文件夹被自动创建，且第二次运行不会重复创建',
+  '没有匹配规则的文件被安全跳过，日志里也有记录（白名单思维）',
+  '目标位置已有同名文件时不会覆盖（exists 检查生效）',
+  '整理日志用追加模式写入，多次运行的历史记录都在',
+  '运行结束打印统计：总数 / 移动数 / 跳过数与实际情况一致',
+  '完整代码连跑两遍均无报错，第二遍零重复移动（幂等）'
+];
+var checkState = [false,false,false,false,false,false,false,false];
+(function(){
+  var box = document.getElementById('checklist');
+  checkItems.forEach(function(text, i){
+    var d = document.createElement('div');
+    d.className = 'check-item';
+    d.innerHTML = '<span class="ckbox"></span><span class="ck-text">'+text+'</span>';
+    d.addEventListener('click', function(){
+      checkState[i] = !checkState[i];
+      d.classList.toggle('done', checkState[i]);
+      updateCheckProgress();
+    });
+    box.appendChild(d);
+  });
+})();
+function updateCheckProgress(){
+  var done = getCheckedCount();
+  document.getElementById('check-fill').style.width = (done / checkItems.length * 100) + '%';
+  document.getElementById('check-msg').textContent = '已验收 ' + done + ' / ' + checkItems.length + ' 项' +
+    (done === checkItems.length ? ' —— 全部通过！文件巨像轰然倒塌 🗿' : '（继续加油）');
+  updateCertLocked();
+}
+function getCheckedCount(){
+  var done = 0;
+  for(var i=0;i<checkState.length;i++){ if(checkState[i]) done++; }
+  return done;
+}
+
+/* ============ 自评打分表 ============ */
+function calcScore(){
+  var total = 0;
+  for(var i=0;i<5;i++){ total += parseInt(document.getElementById('sc-'+i).value, 10); }
+  var el = document.getElementById('score-result');
+  var msg;
+  if(total === 0){ msg = '选择每个维度的分数，看看总评'; }
+  else if(total >= 90){ msg = '自动化宗师！这个整理器已经可以真的上岗伺候你的桌面了。'; }
+  else if(total >= 80){ msg = '优秀！可以昂首挺胸地领取「自动化法师」称号了。'; }
+  else if(total >= 60){ msg = '合格！找到扣分最多的维度，回去针对性改进——这就是升级路线图。'; }
+  else { msg = '还不到 60 分？完全没关系，对照评分要点逐条修补，改一版涨一截。'; }
+  el.innerHTML = '<b>' + total + ' 分</b>' + msg;
+}
+
+/* ============ 记忆卡片（复习第 11-15 课） ============ */
+var cardData = [
+  ['os.listdir(路径) 返回什么','该文件夹下所有条目名字的列表（文件和子文件夹混在一起，不保证顺序）'],
+  ['os.path.join("a", "b") 的结果','自动拼出跨平台正确路径："a/b"（Windows 下自动用反斜杠）'],
+  ['os.path.splitext("照片.JPG") 返回','("照片", "..JPG") —— 拿扩展名取 [1]，比对前记得 .lower()'],
+  ['os.path.isfile / isdir / exists','分别判断：是不是文件 / 是不是文件夹 / 路径存不存在，都返回 True/False'],
+  ['os.makedirs(路径) 建文件夹的稳妥写法','先 exists 检查再建；或 makedirs(路径, exist_ok=True) 已存在也不报错'],
+  ['shutil.move(源, 目标) 干嘛的','移动（搬家）文件或文件夹；目标已有同名文件可能覆盖，先做 exists 检查'],
+  ['open 的 "a" 模式是什么','追加模式：新内容接在文件末尾，历史记录不丢；"w" 模式会先清空文件'],
+  ['json.load(f) 和 json.dump(数据, f)','load 把 json 文件读成字典/列表；dump 把字典/列表写进文件；ensure_ascii=False 保住中文'],
+  ['try/except 怎么兜住错误','try 里放危险代码，except 捕获指定异常（如 FileNotFoundError），出错不崩、走降级逻辑'],
+  ['字典的 .get(键, 默认值)','键存在返回对应值，不存在返回默认值——统计计数 stats.get(c, 0) + 1 的核心']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ 设计决策 Quiz ============ */
+var quizData = [
+  {q:'分类规则（图片→.jpg/.png、文档→.pdf/.txt……）最适合用什么数据结构存？',
+   opts:['一个很长的列表 ["图片", ".jpg", "文档", ".pdf"]','字典：键是分类名，值是扩展名列表','五个独立的变量','一个字符串 "图片:.jpg,.png|文档:.pdf"'], ans:1,
+   exp:'字典的「键 → 值」正好对应「分类 → 扩展名集合」，查询和遍历都自然：items() 一次拿到分类名和它的规则；加新分类只加一个键。列表和字符串都得自己写解析，变量则没法遍历。'},
+  {q:'为什么 shutil.move 移动之前要先 os.path.exists(dst) 检查目标？',
+   opts:['让程序跑得更快','防止目标位置已有同名文件被覆盖，造成数据丢失','Python 语法规定必须先检查','为了让输出更多行'], ans:1,
+   exp:'同名文件直接 move 可能被覆盖——两个"简历.pdf"只能活一个。先检查，命中就改名（加前缀）再移，宁可名字丑一点，不能让用户的文件凭空消失。'},
+  {q:'整理日志为什么要用追加模式 "a" 打开，而不是 "w" ？',
+   opts:['"a" 写入速度更快','"w" 每次都会清空文件，历史整理记录会全部丢失','"a" 能写入中文而 "w" 不能','没有区别，随便选'], ans:1,
+   exp:'"w" 模式一打开就把文件清空，昨天的整理记录瞬间蒸发；"a" 模式把新内容接到末尾，每次运行的记录都完整保留——日志的价值就在于"历史都在"。'},
+  {q:'为什么每个文件的移动要单独包一层 try/except，而不是整个循环包一个？',
+   opts:['try/except 越多代码越好看','一个文件移动失败只跳过它，其余文件继续整理，不会中断全局','Python 不允许循环里没有 try','这样能提升移动速度'], ans:1,
+   exp:'整个循环包一个 try 的话，第 3 个文件出错，后面的 97 个文件全都不整理了。单文件单兜底，坏一个跳一个——自动化脚本要的是"尽量完成 + 出错有交代"。'},
+  {q:'遇到规则里没有的文件（如 神秘文件.xyz），为什么选择跳过而不是统一扔进"其他/"？',
+   opts:['写"其他/"这个文件夹名太麻烦','白名单思维：不认识的文件可能是重要文件，宁可不动也不误动','跳过比移动省内存','Python 无法移动未知扩展名的文件'], ans:1,
+   exp:'自动脚本动的是用户的真实文件，"误动"的代价远大于"没动"。跳过并打印提示，让人类自己决定——这才是值得信赖的自动化。（当然，明确需求时建"其他/"也行，关键是这是你做出的有意设计。）'}
+];
+var quizCorrect = 0;
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    quizCorrect = s;
+    var pts = s * 20;
+    var el = document.getElementById('quiz-result');
+    var msg = s >= 4
+      ? '设计思维在线！满足认证条件之一 ✔（可前往下方领取「自动化法师」认证）'
+      : '差一点！把错题的解析读三遍，刷新页面重新挑战，答对 4 题才能解锁认证';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    updateCertLocked();
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+
+/* ============ 通关认证 ============ */
+function updateCertLocked(){
+  var el = document.getElementById('cert-locked');
+  if(!el) return;
+  el.textContent = '尚未满足条件：验收清单 ' + getCheckedCount() + '/8 ｜ Quiz ' + quizCorrect + '/5 正确' +
+    ((getCheckedCount() === 8 && quizCorrect >= 4) ? '（已满足！输入名字点击领取）' : '（需要 8/8 且 ≥ 4/5）');
+}
+function checkCert(){
+  if(getCheckedCount() < 8 || quizCorrect < 4){
+    alert('条件未达成：需要验收清单 8/8 全勾 + Quiz 答对至少 4 题。当前 ' + getCheckedCount() + '/8 与 ' + quizCorrect + '/5。');
+    return;
+  }
+  var name = document.getElementById('cert-name').value.trim();
+  if(!name){ name = '无名冒险者'; }
+  document.getElementById('cert-holder').textContent = name;
+  document.getElementById('cert-locked').style.display = 'none';
+  var card = document.getElementById('cert-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  card.scrollIntoView({behavior:'smooth', block:'center'});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,3 @@
+# Preserve pre-existing trailing spaces in these byte-identical legacy copies.
+public/cli-course.html whitespace=-blank-at-eol
+"public/python-course/29_大师之路_毕业设计_个人自动化助手.html" whitespace=-blank-at-eol

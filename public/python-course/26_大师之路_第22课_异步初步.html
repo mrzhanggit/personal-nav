@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第22课 · 异步初步 —— 顺风耳</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(244,114,182,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(77,214,255,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--pink);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(244,114,182,.12);color:var(--pink);border:1px solid rgba(244,114,182,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f472b6,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  .hl-p{color:var(--pink);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--purple);} /* 关键字/函数 */
+  .code .s{color:var(--pink);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f9a8d4;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 同步排队可视化 */
+  .queue-bar{display:flex;gap:4px;margin:18px 0 6px;}
+  .qseg{
+    flex:1;text-align:center;padding:14px 4px;border-radius:10px;font-size:13px;
+    border:1px solid var(--line);position:relative;
+  }
+  .qseg b{display:block;font-size:15px;}
+  .qseg small{color:var(--muted);font-size:11px;}
+  .q1{background:rgba(244,114,182,.14);border-color:rgba(244,114,182,.4);}
+  .q2{background:rgba(167,139,250,.14);border-color:rgba(167,139,250,.4);}
+  .q3{background:rgba(77,214,255,.12);border-color:rgba(77,214,255,.4);}
+  .queue-sum{text-align:center;font-size:13px;color:var(--muted);margin-bottom:8px;}
+  .queue-sum b{color:var(--red);}
+  /* 事件循环调度动画 */
+  .loopbox{display:flex;gap:14px;justify-content:center;align-items:stretch;flex-wrap:wrap;margin:20px 0;}
+  .lbox{
+    width:180px;background:var(--card);border:2px solid var(--line);border-radius:14px;
+    padding:14px;text-align:center;animation:dispatch 4.5s infinite;
+  }
+  .lbox .lname{font-size:15px;font-weight:700;margin-bottom:4px;}
+  .lbox .lstate{font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;}
+  .lb1{animation-delay:0s;}
+  .lb2{animation-delay:1.5s;}
+  .lb3{animation-delay:3s;}
+  .lhub{
+    width:180px;background:linear-gradient(140deg,#2a1030,#1a0f2e);border:2px solid var(--gold);
+    border-radius:14px;padding:14px;text-align:center;align-self:center;
+  }
+  .lhub .lname{color:var(--gold);font-weight:800;}
+  .lhub .lstate{font-size:12px;color:var(--muted);}
+  @keyframes dispatch{
+    0%,28%{border-color:var(--pink);box-shadow:0 0 18px rgba(244,114,182,.35);transform:translateY(-4px);}
+    34%,100%{border-color:var(--line);box-shadow:none;transform:none;}
+  }
+  /* 实验室：时间线沙盘 */
+  .tl-ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 14px;}
+  .tl-clock{
+    font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--gold);
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;padding:9px 16px;min-width:150px;text-align:center;
+  }
+  .btn{
+    background:linear-gradient(135deg,var(--pink),var(--purple));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,114,182,.3);}
+  .btn.ghost{background:#0a0d1e;color:var(--text);border:1px solid var(--line);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
+  .tl-panel{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  .tl-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:10px;font-size:14px;}
+  .tl-head b{color:var(--text);}
+  .tl-total{font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--gold);}
+  .tl-body{position:relative;}
+  .tl-lane{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .tl-name{width:86px;font-size:13px;flex-shrink:0;text-align:right;}
+  .tl-track{
+    flex:1;height:26px;background:#0a0d1e;border-radius:7px;position:relative;overflow:hidden;
+    background-image:repeating-linear-gradient(90deg,transparent 0,transparent calc(100%/9 - 1px),rgba(90,100,143,.35) calc(100%/9 - 1px),rgba(90,100,143,.35) calc(100%/9));
+  }
+  .tl-bar{
+    position:absolute;top:3px;bottom:3px;border-radius:5px;overflow:hidden;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+  }
+  .tl-fill{height:100%;width:0%;}
+  .fc0{background:linear-gradient(90deg,#be3d7f,#f472b6);}
+  .fc1{background:linear-gradient(90deg,#6d4bd8,#a78bfa);}
+  .fc2{background:linear-gradient(90deg,#1d9ac9,#4dd6ff);}
+  .tl-switch{
+    position:absolute;top:50%;left:-1px;transform:translate(-50%,-50%);
+    width:12px;height:12px;border-radius:50%;background:var(--gold);
+    box-shadow:0 0 0 3px rgba(245,197,66,.25);animation:pulse 1.6s infinite;z-index:2;
+  }
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(245,197,66,.25);}50%{box-shadow:0 0 0 7px rgba(245,197,66,.08);}}
+  .tl-overlay{position:absolute;left:94px;right:0;top:0;bottom:0;pointer-events:none;}
+  .tl-playhead{
+    position:absolute;top:0;bottom:0;width:2px;background:var(--gold);
+    left:0;z-index:3;box-shadow:0 0 8px rgba(245,197,66,.8);display:none;
+  }
+  .tl-scale{display:flex;margin-left:94px;font-size:10px;color:var(--muted);font-family:ui-monospace,Menlo,monospace;}
+  .tl-scale span{flex:1;text-align:left;}
+  .tl-caption{font-size:12px;color:var(--muted);margin-top:8px;}
+  .tl-caption b{color:var(--pink);}
+  .tl-legend{font-size:12px;color:var(--muted);margin:4px 0 0;}
+  .tl-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--gold);margin-right:5px;vertical-align:-1px;}
+  .tl-logs{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;}
+  .tl-log{
+    flex:1;min-width:260px;background:#0a0d1e;border:1px dashed var(--line);border-radius:10px;
+    padding:10px 14px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:#f9a8d4;
+    min-height:96px;max-height:170px;overflow-y:auto;white-space:pre-wrap;
+  }
+  .tl-log::before{content:attr(data-title);color:var(--muted);font-size:11px;display:block;margin-bottom:3px;}
+  #lab-result{display:none;margin-top:14px;animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;}
+  #lab-result.show{display:block;}
+  .lab-note{font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;margin-top:10px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);color:var(--pink);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#331a2e,#141833);border:1px solid var(--pink);color:var(--pink);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#2a1a3d,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 大师之路 · <b>第 22 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 5 · MASTER ROAD</div>
+    <h1>异步初步 —— 顺风耳</h1>
+    <div class="subtitle">今日目标：让程序学会「等待的时候，先去干别的」</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解同步代码的痛点：排队等待，时间全浪费在「干等」上</li>
+      <li>掌握协程三件套：<span class="hl">async def</span> / <span class="hl">await</span> / <span class="hl">asyncio.run</span></li>
+      <li>看懂事件循环：一位任务等待时立刻切换的调度员</li>
+      <li>用 <span class="hl">asyncio.gather</span> 把 9 秒的下载压缩到 3 秒，并避开两大新手坑</li>
+      <li>通关实验室「时间线对比沙盘」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 同步的痛点 -->
+  <section>
+    <h2><span class="num">1</span>同步的痛点：一条队伍排到底</h2>
+    <p>顺风耳能同时听见千里之外的<b>所有</b>动静——但你现在写的 Python 还是「单线程同步」模式：<span class="hl">一次只做一件事，前一件没做完，后一件就得排队</span>。</p>
+    <p>最烧钱的场景是<b>IO 等待</b>：下载文件、请求网页、读写数据库。这些事的特点是——发出请求后，CPU 只能干等对方响应，<span class="hl">等的不是你的电脑，而是网络和硬盘</span>。</p>
+
+    <div class="queue-bar">
+      <div class="qseg q1"><b>🗺 下载地图</b>3 秒<small>（其中约 3 秒在干等 💤）</small></div>
+      <div class="qseg q2"><b>🎵 下载音效</b>3 秒<small>（干等 💤）</small></div>
+      <div class="qseg q3"><b>🎨 下载皮肤</b>3 秒<small>（干等 💤）</small></div>
+    </div>
+    <div class="queue-sum">同步串行：3 + 3 + 3 = <b>9 秒</b>，而 CPU 真正干活的时间可能不到 0.1 秒</div>
+
+    <p>用最普通的写法复现一下：</p>
+    <div class="code"><span class="k">import</span> <span class="v">time</span>
+
+<span class="k">def</span> <span class="v">download</span>(name):
+    <span class="k">print</span>(<span class="s">"开始下载"</span>, name)
+    <span class="v">time</span>.sleep(<span class="n">3</span>)          <span class="c"># 模拟 3 秒的下载等待：整个程序原地卡住</span>
+    <span class="k">print</span>(<span class="s">"完成"</span>, name)
+
+<span class="v">download</span>(<span class="s">"地图"</span>)
+<span class="v">download</span>(<span class="s">"音效"</span>)
+<span class="v">download</span>(<span class="s">"皮肤"</span>)</div>
+    <div class="out">开始下载 地图
+完成 地图
+开始下载 音效
+完成 音效
+开始下载 皮肤
+完成 皮肤</div>
+
+    <p>🧠 记住这个痛点：<span class="hl">同步模式下，「等待」也在占用你的程序</span>。如果一次要下载 100 个文件，就得排队 300 秒——而异步，能把这 300 秒压到约 3 秒。</p>
+  </section>
+
+  <!-- 2 协程 -->
+  <section>
+    <h2><span class="num">2</span>协程：async def 与 await</h2>
+    <p>异步的主角是<b>协程</b>（coroutine）：一种「可以中途暂停、把时间让给别人、之后再回来继续」的函数。定义它只需在 <code class="hl-p">def</code> 前面加一个 <code class="hl-p">async</code>：</p>
+    <div class="code"><span class="k">import</span> <span class="v">asyncio</span>
+
+<span class="k">async def</span> <span class="v">fetch_treasure</span>():          <span class="c"># async def：定义协程函数</span>
+    <span class="k">print</span>(<span class="s">"开始寻宝"</span>)
+    <span class="k">await</span> <span class="v">asyncio</span>.sleep(<span class="n">2</span>)           <span class="c"># await：等待时把控制权交出去</span>
+    <span class="k">print</span>(<span class="s">"寻宝完成"</span>)
+    <span class="k">return</span> <span class="s">"黄金宝箱"</span>
+
+<span class="k">async def</span> <span class="v">main</span>():
+    box = <span class="k">await</span> <span class="v">fetch_treasure</span>()     <span class="c"># await：等协程跑完并拿结果</span>
+    <span class="k">print</span>(<span class="s">"得到："</span>, box)
+
+<span class="v">asyncio</span>.run(<span class="v">main</span>())                 <span class="c"># 启动事件循环，运行 main</span></div>
+    <div class="out">开始寻宝
+寻宝完成
+得到： 黄金宝箱</div>
+
+    <p>两条黄金规则：</p>
+    <p>① <span class="hl">调用协程函数 ≠ 执行它</span>。<code class="hl-p">fetch_treasure()</code> 只是返回一份「任务说明书」（协程对象），必须交给 <code class="hl-p">await</code> 或事件循环才会真正运行。</p>
+    <p>② <span class="hl">await = 等待结果 + 让出时间</span>。它一边等结果，一边告诉调度员：「我先歇着，你让别人先跑」——这就是异步省时间的全部秘密。</p>
+  </section>
+
+  <!-- 3 事件循环 -->
+  <section>
+    <h2><span class="num">3</span>事件循环：一位忙碌的调度员</h2>
+    <p><b>事件循环</b>（event loop）是异步世界的中枢调度员。它手里攥着所有任务，规则只有一条：<span class="hl">谁进入等待，就立刻切去推进别的任务</span>，绝不让 CPU 闲着。</p>
+
+    <div class="loopbox">
+      <div class="lbox lb1"><div class="lname">🗺 任务 A</div><div class="lstate">await 等待中 💤</div></div>
+      <div class="lhub"><div class="lname">⚙ 事件循环</div><div class="lstate">调度员：切换！切换！<br>谁等待就让位</div></div>
+      <div class="lbox lb2"><div class="lname">🎵 任务 B</div><div class="lstate">await 等待中 💤</div></div>
+      <div class="lbox lb3"><div class="lname">🎨 任务 C</div><div class="lstate">await 等待中 💤</div></div>
+    </div>
+    <p class="queue-sum">看上面的动效：粉色高亮像调度员一样在三个任务间轮转——其实同一时刻<b>只有一个任务在真正运行</b></p>
+
+    <p><span class="hl-c">asyncio.run(main())</span> 就是「把调度员请上台」的指令：创建事件循环 → 运行 main 协程 → 结束后关闭。整个程序通常只调用它一次。</p>
+    <p>⚠️ 但调度员有个天敌：<code class="hl-c">time.sleep()</code>。它是<b>阻塞式</b>等待——直接把整个事件循环按住动弹不得：</p>
+    <div class="code"><span class="k">async def</span> <span class="v">main</span>():
+    <span class="v">time</span>.sleep(<span class="n">3</span>)      <span class="c"># 💥 假异步！事件循环被卡死 3 秒，所有任务排队干等</span>
+    <span class="k">await</span> <span class="v">asyncio</span>.sleep(<span class="n">3</span>)  <span class="c"># ✅ 真异步：等待 3 秒，期间调度员随便切换</span></div>
+    <p>🧠 记忆口诀：<span class="hl">协程里要等，一律 await asyncio.sleep()，别碰 time.sleep()。</span></p>
+  </section>
+
+  <!-- 4 gather + 选型 + 坑 -->
+  <section>
+    <h2><span class="num">4</span>gather 并发 · 选型 · 两大新手坑</h2>
+    <p>单个 await 还是串行。真正让时间重叠的，是把多个协程一起交给调度员——用 <span class="hl">asyncio.gather</span> 并发收集：</p>
+    <div class="code"><span class="k">import</span> <span class="v">asyncio</span>, <span class="v">time</span>
+
+<span class="k">async def</span> <span class="v">download</span>(name):
+    <span class="k">print</span>(<span class="s">"开始下载"</span>, name)
+    <span class="k">await</span> <span class="v">asyncio</span>.sleep(<span class="n">3</span>)   <span class="c"># 异步等待：把时间让给别人</span>
+    <span class="k">print</span>(<span class="s">"完成"</span>, name)
+
+<span class="k">async def</span> <span class="v">main</span>():
+    start = <span class="v">time</span>.time()
+    <span class="k">await</span> <span class="v">asyncio</span>.gather(
+        <span class="v">download</span>(<span class="s">"地图"</span>),
+        <span class="v">download</span>(<span class="s">"音效"</span>),
+        <span class="v">download</span>(<span class="s">"皮肤"</span>),
+    )
+    <span class="k">print</span>(<span class="s">"总耗时："</span>, <span class="v">round</span>(<span class="v">time</span>.time() - start, <span class="n">1</span>), <span class="s">"秒"</span>)
+
+<span class="v">asyncio</span>.run(<span class="v">main</span>())</div>
+    <div class="out">开始下载 地图
+开始下载 音效
+开始下载 皮肤
+完成 地图
+完成 音效
+完成 皮肤
+总耗时： 3.0 秒</div>
+    <p>注意输出顺序：三个「开始下载」<b>先全部出现</b>——每个任务一进入 3 秒等待，调度员立刻切换去启动下一个；三段等待重叠进行，所以总耗时 ≈ 最慢的那一个（3 秒），而不是 9 秒。</p>
+
+    <p><b>异步还是多线程？</b>选型口诀：</p>
+    <p>· <span class="hl">大量 IO 并发（爬虫、API、聊天服务器）→ 首选 asyncio</span>：单线程协作式调度，没有锁竞争，轻松扛成千上万个连接，是现代 Python 的主流选择。</p>
+    <p>· CPU 密集型计算（图像处理、大规模运算）→ asyncio 帮不上忙，用多进程。<span class="hl-c">threading</span> 适合少数量的简单 IO 并发或调用阻塞库。</p>
+
+    <p>最后是两大新手坑，几乎人人踩过：</p>
+    <p>💥 <b>坑一：忘记 await</b>。只拿到协程对象，代码根本没执行：</p>
+    <div class="code"><span class="k">async def</span> <span class="v">fetch</span>():
+    <span class="k">return</span> <span class="n">42</span>
+
+value = <span class="v">fetch</span>()   <span class="c"># 💥 少写了 await！</span>
+<span class="k">print</span>(value)</div>
+    <div class="out">&lt;coroutine object fetch at 0x10393de40&gt;
+RuntimeWarning: coroutine 'fetch' was never awaited</div>
+    <p>地址每次都不同，但看到 <code class="hl-p">coroutine object</code> 就说明：你拿的是说明书，不是宝物。改成 <code class="hl-p">await fetch()</code> 即可。</p>
+    <p>💥 <b>坑二：await 写错了地方</b>。<span class="hl">await 只能出现在 async def 函数体内</span>，写进普通函数或函数外都会直接 <code class="hl-c">SyntaxError</code>：</p>
+    <div class="code"><span class="k">def</span> <span class="v">normal</span>():
+    <span class="k">await</span> <span class="v">asyncio</span>.sleep(<span class="n">1</span>)   <span class="c"># 💥 SyntaxError: 'await' outside async function</span></div>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · 时间线对比沙盘</h2>
+    <p>三件各需 <b>3 秒</b> 的下载任务：同步版排队要 <b>9 秒</b>，gather 版并发只要 <b>3 秒</b>。点击运行，看时间轴怎么被压缩——金色圆点就是事件循环的切换点。</p>
+    <div class="tl-ctrl">
+      <button class="btn" id="tl-run" onclick="runCompare()">▶ 运行对比</button>
+      <button class="btn ghost" onclick="resetLab()">↺ 重置</button>
+      <div class="tl-clock" id="tl-clock">t = 0.0 秒</div>
+    </div>
+
+    <div class="tl-panel">
+      <div class="tl-head"><b>① 同步版 · 排队下载</b><span class="tl-total" id="sync-total">预计总耗时 9 秒</span></div>
+      <div class="tl-body" id="sync-body">
+        <div class="tl-lane"><span class="tl-name">🗺 地图</span><div class="tl-track"><div class="tl-bar" style="left:0%;width:33.33%"><div class="tl-fill fc0" id="sf0"></div></div></div></div>
+        <div class="tl-lane"><span class="tl-name">🎵 音效</span><div class="tl-track"><div class="tl-bar" style="left:33.33%;width:33.33%"><div class="tl-fill fc1" id="sf1"></div></div></div></div>
+        <div class="tl-lane"><span class="tl-name">🎨 皮肤</span><div class="tl-track"><div class="tl-bar" style="left:66.67%;width:33.33%"><div class="tl-fill fc2" id="sf2"></div></div></div></div>
+        <div class="tl-overlay"><div class="tl-playhead" id="sync-ph"></div></div>
+      </div>
+      <div class="tl-scale"><span>0s</span><span>1s</span><span>2s</span><span>3s</span><span>4s</span><span>5s</span><span>6s</span><span>7s</span><span>8s</span><span>9s</span></div>
+      <div class="tl-caption">三根条形<b>首尾相接</b>：前一个不下载完，后一个不许开始，3+3+3 = <b>9 秒</b></div>
+    </div>
+
+    <div class="tl-panel">
+      <div class="tl-head"><b>② asyncio.gather 版 · 并发下载</b><span class="tl-total" id="gather-total">预计总耗时 3 秒</span></div>
+      <div class="tl-body" id="gather-body">
+        <div class="tl-lane"><span class="tl-name">🗺 地图</span><div class="tl-track"><div class="tl-bar" style="left:0%;width:33.33%"><div class="tl-fill fc0" id="gf0"></div><span class="tl-switch" title="任务一开始等待，事件循环立刻切换"></span></div></div></div>
+        <div class="tl-lane"><span class="tl-name">🎵 音效</span><div class="tl-track"><div class="tl-bar" style="left:0%;width:33.33%"><div class="tl-fill fc1" id="gf1"></div><span class="tl-switch" title="任务一开始等待，事件循环立刻切换"></span></div></div></div>
+        <div class="tl-lane"><span class="tl-name">🎨 皮肤</span><div class="tl-track"><div class="tl-bar" style="left:0%;width:33.33%"><div class="tl-fill fc2" id="gf2"></div><span class="tl-switch" title="任务一开始等待，事件循环立刻切换"></span></div></div></div>
+        <div class="tl-overlay"><div class="tl-playhead" id="gather-ph"></div></div>
+      </div>
+      <div class="tl-scale"><span>0s</span><span>1s</span><span>2s</span><span>3s</span><span>4s</span><span>5s</span><span>6s</span><span>7s</span><span>8s</span><span>9s</span></div>
+      <div class="tl-caption">三根条形<b>并行重叠</b>：等待时间彼此覆盖，<b>3 秒</b>全部搞定——右侧空白就是省下的 6 秒 ✨</div>
+      <div class="tl-legend"><i></i>切换点：任务一进入等待，事件循环立刻切去启动下一个任务</div>
+    </div>
+
+    <div class="tl-logs">
+      <div class="tl-log" id="log-sync" data-title="▶ 同步版运行日志"></div>
+      <div class="tl-log" id="log-gather" data-title="▶ gather 版运行日志"></div>
+    </div>
+
+    <div id="lab-result">
+      <p style="margin-top:6px">刚才的动画，对应这两份真实代码（可直接在电脑上运行验证）：</p>
+      <div class="code"><span class="c"># ① 同步版：排队 9 秒</span>
+<span class="k">import</span> <span class="v">time</span>
+
+<span class="k">def</span> <span class="v">download</span>(name):
+    <span class="k">print</span>(<span class="s">"开始下载"</span>, name)
+    <span class="v">time</span>.sleep(<span class="n">3</span>)
+    <span class="k">print</span>(<span class="s">"完成"</span>, name)
+
+<span class="k">for</span> task <span class="k">in</span> [<span class="s">"地图"</span>, <span class="s">"音效"</span>, <span class="s">"皮肤"</span>]:
+    <span class="v">download</span>(task)</div>
+      <div class="out">开始下载 地图
+完成 地图
+开始下载 音效
+完成 音效
+开始下载 皮肤
+完成 皮肤</div>
+      <div class="code"><span class="c"># ② gather 版：并发 3 秒（注意输出顺序）</span>
+<span class="k">import</span> <span class="v">asyncio</span>
+
+<span class="k">async def</span> <span class="v">download</span>(name):
+    <span class="k">print</span>(<span class="s">"开始下载"</span>, name)
+    <span class="k">await</span> <span class="v">asyncio</span>.sleep(<span class="n">3</span>)
+    <span class="k">print</span>(<span class="s">"完成"</span>, name)
+
+<span class="k">async def</span> <span class="v">main</span>():
+    <span class="k">await</span> <span class="v">asyncio</span>.gather(
+        <span class="v">download</span>(<span class="s">"地图"</span>),
+        <span class="v">download</span>(<span class="s">"音效"</span>),
+        <span class="v">download</span>(<span class="s">"皮肤"</span>),
+    )
+
+<span class="v">asyncio</span>.run(<span class="v">main</span>())</div>
+      <div class="out">开始下载 地图
+开始下载 音效
+开始下载 皮肤
+完成 地图
+完成 音效
+完成 皮肤</div>
+      <div class="lab-note">📊 计时对比：同步版 <b>9.0 秒</b> ｜ gather 版 <b>3.0 秒</b> —— 并发数越多，差距越夸张（100 个任务：300 秒 vs 约 3 秒）。异步不是让下载变快，而是让「等待」彼此重叠。</div>
+    </div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测结果，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 新建 <code>async_demo.py</code>，<b>亲手敲一遍</b>第 4 节的 gather 例子并运行，对照输出顺序：三个「开始下载」先全部出现</li>
+    <li>② 把三个任务的 <code>asyncio.sleep(3)</code> 都改成 <code>sleep(1)</code>，先预测总耗时，再运行验证你的预言</li>
+    <li>③ 踩坑实验 A：故意删掉一个 <code>await</code>，运行并观察 <code>coroutine object</code> 输出和 RuntimeWarning</li>
+    <li>④ 踩坑实验 B：在协程里把 <code>asyncio.sleep</code> 换成 <code>time.sleep</code>，加上计时，亲眼看看「假异步」耗时回到 9 秒</li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>pandas 数据分析 —— 千里眼</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 实验室：时间线对比沙盘 ============ */
+var labEvents = [
+  {t:0.1, side:'sync',   text:'0.0s  开始下载 地图'},
+  {t:3.05, side:'sync',  text:'3.0s  完成 地图 → 开始下载 音效'},
+  {t:6.05, side:'sync',  text:'6.0s  完成 音效 → 开始下载 皮肤'},
+  {t:9.05, side:'sync',  text:'9.0s  完成 皮肤 | 总耗时： 9.0 秒'},
+  {t:0.1, side:'gather', text:'0.0s  开始下载 地图 ◆ 切换'},
+  {t:0.4, side:'gather', text:'0.0s  开始下载 音效 ◆ 切换'},
+  {t:0.7, side:'gather', text:'0.0s  开始下载 皮肤 ◆ 三个任务同时在等待'},
+  {t:3.05, side:'gather',text:'3.0s  完成 地图 / 音效 / 皮肤 | 总耗时： 3.0 秒'}
+];
+var simT = 0, timer = null, playing = false;
+
+function setFill(id, pct){
+  var el = document.getElementById(id);
+  if(el) el.style.width = pct + '%';
+}
+function updateBars(){
+  var i, s, pct;
+  for(i = 0; i < 3; i++){
+    s = i * 3;                       /* 同步版：任务 i 从 s 秒开始 */
+    pct = Math.max(0, Math.min(1, (simT - s) / 3)) * 100;
+    setFill('sf' + i, pct);
+    pct = Math.max(0, Math.min(1, simT / 3)) * 100;   /* gather 版：0 秒同时开始 */
+    setFill('gf' + i, pct);
+  }
+  var syncPh = document.getElementById('sync-ph');
+  var gatherPh = document.getElementById('gather-ph');
+  syncPh.style.left = Math.min(100, simT / 9 * 100) + '%';
+  gatherPh.style.left = Math.min(100, simT / 9 * 100) + '%';
+}
+function emitEvents(){
+  var logSync = document.getElementById('log-sync');
+  var logGather = document.getElementById('log-gather');
+  labEvents.forEach(function(ev){
+    if(!ev.done && simT >= ev.t){
+      ev.done = true;
+      var line = document.createElement('div');
+      line.textContent = ev.text;
+      if(ev.side === 'sync'){ logSync.appendChild(line); logSync.scrollTop = logSync.scrollHeight; }
+      else{ logGather.appendChild(line); logGather.scrollTop = logGather.scrollHeight; }
+    }
+  });
+}
+function runCompare(){
+  if(playing) return;
+  resetVisual(false);
+  playing = true;
+  var runBtn = document.getElementById('tl-run');
+  runBtn.disabled = true;
+  document.getElementById('sync-ph').style.display = 'block';
+  document.getElementById('gather-ph').style.display = 'block';
+  timer = setInterval(function(){
+    simT += 0.1;                       /* 1 模拟秒 = 400 毫秒真实时间 */
+    document.getElementById('tl-clock').textContent = 't = ' + simT.toFixed(1) + ' 秒';
+    updateBars();
+    emitEvents();
+    if(simT >= 9.2){
+      clearInterval(timer); timer = null; playing = false;
+      runBtn.disabled = false;
+      document.getElementById('sync-total').textContent = '✔ 实测总耗时 9.0 秒';
+      document.getElementById('gather-total').textContent = '✔ 实测总耗时 3.0 秒';
+      document.getElementById('lab-result').classList.add('show');
+    }
+  }, 40);
+}
+function resetVisual(clearLogs){
+  simT = 0;
+  if(timer){ clearInterval(timer); timer = null; }
+  playing = false;
+  labEvents.forEach(function(ev){ ev.done = false; });
+  var i;
+  for(i = 0; i < 3; i++){ setFill('sf' + i, 0); setFill('gf' + i, 0); }
+  document.getElementById('sync-ph').style.display = 'none';
+  document.getElementById('gather-ph').style.display = 'none';
+  document.getElementById('sync-ph').style.left = '0%';
+  document.getElementById('gather-ph').style.left = '0%';
+  document.getElementById('tl-clock').textContent = 't = 0.0 秒';
+  document.getElementById('sync-total').textContent = '预计总耗时 9 秒';
+  document.getElementById('gather-total').textContent = '预计总耗时 3 秒';
+  if(clearLogs){
+    document.getElementById('log-sync').innerHTML = '';
+    document.getElementById('log-gather').innerHTML = '';
+    document.getElementById('lab-result').classList.remove('show');
+    document.getElementById('tl-run').disabled = false;
+  }
+}
+function resetLab(){ resetVisual(true); }
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 忘写 await 的下场',
+    code:'import asyncio\n\nasync def fetch():\n    return 42\n\nvalue = fetch()   # 注意这一行\nprint(value)',
+    opts:['42','一个协程对象（coroutine object）','None','报错 SyntaxError'],
+    ans:1,
+    exp:'调用协程函数只会返回"任务说明书"（协程对象），代码并没有执行，还会伴随 RuntimeWarning。改成 value = await fetch() 才能拿到 42。'
+  },
+  {
+    title:'第 2 预言 · gather 的总耗时',
+    code:'import asyncio, time\n\nasync def job(n):\n    await asyncio.sleep(2)\n\nasync def main():\n    start = time.time()\n    await asyncio.gather(job(1), job(2), job(3))\n    print(round(time.time() - start))\n\nasyncio.run(main())',
+    opts:['6','2','3','0'],
+    ans:1,
+    exp:'三个任务并发运行，2 秒的等待彼此重叠，总耗时约等于最慢的那一个：2 秒。串行（逐个 await）才是 2+2+2=6 秒。'
+  },
+  {
+    title:'第 3 预言 · 调用 async def 返回什么',
+    code:'async def hello():\n    return "hi"\n\nx = hello()\nprint(type(x))',
+    opts:["&lt;class 'str'&gt;","&lt;class 'coroutine'&gt;","&lt;class 'function'&gt;","报错 TypeError"],
+    ans:1,
+    exp:'async def 定义的函数叫协程函数，调用它返回协程对象（coroutine），不会立刻执行函数体。想拿到 "hi" 需要 await。'
+  },
+  {
+    title:'第 4 预言 · 协程里的 time.sleep',
+    code:'async def main():\n    time.sleep(3)          # 误用了 time.sleep\n    await asyncio.sleep(1)\n\nasyncio.run(main())',
+    opts:['完全等价，没有影响','整个事件循环被卡住 3 秒，其他任务干等','报错：time.sleep 不能写在协程里','自动变成异步等待'],
+    ans:1,
+    exp:'time.sleep 是阻塞式等待，会把事件循环整个按住，其他任务全部排队。协程里要等，一律用 await asyncio.sleep()。'
+  },
+  {
+    title:'第 5 预言 · await 的合法位置',
+    code:'def normal():\n    await asyncio.sleep(1)\n\nnormal()',
+    opts:['正常运行，睡 1 秒','SyntaxError 语法报错','返回一个协程对象，静默通过','RuntimeWarning'],
+    ans:1,
+    exp:"await 只能写在 async def 函数体内。写在普通函数里，Python 在解析阶段就报 SyntaxError: 'await' outside async function。"
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(function(l){
+      return l.replace(/("[^"]*")/g,'<span style="color:var(--pink)">$1</span>')
+              .replace(/(^|\s)(\d+)(\s|$)/g,'$1<span style="color:var(--orange)">$2</span>$3')
+              .replace(/(print|return|import|async|await|def|asyncio|time|round|type)/g,'<span style="color:var(--purple)">$1</span>');
+    }).join('\n');
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="opt" data-i="'+i+'">'+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">'+q.title+'</div>'+
+      '<div class="code" style="margin:6px 0">'+codeHtml+'</div>'+
+      '<div class="oracle-opts">'+optsHtml+'</div>'+
+      '<div class="explain">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['同步的痛点','排队等待：IO 等待期间 CPU 干闲着，10 个各 3 秒的任务要排队 30 秒'],
+  ['async def 定义什么','协程函数。调用它返回协程对象，不会立刻执行函数体'],
+  ['await 的双重作用','等待结果的同时，把控制权交还事件循环去推进别的任务'],
+  ['事件循环是什么','一位调度员：谁进入等待就切换到别的任务，绝不让 CPU 闲着'],
+  ['asyncio.run(main())','程序的异步入口：创建事件循环 → 运行 main → 结束后关闭'],
+  ['asyncio.sleep vs time.sleep','前者异步等待（可切换）；后者阻塞整个事件循环，是"假异步"'],
+  ['asyncio.gather(a, b, c)','并发运行多个协程并收集全部结果，总耗时 ≈ 最慢的那个'],
+  ['忘写 await 会怎样','只拿到协程对象，代码没执行，伴随 RuntimeWarning'],
+  ['await 能写在哪','只能写在 async def 函数体内；写在普通函数里是 SyntaxError'],
+  ['大量 IO 并发选什么','首选 asyncio（单线程协作式）；CPU 密集型才用多进程']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">'+
+      '<div class="mface mfront">'+c[0]+'</div>'+
+      '<div class="mface mback">'+c[1]+'</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'同步下载 3 个各需 3 秒的文件，总耗时大约是？',
+   opts:['3 秒','6 秒','9 秒','1 秒'], ans:2,
+   exp:'同步串行：一个做完才能做下一个，3+3+3 = 9 秒，等待全部排队。'},
+  {q:'async def 定义的函数，直接调用后得到什么？',
+   opts:['函数的返回值','一个协程对象','None','立刻报错'], ans:1,
+   exp:'协程函数调用后返回协程对象（任务说明书），必须交给 await 或事件循环才会执行。'},
+  {q:'await 的正确理解是？',
+   opts:['让程序彻底停下来什么也不干','等待结果的同时把控制权交还事件循环','另开一个线程去执行','只能配合 time.sleep 使用'], ans:1,
+   exp:'await = 等待 + 让位。它一边等结果，一边让调度员切换去推进其他任务，这就是异步省时间的原理。'},
+  {q:'事件循环的角色最像什么？',
+   opts:['一台增加 CPU 核数的机器','一位任务等待时立刻切换的调度员','一个存放变量的仓库','一种网络协议'], ans:1,
+   exp:'事件循环在单线程里轮转调度：谁 await 进入等待，就切去干别的，同一时刻仍只有一个任务在运行。'},
+  {q:'asyncio.run(main()) 的作用是？',
+   opts:['定义 main 函数','启动事件循环并运行 main 协程','暂停 main 协程','创建一个新线程'], ans:1,
+   exp:'它是异步程序的入口：创建事件循环、运行传入的协程、结束后关闭，通常整个程序只调用一次。'},
+  {q:'在协程里写 time.sleep(3) 会发生什么？',
+   opts:['和 asyncio.sleep(3) 完全一样','阻塞整个事件循环 3 秒','自动变成异步等待','报 SyntaxError'], ans:1,
+   exp:'time.sleep 是阻塞等待，会把事件循环卡住，其他任务全部干等。协程里要用 await asyncio.sleep()。'},
+  {q:'用 asyncio.gather 并发运行 3 个各需 3 秒的协程，总耗时约？',
+   opts:['9 秒','6 秒','3 秒','1 秒'], ans:2,
+   exp:'三段等待彼此重叠，总耗时约等于最慢的那个任务：3 秒。'},
+  {q:'result = fetch() 漏写 await，print(result) 会输出什么？',
+   opts:['函数的返回值','None','一个协程对象，且伴随 RuntimeWarning','报错 SyntaxError'], ans:2,
+   exp:'拿到的是 coroutine object（说明书），代码没有执行；Python 还会提示 coroutine was never awaited。'},
+  {q:'下面哪段代码会报 SyntaxError？',
+   opts:['async def f():<br>    await asyncio.sleep(1)','def f():<br>    await asyncio.sleep(1)','asyncio.run(main())','await asyncio.gather(a, b)<br>（写在 async 函数内）'], ans:1,
+   exp:"await 只能出现在 async def 函数体内，写在普通 def 里直接 SyntaxError: 'await' outside async function。"},
+  {q:'写一个要同时请求上千个网页的爬虫，现代 Python 首选？',
+   opts:['asyncio 异步','多进程','一个一个同步请求','手工开 1000 个线程'], ans:0,
+   exp:'大量 IO 并发首选 asyncio：单线程协作式调度，无锁竞争，轻松扛上千连接；CPU 密集才考虑多进程。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q,idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o,i){
+      return '<button class="qq-opt" data-i="'+i+'">'+String.fromCharCode(65+i)+'. '+o+'</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q'+(idx+1)+'</i>'+q.q+'</div>'+
+      '<div class="qq-opts">'+optsHtml+'</div>'+
+      '<div class="qq-exp">'+q.exp+'</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right')||btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！顺风耳本耳，下一课已为你解锁 🔓' : '通关成功！第 23 课「pandas 数据分析」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>'+pts+' 分</b>'+s+' / '+quizData.length+' 正确<br>'+msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

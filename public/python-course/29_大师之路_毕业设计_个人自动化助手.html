@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毕业设计 · 个人自动化助手 —— 大师之路终极试炼</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4ade80; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(244,114,182,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(245,197,66,.06), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--pink);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(244,114,182,.12);color:var(--pink);border:1px solid rgba(244,114,182,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:30px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f472b6,#f5c542 50%,#4dd6ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  .num.crown{width:auto;padding:0 10px;font-size:14px;}
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:13.5px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--purple);} /* 关键字 */
+  .code .s{color:var(--pink);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 函数/变量 */
+  .code .cmd{color:#f9a8d4;font-weight:600;} /* 终端命令行 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f9a8d4;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out.gold::before{content:"▶ assistant.log：";}
+  /* 毕业宣言 */
+  .vow{
+    background:linear-gradient(140deg,#331a2e,#141833);border:2px solid var(--pink);
+    border-radius:16px;padding:22px 26px;margin:16px 0;text-align:center;
+  }
+  .vow h3{color:var(--pink);font-size:17px;letter-spacing:3px;margin-bottom:10px;}
+  .vow p{font-size:15px;}
+  .vow .sig{color:var(--muted);font-size:12px;margin-top:10px;}
+  /* 架构图 */
+  .arch{margin:18px 0;}
+  .arch-top{
+    border:2px solid var(--pink);background:var(--card);border-radius:14px;
+    padding:12px;text-align:center;font-size:15px;font-weight:700;color:var(--pink);
+    max-width:460px;margin:0 auto;
+  }
+  .arch-top small{display:block;font-weight:400;font-size:12px;color:var(--muted);}
+  .arch-arrows{display:flex;justify-content:space-around;color:var(--muted);padding:4px 0;font-size:14px;}
+  .arch-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .arch-mod{
+    flex:1;min-width:150px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 10px;text-align:center;font-size:13px;transition:all .25s;cursor:default;
+  }
+  .arch-mod:hover{transform:translateY(-4px);border-color:var(--cyan);}
+  .arch-mod b{display:block;color:var(--cyan);font-size:14px;margin-bottom:2px;}
+  .arch-mod small{color:var(--muted);font-size:11px;display:block;line-height:1.6;}
+  .arch-bottom{
+    border:1px dashed var(--gold);background:var(--card);border-radius:12px;
+    padding:10px;text-align:center;font-size:13px;color:var(--gold);margin-top:4px;
+  }
+  /* 里程碑 */
+  .ms-box{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--pink);
+    border-radius:14px;padding:16px 20px;margin:18px 0;
+  }
+  .ms-box h3{font-size:15px;color:var(--pink);margin-bottom:8px;letter-spacing:1px;}
+  .ms-ok{font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:10px;margin-top:6px;}
+  .ms-ok b{color:var(--gold);}
+  /* 验收清单 */
+  .ck-item{
+    display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+    border-radius:10px;padding:11px 14px;margin:8px 0;cursor:pointer;font-size:14px;transition:all .2s;
+  }
+  .ck-item:hover{border-color:var(--cyan);}
+  .ck-item .ckbox{
+    width:20px;height:20px;border:2px solid var(--muted);border-radius:6px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;margin-top:3px;
+    transition:all .2s;
+  }
+  .ck-item.done{border-color:var(--pink);background:rgba(244,114,182,.06);}
+  .ck-item.done .ckbox{background:var(--pink);border-color:var(--pink);color:#0d1021;}
+  .ck-item.done .ck-txt{color:var(--muted);}
+  #ck-count{margin-top:12px;text-align:center;font-size:14px;color:var(--muted);}
+  #ck-count b{color:var(--gold);font-size:17px;}
+  .ck-full{color:var(--pink) !important;}
+  /* 自评表 */
+  .rate-row{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin:8px 0;
+  }
+  .rate-name b{font-size:14.5px;}
+  .rate-name small{display:block;color:var(--muted);font-size:12px;}
+  .stars{display:flex;gap:2px;}
+  .star{
+    background:none;border:none;font-size:24px;line-height:1;cursor:pointer;padding:0 2px;
+    color:#3a3f6b;font-family:inherit;transition:transform .15s,color .15s;
+  }
+  .star:hover{transform:scale(1.25);}
+  .star.on{color:var(--gold);text-shadow:0 0 10px rgba(245,197,66,.45);}
+  #rate-result{
+    display:none;margin-top:14px;text-align:center;padding:14px;border-radius:12px;
+    background:var(--card);border:1px solid var(--gold);font-size:14px;
+  }
+  #rate-result.show{display:block;animation:popIn .4s both;}
+  #rate-result b{color:var(--gold);}
+  /* 称号时间线 */
+  .titles{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:16px 0;}
+  .title-chip{
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:5px 14px;font-size:12.5px;color:var(--muted);
+  }
+  .title-chip b{color:var(--pink);}
+  .title-chip.now{border-color:var(--gold);box-shadow:0 0 16px rgba(245,197,66,.2);}
+  .title-chip.now b{color:var(--gold);}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:13.5px;
+  }
+  .mfront{background:linear-gradient(135deg,#331a2e,#141833);border:1px solid var(--pink);color:var(--pink);font-weight:600;}
+  .mfront small{display:block;font-size:10px;color:var(--muted);font-weight:400;margin-bottom:4px;letter-spacing:1px;}
+  .mback{background:linear-gradient(135deg,#2a1a3d,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:12.5px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--pink);background:rgba(244,114,182,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 毕业证书 */
+  .lab-input{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+  .lab-input input{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--pink);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(244,114,182,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--pink),var(--purple));color:#0d1021;border:none;
+    padding:11px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,114,182,.3);}
+  .cert{
+    display:none;margin-top:16px;border:2px solid var(--gold);border-radius:16px;
+    background:linear-gradient(140deg,#2a1a3d,#141833);
+    padding:28px 26px;text-align:center;position:relative;
+  }
+  .cert.show{display:block;animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both;}
+  .cert::before{
+    content:"♛";position:absolute;top:10px;left:14px;color:rgba(245,197,66,.35);font-size:22px;
+  }
+  .cert::after{
+    content:"♛";position:absolute;top:10px;right:14px;color:rgba(245,197,66,.35);font-size:22px;
+  }
+  .cert-title{letter-spacing:6px;color:var(--muted);font-size:12px;margin-bottom:8px;}
+  .cert-rank{
+    font-size:28px;font-weight:800;letter-spacing:3px;
+    background:linear-gradient(120deg,#f5c542,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px;
+  }
+  .cert-body{font-size:14.5px;}
+  .cert-body b{color:var(--gold);font-size:18px;letter-spacing:1px;}
+  .cert-quote{color:var(--muted);font-size:13px;font-style:italic;margin-top:10px;}
+  .cert-date{color:var(--muted);font-size:12px;margin-top:12px;letter-spacing:1px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 大师之路 · <b>毕业设计 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 5 · MASTER ROAD · FINAL TRIAL</div>
+    <h1>♛ 毕业设计 · 个人自动化助手</h1>
+    <div class="subtitle">大师之路终极试炼 —— 做一个每天真替你干活的系统</div>
+    <div class="mission">
+      <h3>📜 终极试炼任务书</h3>
+      <li>整合 12 周所学：<span class="hl">定时运行 + 多个功能模块 + 数据持久化 + 结果推送/展示</span></li>
+      <li>按 4 个里程碑推进：单模块跑通 → 调度器串联 → pandas 日报 → 异常防护收尾</li>
+      <li>合体成约 120 行的完整框架骨架，逐块填装、逐块验收</li>
+      <li>用 8 项验收清单 + 5 维大师自评表检验成果</li>
+      <li>翻熟 10 张全课程记忆卡片，通过毕业答辩 Quiz 5 题，领取<span class="hl">「Python 高阶玩家」</span>称号与毕业证书</li>
+    </div>
+  </header>
+
+  <!-- 1 毕业宣言 -->
+  <section>
+    <h2><span class="num">1</span>⚔ 毕业宣言</h2>
+    <p>过去 25 课，你写的每一个程序都止步于「练习」：跑一次、看一眼、关掉。毕业设计的规则变了——<span class="hl">它要在你睡觉、上课、打游戏的时候，每天真的替你干活</span>。</p>
+    <div class="vow">
+      <h3>毕 业 宣 言</h3>
+      <p>我，26 课的修行者，在此立誓：<br>
+      不再写看完就扔的练习品，<br>
+      而要交付一个<span class="hl">定时运行、多模块协作、数据持久化、结果主动汇报</span>的系统。<br>
+      一周之后，它每天早上 8:30 准时上岗：<br>
+      整理我的下载文件夹 → 抓取今日天气 → 记入 CSV 档案 → 生成日报通知我。</p>
+      <div class="sig">—— 我在喝豆浆，它在打工。这就是自动化的浪漫。</div>
+    </div>
+    <p>这不是能不能的问题——你的技能树早就点满了。缺的只是把五关的战利品<b>拼在同一台机器上</b>。</p>
+  </section>
+
+  <!-- 2 系统架构设计 -->
+  <section>
+    <h2><span class="num">2</span>🏛 系统架构设计</h2>
+    <p>先画图，后写码——这是第 16 课以来你应有的直觉。整个系统 = <span class="hl">1 个调度器 + 4 个功能模块 + 1 层数据底座</span>：</p>
+    <div class="arch">
+      <div class="arch-top">⏰ 主调度器 · schedule<small>每天 08:30 执行 morning_job()，依次点名四个模块</small></div>
+      <div class="arch-arrows"><span>↓</span><span>↓</span><span>↓</span><span>↓</span></div>
+      <div class="arch-row">
+        <div class="arch-mod"><b>📦 模块A · 文件整理</b>pathlib + shutil<small>复用 BOSS3<br>桌面自动整理器</small></div>
+        <div class="arch-mod"><b>📡 模块B · 信息抓取</b>requests + API<small>复用第 13 课<br>天气早报机器人</small></div>
+        <div class="arch-mod"><b>📊 模块C · 数据汇总</b>pandas<small>复用第 23 课<br>groupby 聚合</small></div>
+        <div class="arch-mod"><b>📨 模块D · 报告通知</b>文件读写 + print<small>复用第 9 课<br>进阶可接 webhook</small></div>
+      </div>
+      <div class="arch-arrows"><span>↓</span><span>↓</span><span>↓</span><span>↓</span></div>
+      <div class="arch-bottom">💾 数据底座：run_log.csv（历史记录，越滚越厚） + assistant.log（运行日志，黑匣子）</div>
+    </div>
+    <p>读图三个要点：</p>
+    <p>① <span class="hl">调度器不干活，只点名</span>——它自己不整理文件也不抓天气，只负责在正确的时间叫醒正确的模块（单一职责，第 16 课）。</p>
+    <p>② <span class="hl">四个模块互不相识</span>——A 崩了不影响 BCD，靠的是统一护甲 safe_run（第 10 课异常处理 + 日志）。</p>
+    <p>③ <span class="hl">所有结果流向数据底座</span>——今天的运行记录落进 CSV，明天的日报才有历史可汇总（第 9 课持久化 + 第 23 课 pandas）。</p>
+  </section>
+
+  <!-- 3 里程碑计划 -->
+  <section>
+    <h2><span class="num">3</span>🗺 里程碑计划 · 四步登顶</h2>
+    <p>别想着一次写出 120 行。按游戏攻略的节奏，<span class="hl">每一步都是能独立运行的真实程序</span>。目标文件夹结构先立起来：</p>
+    <div class="code">my_assistant/
+├── organizer.py      <span class="c"># 里程碑1：先让它单独跑通</span>
+├── scheduler_demo.py <span class="c"># 里程碑2：调度器上线</span>
+├── reporter.py       <span class="c"># 里程碑3：pandas 日报</span>
+├── main.py           <span class="c"># 里程碑4：加护甲与日志的最终形态</span>
+├── run_log.csv       <span class="c"># 运行后自动生成：历史记录</span>
+└── assistant.log     <span class="c"># 运行后自动生成：黑匣子日志</span></div>
+
+    <div class="ms-box">
+      <h3>🏁 里程碑 1 · 单模块先跑通（第 1 天）</h3>
+      <p>原则：<span class="hl">先让最小的一块真实干活，再谈系统。</span>在测试文件夹里扔 7 个杂乱文件（含 1 个不在清单里的 .zip），运行 organizer.py：</p>
+      <div class="code"><span class="k">from</span> pathlib <span class="k">import</span> Path
+<span class="k">import</span> shutil
+
+<span class="k">def</span> <span class="v">organize</span>(folder):
+    <span class="s">&quot;&quot;&quot;把 folder 里的散乱文件按扩展名分类到子文件夹，返回移动数量&quot;&quot;&quot;</span>
+    ext_map = {
+        <span class="s">&quot;图片&quot;</span>: [<span class="s">&quot;.png&quot;</span>, <span class="s">&quot;.jpg&quot;</span>, <span class="s">&quot;.gif&quot;</span>],
+        <span class="s">&quot;文档&quot;</span>: [<span class="s">&quot;.pdf&quot;</span>, <span class="s">&quot;.docx&quot;</span>, <span class="s">&quot;.txt&quot;</span>],
+        <span class="s">&quot;表格&quot;</span>: [<span class="s">&quot;.xlsx&quot;</span>, <span class="s">&quot;.csv&quot;</span>],
+    }
+    moved = <span class="n">0</span>
+    <span class="k">for</span> f <span class="k">in</span> <span class="v">Path</span>(folder).<span class="v">iterdir</span>():
+        <span class="k">if</span> f.<span class="v">is_file</span>():
+            <span class="k">for</span> kind, exts <span class="k">in</span> ext_map.<span class="v">items</span>():
+                <span class="k">if</span> f.suffix.<span class="v">lower</span>() <span class="k">in</span> exts:
+                    target = <span class="v">Path</span>(folder) / kind
+                    target.<span class="v">mkdir</span>(exist_ok=<span class="k">True</span>)
+                    shutil.<span class="v">move</span>(<span class="v">str</span>(f), <span class="v">str</span>(target / f.name))
+                    moved += <span class="n">1</span>
+                    <span class="k">break</span>
+    <span class="k">return</span> moved
+
+<span class="k">if</span> __name__ == <span class="s">&quot;__main__&quot;</span>:
+    n = <span class="v">organize</span>(<span class="s">&quot;/Users/hero/test_folder&quot;</span>)
+    <span class="v">print</span>(<span class="s">f&quot;整理完成，共移动 {n} 个文件&quot;</span>)</div>
+      <div class="out">整理完成，共移动 6 个文件</div>
+      <p>这就是 BOSS3「桌面自动整理器」的核心，原封不动复用——<span class="hl">好的模块写一次，用一辈子</span>。.zip 不在清单里所以留下，这本身就是一次真实测试：程序只动它认识的文件。</p>
+      <div class="ms-ok">✅ 达成标准：终端打印「整理完成，共移动 <b>6</b> 个文件」，文件夹里出现 <b>图片 / 文档 / 表格</b> 三个子文件夹。</div>
+    </div>
+
+    <div class="ms-box">
+      <h3>🏁 里程碑 2 · 调度器上线，模块串成流水线（第 2-3 天）</h3>
+      <p>第三方库 schedule 一行装好：<span class="hl-c">pip install schedule</span>。它让 Python 自己盯表：</p>
+      <div class="code"><span class="k">import</span> schedule
+<span class="k">import</span> time
+<span class="k">from</span> organizer <span class="k">import</span> organize   <span class="c"># 里程碑1 的模块直接复用</span>
+
+<span class="k">def</span> <span class="v">morning_job</span>():
+    <span class="v">print</span>(<span class="s">&quot;【调度】开始执行：文件整理&quot;</span>)
+    n = <span class="v">organize</span>(<span class="s">&quot;/Users/hero/Downloads&quot;</span>)
+    <span class="v">print</span>(<span class="s">&quot;【调度】完成，本次移动&quot;</span>, n, <span class="s">&quot;个文件&quot;</span>)
+
+schedule.<span class="v">every</span>().day.<span class="v">at</span>(<span class="s">&quot;08:30&quot;</span>).<span class="v">do</span>(morning_job)   <span class="c"># 每天 08:30</span>
+
+<span class="v">print</span>(<span class="s">&quot;调度器已启动，等待 08:30 ……（Ctrl+C 退出）&quot;</span>)
+<span class="k">while</span> <span class="k">True</span>:
+    schedule.<span class="v">run_pending</span>()   <span class="c"># 每秒检查一次：到点了吗？</span>
+    time.<span class="v">sleep</span>(<span class="n">1</span>)</div>
+      <div class="out">调度器已启动，等待 08:30 ……（Ctrl+C 退出）</div>
+      <p>启动后立刻打印第一行；到 08:30 时会<b>自动</b>追加两行「开始执行 / 完成」——没有人按任何键。while True + run_pending() 是系统的心跳：每一秒问一次「到点了吗」。生产环境也可用系统的 crontab / 任务计划程序实现，schedule 胜在纯 Python、跨平台、好调试。</p>
+      <div class="ms-ok">✅ 达成标准：把 at("08:30") 临时改成两分钟后的时间，<b>亲眼看它自动开火一次</b>再改回来。</div>
+    </div>
+
+    <div class="ms-box">
+      <h3>🏁 里程碑 3 · 加入 pandas 日报（第 4-5 天）</h3>
+      <p>有了历史记录，就该让第 23 课的 pandas 上场——<span class="hl">一行 groupby 顶十行手写循环</span>：</p>
+      <div class="code"><span class="k">import</span> pandas <span class="k">as</span> pd
+
+<span class="k">def</span> <span class="v">make_report</span>(rows):
+    <span class="s">&quot;&quot;&quot;rows 是每次运行的记录：[{日期, 模块, 结果}, ...]&quot;&quot;&quot;</span>
+    df = pd.<span class="v">DataFrame</span>(rows)
+    summary = df.<span class="v">groupby</span>(<span class="s">&quot;模块&quot;</span>)[<span class="s">&quot;结果&quot;</span>].<span class="v">agg</span>([<span class="s">&quot;count&quot;</span>, <span class="s">&quot;sum&quot;</span>])
+    summary.columns = [<span class="s">&quot;执行次数&quot;</span>, <span class="s">&quot;成功数&quot;</span>]
+    df.<span class="v">to_csv</span>(<span class="s">&quot;run_log.csv&quot;</span>, index=<span class="k">False</span>, encoding=<span class="s">&quot;utf-8-sig&quot;</span>)
+    <span class="k">return</span> summary
+
+demo = [
+    {<span class="s">&quot;日期&quot;</span>: <span class="s">&quot;2025-06-01&quot;</span>, <span class="s">&quot;模块&quot;</span>: <span class="s">&quot;文件整理&quot;</span>, <span class="s">&quot;结果&quot;</span>: <span class="n">12</span>},
+    {<span class="s">&quot;日期&quot;</span>: <span class="s">&quot;2025-06-01&quot;</span>, <span class="s">&quot;模块&quot;</span>: <span class="s">&quot;数据汇总&quot;</span>, <span class="s">&quot;结果&quot;</span>: <span class="n">3</span>},
+    {<span class="s">&quot;日期&quot;</span>: <span class="s">&quot;2025-06-02&quot;</span>, <span class="s">&quot;模块&quot;</span>: <span class="s">&quot;文件整理&quot;</span>, <span class="s">&quot;结果&quot;</span>: <span class="n">8</span>},
+]
+<span class="v">print</span>(<span class="v">make_report</span>(demo))</div>
+      <div class="out">      执行次数  成功数
+模块             
+数据汇总     1    3
+文件整理     2   20</div>
+      <p>三天的运行记录，groupby 之后一眼看清：文件整理跑了 2 次、累计搬了 20 个文件。小细节：<span class="hl-c">encoding="utf-8-sig"</span> 是给 Excel 看的编码，双击 CSV 打开不乱码。</p>
+      <div class="ms-ok">✅ 达成标准：run_log.csv 能用 Excel 正常打开；往 demo 里加一条记录再跑，<b>数字会正确累加</b>。</div>
+    </div>
+
+    <div class="ms-box">
+      <h3>🏁 里程碑 4 · 护甲、日志与收尾（第 6-7 天）</h3>
+      <p>无人值守系统的生死线：<span class="hl">任何模块崩了，系统不能陪葬</span>。给每个任务套上统一护甲 safe_run：</p>
+      <div class="code"><span class="k">import</span> logging
+
+logging.<span class="v">basicConfig</span>(
+    filename=<span class="s">&quot;assistant.log&quot;</span>,
+    level=logging.INFO,
+    format=<span class="s">&quot;%(asctime)s [%(levelname)s] %(message)s&quot;</span>,
+)
+
+<span class="k">def</span> <span class="v">safe_run</span>(job_name, job_func, *args):
+    <span class="s">&quot;&quot;&quot;穿上护甲再干活：任何模块崩了都不拖垮整个系统&quot;&quot;&quot;</span>
+    <span class="k">try</span>:
+        result = <span class="v">job_func</span>(*args)
+        logging.<span class="v">info</span>(<span class="s">&quot;%s 完成：%s&quot;</span>, job_name, result)
+        <span class="k">return</span> result
+    <span class="k">except</span> Exception <span class="k">as</span> e:
+        logging.<span class="v">error</span>(<span class="s">&quot;%s 出错：%s&quot;</span>, job_name, e)
+        <span class="k">return</span> <span class="k">None</span>
+
+<span class="k">def</span> <span class="v">divide</span>(a, b):
+    <span class="k">return</span> a / b
+
+<span class="v">print</span>(<span class="v">safe_run</span>(<span class="s">&quot;正常任务&quot;</span>, divide, <span class="n">10</span>, <span class="n">2</span>))
+<span class="v">print</span>(<span class="v">safe_run</span>(<span class="s">&quot;翻车任务&quot;</span>, divide, <span class="n">10</span>, <span class="n">0</span>))</div>
+      <div class="out">5.0
+None</div>
+      <p>「翻车任务」除以零，程序没崩、返回 None，现场还被记进了黑匣子：</p>
+      <div class="out gold">2026-06-03 08:30:01,215 [INFO] 正常任务 完成：5.0
+2026-06-03 08:30:01,216 [ERROR] 翻车任务 出错：division by zero</div>
+      <p>三天后系统出问题，你不用猜——打开 assistant.log，哪一秒、哪个模块、什么错误，白纸黑字。</p>
+      <div class="ms-ok">✅ 达成标准：故意让某个任务必然报错（比如除以 0），系统打印 None 但<b>不崩溃</b>，assistant.log 里出现 ERROR 行。</div>
+    </div>
+
+    <div class="ms-box" style="border-left-color:var(--gold);">
+      <h3 style="color:var(--gold)">♛ 合体 · 整合框架完整骨架（main.py · 约 120 行）</h3>
+      <p>四个里程碑拼成最终形态：<span class="hl">配置区 → 日志 → 通用护甲 → 四个模块 → 主调度器</span>。照着这个骨架填装你自己的功能，本周末你的助手就能上岗：</p>
+      <div class="code"><span class="s">&quot;&quot;&quot;个人自动化助手 · 整合框架骨架
+================================
+每天 08:30 自动执行：整理文件 → 抓取天气 → 汇总数据 → 生成日报并通知
+依赖安装：pip install schedule requests pandas
+&quot;&quot;&quot;</span>
+<span class="k">import</span> logging
+<span class="k">import</span> shutil
+<span class="k">import</span> time
+<span class="k">from</span> datetime <span class="k">import</span> datetime
+<span class="k">from</span> pathlib <span class="k">import</span> Path
+
+<span class="k">import</span> pandas <span class="k">as</span> pd
+<span class="k">import</span> requests
+<span class="k">import</span> schedule
+
+<span class="c"># ---------- 配置区：所有会变的参数集中一处 ----------</span>
+CONFIG = {
+    <span class="s">&quot;messy_folder&quot;</span>: Path.<span class="v">home</span>() / <span class="s">&quot;Downloads&quot;</span>,   <span class="c"># 待整理的文件夹</span>
+    <span class="s">&quot;city&quot;</span>: <span class="s">&quot;beijing&quot;</span>,                           <span class="c"># 天气接口的城市代码</span>
+    <span class="s">&quot;out_dir&quot;</span>: <span class="v">Path</span>(<span class="s">&quot;assistant_output&quot;</span>),         <span class="c"># 报告输出目录</span>
+    <span class="s">&quot;retry&quot;</span>: <span class="n">2</span>,                                  <span class="c"># 网络失败重试次数</span>
+}
+
+<span class="c"># ---------- 日志：无人值守系统的黑匣子 ----------</span>
+logging.<span class="v">basicConfig</span>(
+    filename=<span class="s">&quot;assistant.log&quot;</span>,
+    level=logging.INFO,
+    format=<span class="s">&quot;%(asctime)s [%(levelname)s] %(message)s&quot;</span>,
+)
+
+<span class="c"># ---------- 通用护甲：崩了不连坐，还能重试 ----------</span>
+<span class="k">def</span> <span class="v">safe_run</span>(job_name, job_func, *args, **kwargs):
+    <span class="k">for</span> attempt <span class="k">in</span> <span class="v">range</span>(<span class="n">1</span>, CONFIG[<span class="s">&quot;retry&quot;</span>] + <span class="n">1</span>):
+        <span class="k">try</span>:
+            result = <span class="v">job_func</span>(*args, **kwargs)
+            logging.<span class="v">info</span>(<span class="s">&quot;%s 成功：%s&quot;</span>, job_name, result)
+            <span class="k">return</span> result
+        <span class="k">except</span> Exception <span class="k">as</span> e:
+            logging.<span class="v">warning</span>(<span class="s">&quot;%s 第 %s 次失败：%s&quot;</span>, job_name, attempt, e)
+            time.<span class="v">sleep</span>(<span class="n">2</span>)                    <span class="c"># 缓两秒再试，别把对方服务器打急了</span>
+    logging.<span class="v">error</span>(<span class="s">&quot;%s 连续失败，跳过本次任务&quot;</span>, job_name)
+    <span class="k">return</span> <span class="k">None</span>
+
+<span class="c"># ---------- 模块 A：文件整理（复用 BOSS3 桌面自动整理器） ----------</span>
+EXT_MAP = {
+    <span class="s">&quot;图片&quot;</span>: [<span class="s">&quot;.png&quot;</span>, <span class="s">&quot;.jpg&quot;</span>, <span class="s">&quot;.gif&quot;</span>],
+    <span class="s">&quot;文档&quot;</span>: [<span class="s">&quot;.pdf&quot;</span>, <span class="s">&quot;.docx&quot;</span>, <span class="s">&quot;.txt&quot;</span>],
+    <span class="s">&quot;表格&quot;</span>: [<span class="s">&quot;.xlsx&quot;</span>, <span class="s">&quot;.csv&quot;</span>],
+}
+ALL_EXTS = {ext <span class="k">for</span> exts <span class="k">in</span> EXT_MAP.<span class="v">values</span>() <span class="k">for</span> ext <span class="k">in</span> exts}
+
+<span class="k">def</span> <span class="v">job_organize</span>(folder):
+    moved = <span class="n">0</span>
+    <span class="k">for</span> f <span class="k">in</span> <span class="v">Path</span>(folder).<span class="v">iterdir</span>():
+        <span class="k">if</span> f.<span class="v">is_file</span>() <span class="k">and</span> f.suffix.<span class="v">lower</span>() <span class="k">in</span> ALL_EXTS:
+            <span class="k">for</span> kind, exts <span class="k">in</span> EXT_MAP.<span class="v">items</span>():
+                <span class="k">if</span> f.suffix.<span class="v">lower</span>() <span class="k">in</span> exts:
+                    target = <span class="v">Path</span>(folder) / kind
+                    target.<span class="v">mkdir</span>(exist_ok=<span class="k">True</span>)
+                    shutil.<span class="v">move</span>(<span class="v">str</span>(f), <span class="v">str</span>(target / f.name))
+                    moved += <span class="n">1</span>
+                    <span class="k">break</span>
+    <span class="k">return</span> moved
+
+<span class="c"># ---------- 模块 B：信息抓取（requests + API） ----------</span>
+<span class="k">def</span> <span class="v">job_fetch_weather</span>(city):
+    resp = requests.<span class="v">get</span>(
+        <span class="s">&quot;wttr.in/&quot;</span> + city,      <span class="c"># 演示骨架：协议头省略，实际使用需补全（第 13 课）</span>
+        params={<span class="s">&quot;format&quot;</span>: <span class="s">&quot;j1&quot;</span>},
+        timeout=<span class="n">10</span>,
+    )
+    resp.<span class="v">raise_for_status</span>()
+    data = resp.<span class="v">json</span>()
+    <span class="k">return</span> data[<span class="s">&quot;current_condition&quot;</span>][<span class="n">0</span>][<span class="s">&quot;temp_C&quot;</span>]
+
+<span class="c"># ---------- 模块 C：数据汇总（pandas，复用第 23 课） ----------</span>
+<span class="k">def</span> <span class="v">job_summarize</span>(rows):
+    df = pd.<span class="v">DataFrame</span>(rows)
+    CONFIG[<span class="s">&quot;out_dir&quot;</span>].<span class="v">mkdir</span>(exist_ok=<span class="k">True</span>)
+    df.<span class="v">to_csv</span>(CONFIG[<span class="s">&quot;out_dir&quot;</span>] / <span class="s">&quot;run_log.csv&quot;</span>,
+              index=<span class="k">False</span>, encoding=<span class="s">&quot;utf-8-sig&quot;</span>)
+    <span class="k">return</span> <span class="v">len</span>(df)
+
+<span class="c"># ---------- 模块 D：报告生成与通知 ----------</span>
+<span class="k">def</span> <span class="v">job_report</span>(temp, moved, total):
+    lines = [
+        <span class="s">&quot;===== 个人助手日报 %s =====&quot;</span> % datetime.<span class="v">now</span>().<span class="v">strftime</span>(<span class="s">&quot;%Y-%m-%d&quot;</span>),
+        <span class="s">&quot;今日温度：%s ℃&quot;</span> % temp,
+        <span class="s">&quot;整理文件：%s 个&quot;</span> % moved,
+        <span class="s">&quot;累计记录：%s 条&quot;</span> % total,
+    ]
+    report = <span class="s">&quot;\n&quot;</span>.<span class="v">join</span>(lines)
+    (CONFIG[<span class="s">&quot;out_dir&quot;</span>] / <span class="s">&quot;daily_report.txt&quot;</span>).<span class="v">write_text</span>(report, encoding=<span class="s">&quot;utf-8&quot;</span>)
+    <span class="v">print</span>(report)      <span class="c"># 终端通知；进阶可换成钉钉/邮件 webhook 推送</span>
+    <span class="k">return</span> report
+
+<span class="c"># ---------- 主调度器：把四个模块串成一条流水线 ----------</span>
+<span class="k">def</span> <span class="v">morning_job</span>():
+    log_path = CONFIG[<span class="s">&quot;out_dir&quot;</span>] / <span class="s">&quot;run_log.csv&quot;</span>
+    <span class="k">if</span> log_path.<span class="v">exists</span>():
+        rows = pd.<span class="v">read_csv</span>(log_path).<span class="v">to_dict</span>(<span class="s">&quot;records&quot;</span>)
+    <span class="k">else</span>:
+        rows = []
+    temp = <span class="v">safe_run</span>(<span class="s">&quot;天气抓取&quot;</span>, job_fetch_weather, CONFIG[<span class="s">&quot;city&quot;</span>])
+    moved = <span class="v">safe_run</span>(<span class="s">&quot;文件整理&quot;</span>, job_organize, CONFIG[<span class="s">&quot;messy_folder&quot;</span>]) <span class="k">or</span> <span class="n">0</span>
+    rows.<span class="v">append</span>({<span class="s">&quot;日期&quot;</span>: datetime.<span class="v">now</span>().<span class="v">strftime</span>(<span class="s">&quot;%Y-%m-%d&quot;</span>),
+                 <span class="s">&quot;温度&quot;</span>: temp, <span class="s">&quot;文件数&quot;</span>: moved})
+    total = <span class="v">safe_run</span>(<span class="s">&quot;数据汇总&quot;</span>, job_summarize, rows) <span class="k">or</span> <span class="v">len</span>(rows)
+    <span class="v">safe_run</span>(<span class="s">&quot;报告生成&quot;</span>, job_report, temp, moved, total)
+
+<span class="k">def</span> <span class="v">main</span>():
+    CONFIG[<span class="s">&quot;out_dir&quot;</span>].<span class="v">mkdir</span>(exist_ok=<span class="k">True</span>)
+    schedule.<span class="v">every</span>().day.<span class="v">at</span>(<span class="s">&quot;08:30&quot;</span>).<span class="v">do</span>(morning_job)
+    logging.<span class="v">info</span>(<span class="s">&quot;调度器启动，每天 08:30 自动执行&quot;</span>)
+    <span class="k">while</span> <span class="k">True</span>:
+        schedule.<span class="v">run_pending</span>()
+        time.<span class="v">sleep</span>(<span class="n">1</span>)
+
+<span class="k">if</span> __name__ == <span class="s">&quot;__main__&quot;</span>:
+    <span class="v">main</span>()</div>
+      <p>开工前先 <span class="hl-c">git init</span> 入库、写好 .gitignore（排除 venv/ 和 .env）——第 24 课的习惯，从今天起就是肌肉记忆。</p>
+    </div>
+  </section>
+
+  <!-- 4 验收标准清单 -->
+  <section>
+    <h2><span class="num">4</span>📋 验收标准清单 · 8 项</h2>
+    <p>逐项实测（不是「我觉得可以」），<span class="hl">全部勾完才有资格参加毕业答辩</span>。点击条目即可勾选：</p>
+    <div id="ck-list"></div>
+    <div id="ck-count">已达成 <b>0 / 8</b> —— 全部勾完再参加毕业答辩</div>
+  </section>
+
+  <!-- 5 大师自评表 -->
+  <section>
+    <h2><span class="num">5</span>⭐ 大师自评表 · 5 个维度</h2>
+    <p>别人打分看运气，大师打分看标准。给你的作品逐维度点星（1-5 星）：</p>
+    <div id="selfrate"></div>
+    <div id="rate-result"></div>
+  </section>
+
+  <!-- 6 毕业致辞 -->
+  <section>
+    <h2><span class="num">6</span>🎓 毕业致辞</h2>
+    <p>还记得第 1 课吗？那天你连「变量」是什么都不知道，全部的本事只有一行 <span class="hl-c">print("你好，阿呆")</span>。</p>
+    <p>26 课之后，你的成长弧线是这样的：</p>
+    <p>💠 <b>新手村</b>：让程序开口说话、学会判断与重复——你驯服了语法这头幼龙；</p>
+    <p>💠 <b>装备库</b>：列表、字典、文件、异常护盾——你的数据第一次活过了关机；</p>
+    <p>💠 <b>副本挑战</b>：requests、os、正则——程序第一次替你伸手到网络和硬盘；</p>
+    <p>💠 <b>进阶秘境</b>：类、继承、装饰器——你从「写脚本的人」变成了「设计系统的人」；</p>
+    <p>💠 <b>大师之路</b>：并发、pandas、Git 工程化——三张王牌集齐，今天全部拍在毕业设计桌上。</p>
+    <div class="titles">
+      <div class="title-chip">壹 新手村 · <b>初级冒险者</b></div>
+      <div class="title-chip">➜ 贰 装备库 · <b>装备齐全的行者</b></div>
+      <div class="title-chip">➜ 叁 副本挑战 · <b>自动化法师</b></div>
+      <div class="title-chip">➜ 肆 进阶秘境 · <b>系统设计师</b></div>
+      <div class="title-chip now">➜ 伍 大师之路 · <b>Python 高阶玩家</b></div>
+    </div>
+    <p>真正的毕业，不是「学完了 26 课」，而是从此——</p>
+    <p style="text-align:center;font-size:16px;"><span class="hl">「遇到任何重复劳动，你的第一反应是：这个，能写个脚本。」</span></p>
+    <p style="text-align:center;color:var(--muted);font-size:13px;">这句话，就是你的毕业证。</p>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 全课程记忆卡片 · 五关各 2 张</h2>
+    <p>五大关卡，每关挑出 2 个最核心的考点——这是整段旅程的浓缩，也是你带走的行李。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出的卡片，回对应关卡补课。</div>
+  </section>
+
+  <!-- 8 毕业答辩 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 毕业答辩 · Quiz 5 题 · 答对 4 题授予称号</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 通关认证 -->
+  <section>
+    <h2><span class="num crown">♛</span>通关认证 · 「Python 高阶玩家」</h2>
+    <p>五大关卡、26 课、5 场 BOSS 战、一个每天替你干活的系统——全部通关。输入你的名字，领取毕业证书：</p>
+    <div class="lab-input">
+      <input id="grad-name" maxlength="12" placeholder="输入你的名字，镌刻在毕业证书上">
+      <button class="btn" onclick="grantCert()">🏆 授予称号 · 生成证书</button>
+    </div>
+    <div class="cert" id="cert">
+      <div class="cert-title">— CERTIFICATE —</div>
+      <div class="cert-rank">Python 高阶玩家</div>
+      <div class="cert-body">兹证明 <b id="cert-name">—</b></div>
+      <div class="cert-body">通关《Python 修炼之旅》五大关卡 · 26 课 · 毕业设计</div>
+      <div class="cert-quote">「从 print 到架构——从此遇到重复劳动，第一反应是：这个能写个脚本。」</div>
+      <div class="cert-date" id="cert-date">—</div>
+    </div>
+  </section>
+
+  <footer>
+    全 26 课 · 五大关卡 · 完结撒花 🎉 ｜ 你的下一个项目，藏在你明天遇到的第一件重复劳动里
+  </footer>
+</div>
+
+<script>
+/* ============ 验收清单 ============ */
+var ckData = [
+  '⏰ <b>定时运行</b>：每天 08:30 无人值守自动执行，全程不需要人按任何键',
+  '📦 <b>模块A 文件整理</b>：指定文件夹整理后 0 个散乱目标文件（按扩展名归档，.zip 这类不认识的文件安然无恙）',
+  '📡 <b>模块B 信息抓取</b>：外部数据获取失败时自动重试；重试失败记录日志并跳过，而不是崩溃',
+  '💾 <b>数据持久化</b>：每次运行的结果追加进 run_log.csv，重启程序后历史一条不丢',
+  '📊 <b>模块C 数据汇总</b>：pandas 能正确汇总历史记录（groupby 出执行次数与结果统计）',
+  '📨 <b>模块D 报告通知</b>：每天生成一份可读的 daily_report.txt 日报，并有输出通知',
+  '🛡 <b>异常防护</b>：任何一个模块抛异常，系统不退出、日志留痕、其余模块照常执行',
+  '📜 <b>工程规范</b>：README 写清安装与使用；git 管理项目，.gitignore 排除 venv/ 与 .env'
+];
+var ckDone = [];
+(function(){
+  var box = document.getElementById('ck-list');
+  ckData.forEach(function(t, i){
+    var d = document.createElement('div');
+    d.className = 'ck-item';
+    d.innerHTML = '<div class="ckbox">✓</div><span class="ck-txt">' + t + '</span>';
+    d.addEventListener('click', function(){
+      d.classList.toggle('done');
+      ckDone[i] = d.classList.contains('done');
+      updateCk();
+    });
+    box.appendChild(d);
+    ckDone[i] = false;
+  });
+  updateCk();
+})();
+function updateCk(){
+  var n = 0, i;
+  for(i = 0; i < ckDone.length; i++){ if(ckDone[i]) n++; }
+  var el = document.getElementById('ck-count');
+  if(n >= ckData.length){
+    el.innerHTML = '<b class="ck-full">8 / 8 全部达成！</b> 毕业答辩在等你，去吧';
+  } else {
+    el.innerHTML = '已达成 <b>' + n + ' / ' + ckData.length + '</b> —— 全部勾完再参加毕业答辩';
+  }
+}
+
+/* ============ 大师自评表 ============ */
+var dims = [
+  {name:'功能完成度', desc:'四个模块是否都真实干活，而非占位假数据？'},
+  {name:'代码质量', desc:'命名见名知意、函数职责单一、关键处有注释？'},
+  {name:'稳定性', desc:'断网、缺文件夹、API 抽风时，系统都不崩且有日志？'},
+  {name:'数据闭环', desc:'记录真的落盘，第二天真的被读回来进了日报？'},
+  {name:'工程规范', desc:'结构清晰、README 完整、git 历史干净、有测试？'}
+];
+var ratings = [0, 0, 0, 0, 0];
+(function(){
+  var box = document.getElementById('selfrate');
+  dims.forEach(function(d, i){
+    var row = document.createElement('div');
+    row.className = 'rate-row';
+    row.innerHTML = '<div class="rate-name"><b>' + d.name + '</b><small>' + d.desc + '</small></div>' +
+                    '<div class="stars" id="stars-' + i + '"></div>';
+    box.appendChild(row);
+    var holder = row.querySelector('.stars');
+    for(var s = 1; s <= 5; s++){
+      (function(si){
+        var b = document.createElement('button');
+        b.className = 'star';
+        b.textContent = '★';
+        b.title = si + ' 星';
+        b.addEventListener('click', function(){
+          ratings[i] = si;
+          drawStars();
+        });
+        holder.appendChild(b);
+      })(s);
+    }
+  });
+  drawStars();
+})();
+function drawStars(){
+  var i, j;
+  for(i = 0; i < dims.length; i++){
+    var btns = document.getElementById('stars-' + i).querySelectorAll('.star');
+    for(j = 0; j < btns.length; j++){
+      if(j < ratings[i]){ btns[j].classList.add('on'); }
+      else{ btns[j].classList.remove('on'); }
+    }
+  }
+  var total = ratings[0] + ratings[1] + ratings[2] + ratings[3] + ratings[4];
+  var el = document.getElementById('rate-result');
+  var allRated = (ratings.indexOf(0) === -1);
+  if(allRated){
+    var msg;
+    if(total >= 22){ msg = total + ' / 25 —— 大师中的大师，这个项目可以直接写进简历！'; }
+    else if(total >= 17){ msg = total + ' / 25 —— 扎实的毕业作品，短板就是你下一个项目的进化方向'; }
+    else{ msg = total + ' / 25 —— 项目已成型，按自评短板迭代一轮，再来重新打分'; }
+    el.innerHTML = '大师自评：<b>' + msg + '</b>';
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+/* ============ 全课程记忆卡片 ============ */
+var cardData = [
+  ['变量与类型转换', '新手村', '变量是贴了标签的盒子；先算右边再放左边；数字和文字相加要先 str() 转换'],
+  ['函数：技能封装', '新手村', '把一段魔法封进函数：参数是入场券，return 是战利品，一个函数只干一件事'],
+  ['try/except 防崩护盾', '装备库', 'except Exception as e 兜住报错攻击，程序再也不闪退——无人值守系统的生死线'],
+  ['with open 持久化', '装备库', 'with open(路径, "w", encoding="utf-8") as f 自动关门，数据在关机后依然存在'],
+  ['requests + API', '副本挑战', 'requests.get(地址, timeout=10).json() 三步拿情报；timeout 和 raise_for_status 是安全带'],
+  ['pathlib + shutil', '副本挑战', 'Path 遍历文件夹、suffix 看扩展名、shutil.move 归档——批量文件操作三件套'],
+  ['类与对象', '进阶秘境', 'class 描述种族：__init__ 发初始装备，self 是「我自己」，对象 = 属性 + 行为'],
+  ['装饰器附魔', '进阶秘境', '@装饰器 给函数加计时/日志/缓存效果，不动原函数一根毫毛'],
+  ['Git 三区模型', '大师之路', '工作区 →git add→ 暂存区 →git commit→ 仓库；checkout 哈希 读档回退'],
+  ['pandas 汇总', '大师之路', 'DataFrame 存表格、groupby 分组聚合、to_csv 落盘——一行抵十行循环']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront"><small>' + c[1] + '</small>' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[2] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ 毕业答辩 Quiz ============ */
+var quizData = [
+  {q:'毕业系统的「模块B 信息抓取」要拿今天的真实天气，标准姿势是哪一套？',
+   opts:['requests.get(地址, timeout=10) 发请求，再用 .json() 解析回执',
+         'print() 把天气打印出来',
+         'random.randint(1, 40) 猜一个温度',
+         'input() 让用户每天手输温度'], ans:0,
+   exp:'第 13 课「情报网」：requests 负责发请求，.json() 负责解析；timeout 防止服务器装死拖垮调度器——这是无人值守系统的安全带。'},
+  {q:'为什么整个系统必须套上 try/except + 日志（logging）？',
+   opts:['让代码看起来更专业',
+         '因为无人值守：没有人在旁边点「确定」，模块崩了必须自己兜住并留下日志，才不拖垮其他模块',
+         'Python 语法规定必须写',
+         '防止别人看懂你的代码'], ans:1,
+   exp:'第 10 课 + 毕业设计里程碑4：safe_run 护甲让任何模块崩了都返回 None 并记入 assistant.log，系统继续跑，三天后排查也有据可查。'},
+  {q:'日报里的「各模块累计统计」为什么用 pandas 而不是手写循环？',
+   opts:['手写循环在 Python 里已被禁用',
+         'pandas 的图表颜色更多',
+         '一行 groupby 聚合顶十行手写循环，还能直接 to_csv 落盘，且不易写错',
+         'pandas 运行不需要内存'], ans:2,
+   exp:'第 23 课「千里眼」：DataFrame + groupby + agg 三板斧，把「分组统计」从循环苦力活变成一行声明——这就是数据分析的王牌。'},
+  {q:'「每天 08:30 自动运行」由哪段代码实现？',
+   opts:['在代码末尾写 input("按回车运行")',
+         'schedule.every().day.at("08:30").do(任务) 配上 while True 循环里的 run_pending()',
+         '用 print("该干活了") 每天喊一次',
+         '把闹钟设在 08:30，每天手动运行一次'], ans:1,
+   exp:'里程碑2：schedule 负责登记任务时间，while True + run_pending() 是心跳——每秒检查一次「到点了吗」，到点自动开火。'},
+  {q:'综合题：历史运行记录为什么要写进 run_log.csv，而不是 print 完就完？',
+   opts:['print 的内容关掉窗口就消失；CSV 落盘后第二天能读回来继续追加，日报才有历史可汇总',
+         'CSV 文件比 print 高级',
+         'print 是付费功能',
+         '不写文件会被 Python 警告'], ans:0,
+   exp:'第 9 课「存档系统」的终极意义：数据持久化让程序拥有「记忆」。今天的记录是明天日报的原材料——这就是数据闭环。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + o + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + q.q + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 20;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? '答辩通过！「Python 高阶玩家」称号已就绪——去下方领证书吧 🔓'
+      : '答辩未通过：把错题对应的关卡回炉一遍（卡片上有提示），刷新后重新答辩';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+
+/* ============ 毕业证书 ============ */
+function grantCert(){
+  var name = document.getElementById('grad-name').value.trim();
+  if(!name){ alert('先写下你的名字——证书要实名颁发！'); return; }
+  document.getElementById('cert-name').textContent = name;
+  var d = new Date();
+  document.getElementById('cert-date').textContent =
+    d.getFullYear() + ' 年 ' + (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 大师之路 · 毕业认证';
+  var cert = document.getElementById('cert');
+  cert.classList.remove('show'); void cert.offsetWidth; cert.classList.add('show');
+}
+</script>
+</body>
+</html>

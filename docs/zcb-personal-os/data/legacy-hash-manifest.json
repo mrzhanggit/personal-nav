@@ -1,0 +1,225 @@
+{
+  "baselineCommit": "4a309f5fc14457ec7a288b097f99c705b5f25288",
+  "algorithm": "sha256",
+  "baselineFileCount": 54,
+  "protectedFileCount": 53,
+  "replaceable": {
+    "path": "index.html",
+    "sha256": "5e0610930c6da571739ef7ad0152b850da447a8e12c24dc79f5ef426a1187a7c",
+    "policy": "replaceable; excluded from legacy invariant checks"
+  },
+  "files": [
+    {
+      "path": "claude-code-course.html",
+      "sha256": "ead067a84e29e306711ad416eef11ee70f5a08a977ac604b619e8c5cc0c20814"
+    },
+    {
+      "path": "cli-course.html",
+      "sha256": "f00b71dd49f111899097ae4883d39e0f5a70fca13189cf3c0cb356122c6e0f82"
+    },
+    {
+      "path": "links.json",
+      "sha256": "fa1d3ad63b81fc60a580fd59843cf875d0a8ef2fe8a5444c01c4b573de21c263"
+    },
+    {
+      "path": "python-course/00_课程总览_修炼之旅地图.html",
+      "sha256": "71dda12f302c3e974c924e29f1148e794dd2a93c5fbf9a400c7904faa2d19a47"
+    },
+    {
+      "path": "python-course/01_新手村_第1课_变量与print.html",
+      "sha256": "82a4a8a49d2d215c0529c08a348cfb3c590d234c09b152560c9af8c5fe5467b5"
+    },
+    {
+      "path": "python-course/02_新手村_第2课_数据类型与input.html",
+      "sha256": "735ed8788a31b69581f18bbfd5e74c663fd5f3211b73061dbf669ab6dbcfe0a1"
+    },
+    {
+      "path": "python-course/03_新手村_第3课_条件判断.html",
+      "sha256": "b100b1f79bfeb95212207bb835e7512f68619ae70deb88e0191531164150e859"
+    },
+    {
+      "path": "python-course/04_新手村_第4课_循环.html",
+      "sha256": "1d60143129165f1bb6a2540d9b3f31bdd388ff10fab7eba130a80270b3b8a7a3"
+    },
+    {
+      "path": "python-course/05_新手村_第5课_函数.html",
+      "sha256": "d8aaaf389f1c1b12d051f2fc27c9db4385cc6b6ffcec4ddeccf127c90a294aad"
+    },
+    {
+      "path": "python-course/06_新手村_BOSS战_文字冒险游戏.html",
+      "sha256": "0109d638f0d6e48ce200ac0cdd617bca8693b9e40479d26dd21f8cd0dbaef911"
+    },
+    {
+      "path": "python-course/07_装备库_第6课_列表与元组.html",
+      "sha256": "694bcaa0a96d73d37e5317185d66e94b942778d75288a8cfc5aff64f8fe6396d"
+    },
+    {
+      "path": "python-course/08_装备库_第7课_字典与集合.html",
+      "sha256": "309571e180982cb1b2b0f28f5109adae2356f763f2dfe4732fb31bd44a59ec9a"
+    },
+    {
+      "path": "python-course/09_装备库_第8课_字符串精通.html",
+      "sha256": "bc8eee5851cd6753ab35bb74a2d0be2d5c9365a3454202a6e28a84e49654910e"
+    },
+    {
+      "path": "python-course/10_装备库_第9课_文件读写.html",
+      "sha256": "98849d30615cf75c8afc7343d693d1bfc6e4933d1fe1c88085036bdb1292f4b3"
+    },
+    {
+      "path": "python-course/11_装备库_第10课_异常处理.html",
+      "sha256": "a41184c9e8aa5638b3f9a9a8cd09b76b24ea5be9854dea3a4c14cc09a741e895"
+    },
+    {
+      "path": "python-course/12_装备库_BOSS战_命令行待办清单.html",
+      "sha256": "530aa620243f10c5a19004802e54e7588b2a5106a4eea2c5e5abd6c485e40d29"
+    },
+    {
+      "path": "python-course/13_副本挑战_第11课_模块与pip.html",
+      "sha256": "d2933c452143ba9834132c718ad3f2f3dcd9ed070293f1acce319f12524acaaf"
+    },
+    {
+      "path": "python-course/14_副本挑战_第12课_时间与随机.html",
+      "sha256": "38d43d147381f7027d36736f78b6c5699faa78113e622e0b2f0342d31978f432"
+    },
+    {
+      "path": "python-course/15_副本挑战_第13课_requests与API.html",
+      "sha256": "fe0862f0e13fbb13d65e7be0af0942200e7d681084fc313dee888fdeb4f802d5"
+    },
+    {
+      "path": "python-course/16_副本挑战_第14课_os与shutil.html",
+      "sha256": "71961c02cfac2ebdb8e18f3b3345a1f8c0e187e2d112949ba1446fdff0e6f496"
+    },
+    {
+      "path": "python-course/17_副本挑战_第15课_正则表达式.html",
+      "sha256": "7d1728a4d38b910f2228310dd3d8b81069b8628375ccdbf5ba267fcb4b541c58"
+    },
+    {
+      "path": "python-course/18_副本挑战_BOSS战_桌面自动整理器.html",
+      "sha256": "b7efa73cdc1272c8ce7500bf01acd4497f29272c2562e402615bf087c503f7c4"
+    },
+    {
+      "path": "python-course/19_进阶秘境_第16课_类与对象.html",
+      "sha256": "a93f77f928f9999b663f00e91a58eb2515298789b347c11a4cf68966ca946d0f"
+    },
+    {
+      "path": "python-course/20_进阶秘境_第17课_继承与魔法方法.html",
+      "sha256": "57d919fbef0864f0d9920b73515a168c241339c9e37cd72a07c57bb47caf520b"
+    },
+    {
+      "path": "python-course/21_进阶秘境_第18课_推导式与生成器.html",
+      "sha256": "f889d460bf508df9bfbe3ab301babb2280e71055edd52a52c97fcf8cb99ce09a"
+    },
+    {
+      "path": "python-course/22_进阶秘境_第19课_装饰器与闭包.html",
+      "sha256": "0911ed06e7eadc3ef2a87d9b2adff08b996ae7d0c77ad8fc9d1777b107d92d65"
+    },
+    {
+      "path": "python-course/23_进阶秘境_第20课_递归与算法.html",
+      "sha256": "2980aa391aa131177ef0a5680806d06dee738668b82d2bda0334acc5ffda5748"
+    },
+    {
+      "path": "python-course/24_进阶秘境_BOSS战_卡牌对战游戏.html",
+      "sha256": "762d0d6646c8813d93c74b29c6e4bdbe5edada212e5f01a9707b7c5a015a294c"
+    },
+    {
+      "path": "python-course/25_大师之路_第21课_多线程与并发.html",
+      "sha256": "f36fd39d875494d4a3800e9dd1dab692a5e7f09e27d33ff0dbc2f7749b453f49"
+    },
+    {
+      "path": "python-course/26_大师之路_第22课_异步初步.html",
+      "sha256": "9acc6dab9c08608fd525b9428278b70569b0e36cbc00e2b052799ae7405ee127"
+    },
+    {
+      "path": "python-course/27_大师之路_第23课_pandas数据分析.html",
+      "sha256": "303e15b9ce37b48d17fa7f22c2c60720b304a5b94626941f9d3fc34bbacd068d"
+    },
+    {
+      "path": "python-course/28_大师之路_第24课_Git与工程化.html",
+      "sha256": "42845e4043ab5d61c53a1971d604d9f2d951a32ac2808a9ac55622a01c26f03e"
+    },
+    {
+      "path": "python-course/29_大师之路_毕业设计_个人自动化助手.html",
+      "sha256": "23cdedfe4d08e85581588997ca2215d626fb1b04a03a85fd29c492ee5c065750"
+    },
+    {
+      "path": "python-course/index.html",
+      "sha256": "71dda12f302c3e974c924e29f1148e794dd2a93c5fbf9a400c7904faa2d19a47"
+    },
+    {
+      "path": "timeline/byzantine/index.html",
+      "sha256": "6769824a550278c517d77d51dffbda7f1d6781db6e0f2ee871f979698d5b8c63"
+    },
+    {
+      "path": "timeline/byzantine/style-a.html",
+      "sha256": "c51a33a8c7304d3e5c934c93741eee1e3706e014dc42941ed62276eb9a2fc445"
+    },
+    {
+      "path": "timeline/byzantine/style-b.html",
+      "sha256": "e9a7b109de43ab492a9821c35864644f0f29e791bda8edddf8e0745b125e61e0"
+    },
+    {
+      "path": "timeline/byzantine/style-c.html",
+      "sha256": "e5acddb914732a59269077049a0410453c9663320423bae28e4f3d3cbd3125cc"
+    },
+    {
+      "path": "timeline/france/index.html",
+      "sha256": "7b2b56dd7570fc201697d5623d0e042053af928c586d9bcdd7d496ae819c19f3"
+    },
+    {
+      "path": "timeline/france/style-a.html",
+      "sha256": "b79407062be11714833c91dccc6e5bf542f03ace58772135c65c33ac6df77e1e"
+    },
+    {
+      "path": "timeline/france/style-b.html",
+      "sha256": "846a08523e9ed6f23fb65ea969cf1094b530eb51a775644471d5d521fa9fd32e"
+    },
+    {
+      "path": "timeline/france/style-c.html",
+      "sha256": "f1b01ca37e99f34c0f548cc3b827c4700c05c2ff7058e41cb11d46e0362e5102"
+    },
+    {
+      "path": "timeline/japan-history.html",
+      "sha256": "ee6fad520ef5162b08ce759d935b6c6090fb975bf7a6aa690b98d86740a8d6a1"
+    },
+    {
+      "path": "timeline/renaissance/index.html",
+      "sha256": "1b0122f8d959b1f8fef1b4bc9f80d8437c36ceaba6f8f0c255dda4481bcfa60d"
+    },
+    {
+      "path": "timeline/renaissance/style-a.html",
+      "sha256": "99985a5fc33bd32ee3af06f94879312b0eea37b5a1e50b1cf0f0baa8b7d5d2df"
+    },
+    {
+      "path": "timeline/renaissance/style-b.html",
+      "sha256": "46e3526af8f50351cfa21b7630b5b2bdc10fb70343c48cec7fe54b680f07150d"
+    },
+    {
+      "path": "timeline/renaissance/style-c.html",
+      "sha256": "e18ac457a13573cc459158cfaaa59c4b7e29c7eaa9356fcff491d2ff9f6e9ee9"
+    },
+    {
+      "path": "timeline/rome/index.html",
+      "sha256": "dda54f5f747f5e37af8c7f5c6b7083b2d57515388a1d9cc5c11c5b570c3434a3"
+    },
+    {
+      "path": "timeline/russia/index.html",
+      "sha256": "425677ea3b4f3c6fcae20ec4066afd4c88636d10718bd2426885239fdd6a2b61"
+    },
+    {
+      "path": "timeline/russia/style-a.html",
+      "sha256": "bc772f314e71e32083ad1c0603578150cb982f68ccf3098e95d6a1a64e92b1f3"
+    },
+    {
+      "path": "timeline/russia/style-b.html",
+      "sha256": "41a23d320b67ac2c6d9c74e644bc01c29e092707dcb54b615c98ee7f64e11b81"
+    },
+    {
+      "path": "timeline/russia/style-c.html",
+      "sha256": "dc5be750450513a19407bdde10a9896052c442a996d16d6017b2906b6c3af4fb"
+    },
+    {
+      "path": "timeline/uk-history.html",
+      "sha256": "8f3b61e3fdc9eb751952d36225b39a6c414453719e8d6d7e1f16b7c940725fb2"
+    }
+  ]
+}

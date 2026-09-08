@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>★ BOSS 战 · 命令行待办清单 —— 装备库毕业试炼</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4dd6ff; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.12), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(167,139,250,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--green);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--green);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#7eeaff,#4dd6ff 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4dd6ff,#a78bfa);
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--green);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#a8ecff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  .out.session::before{content:"▶ 运行实录（> 开头的是你输入的命令）：";}
+  .file-cap{font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:12px;}
+  /* 作战计划卡片 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:15px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  .btn{
+    background:linear-gradient(135deg,#4dd6ff,#a78bfa);color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  /* BOSS 需求书 */
+  .boss-card{
+    background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--red);border-radius:16px;padding:20px 24px;margin:14px 0;
+  }
+  .boss-card h3{color:var(--red);font-size:17px;margin-bottom:8px;letter-spacing:1px;}
+  .boss-card .req{margin:6px 0;font-size:14px;}
+  .boss-card .req b{color:var(--cyan);font-family:ui-monospace,Menlo,monospace;font-size:13px;margin-right:8px;}
+  /* 验收清单 */
+  .check-item{
+    display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
+    border-radius:12px;padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:all .2s;
+  }
+  .check-item:hover{border-color:var(--cyan);}
+  .check-item .box{
+    width:24px;height:24px;border-radius:7px;border:2px solid var(--muted);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:15px;color:#0d1021;font-weight:800;
+  }
+  .check-item.done{border-color:var(--green);background:rgba(77,214,255,.08);}
+  .check-item.done .box{background:var(--green);border-color:var(--green);}
+  .check-item.done span{color:var(--muted);text-decoration:line-through;}
+  #check-progress{font-size:14px;color:var(--cyan);font-weight:700;margin-top:10px;}
+  /* 打分表 */
+  .score-row{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:12px 16px;margin-bottom:10px;
+  }
+  .score-row .sname{font-weight:700;color:var(--text);}
+  .score-row .sdesc{font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .score-btns{display:flex;gap:8px;flex-wrap:wrap;}
+  .sbtn{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:8px;color:var(--text);
+    padding:5px 14px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;transition:all .2s;
+  }
+  .sbtn:hover{border-color:var(--cyan);}
+  .sbtn.on{background:var(--green);color:#0d1021;font-weight:800;border-color:var(--green);}
+  #score-total{
+    margin-top:14px;text-align:center;padding:16px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);display:none;
+  }
+  #score-total.show{display:block;animation:popIn .4s both;}
+  #score-total b{font-size:32px;color:var(--gold);display:block;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{perspective:800px;height:130px;cursor:pointer;}
+  .mcard-inner{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d;}
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 通关认证 */
+  .cert{
+    display:none;margin-top:20px;text-align:center;
+    background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:18px;padding:30px 26px;
+    animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .cert.show{display:block;}
+  .cert h3{color:var(--gold);font-size:14px;letter-spacing:6px;margin-bottom:12px;}
+  .cert .cert-title{font-size:30px;font-weight:800;color:var(--gold);letter-spacing:3px;margin-bottom:10px;}
+  .cert .cert-text{font-size:13px;color:var(--muted);margin:10px auto;max-width:520px;}
+  .cert .cert-seal{
+    display:inline-block;margin-top:14px;padding:6px 18px;border:1px dashed var(--gold);
+    border-radius:999px;color:var(--gold);font-size:13px;letter-spacing:2px;
+  }
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>BOSS 战 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY · BOSS BATTLE</div>
+    <h1>★ BOSS 战 · 命令行待办清单</h1>
+    <div class="subtitle">装备库毕业试炼：打造你的第一个带数据持久化的完整项目</div>
+    <div class="mission">
+      <h3>📜 BOSS 战任务书</h3>
+      <li>独立完成命令行待办清单：添加 / 完成 / 删除 / 列出任务</li>
+      <li>用 <span class="hl">json</span> 文件存档，程序重启后数据不丢</li>
+      <li>综合运用第 6-10 课全部装备：列表、字典、字符串、文件、异常</li>
+      <li>通过功能验收 8 项 + 自评打分 + 设计决策 Quiz 5/5，赢取<span class="hl">「装备齐全的行者」</span>称号</li>
+    </div>
+  </header>
+
+  <!-- 1 BOSS 宣言 -->
+  <section>
+    <h2><span class="num">1</span>🐲 BOSS 宣言 · 需求书</h2>
+    <p>你一路披荆斩棘，终于惊动了装备库最深处的守关 BOSS——<span class="hl">遗忘魔龙</span>。它最擅长的招数是「记忆抹除」：你每次关掉程序，所有进度就凭空消失。</p>
+    <p>想要击败它，你必须造出一件能<span class="hl-c">对抗遗忘</span>的神器——一个会把数据存进文件、下次启动还能读回来的命令行待办清单。它吐出一张需求书：</p>
+    <div class="boss-card">
+      <h3>🔥 遗忘魔龙 · 需求书（全部满足方可通关）</h3>
+      <div class="req"><b>R1</b>添加任务：输入任务标题，加入清单</div>
+      <div class="req"><b>R2</b>完成任务：输入编号，对应任务打上 ✔</div>
+      <div class="req"><b>R3</b>删除任务：输入编号，对应任务从清单移除</div>
+      <div class="req"><b>R4</b>列出任务：显示编号、完成状态和完成统计</div>
+      <div class="req"><b>R5</b>数据持久化：任务存进 <b>todo.json</b>——启动时读取，退出时保存</div>
+      <div class="req"><b>R6</b>异常防御：文件不存在或损坏时，程序不许崩溃</div>
+    </div>
+    <p>别慌——你已经集齐了打败它需要的全部装备。这节课我们把它们熔铸成一件完整的神器。</p>
+  </section>
+
+  <!-- 2 作战计划 -->
+  <section>
+    <h2><span class="num">2</span>🗺️ 作战计划 · 四层拆解</h2>
+    <p>对付大项目，莽夫直接开写，勇者先画地图。把待办清单拆成四层，每层只用几个函数，一层一层搭建：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">存档层</div><div class="val">load / save</div><div class="tip">json 读写 · 第 9 课</div></div>
+      <div class="mbox"><div class="tag">展示层</div><div class="val">show_tasks</div><div class="tip">enumerate + f-string · 第 6/8 课</div></div>
+      <div class="mbox"><div class="tag">操作层</div><div class="val">add·done·del</div><div class="tip">列表与字典 · 第 6/7 课</div></div>
+      <div class="mbox"><div class="tag">调度层</div><div class="val">main</div><div class="tip">while True + 异常 · 第 4/10 课</div></div>
+    </div>
+    <p>🧠 口诀：<span class="hl">自顶向下设计</span>（先想清楚分几层），<span class="hl">自底向上搭建</span>（从最独立的存档层开始写，每写完一层立刻测试）。</p>
+  </section>
+
+  <!-- 3 第1步 -->
+  <section>
+    <h2><span class="num">3</span>🧱 第 1 步 · 存档层：json 读写</h2>
+    <p>对抗遗忘的核心装备是 <span class="hl">json</span> 模块：<span class="hl-c">json.dump()</span> 把 Python 对象写成文件，<span class="hl-c">json.load()</span> 把文件读回 Python 对象——一来一回，数据格式分毫不变。</p>
+    <div class="code"><span class="k">import</span> <span class="k">json</span>
+
+tasks = [
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;学习变量&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">True</span>},
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;闯过 BOSS 战&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>},
+]
+
+<span class="k">with</span> <span class="k">open</span>(<span class="s">&quot;todo.json&quot;</span>, <span class="s">&quot;w&quot;</span>, encoding=<span class="s">&quot;utf-8&quot;</span>) <span class="k">as</span> f:
+    <span class="k">json</span>.<span class="k">dump</span>(tasks, f, ensure_ascii=<span class="k">False</span>, indent=<span class="n">2</span>)
+
+<span class="k">with</span> <span class="k">open</span>(<span class="s">&quot;todo.json&quot;</span>, <span class="s">&quot;r&quot;</span>, encoding=<span class="s">&quot;utf-8&quot;</span>) <span class="k">as</span> f:
+    loaded = <span class="k">json</span>.<span class="k">load</span>(f)
+
+<span class="k">print</span>(loaded[<span class="n">0</span>][<span class="s">&quot;title&quot;</span>], <span class="s">&quot;-&quot;</span>, <span class="s">&quot;已完成&quot;</span> <span class="k">if</span> loaded[<span class="n">0</span>][<span class="s">&quot;done&quot;</span>] <span class="k">else</span> <span class="s">&quot;未完成&quot;</span>)</div>
+    <div class="out">学习变量 - 已完成</div>
+    <p>运行后，文件夹里会多出一个 <code class="hl-c">todo.json</code>，打开看看它的真容——人能读懂，机器也能解析：</p>
+    <div class="code">[
+  {
+    <span class="s">&quot;title&quot;</span>: <span class="s">&quot;学习变量&quot;</span>,
+    <span class="s">&quot;done&quot;</span>: <span class="k">true</span>
+  },
+  {
+    <span class="s">&quot;title&quot;</span>: <span class="s">&quot;闯过 BOSS 战&quot;</span>,
+    <span class="s">&quot;done&quot;</span>: <span class="k">false</span>
+  }
+]</div>
+    <div class="file-cap">▲ todo.json 的内容：Python 的 True/False 存档后变成 json 的 true/false</div>
+    <p>三个参数记牢：<span class="hl">ensure_ascii=False</span> 让中文原样保存不变成乱码；<span class="hl">indent=2</span> 让排版缩进好看；<span class="hl">encoding="utf-8"</span> 读写都要带，双保险防乱码。</p>
+  </section>
+
+  <!-- 4 第2步 -->
+  <section>
+    <h2><span class="num">4</span>🧱 第 2 步 · 展示层：show_tasks</h2>
+    <p>清单要「列」得漂亮：每个任务带编号（从 1 开始，对用户友好）、带状态符号，最后再来一行统计。三个老朋友登场：<span class="hl-c">enumerate(tasks, start=1)</span> 同时拿编号和元素、f-string 拼输出、<span class="hl-c">sum()</span> 统计已完成数量。</p>
+    <div class="code">tasks = [
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;学习变量&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">True</span>},
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;闯过 BOSS 战&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>},
+]
+
+<span class="k">def</span> <span class="v">show_tasks</span>(tasks):
+    <span class="s">&quot;&quot;</span><span class="s">&quot;列出所有任务&quot;</span><span class="s">&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> tasks:
+        <span class="k">print</span>(<span class="s">&quot;清单空空如也，去添加一个任务吧！&quot;</span>)
+        <span class="k">return</span>
+    <span class="k">print</span>(<span class="s">&quot;=&quot;</span> * <span class="n">26</span>)
+    <span class="k">for</span> i, task <span class="k">in</span> <span class="k">enumerate</span>(tasks, start=<span class="n">1</span>):
+        mark = <span class="s">&quot;✔&quot;</span> <span class="k">if</span> task[<span class="s">&quot;done&quot;</span>] <span class="k">else</span> <span class="s">&quot;□&quot;</span>
+        <span class="k">print</span>(f<span class="s">&quot;{mark} {i}. {task[&#x27;title&#x27;]}&quot;</span>)
+    <span class="k">print</span>(<span class="s">&quot;=&quot;</span> * <span class="n">26</span>)
+    done = <span class="k">sum</span>(<span class="n">1</span> <span class="k">for</span> t <span class="k">in</span> tasks <span class="k">if</span> t[<span class="s">&quot;done&quot;</span>])
+    <span class="k">print</span>(f<span class="s">&quot;共 {len(tasks)} 项，已完成 {done} 项&quot;</span>)
+
+<span class="v">show_tasks</span>(tasks)</div>
+    <div class="out">==========================
+✔ 1. 学习变量
+□ 2. 闯过 BOSS 战
+==========================
+共 2 项，已完成 1 项</div>
+    <p>小亮点：<span class="hl-c">"✔" if task["done"] else "□"</span> 是三元表达式——条件成立取前面的值，否则取后面的。一行顶四行。</p>
+  </section>
+
+  <!-- 5 第3步 -->
+  <section>
+    <h2><span class="num">5</span>🧱 第 3 步 · 操作层：add_task 添加</h2>
+    <p>添加任务 = 往列表里 append 一个新字典。<span class="hl-c">strip()</span> 先把输入两端的空格和换行去掉，防止「手滑空格变空任务」；标题为空就直接拦截。</p>
+    <div class="code"><span class="k">def</span> <span class="v">add_task</span>(tasks):
+    title = <span class="k">input</span>(<span class="s">&quot;新任务标题：&quot;</span>).<span class="k">strip</span>()
+    <span class="k">if</span> <span class="k">not</span> title:
+        <span class="k">print</span>(<span class="s">&quot;标题不能为空&quot;</span>)
+        <span class="k">return</span>
+    tasks.<span class="k">append</span>({<span class="s">&quot;title&quot;</span>: title, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>})
+    <span class="k">print</span>(f<span class="s">&quot;已添加：{title}&quot;</span>)
+
+tasks = []
+<span class="v">add_task</span>(tasks)          <span class="c"># 此处输入：学会 json 模块</span>
+<span class="k">print</span>(tasks)             <span class="c"># 看看盒子里的数据长什么样</span></div>
+    <div class="out">已添加：学会 json 模块
+[{'title': '学会 json 模块', 'done': False}]</div>
+    <p>注意每个任务的骨架：<code class="hl-c">{"title": ..., "done": False}</code>——新任务默认未完成，等 done_task 来翻牌。</p>
+  </section>
+
+  <!-- 6 第4步 -->
+  <section>
+    <h2><span class="num">6</span>🧱 第 4 步 · 操作层：done_task / del_task</h2>
+    <p>完成和删除都要「按编号」操作，而用户永远可能输入奇怪的东西：99、abc、空回车……防御三连：<span class="hl-c">isdigit()</span> 查是否纯数字、范围检查 <span class="hl-c">1 &lt;= int(num) &lt;= len(tasks)</span>、不合法就友好提示。删除用 <span class="hl-c">pop()</span>——它会顺手返回被删掉的元素，正好拿来播报。</p>
+    <div class="code"><span class="k">def</span> <span class="v">done_task</span>(tasks):
+    num = <span class="k">input</span>(<span class="s">&quot;要完成第几项？&quot;</span>).<span class="k">strip</span>()
+    <span class="k">if</span> num.<span class="k">isdigit</span>() <span class="k">and</span> <span class="n">1</span> <= <span class="k">int</span>(num) <= <span class="k">len</span>(tasks):
+        tasks[<span class="k">int</span>(num) - <span class="n">1</span>][<span class="s">&quot;done&quot;</span>] = <span class="k">True</span>
+        <span class="k">print</span>(<span class="s">&quot;🎉 干得漂亮！&quot;</span>)
+    <span class="k">else</span>:
+        <span class="k">print</span>(<span class="s">&quot;编号无效&quot;</span>)
+
+tasks = [
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;学 Python&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>},
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;打 BOSS&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>},
+]
+<span class="v">done_task</span>(tasks)         <span class="c"># 此处输入：1（合法编号）</span>
+<span class="v">done_task</span>(tasks)         <span class="c"># 此处输入：99（越界编号）</span>
+<span class="k">print</span>(tasks[<span class="n">0</span>])</div>
+    <div class="out">🎉 干得漂亮！
+编号无效
+{'title': '学 Python', 'done': True}</div>
+    <p>编号换算小陷阱：用户说「第 1 项」，Python 列表下标是 <span class="hl">0</span>，所以要 <code class="hl-c">int(num) - 1</code>。del_task 的写法完全同款，只是把 <code class="hl-c">= True</code> 换成 <code class="hl-c">pop(int(num) - 1)</code>（完整代码见第 8 步）。</p>
+  </section>
+
+  <!-- 7 第5步 -->
+  <section>
+    <h2><span class="num">7</span>🧱 第 5 步 · 调度层：while True 主菜单</h2>
+    <p>万事俱备，只差总指挥。<span class="hl">while True</span> 死循环 + <span class="hl-c">break</span> 是命令行程序的标配骨架：不断接收命令、分发给对应函数，直到用户输入 quit 才存档退出。</p>
+    <div class="code"><span class="k">def</span> <span class="v">main</span>():
+    tasks = <span class="v">load_tasks</span>()          <span class="c"># 启动时读档（第 1 步）</span>
+    <span class="k">print</span>(<span class="s">&quot;📋 欢迎使用命令行待办清单（输入 help 查看命令）&quot;</span>)
+    <span class="k">while</span> <span class="k">True</span>:                   <span class="c"># 主循环：反复接收命令</span>
+        cmd = <span class="k">input</span>(<span class="s">&quot;\n&gt; &quot;</span>).<span class="k">strip</span>().<span class="k">lower</span>()
+        <span class="k">if</span> cmd == <span class="s">&quot;list&quot;</span>:
+            <span class="v">show_tasks</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;add&quot;</span>:
+            <span class="v">add_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;done&quot;</span>:
+            <span class="v">done_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;del&quot;</span>:
+            <span class="v">del_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;help&quot;</span>:
+            <span class="k">print</span>(<span class="s">&quot;命令：add 添加 / list 列出 / done 完成 / del 删除 / quit 保存并退出&quot;</span>)
+        <span class="k">elif</span> cmd == <span class="s">&quot;quit&quot;</span>:
+            <span class="v">save_tasks</span>(tasks)     <span class="c"># 退出前存档</span>
+            <span class="k">print</span>(<span class="s">&quot;已保存到&quot;</span>, TODO_FILE, <span class="s">&quot;，再见！&quot;</span>)
+            <span class="k">break</span>                 <span class="c"># 跳出 while True，程序结束</span>
+        <span class="k">else</span>:
+            <span class="k">print</span>(<span class="s">&quot;未知命令，输入 help 查看用法&quot;</span>)
+
+<span class="k">if</span> __name__ == <span class="s">&quot;__main__&quot;</span>:
+    <span class="v">main</span>()</div>
+    <div class="out session">📋 欢迎使用命令行待办清单（输入 help 查看命令）
+
+&gt; help
+命令：add 添加 / list 列出 / done 完成 / del 删除 / quit 保存并退出
+
+&gt; add
+新任务标题：喝口水
+已添加：喝口水
+
+&gt; xyz
+未知命令，输入 help 查看用法
+
+&gt; quit
+已保存到 todo.json ，再见！</div>
+    <p>细节：<span class="hl-c">strip().lower()</span> 让 "ADD"、"add " 都能被识别——把用户输入先洗干净再比较，是命令行程序的基本礼仪。</p>
+  </section>
+
+  <!-- 8 第6步 完整代码 -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 第 6 步 · 神器合体：完整代码（88 行）</h2>
+    <p>把前五步的零件组装起来，再补上 <span class="hl-c">load_tasks()</span> 的异常防御（文件不存在返回空列表、文件损坏自动重置）——神器成型：</p>
+    <div class="code"><span class="k">import</span> <span class="k">json</span>
+<span class="k">import</span> <span class="k">os</span>
+
+TODO_FILE = <span class="s">&quot;todo.json&quot;</span>
+
+<span class="k">def</span> <span class="v">load_tasks</span>():
+    <span class="s">&quot;&quot;</span><span class="s">&quot;启动时读取 todo.json；文件不存在或损坏时返回空列表&quot;</span><span class="s">&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> <span class="k">os</span>.path.<span class="k">exists</span>(TODO_FILE):
+        <span class="k">return</span> []
+    <span class="k">try</span>:
+        <span class="k">with</span> <span class="k">open</span>(TODO_FILE, <span class="s">&quot;r&quot;</span>, encoding=<span class="s">&quot;utf-8&quot;</span>) <span class="k">as</span> f:
+            <span class="k">return</span> <span class="k">json</span>.<span class="k">load</span>(f)
+    <span class="k">except</span> (<span class="k">json</span>.JSONDecodeError, OSError):
+        <span class="k">print</span>(<span class="s">&quot;⚠️ 数据文件损坏，已重置为空清单&quot;</span>)
+        <span class="k">return</span> []
+
+<span class="k">def</span> <span class="v">save_tasks</span>(tasks):
+    <span class="s">&quot;&quot;</span><span class="s">&quot;退出时把任务列表写回 todo.json&quot;</span><span class="s">&quot;&quot;</span>
+    <span class="k">with</span> <span class="k">open</span>(TODO_FILE, <span class="s">&quot;w&quot;</span>, encoding=<span class="s">&quot;utf-8&quot;</span>) <span class="k">as</span> f:
+        <span class="k">json</span>.<span class="k">dump</span>(tasks, f, ensure_ascii=<span class="k">False</span>, indent=<span class="n">2</span>)
+
+<span class="k">def</span> <span class="v">show_tasks</span>(tasks):
+    <span class="s">&quot;&quot;</span><span class="s">&quot;列出所有任务&quot;</span><span class="s">&quot;&quot;</span>
+    <span class="k">if</span> <span class="k">not</span> tasks:
+        <span class="k">print</span>(<span class="s">&quot;清单空空如也，去添加一个任务吧！&quot;</span>)
+        <span class="k">return</span>
+    <span class="k">print</span>(<span class="s">&quot;=&quot;</span> * <span class="n">26</span>)
+    <span class="k">for</span> i, task <span class="k">in</span> <span class="k">enumerate</span>(tasks, start=<span class="n">1</span>):
+        mark = <span class="s">&quot;✔&quot;</span> <span class="k">if</span> task[<span class="s">&quot;done&quot;</span>] <span class="k">else</span> <span class="s">&quot;□&quot;</span>
+        <span class="k">print</span>(f<span class="s">&quot;{mark} {i}. {task[&#x27;title&#x27;]}&quot;</span>)
+    <span class="k">print</span>(<span class="s">&quot;=&quot;</span> * <span class="n">26</span>)
+    done = <span class="k">sum</span>(<span class="n">1</span> <span class="k">for</span> t <span class="k">in</span> tasks <span class="k">if</span> t[<span class="s">&quot;done&quot;</span>])
+    <span class="k">print</span>(f<span class="s">&quot;共 {len(tasks)} 项，已完成 {done} 项&quot;</span>)
+
+<span class="k">def</span> <span class="v">add_task</span>(tasks):
+    title = <span class="k">input</span>(<span class="s">&quot;新任务标题：&quot;</span>).<span class="k">strip</span>()
+    <span class="k">if</span> <span class="k">not</span> title:
+        <span class="k">print</span>(<span class="s">&quot;标题不能为空&quot;</span>)
+        <span class="k">return</span>
+    tasks.<span class="k">append</span>({<span class="s">&quot;title&quot;</span>: title, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>})
+    <span class="k">print</span>(f<span class="s">&quot;已添加：{title}&quot;</span>)
+
+<span class="k">def</span> <span class="v">done_task</span>(tasks):
+    <span class="v">show_tasks</span>(tasks)
+    <span class="k">if</span> <span class="k">not</span> tasks:
+        <span class="k">return</span>
+    num = <span class="k">input</span>(<span class="s">&quot;要完成第几项？&quot;</span>).<span class="k">strip</span>()
+    <span class="k">if</span> num.<span class="k">isdigit</span>() <span class="k">and</span> <span class="n">1</span> <= <span class="k">int</span>(num) <= <span class="k">len</span>(tasks):
+        tasks[<span class="k">int</span>(num) - <span class="n">1</span>][<span class="s">&quot;done&quot;</span>] = <span class="k">True</span>
+        <span class="k">print</span>(<span class="s">&quot;🎉 干得漂亮！&quot;</span>)
+    <span class="k">else</span>:
+        <span class="k">print</span>(<span class="s">&quot;编号无效&quot;</span>)
+
+<span class="k">def</span> <span class="v">del_task</span>(tasks):
+    <span class="v">show_tasks</span>(tasks)
+    <span class="k">if</span> <span class="k">not</span> tasks:
+        <span class="k">return</span>
+    num = <span class="k">input</span>(<span class="s">&quot;要删除第几项？&quot;</span>).<span class="k">strip</span>()
+    <span class="k">if</span> num.<span class="k">isdigit</span>() <span class="k">and</span> <span class="n">1</span> <= <span class="k">int</span>(num) <= <span class="k">len</span>(tasks):
+        removed = tasks.<span class="k">pop</span>(<span class="k">int</span>(num) - <span class="n">1</span>)
+        <span class="k">print</span>(f<span class="s">&quot;已删除：{removed[&#x27;title&#x27;]}&quot;</span>)
+    <span class="k">else</span>:
+        <span class="k">print</span>(<span class="s">&quot;编号无效&quot;</span>)
+
+<span class="k">def</span> <span class="v">main</span>():
+    tasks = <span class="v">load_tasks</span>()
+    <span class="k">print</span>(<span class="s">&quot;📋 欢迎使用命令行待办清单（输入 help 查看命令）&quot;</span>)
+    <span class="k">while</span> <span class="k">True</span>:
+        cmd = <span class="k">input</span>(<span class="s">&quot;\n&gt; &quot;</span>).<span class="k">strip</span>().<span class="k">lower</span>()
+        <span class="k">if</span> cmd == <span class="s">&quot;list&quot;</span>:
+            <span class="v">show_tasks</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;add&quot;</span>:
+            <span class="v">add_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;done&quot;</span>:
+            <span class="v">done_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;del&quot;</span>:
+            <span class="v">del_task</span>(tasks)
+        <span class="k">elif</span> cmd == <span class="s">&quot;help&quot;</span>:
+            <span class="k">print</span>(<span class="s">&quot;命令：add 添加 / list 列出 / done 完成 / del 删除 / quit 保存并退出&quot;</span>)
+        <span class="k">elif</span> cmd == <span class="s">&quot;quit&quot;</span>:
+            <span class="v">save_tasks</span>(tasks)
+            <span class="k">print</span>(<span class="s">&quot;已保存到&quot;</span>, TODO_FILE, <span class="s">&quot;，再见！&quot;</span>)
+            <span class="k">break</span>
+        <span class="k">else</span>:
+            <span class="k">print</span>(<span class="s">&quot;未知命令，输入 help 查看用法&quot;</span>)
+
+<span class="k">if</span> __name__ == <span class="s">&quot;__main__&quot;</span>:
+    <span class="v">main</span>()</div>
+    <p>使用方法：把代码保存为 <code class="hl-c">todo.py</code>，在终端运行 <code class="hl-c">python3 todo.py</code>。退出后同目录会出现 <code class="hl-c">todo.json</code>——那是你亲手封印的、遗忘魔龙再也吃不掉的数据。</p>
+    <p>💡 检验持久化的黄金动作：<span class="hl">退出 → 重新启动 → list</span>。如果任务还在，恭喜，魔龙已被斩落。</p>
+  </section>
+
+  <!-- 9 验收清单 -->
+  <section>
+    <h2><span class="num">9</span>✅ 功能验收清单 · 8 项</h2>
+    <p>真机跑一遍程序，每测过一项就点一下把它勾掉：</p>
+    <div id="checklist"></div>
+    <div id="check-progress">已验收 0 / 8</div>
+  </section>
+
+  <!-- 10 自评打分 -->
+  <section>
+    <h2><span class="num">10</span>📊 自评打分表 · 5 维度 × 20 分</h2>
+    <p>诚实是勇者的美德。每个维度选一个分数（0 / 5 / 10 / 15 / 20），加满 100：</p>
+    <div id="score-table"></div>
+    <div id="score-total"></div>
+  </section>
+
+  <!-- 11 进阶挑战 -->
+  <section>
+    <h2><span class="num">11</span>🔥 进阶挑战 · 三件神器（选做）</h2>
+    <p>基础神器锻造完成后，试试给它镶嵌三颗宝石：</p>
+    <p><span class="hl">① 优先级宝石</span>——给任务加 <code class="hl-c">priority</code> 字段（1 高 / 2 中 / 3 低），list 时按优先级排序：</p>
+    <div class="code">tasks = [
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;打 BOSS&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>, <span class="s">&quot;priority&quot;</span>: <span class="n">1</span>},
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;整理背包&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>, <span class="s">&quot;priority&quot;</span>: <span class="n">3</span>},
+    {<span class="s">&quot;title&quot;</span>: <span class="s">&quot;升级武器&quot;</span>, <span class="s">&quot;done&quot;</span>: <span class="k">False</span>, <span class="s">&quot;priority&quot;</span>: <span class="n">2</span>},
+]
+
+<span class="k">for</span> task <span class="k">in</span> <span class="k">sorted</span>(tasks, key=<span class="k">lambda</span> t: t[<span class="s">&quot;priority&quot;</span>]):
+    <span class="k">print</span>(task[<span class="s">&quot;priority&quot;</span>], task[<span class="s">&quot;title&quot;</span>])</div>
+    <div class="out">1 打 BOSS
+2 升级武器
+3 整理背包</div>
+    <p><span class="hl">② 截止日期宝石</span>——给任务加 <code class="hl-c">due</code> 字段存日期，用第 12 课预告的 datetime 计算剩余天数（输出随当天日期变化）：</p>
+    <div class="code"><span class="k">from</span> <span class="k">datetime</span> <span class="k">import</span> date
+
+deadline = <span class="v">date</span>(<span class="n">2026</span>, <span class="n">12</span>, <span class="n">31</span>)
+left = (deadline - date.<span class="k">today</span>()).days
+<span class="k">print</span>(f<span class="s">&quot;距离截止还有 {left} 天&quot;</span>)</div>
+    <p><span class="hl">③ 查找宝石</span>——输入关键词，用第 8 课的 <code class="hl-c">in</code> 找出所有标题包含它的任务：</p>
+    <div class="code">keyword = <span class="k">input</span>(<span class="s">&quot;查找关键词：&quot;</span>).<span class="k">strip</span>()
+<span class="k">for</span> i, task <span class="k">in</span> <span class="k">enumerate</span>(tasks, start=<span class="n">1</span>):
+    <span class="k">if</span> keyword <span class="k">in</span> task[<span class="s">&quot;title&quot;</span>]:
+        <span class="k">print</span>(f<span class="s">&quot;找到：{i}. {task[&#x27;title&#x27;]}&quot;</span>)</div>
+  </section>
+
+  <!-- 12 记忆卡片 -->
+  <section>
+    <h2><span class="num">12</span>🃏 记忆卡片 · 第 6-10 课考点回顾</h2>
+    <p>BOSS 战前先擦亮旧装备。每张卡片正面是问题，背面是答案：</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 13 设计决策 Quiz -->
+  <section>
+    <h2><span class="num">13</span>⚖️ 设计决策 Quiz · 5 题 · 全对解锁认证</h2>
+    <p>这一关不考「代码怎么写」，考「为什么这么写」——能讲清设计理由，才算真正毕业。</p>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 14 通关认证 -->
+  <section>
+    <h2><span class="num">14</span>🏆 通关认证</h2>
+    <p>当你完成功能验收 8 项、诚实自评，并斩落设计决策 Quiz 5 连击，就可以领取装备库的毕业认证：</p>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn" onclick="claimCert()">🏅 领取通关认证</button>
+    </div>
+    <div class="cert" id="cert">
+      <h3>通 关 认 证</h3>
+      <div class="cert-title">「装备齐全的行者」</div>
+      <div class="cert-text">装备库 · BOSS 战 · 命令行待办清单</div>
+      <div class="cert-text">你已集齐列表、字典、字符串、文件、异常五件神器，并独立锻造出第一个带数据持久化的完整项目。遗忘魔龙已被斩落，副本挑战的大门为你敞开。</div>
+      <div class="cert-seal">⚔ 装备库 · 认证印章</div>
+    </div>
+  </section>
+
+  <footer>
+    通关条件：功能验收 8/8 + 自评 ≥ 80 + 设计决策 Quiz 5/5 ｜ 下一站：副本挑战 · 第 11 课「模块与 pip —— 召唤外援」
+  </footer>
+</div>
+
+<script>
+/* ============ 功能验收清单（状态存内存变量，页面刷新重置） ============ */
+var checkData = [
+  '程序能正常启动——即使 todo.json 还不存在',
+  'add 添加任务后，list 能立刻看到新任务',
+  '输入空白标题会被拦截，不会混进空任务',
+  'done 能给指定任务打 ✔，底部统计同步更新',
+  'del 能删除指定任务，删除后编号自动重排',
+  '输入不存在的编号或未知命令，程序不崩溃、有友好提示',
+  'quit 退出后，打开 todo.json 能看到刚才的任务数据',
+  '重新启动程序，上次退出前的任务原封不动地回来了'
+];
+(function(){
+  var box = document.getElementById('checklist');
+  checkData.forEach(function(text, idx){
+    var item = document.createElement('div');
+    item.className = 'check-item';
+    item.innerHTML = '<div class="box"></div><span>' + text + '</span>';
+    item.addEventListener('click', function(){
+      item.classList.toggle('done');
+      var boxMark = item.querySelector('.box');
+      boxMark.textContent = item.classList.contains('done') ? '✔' : '';
+      var done = document.querySelectorAll('.check-item.done').length;
+      document.getElementById('check-progress').textContent =
+        done === checkData.length
+          ? '已验收 ' + done + ' / ' + checkData.length + ' —— 验收通过，魔龙血条已清空！'
+          : '已验收 ' + done + ' / ' + checkData.length;
+    });
+    box.appendChild(item);
+  });
+})();
+
+/* ============ 自评打分表 ============ */
+var dims = [
+  ['功能完整度', '添加 / 完成 / 删除 / 列出 / 持久化，一个不缺'],
+  ['代码正确性', '边界情况全有防御：空标题、错编号、坏文件'],
+  ['结构清晰度', '函数各司其职、命名见名知意、注释到位'],
+  ['体验友好度', '提示语看得懂、输出排版整齐'],
+  ['独立程度', '先自己动手写，卡住了才看引导']
+];
+var scorePick = [null, null, null, null, null];
+(function(){
+  var box = document.getElementById('score-table');
+  dims.forEach(function(d, idx){
+    var row = document.createElement('div');
+    row.className = 'score-row';
+    var btns = [0, 5, 10, 15, 20].map(function(v){
+      return '<button class="sbtn" data-v="' + v + '">' + v + '</button>';
+    }).join('');
+    row.innerHTML = '<div class="sname">' + (idx + 1) + '. ' + d[0] +
+      '</div><div class="sdesc">' + d[1] + '</div><div class="score-btns">' + btns + '</div>';
+    box.appendChild(row);
+    row.querySelectorAll('.sbtn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        row.querySelectorAll('.sbtn').forEach(function(b){ b.classList.remove('on'); });
+        btn.classList.add('on');
+        scorePick[idx] = +btn.dataset.v;
+        updateTotal();
+      });
+    });
+  });
+  function updateTotal(){
+    var total = 0, picked = 0;
+    for(var i = 0; i < scorePick.length; i++){
+      if(scorePick[i] !== null){ total += scorePick[i]; picked++; }
+    }
+    if(picked < dims.length) return;
+    var el = document.getElementById('score-total');
+    var verdict = total >= 90 ? '传说级神器！可以进军副本挑战了'
+      : total >= 80 ? '史诗级佳作！稳稳毕业'
+      : total >= 60 ? '合格线以上，回去打磨一下短板再出发'
+      : '别灰心，对照评分维度把项目再迭代一版';
+    el.innerHTML = '<b>' + total + ' 分</b>自评完成 —— ' + verdict;
+    el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+  }
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['列表怎么加元素 / 删元素？', 'append(x) 加到末尾；pop(i) 删除第 i 个并返回它（第 6 课）'],
+  ['enumerate(tasks, start=1) 干嘛的？', '遍历时同时拿到编号和元素，start=1 让编号从 1 开始（第 6 课）'],
+  ['字典怎么取值 / 改值？', 'd["key"] 取值，d["key"] = 新值 修改；key 不存在会 KeyError（第 7 课）'],
+  ['怎么判断 key 在不在字典里？', '用 in：if "title" in task:（第 7 课）'],
+  ['怎么判断输入是不是纯数字？', '"42".isdigit() 是 True，"abc".isdigit() 是 False（第 8 课）'],
+  ['f-string 怎么写？', 'f"共 {len(tasks)} 项"——大括号里可以放任意表达式（第 8 课）'],
+  ['with open(...) as f 好在哪？', '用完自动关闭文件，不怕忘记 f.close()（第 9 课）'],
+  ['读写文件为什么要 encoding="utf-8"？', '保证中文读写不乱码（第 9 课）'],
+  ['try / except 是干嘛的？', '把可能出错的代码放 try 里，出错就跳进 except 执行，程序不崩溃（第 10 课）'],
+  ['json.dump 和 json.load 的区别？', 'dump 把 Python 对象写进文件；load 把文件内容读回 Python 对象（第 9 课）']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[1] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ 设计决策 Quiz ============ */
+var quizData = [
+  {q:'任务数据为什么存成 json 文件，而不是自己拼字符串写 txt？',
+   opts:['json 文件看起来更酷','json 一行代码就能在「Python 对象与文字」间转换，读写都不用手动解析','txt 文件无法用 open 打开','写 json 不需要关闭文件'], ans:1,
+   exp:'若用 txt 存 "学习变量|True"，读回来要自己 split 解析，分隔符里再出现 | 就全崩了。json.load/json.dump 自动完成转换，结构化数据的标准答案。'},
+  {q:'为什么要拆成 load_tasks、show_tasks 等多个函数，而不是全写进一个大循环？',
+   opts:['函数能让代码自动跑得更快','Python 规定必须有函数','每个函数只管一件事，可单独测试、单独修改，主循环只做调度，结构清晰','不拆函数程序无法运行'], ans:2,
+   exp:'这是「高内聚、低耦合」的雏形：修 show_tasks 不影响存档逻辑，测 add_task 不用跑整个程序。函数拆分是可维护性的关键。'},
+  {q:'每个任务用什么数据结构存放最合适？',
+   opts:['一个很长的字符串，用逗号分隔','list 套 dict：list 保持顺序方便按编号操作，dict 描述任务的字段（title / done）','全部用数字编号','一个巨大的 dict，key 是任务名'], ans:1,
+   exp:'list 天然有序、可 pop 按下标删除；dict 用字段名取值清晰防错。list 套 dict 是描述「一堆记录」的经典结构。'},
+  {q:'什么时候读 todo.json、什么时候写 todo.json？',
+   opts:['每敲一个命令就读写一次文件','启动时读一次，退出时写一次','永远不写，数据放内存就行','随机时机读写'], ans:1,
+   exp:'启动读、退出写，既保证数据不丢（R5 需求），又不会每次操作都慢吞吞地碰硬盘。若担心中途断电丢数据，进阶做法是每次修改后立即保存。'},
+  {q:'load_tasks 里为什么要写 try / except？',
+   opts:['为了显得代码长','json.load 随时会报语法错误','todo.json 可能不存在或内容损坏，出错时返回空列表，让程序照样能启动（R6 需求）','try 里的代码跑得更快'], ans:2,
+   exp:'第一次运行时文件根本不存在；文件还可能被手滑改坏。异常防御保证任何情况下程序都能体面启动——这是第 10 课装备的实战价值。'}
+];
+window.__bossQuiz = 0;
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + o + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + q.q + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        window.__bossQuiz = score;
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 20;
+    var el = document.getElementById('quiz-result');
+    var msg = pts === 100
+      ? '五连击全中！设计思维已成型，快去领取通关认证 🏆'
+      : pts >= 80
+        ? '险过！但领取通关认证需要 5/5 全对，把错题的设计理由再想一想（刷新页面可重答）'
+        : '设计直觉还需打磨：把错题对应章节的代码重读一遍，刷新页面重新挑战';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+
+/* ============ 通关认证 ============ */
+function claimCert(){
+  if(window.__bossQuiz === quizData.length){
+    var cert = document.getElementById('cert');
+    cert.classList.add('show');
+    cert.scrollIntoView({behavior:'smooth', block:'center'});
+  }else{
+    alert('遗忘魔龙还未倒下：设计决策 Quiz 需要 5/5 全对（当前 ' + (window.__bossQuiz || 0) + '/5），完成后再来领取认证！');
+  }
+}
+</script>
+</body>
+</html>

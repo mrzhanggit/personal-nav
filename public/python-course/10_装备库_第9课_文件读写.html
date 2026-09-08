@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第9课 · 文件读写 —— 存档系统</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --green:#4dd6ff; --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(77,214,255,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(167,139,250,.08), transparent);
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--cyan);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(77,214,255,.12);color:var(--cyan);border:1px solid rgba(77,214,255,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#4dd6ff,#a78bfa 50%,#f5c542);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section:nth-child(3){animation-delay:.05s;}
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--cyan),var(--purple));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:#8be9fd;} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#a9ecff;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 魔法盒子动画 */
+  .boxes{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:20px 0;}
+  .mbox{
+    width:150px;background:var(--card);border:2px solid var(--cyan);border-radius:14px;
+    padding:14px;text-align:center;position:relative;transition:all .3s;cursor:default;
+  }
+  .mbox:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 8px 28px rgba(77,214,255,.25);}
+  .mbox .tag{
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;color:var(--cyan);
+    background:rgba(77,214,255,.1);border-radius:8px;padding:2px 8px;display:inline-block;
+  }
+  .mbox .val{
+    font-size:20px;font-weight:800;margin:8px 0 4px;color:var(--gold);word-break:break-all;
+  }
+  .mbox .tip{font-size:11px;color:var(--muted);}
+  .mbox.danger{border-color:var(--red);}
+  .mbox.danger .tag{color:var(--red);background:rgba(248,113,113,.1);}
+  /* 警告框 */
+  .warn-box{
+    background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);border-radius:12px;
+    padding:14px 18px;margin:14px 0;font-size:14px;
+  }
+  .warn-box b{color:var(--red);}
+  /* 实验室 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input{
+    flex:1;min-width:120px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--cyan),var(--purple));color:#0d1021;border:none;
+    padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(77,214,255,.3);}
+  .btn-danger{background:linear-gradient(135deg,var(--red),var(--orange));}
+  .btn-danger:hover{box-shadow:0 6px 20px rgba(248,113,113,.35);}
+  .lab-tip{font-size:12px;color:var(--muted);margin:6px 0 4px;}
+  .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  @media(max-width:720px){.lab-grid{grid-template-columns:1fr;}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;}
+  .panel-title{font-size:13px;color:var(--cyan);font-weight:700;margin-bottom:8px;letter-spacing:1px;font-family:ui-monospace,Menlo,monospace;}
+  .file-box{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:10px;padding:10px 12px;
+    font-family:ui-monospace,Menlo,monospace;font-size:13px;min-height:84px;
+  }
+  .fline{padding:2px 6px;border-radius:4px;animation:lineIn .35s both;}
+  .fline .ln{color:#3a4270;margin-right:8px;user-select:none;}
+  .fline.new{background:rgba(77,214,255,.10);border-left:2px solid var(--gold);}
+  .empty-file{color:var(--muted);font-size:12px;font-style:italic;}
+  .run-status{
+    margin-top:12px;background:#0a0d1e;border:1px solid var(--line);border-radius:10px;
+    padding:10px 14px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;min-height:44px;
+  }
+  .run-status .step{animation:fadeIn .3s both;padding:2px 0;color:var(--text);}
+  .run-status .step.warn{color:var(--red);}
+  .run-status .step.ok{color:var(--cyan);}
+  .hero-card{
+    display:none;margin-top:16px;background:linear-gradient(140deg,#1d2448,#141833);
+    border:2px solid var(--gold);border-radius:16px;padding:22px 26px;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .hero-card.show{display:block;}
+  .hero-card h3{color:var(--gold);font-size:20px;letter-spacing:2px;margin-bottom:8px;}
+  .hero-card .attr{display:flex;gap:24px;flex-wrap:wrap;margin:10px 0;}
+  .hero-card .attr div{text-align:center;}
+  .hero-card .attr b{font-size:26px;display:block;}
+  .hero-card .attr span{font-size:12px;color:var(--muted);}
+  .hero-card .rarity{color:var(--purple);font-weight:700;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--green);background:rgba(77,214,255,.15);color:var(--cyan);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--green);background:rgba(77,214,255,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+  @keyframes lineIn{from{opacity:0;transform:translateX(-10px);}to{opacity:1;transform:none;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 装备库 · <b>第 9 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 2 · ARMORY</div>
+    <h1>文件读写 —— 存档系统</h1>
+    <div class="subtitle">今日目标：让英雄的数据在程序关闭后依然存活</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>理解「文件 = 程序的持久化背包」，学会 <span class="hl">with open(...)</span> 标准姿势</li>
+      <li>分清读档三兄弟：<span class="hl">read / readline / readlines</span></li>
+      <li>牢记 <span class="hl">"w" 会清空原文件</span> 的血泪警告，追加要用 <span class="hl">"a"</span></li>
+      <li>养成写 <span class="hl">encoding="utf-8"</span> 的职业习惯，学会逐行读大文件</li>
+      <li>通关实验室「模拟存档系统」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 open 与 with -->
+  <section>
+    <h2><span class="num">1</span>open 与 with：给数据一个永久的家</h2>
+    <p>之前学的变量有个致命弱点：<span class="hl">程序一关，内存清空</span>，辛苦练的英雄一夜回到解放前。想让数据活过关机？把它们写进<b>文件</b>——这就是「存档」。</p>
+    <p>读写文件的第一步是 <span class="hl-c">open()</span>，它需要告诉 Python 三件事：打开哪个文件、用什么模式、用什么编码。</p>
+    <div class="code"><span class="v">f</span> = <span class="k">open</span>(<span class="s">"game_save.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>)
+<span class="v">data</span> = <span class="v">f</span>.<span class="k">read</span>()      <span class="c"># 读取全部内容</span>
+<span class="v">f</span>.<span class="k">close</span>()          <span class="c"># 用完必须手动关门，忘了它就一直占着文件</span></div>
+
+    <p>手动版的问题：<span class="hl">忘了写 close()</span>（新手十次有九次忘），或者代码中途出错根本走不到 close。所以 Python 送给所有玩家一件神器——<span class="hl-c">with</span>：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"game_save.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">data</span> = <span class="v">f</span>.<span class="k">read</span>()
+<span class="c"># 缩进结束，文件自动关闭——哪怕中途出了错也会关</span></div>
+    <div class="code"><span class="k">print</span>(<span class="v">f</span>.closed)</div>
+    <div class="out">True</div>
+
+    <div class="boxes">
+      <div class="mbox danger"><div class="tag">f = open(...)</div><div class="val">手动版</div><div class="tip">要自己写 f.close()，忘写就出事</div></div>
+      <div class="mbox"><div class="tag">with open(...) as f:</div><div class="val">推荐版</div><div class="tip">自动关门，出错也不怕</div></div>
+    </div>
+    <p>🧠 记忆口诀：<span class="hl">开门用 with，关门不用愁。</span>本课所有代码都用 with 写法。</p>
+  </section>
+
+  <!-- 2 三种读法 -->
+  <section>
+    <h2><span class="num">2</span>读档三兄弟：read / readline / readlines</h2>
+    <p>先用一个三行的存档文件做实验（下面代码会把它创建出来）：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"save.txt"</span>, <span class="s">"w"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">f</span>.<span class="k">write</span>(<span class="s">"名字:阿呆\n等级:10\n金币:300\n"</span>)</div>
+
+    <div class="boxes">
+      <div class="mbox"><div class="tag">read()</div><div class="val">一个大字符串</div><div class="tip">整个文件一口吞下</div></div>
+      <div class="mbox"><div class="tag">readline()</div><div class="val">一行字符串</div><div class="tip">自带结尾 \n，再调读下一行</div></div>
+      <div class="mbox"><div class="tag">readlines()</div><div class="val">字符串列表</div><div class="tip">每行一个元素（含 \n）</div></div>
+    </div>
+
+    <p>① <span class="hl-c">read()</span>：不分段，全部内容连成一个字符串（包括换行符 \n 本身）：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"save.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="k">print</span>(<span class="v">f</span>.<span class="k">read</span>())</div>
+    <div class="out">名字:阿呆
+等级:10
+金币:300</div>
+
+    <p>② <span class="hl-c">readline()</span>：像用吸管喝，一次只喝一行。返回的字符串<b>自带结尾的 \n</b>：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"save.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="k">print</span>(<span class="v">f</span>.<span class="k">readline</span>(), end=<span class="s">""</span>)  <span class="c"># 用 end="" 防止多出一个空行</span>
+    <span class="k">print</span>(<span class="v">f</span>.<span class="k">readline</span>(), end=<span class="s">""</span>)  <span class="c"># 再调用一次，读的是第二行</span></div>
+    <div class="out">名字:阿呆
+等级:10</div>
+
+    <p>③ <span class="hl-c">readlines()</span>：把每一行装进列表，方便用下标和 for 循环处理：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"save.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">lines</span> = <span class="v">f</span>.<span class="k">readlines</span>()   <span class="c"># 注意：返回的是列表！</span>
+<span class="k">print</span>(<span class="v">lines</span>)
+<span class="k">print</span>(<span class="v">lines</span>[<span class="n">1</span>])</div>
+    <div class="out">['名字:阿呆\n', '等级:10\n', '金币:300\n']
+等级:10</div>
+    <p>看清楚：列表里每个元素都<b>带着 \n</b>，处理时通常要 <code class="hl-c">strip()</code> 掉。</p>
+  </section>
+
+  <!-- 3 写入与 w 警告 -->
+  <section>
+    <h2><span class="num">3</span>写入江湖：write / writelines 与 "w" 血泪警告</h2>
+    <p>写入用 <span class="hl-c">write()</span>。第一个坑马上就来——<span class="hl">write 不自动换行</span>：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"log.txt"</span>, <span class="s">"w"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">f</span>.<span class="k">write</span>(<span class="s">"第1行"</span>)
+    <span class="v">f</span>.<span class="k">write</span>(<span class="s">"第2行"</span>)
+<span class="c"># log.txt 的内容：第1行第2行 —— 挤在一起！</span></div>
+    <p>想换行？自己动手：<code class="hl-c">f.write("第1行\n")</code>。要一次写多行，用 <span class="hl-c">writelines(列表)</span>（\n 依然要自己带）：</p>
+    <div class="code"><span class="v">logs</span> = [<span class="s">"击杀了史莱姆\n"</span>, <span class="s">"拾获了草药\n"</span>, <span class="s">"升到了 2 级\n"</span>]
+<span class="k">with</span> <span class="k">open</span>(<span class="s">"log.txt"</span>, <span class="s">"w"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">f</span>.<span class="k">writelines</span>(<span class="v">logs</span>)</div>
+
+    <div class="warn-box">⚠️ <b>血泪警告：用 "w" 打开一个已有内容的文件，原内容会在打开的瞬间被清空！</b>多少英雄的日记、配置、存档葬身于此。文件不存在时 "w" 会新建，这很贴心；但文件存在时它就是个无情的粉碎机。</div>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"diary.txt"</span>, <span class="s">"w"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="v">f</span>.<span class="k">write</span>(<span class="s">"三年的游戏日记……"</span>)
+<span class="c"># 第二次用 "w" 打开 diary.txt 的那一瞬间——日记全部蒸发</span></div>
+
+    <p>四种常用模式一次记牢（鼠标移上去看说明）：</p>
+    <div class="boxes">
+      <div class="mbox"><div class="tag">"r"</div><div class="val">读取</div><div class="tip">文件不存在则报错</div></div>
+      <div class="mbox danger"><div class="tag">"w"</div><div class="val">写入</div><div class="tip">清空重写！不存在则创建</div></div>
+      <div class="mbox"><div class="tag">"a"</div><div class="val">追加</div><div class="tip">只在末尾写，老内容不动</div></div>
+      <div class="mbox"><div class="tag">"r+"</div><div class="val">读写</div><div class="tip">可读可写，不清空</div></div>
+    </div>
+  </section>
+
+  <!-- 4 encoding 与大文件 -->
+  <section>
+    <h2><span class="num">4</span>两个职业习惯：encoding 与逐行读大文件</h2>
+    <p><b>习惯一：永远写 <span class="hl-c">encoding="utf-8"</span>。</b>文字在文件里存的是编码后的字节，Windows 默认用 GBK 解码、Mac/Linux 默认 UTF-8。你写的中文存档，拿到别的电脑上读——<span class="hl">乱码</span>，甚至直接 <code class="hl-c">UnicodeDecodeError</code>。</p>
+    <div class="code"><span class="v">f</span> = <span class="k">open</span>(<span class="s">"存档.txt"</span>)          <span class="c"># 💥 不写 encoding，在 Windows 上可能直接报错</span>
+<span class="c"># 正确姿势：读和写都明确指定编码</span>
+<span class="k">with</span> <span class="k">open</span>(<span class="s">"存档.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="k">pass</span></div>
+
+    <p><b>习惯二：大文件用 <span class="hl-c">for line in f</span> 逐行读。</b>read() 和 readlines() 会把整个文件塞进内存——几 GB 的日志能把电脑干趴下。逐行读，内存里每次只有一行：</p>
+    <div class="code"><span class="k">with</span> <span class="k">open</span>(<span class="s">"big_log.txt"</span>, <span class="s">"r"</span>, encoding=<span class="s">"utf-8"</span>) <span class="k">as</span> <span class="v">f</span>:
+    <span class="k">for</span> <span class="v">line</span> <span class="k">in</span> <span class="v">f</span>:              <span class="c"># 逐行读：一行处理完才读下一行</span>
+        <span class="k">if</span> <span class="s">"BOSS"</span> <span class="k">in</span> <span class="v">line</span>:
+            <span class="k">print</span>(<span class="v">line</span>, end=<span class="s">""</span>)</div>
+
+    <p>最后聊聊<b>路径</b>：写 <code class="hl-c">"game_save.txt"</code> 表示「当前目录下的这个文件」，是最省心的做法（文件和 .py 放一起）。要进子文件夹就写相对路径 <code class="hl-c">"saves/hero.txt"</code>。新手期不建议去碰 C 盘那种绝对路径。</p>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · 模拟存档系统</h2>
+    <p>下面用<b>页面内存变量模拟</b> game_save.txt 和 battle_log.txt 两个文件（浏览器页面不能真写磁盘，但读写逻辑与真实 Python 完全一致）。编辑英雄数据 → 点「保存」看 <b>w 模式</b>写入过程 → 点「读取」看逐行解析还原 → 用 <b>a 模式</b>追加战绩 → 最后那个红色按钮，带你亲眼见证 "w" 的粉碎现场。</p>
+    <div class="lab-input">
+      <input id="sv-name" maxlength="8" placeholder="英雄名" value="阿呆">
+      <input id="sv-level" maxlength="4" placeholder="等级" value="10">
+      <input id="sv-gold" maxlength="8" placeholder="金币" value="300">
+    </div>
+    <div class="lab-input">
+      <button class="btn" onclick="saveGame()">💾 保存存档（w）</button>
+      <button class="btn" onclick="loadGame()">📖 读取存档（r）</button>
+      <button class="btn" onclick="appendLog()">⚔ 记录战绩（a）</button>
+      <button class="btn btn-danger" onclick="dangerLog()">💥 手滑现场（w 覆盖战绩）</button>
+    </div>
+    <div class="lab-tip">💡 提示：先保存一次，再改个名字保存第二次——注意状态栏里 "w" 模式对旧存档做了什么。</div>
+    <div class="lab-grid">
+      <div class="panel">
+        <div class="panel-title">📜 Python 代码（实时同步）</div>
+        <div class="code" id="lab-code" style="margin:0;min-height:150px"></div>
+        <div class="run-status" id="lab-status"><div class="step">💤 等待操作……</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">📄 game_save.txt（内存模拟）</div>
+        <div class="file-box" id="file-save"></div>
+        <div class="panel-title" style="margin-top:12px">📄 battle_log.txt（内存模拟）</div>
+        <div class="file-box" id="file-log"></div>
+      </div>
+    </div>
+    <div class="hero-card" id="load-card">
+      <h3 id="ld-name">—</h3>
+      <div class="rarity">✅ 存档读取成功 · 数据已还原</div>
+      <div class="attr">
+        <div><b id="ld-level">—</b><span>等级</span></div>
+        <div><b id="ld-gold">—</b><span>金币</span></div>
+        <div><b id="ld-lines">—</b><span>读取行数</span></div>
+      </div>
+    </div>
+    <div class="out" id="load-out" style="display:none"></div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 在电脑上新建文件夹 <code>python_adventure</code>，写 <code>save_hero.py</code>：用 <code>with open + "w" + encoding="utf-8"</code> 把自己的英雄档案（名字/等级/金币各一行）写入 <code>hero_save.txt</code>，运行后用记事本打开检查</li>
+    <li>② 再写 <code>load_hero.py</code>：用 <code>for line in f</code> 逐行读取并 <code>print</code> 出来</li>
+    <li>③ 血泪实验：先手动往 <code>hero_save.txt</code> 里多加两行内容，再运行一次 <code>save_hero.py</code>，重新打开文件——亲眼看看 "w" 把旧内容清空了</li>
+    <li>④ 把读取代码分别改成 <code>f.read()</code>、<code>f.readline()</code>、<code>f.readlines()</code> 各运行一次，对比输出差异</li>
+    <li>⑤ 写 <code>keep_log.py</code>：用 <code>"a"</code> 模式每运行一次就追加一行「今日修炼完成」，连跑三次看效果</li>
+    <li>⑥ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：第 10 课「异常处理 —— 防崩护盾」
+  </footer>
+</div>
+
+<script>
+/* ============ 迷你 Python 语法高亮（供实验室/预言机动态代码使用） ============ */
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var KW = /^(with|open|as|for|in|if|elif|else|try|except|finally|raise|while|break|continue|pass|print|input|int|str|float|len|read|readline|readlines|write|writelines|close|split|strip|append|ValueError|ZeroDivisionError|KeyError|IndexError|TypeError|FileNotFoundError|Exception|True|False|None|and|or|not)$/;
+function hl(code){
+  var out = '', i = 0;
+  while(i < code.length){
+    var ch = code[i];
+    if(ch === '"' || ch === "'"){
+      var j = i + 1;
+      while(j < code.length && code[j] !== ch){ j++; }
+      var end = Math.min(j + 1, code.length);
+      out += '<span class="s">' + esc(code.slice(i, end)) + '</span>';
+      i = end;
+    } else if(ch === '#'){
+      var j2 = i;
+      while(j2 < code.length && code[j2] !== '\n'){ j2++; }
+      out += '<span class="c">' + esc(code.slice(i, j2)) + '</span>';
+      i = j2;
+    } else if(ch >= '0' && ch <= '9'){
+      var j3 = i;
+      while(j3 < code.length && code[j3] >= '0' && code[j3] <= '9'){ j3++; }
+      out += '<span class="n">' + code.slice(i, j3) + '</span>';
+      i = j3;
+    } else if(/[A-Za-z_]/.test(ch)){
+      var j4 = i;
+      while(j4 < code.length && /[A-Za-z0-9_]/.test(code[j4])){ j4++; }
+      var w = code.slice(i, j4);
+      out += KW.test(w) ? '<span class="k">' + w + '</span>' : '<span class="v">' + w + '</span>';
+      i = j4;
+    } else {
+      out += esc(ch);
+      i++;
+    }
+  }
+  return out;
+}
+
+/* ============ 实验室：模拟存档系统（内存变量模拟文件） ============ */
+var saveFile = null;   // game_save.txt 的内容，null 表示文件还不存在
+var logFile = null;    // battle_log.txt 的内容
+var battleNo = 0;
+var monsters = ['哥布林', '野狼王', '骷髅兵', '暗影蝙蝠', '独眼巨人'];
+
+function gv(id){ return document.getElementById(id).value.trim(); }
+function clean(s){ return String(s).replace(/["'\\:]/g, ''); }
+
+function setStatus(steps){
+  var box = document.getElementById('lab-status');
+  box.innerHTML = '';
+  steps.forEach(function(st){
+    setTimeout(function(){
+      var d = document.createElement('div');
+      d.className = 'step ' + (st.c || '');
+      d.textContent = st.t;
+      box.appendChild(d);
+    }, st.d);
+  });
+}
+
+function renderFile(id, content, newFrom){
+  var el = document.getElementById(id);
+  el.innerHTML = '';
+  if(content === null){
+    el.innerHTML = '<div class="empty-file">（文件还不存在）</div>';
+    return;
+  }
+  var lines = content.split('\n');
+  if(lines.length && lines[lines.length - 1] === ''){ lines.pop(); }
+  lines.forEach(function(l, idx){
+    var d = document.createElement('div');
+    var isNew = (newFrom !== undefined && idx >= newFrom);
+    d.className = 'fline' + (isNew ? ' new' : '');
+    if(isNew){ d.style.animationDelay = ((idx - newFrom) * 0.3) + 's'; }
+    d.innerHTML = '<span class="ln">' + (idx + 1) + '</span>' + esc(l === '' ? ' ' : l);
+    el.appendChild(d);
+  });
+}
+
+function countLines(s){
+  if(s === null){ return 0; }
+  return s.split('\n').filter(function(x){ return x !== ''; }).length;
+}
+
+function saveGame(){
+  var name = clean(gv('sv-name')) || '无名英雄';
+  var level = clean(gv('sv-level')) || '1';
+  var gold = clean(gv('sv-gold')) || '0';
+  var hadOld = saveFile !== null;
+  var oldLines = countLines(saveFile);
+  saveFile = '名字:' + name + '\n等级:' + level + '\n金币:' + gold + '\n';
+
+  var code = '# 💾 保存存档：with + "w" 模式写入\n' +
+    'with open("game_save.txt", "w", encoding="utf-8") as f:\n' +
+    '    f.write("名字:' + name + '\\n")\n' +
+    '    f.write("等级:' + level + '\\n")\n' +
+    '    f.write("金币:' + gold + '\\n")\n' +
+    '# 出了 with 代码块，文件自动关闭，不用写 f.close()';
+  document.getElementById('lab-code').innerHTML = hl(code);
+  renderFile('file-save', saveFile, 0);
+
+  var steps = [
+    {d:0,   t:'🔓 with open("game_save.txt", "w") —— 打开文件'}
+  ];
+  if(hadOld){
+    steps.push({d:600, t:'⚠ "w" 模式打开的瞬间：原来的 ' + oldLines + ' 行旧存档被清空了！', c:'warn'});
+  } else {
+    steps.push({d:600, t:'✨ 文件不存在？没关系，"w" 会自动创建', c:'ok'});
+  }
+  steps.push({d:1200, t:'✍ 写入：名字:' + name});
+  steps.push({d:1600, t:'✍ 写入：等级:' + level});
+  steps.push({d:2000, t:'✍ 写入：金币:' + gold});
+  steps.push({d:2600, t:'✓ 离开 with 代码块，文件已自动关闭（这就是 with 的温柔）', c:'ok'});
+  setStatus(steps);
+}
+
+function loadGame(){
+  var code = '# 📖 读取存档：for line in f 逐行解析\n' +
+    'hero = {}\n' +
+    'with open("game_save.txt", "r", encoding="utf-8") as f:\n' +
+    '    for line in f:\n' +
+    '        line = line.strip()      # 去掉行尾的 \\n\n' +
+    '        key, value = line.split(":")\n' +
+    '        hero[key] = value\n\n' +
+    'print(hero)';
+  document.getElementById('lab-code').innerHTML = hl(code);
+
+  if(saveFile === null){
+    setStatus([
+      {d:0,   t:'🔓 with open("game_save.txt", "r") —— 打开文件'},
+      {d:700, t:'💥 FileNotFoundError: 还没存过档！先点「保存存档」', c:'warn'}
+    ]);
+    return;
+  }
+  renderFile('file-save', saveFile, 0);
+
+  var lines = saveFile.split('\n').filter(function(x){ return x !== ''; });
+  var hero = {};
+  lines.forEach(function(l){
+    var p = l.split(':');
+    hero[p[0]] = p[1];
+  });
+  var outStr = '{' + lines.map(function(l){
+    var p = l.split(':');
+    return "'" + p[0] + "': '" + p[1] + "'";
+  }).join(', ') + '}';
+
+  setStatus([
+    {d:0,    t:'🔓 with open("game_save.txt", "r") —— 打开文件'},
+    {d:600,  t:'📖 for line in f —— 逐行读取（大文件也扛得住）'},
+    {d:1300, t:'🔧 strip() 去掉 \\n，split(":") 拆成键和值'},
+    {d:2000, t:'✓ 自动关闭，读取完成', c:'ok'},
+    {d:2600, t:'🏅 存档还原成功：名字=' + hero['名字'] + ' 等级=' + hero['等级'] + ' 金币=' + hero['金币'], c:'ok'}
+  ]);
+
+  var card = document.getElementById('load-card');
+  card.classList.remove('show'); void card.offsetWidth; card.classList.add('show');
+  document.getElementById('ld-name').textContent = '⚔ ' + (hero['名字'] || '—');
+  document.getElementById('ld-level').textContent = hero['等级'] || '—';
+  document.getElementById('ld-gold').textContent = hero['金币'] || '—';
+  document.getElementById('ld-lines').textContent = lines.length;
+  var outBox = document.getElementById('load-out');
+  outBox.style.display = 'block';
+  outBox.textContent = outStr;
+}
+
+function appendLog(){
+  battleNo++;
+  var m = monsters[(battleNo - 1) % monsters.length];
+  var gold = 50 * battleNo;
+  var line = '第' + battleNo + '场：击败了' + m + '，金币+' + gold;
+  var existed = logFile !== null;
+  var oldCount = countLines(logFile);
+  logFile = (logFile === null ? '' : logFile) + line + '\n';
+
+  var code = '# ⚔ 追加战绩："a" 模式只往末尾写，不动老内容\n' +
+    'with open("battle_log.txt", "a", encoding="utf-8") as f:\n' +
+    '    f.write("' + line + '\\n")';
+  document.getElementById('lab-code').innerHTML = hl(code);
+  renderFile('file-log', logFile, oldCount);
+
+  var steps = [{d:0, t:'🔓 with open("battle_log.txt", "a") —— 打开文件'}];
+  if(existed){
+    steps.push({d:600, t:'🛡 原有 ' + oldCount + ' 条战绩完好保留（这就是 "a" 的温柔）', c:'ok'});
+  } else {
+    steps.push({d:600, t:'✨ 文件不存在？"a" 模式会自动创建', c:'ok'});
+  }
+  steps.push({d:1200, t:'✍ 追加写入：' + line});
+  steps.push({d:1800, t:'✓ 自动关闭，完成', c:'ok'});
+  setStatus(steps);
+}
+
+function dangerLog(){
+  if(logFile === null){
+    setStatus([{d:0, t:'战绩日志还不存在，先点「⚔ 记录战绩」打几场再来', c:'warn'}]);
+    return;
+  }
+  var oldCount = countLines(logFile);
+  logFile = '（手滑，什么都没了）\n';
+
+  var code = '# 💥 手滑现场：手一抖用了 "w" 打开战绩日志\n' +
+    'with open("battle_log.txt", "w", encoding="utf-8") as f:\n' +
+    '    f.write("（手滑，什么都没了）\\n")\n\n' +
+    '# "w" 打开的瞬间，之前 ' + oldCount + ' 条战绩全部蒸发——血泪警告本警告';
+  document.getElementById('lab-code').innerHTML = hl(code);
+  renderFile('file-log', logFile, 0);
+
+  setStatus([
+    {d:0,   t:'🔓 with open("battle_log.txt", "w") —— 打开文件'},
+    {d:600, t:'⚠ 糟了！用的是 "w"：' + oldCount + ' 条旧战绩瞬间蒸发！', c:'warn'},
+    {d:1300, t:'✍ 写入：1 行新内容'},
+    {d:1900, t:'💔 文件关闭了，但数据已经回不来了……这就是本课的血泪警告', c:'warn'}
+  ]);
+}
+
+/* 初始化实验室 */
+document.getElementById('lab-code').innerHTML = hl('# 点上方按钮操作：保存 / 读取 / 追加 / 手滑\n# 这里的代码会实时变化，右侧「文件内容」面板同步更新');
+renderFile('file-save', null);
+renderFile('file-log', null);
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · write 换行之谜',
+    code:'f = open("log.txt", "w", encoding="utf-8")\nf.write("第1行")\nf.write("第2行")\nf.close()\n\n# log.txt 的内容是？',
+    opts:['第1行 和 第2行 各占一行','第1行第2行（挤在一起）','只有 第2行','报错'],
+    ans:1,
+    exp:'write() 只负责写字符本身，不会自动加 \\n。两次 write 的内容首尾相接，所以挤成一行。想分行要自己写 f.write("第1行\\n")。'
+  },
+  {
+    title:'第 2 预言 · "w" 的粉碎机',
+    code:'with open("diary.txt", "w", encoding="utf-8") as f:\n    f.write("今天打了Boss")\nwith open("diary.txt", "w", encoding="utf-8") as f:\n    f.write("今天逛了商店")\n\n# diary.txt 最终内容是？',
+    opts:['今天打了Boss今天逛了商店','今天逛了商店','两行都在','报错：文件已存在'],
+    ans:1,
+    exp:'第二次用 "w" 打开的瞬间，原内容就被清空了，所以只剩下后来写入的「今天逛了商店」。想保留旧内容应该用 "a" 追加模式。'
+  },
+  {
+    title:'第 3 预言 · readlines 的真面目',
+    code:'with open("save.txt", "w", encoding="utf-8") as f:\n    f.write("HP=100\\nMP=50")\nwith open("save.txt", "r", encoding="utf-8") as f:\n    lines = f.readlines()\nprint(lines)',
+    opts:["['HP=100', 'MP=50']","['HP=100\\n', 'MP=50']","'HP=100\\nMP=50'","('HP=100', 'MP=50')"],
+    ans:1,
+    exp:'readlines() 返回的是列表，每个元素是一行的字符串，而且自带行尾的 \\n。read() 才是返回一个大字符串，注意别混淆。'
+  },
+  {
+    title:'第 4 预言 · with 的承诺',
+    code:'with open("save.txt", "r", encoding="utf-8") as f:\n    data = f.read()\nprint(f.closed)',
+    opts:['False','True','None','报错：文件已关闭'],
+    ans:1,
+    exp:'with 代码块结束时自动调用 close()，哪怕中途出错也会关闭。f.closed 用来查询文件是否已关闭——这里是 True，这就是推荐 with 的原因。'
+  },
+  {
+    title:'第 5 预言 · 追加模式',
+    code:'with open("log.txt", "a", encoding="utf-8") as f:\n    f.write("击败哥布林")\n\n# log.txt 原内容：第1天：开局\\n\n# 现在的内容是？',
+    opts:['第1天：开局\\n击败哥布林','只有：击败哥布林','击败哥布林第1天：开局','报错'],
+    ans:0,
+    exp:'"a" 追加模式把光标放到文件末尾，写入的内容接在原内容之后。原来的「第1天：开局\\n」原封不动，新内容跟在后面（写入本身不会自动加 \\n）。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = hl(q.code);
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="' + i + '">' + esc(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">' + q.title + '</div>' +
+      '<div class="code" style="margin:6px 0">' + codeHtml + '</div>' +
+      '<div class="oracle-opts">' + optsHtml + '</div>' +
+      '<div class="explain">' + esc(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['为什么推荐 with open？', '代码块结束时自动关闭文件，即使中途出错也会关，不用手动 close()'],
+  ['"w" 模式多危险？', '打开已存在的文件会立刻清空原内容（文件不存在则会新建）'],
+  ['"a" 模式干嘛的？', '追加模式：只在文件末尾写入，原内容原封不动'],
+  ['"r+" 是什么？', '可读可写，不清空原文件，光标停在文件开头'],
+  ['read() 返回什么？', '整个文件内容组成的一个大字符串（含 \\n）'],
+  ['readline() 返回什么？', '一行内容的字符串（自带结尾 \\n），再调用就读下一行'],
+  ['readlines() 返回什么？', '所有行组成的列表，每个元素是一行（含 \\n）'],
+  ['为什么要 encoding="utf-8"？', '统一编码读写，中文不乱码；Windows 默认 GBK，不写容易出错'],
+  ['write() 的坑？', '不会自动换行！想换行要自己在字符串里写 \\n'],
+  ['大文件怎么读最稳？', 'for line in f: 逐行读，内存里一次只放一行']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + c[0] + '</div>' +
+      '<div class="mface mback">' + c[1] + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'使用 with open("a.txt") as f: 最大的好处是？',
+   opts:['读文件速度更快','代码块结束时自动关闭文件，即使中途出错也会关','能自动创建文件夹','可以不写 encoding'], ans:1,
+   exp:'with 的核心价值就是「自动关闭」——正常结束会关，中途出错也会关，彻底告别忘写 close()。'},
+  {q:'用 "w" 模式打开一个已存在且有内容的文件，会发生什么？',
+   opts:['在末尾追加新内容','直接报错','原内容立刻被清空','原内容自动备份一份'], ans:2,
+   exp:'"w" 是写入模式，打开瞬间清空原文件。想保留原内容要用 "a" 追加模式。这是新手数据丢失第一名原因。'},
+  {q:'readlines() 的返回值是？',
+   opts:['一个包含全部内容的大字符串','一个字符串列表，每个元素是一行（含 \\n）','一个整数（文件行数）','每次调用返回一行'], ans:1,
+   exp:'readlines() 把每行装进列表返回；「每次调用返回一行」的是 readline()。'},
+  {q:'想往战绩日志末尾追加一条记录，open 应该用哪种模式？',
+   opts:['"r"','"w"','"a"','"r+"'], ans:2,
+   exp:'"a" = append 追加，只在末尾写且不动老内容；"w" 会清空整个文件，千万别用错。'},
+  {q:'f.write("你好") 之后文件里没有换行，怎么解决？',
+   opts:['write 本来就会自动换行','写成 f.write("你好\\n")','连续调用两次 write 就换行了','加 encoding="utf-8" 就行'], ans:1,
+   exp:'write() 只写给出的字符，换行符 \\n 要自己加在字符串末尾。'},
+  {q:'打开文件时写 encoding="utf-8" 是为了什么？',
+   opts:['让文件体积更小','统一编码，避免中文乱码或读取报错','提高读写速度','不写会报语法错误'], ans:1,
+   exp:'不同系统默认编码不同（Windows 是 GBK），中文内容跨平台读写时明确指定 UTF-8 最保险。'},
+  {q:'用 "r" 模式打开一个不存在的文件，会怎样？',
+   opts:['自动创建一个空文件','返回空字符串','抛出 FileNotFoundError','返回 None'], ans:2,
+   exp:'只有 "w" 和 "a" 会自动创建文件；"r" 读模式找不到文件会直接抛 FileNotFoundError。'},
+  {q:'"r+" 模式的特点是？',
+   opts:['只读不写','只写不读','可读可写，且不清空原内容','清空原内容后可读可写'], ans:2,
+   exp:'"r+" 是读写模式：既能读又能写，但不像 "w" 那样清空文件，光标在文件开头。'},
+  {q:'要逐行处理一个几 GB 的大日志文件，最推荐的读法是？',
+   opts:['f.read() 一次全读','f.readlines() 全装进列表','for line in f: 逐行读','用记事本打开看'], ans:2,
+   exp:'for line in f 每次只在内存里放一行；read()/readlines() 会把整个文件塞进内存，大文件直接把电脑干趴。'},
+  {q:'with open("s.txt", "r", encoding="utf-8") as f:\n    data = f.read()\n执行后 data 是什么类型？',
+   opts:['list','str','int','dict'], ans:1,
+   exp:'read() 把整个文件内容作为一个大字符串返回；返回 list 的是 readlines()。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + esc(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + esc(q.q).replace(/\n/g, '<br>') + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + esc(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')) return;
+        var i = +btn.dataset.i;
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length) showResult(score);
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！存档大师，下一课已为你解锁 🔓' : '通关成功！第 10 课「异常处理」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>

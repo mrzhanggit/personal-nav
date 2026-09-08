@@ -2,3 +2,5 @@
 .workbuddy/automations/
 .DS_Store
 .tokenize
+node_modules/
+.phase-a-build/

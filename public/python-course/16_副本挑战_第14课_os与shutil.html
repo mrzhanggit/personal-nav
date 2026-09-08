@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第14课 · os 与 shutil —— 文件管家</title>
+<style>
+  :root{
+    --bg:#0d1021; --bg2:#141833; --card:#1a1f3d;
+    --gold:#f5c542; --cyan:#4dd6ff; --purple:#a78bfa;
+    --pink:#f472b6; --orange:#fb923c;
+    --red:#f87171; --text:#e8eaf6; --muted:#8b93b8; --line:#2a3060;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.75;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 50% -10%, rgba(245,197,66,.10), transparent),
+      radial-gradient(ellipse 40% 30% at 95% 90%, rgba(251,146,60,.08), transparent);
+  }
+  .wrap{max-width:880px;margin:0 auto;padding:36px 20px 80px;}
+  /* 头部 */
+  .crumb{font-size:13px;color:var(--muted);margin-bottom:14px;}
+  .crumb b{color:var(--gold);}
+  header{text-align:center;margin-bottom:34px;}
+  .lesson-badge{
+    display:inline-block;padding:4px 16px;border-radius:999px;font-size:12px;letter-spacing:2px;
+    background:rgba(245,197,66,.12);color:var(--gold);border:1px solid rgba(245,197,66,.35);margin-bottom:12px;
+  }
+  h1{
+    font-size:32px;font-weight:800;letter-spacing:1px;
+    background:linear-gradient(120deg,#f5c542,#fb923c 50%,#f472b6);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;}
+  .mission{
+    margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 22px;text-align:left;font-size:14px;
+  }
+  .mission h3{color:var(--gold);font-size:15px;margin-bottom:6px;}
+  .mission li{margin-left:18px;}
+  /* 板块 */
+  section{
+    background:var(--bg2);border:1px solid var(--line);border-radius:18px;
+    padding:26px 28px;margin-bottom:26px;animation:fadeUp .6s ease both;
+  }
+  section h2{
+    font-size:19px;margin-bottom:16px;display:flex;align-items:center;gap:10px;letter-spacing:1px;
+  }
+  .num{
+    width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--gold),var(--orange));
+    color:#0d1021;display:inline-flex;align-items:center;justify-content:center;
+    font-size:15px;font-weight:800;flex-shrink:0;
+  }
+  section p{margin-bottom:10px;}
+  .hl{color:var(--gold);font-weight:600;}
+  .hl-c{color:var(--cyan);font-weight:600;}
+  /* 代码块 */
+  .code{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:12px;
+    padding:16px 18px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14px;overflow-x:auto;margin:12px 0;position:relative;white-space:pre-wrap;
+  }
+  .code .c{color:#5b648f;}   /* 注释 */
+  .code .k{color:var(--pink);} /* 关键字/函数 */
+  .code .s{color:var(--gold);} /* 字符串 */
+  .code .n{color:var(--orange);} /* 数字 */
+  .code .v{color:var(--cyan);}  /* 变量 */
+  .out{
+    background:#0a0d1e;border:1px dashed var(--line);border-radius:12px;
+    padding:12px 18px;font-family:ui-monospace,Menlo,monospace;font-size:14px;
+    color:#f2d98a;margin-top:-4px;margin-bottom:12px;white-space:pre-wrap;
+  }
+  .out::before{content:"▶ 输出：";color:var(--muted);font-size:12px;display:block;margin-bottom:2px;}
+  /* 警示框 */
+  .warnbox{
+    background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);border-radius:14px;
+    padding:14px 18px;margin:14px 0;font-size:14px;
+  }
+  .warnbox b{color:var(--red);}
+  /* 目录树可视化 */
+  .dirtree{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;font-family:ui-monospace,Menlo,monospace;font-size:14px;margin:16px 0;
+  }
+  .dt-root{color:var(--gold);font-weight:700;}
+  .dt-tag{font-size:11px;color:#0d1021;background:var(--gold);border-radius:6px;padding:1px 8px;margin-left:8px;font-family:inherit;}
+  .dt-children{margin-left:22px;border-left:1px dashed var(--line);padding-left:14px;margin-top:6px;}
+  .dt-item{padding:2px 8px;border-radius:6px;transition:all .2s;cursor:default;}
+  .dt-item:hover{background:rgba(245,197,66,.12);transform:translateX(4px);}
+  .dt-item .dt-note{color:var(--muted);font-size:12px;margin-left:8px;}
+  /* 实验室通用 */
+  .lab-input{
+    display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;align-items:center;
+  }
+  .lab-input input, .lab-input select{
+    flex:1;min-width:180px;background:#0a0d1e;border:1px solid var(--cyan);border-radius:10px;
+    padding:11px 16px;color:var(--text);font-size:15px;outline:none;font-family:inherit;
+  }
+  .lab-input input:focus{box-shadow:0 0 0 3px rgba(77,214,255,.18);}
+  .btn{
+    background:linear-gradient(135deg,var(--gold),var(--orange));color:#0d1021;border:none;
+    padding:11px 26px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;
+    transition:transform .15s, box-shadow .2s;font-family:inherit;
+  }
+  .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(245,197,66,.3);}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600;}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);box-shadow:none;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+  /* 文件夹整理模拟器 */
+  .lab2col{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;}
+  .folder-area{flex:1;min-width:300px;}
+  .code-side{flex:1;min-width:300px;}
+  .folder-root{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:14px;padding:14px;
+    position:sticky;top:12px;
+  }
+  .folder-title{color:var(--gold);font-weight:700;font-size:15px;}
+  .file-zone{
+    display:flex;flex-wrap:wrap;gap:8px;min-height:64px;padding:10px;
+    border:1px dashed var(--line);border-radius:10px;margin-top:10px;align-content:flex-start;
+  }
+  .cat-zone{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px;}
+  .folder-box{
+    background:var(--card);border:1px solid var(--cyan);border-radius:12px;padding:10px;
+    animation:popIn .4s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .folder-box h4{font-size:13px;color:var(--cyan);margin-bottom:8px;font-weight:700;}
+  .folder-box .fz{display:flex;flex-direction:column;gap:6px;min-height:24px;}
+  .file-chip{
+    background:#141833;border:1px solid var(--line);border-radius:8px;padding:4px 10px;
+    font-size:13px;font-family:ui-monospace,Menlo,monospace;transition:all .25s;cursor:default;
+    position:relative;z-index:1;
+  }
+  .file-chip:hover{border-color:var(--gold);}
+  .file-chip.mv{transform:scale(1.12);border-color:var(--gold);box-shadow:0 0 14px rgba(245,197,66,.45);z-index:3;}
+  .folder-box.dying{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .cl.active{background:rgba(245,197,66,.16);border-radius:4px;}
+  .lab-code{margin:0;}
+  .lab-hint{font-size:12px;color:var(--muted);margin-top:8px;}
+  /* 预言机 */
+  .oracle-q{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:16px 20px;margin-bottom:14px;
+  }
+  .oracle-q .qtitle{font-size:14px;color:var(--purple);margin-bottom:8px;font-weight:600;}
+  .oracle-opts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:9px;color:var(--text);
+    padding:8px 16px;font-size:13px;cursor:pointer;font-family:ui-monospace,Menlo,monospace;
+    transition:all .2s;
+  }
+  .opt:hover{border-color:var(--cyan);}
+  .opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);color:var(--gold);}
+  .opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);color:var(--red);}
+  .explain{
+    display:none;margin-top:10px;font-size:13px;color:var(--muted);
+    border-left:3px solid var(--gold);padding-left:12px;
+  }
+  .explain.show{display:block;animation:fadeIn .4s;}
+  /* 记忆卡片 */
+  .cards-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px;
+  }
+  .mcard{
+    perspective:800px;height:130px;cursor:pointer;
+  }
+  .mcard-inner{
+    position:relative;width:100%;height:100%;transition:transform .55s;
+    transform-style:preserve-3d;
+  }
+  .mcard.flip .mcard-inner{transform:rotateY(180deg);}
+  .mface{
+    position:absolute;inset:0;backface-visibility:hidden;border-radius:13px;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;font-size:14px;
+  }
+  .mfront{background:linear-gradient(135deg,#1d2448,#141833);border:1px solid var(--cyan);color:var(--cyan);font-weight:600;}
+  .mback{background:linear-gradient(135deg,#16284a,#101530);border:1px solid var(--gold);color:var(--text);transform:rotateY(180deg);font-size:13px;}
+  .cards-tip{font-size:12px;color:var(--muted);margin-top:10px;}
+  /* Quiz */
+  .quiz-q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+  .quiz-q .qq{font-size:15px;margin-bottom:10px;font-weight:600;}
+  .quiz-q .qq i{color:var(--gold);font-style:normal;margin-right:6px;}
+  .qq-opts{display:grid;gap:8px;}
+  .qq-opt{
+    background:#0a0d1e;border:1px solid var(--line);border-radius:10px;color:var(--text);
+    padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;transition:all .2s;font-family:inherit;
+  }
+  .qq-opt:hover{border-color:var(--cyan);}
+  .qq-opt.right{border-color:var(--gold);background:rgba(245,197,66,.15);}
+  .qq-opt.wrong{border-color:var(--red);background:rgba(248,113,113,.12);}
+  .qq-exp{display:none;margin-top:10px;font-size:13px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;}
+  .qq-exp.show{display:block;}
+  #quiz-result{
+    display:none;margin-top:16px;text-align:center;padding:18px;border-radius:14px;
+    background:var(--card);border:1px solid var(--gold);animation:popIn .4s both;
+  }
+  #quiz-result.show{display:block;}
+  #quiz-result b{font-size:34px;color:var(--gold);display:block;}
+  /* 课后任务 */
+  .homework li{margin:8px 0 8px 18px;}
+  .homework code{background:rgba(77,214,255,.1);color:var(--cyan);padding:1px 7px;border-radius:6px;font-family:ui-monospace,Menlo,monospace;font-size:13px;}
+  footer{text-align:center;color:var(--muted);font-size:13px;margin-top:40px;padding-top:24px;border-top:1px dashed var(--line);}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popIn{from{opacity:0;transform:scale(.7);}to{opacity:1;transform:scale(1);}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumb">◈ 副本挑战 · <b>第 14 课 / 共 26 课</b></div>
+
+  <header>
+    <div class="lesson-badge">STAGE 14 · DUNGEON</div>
+    <h1>os 与 shutil —— 文件管家</h1>
+    <div class="subtitle">今日目标：让 Python 替你接管硬盘上的文件大军</div>
+    <div class="mission">
+      <h3>📜 今日任务清单</h3>
+      <li>认识文件管家 <span class="hl">os</span>：用 getcwd / listdir 摸清家底</li>
+      <li>用 <span class="hl">os.path</span> 四件套 exists / join / isfile / isdir 探路</li>
+      <li>学会 <span class="hl">makedirs</span> 建目录、<span class="hl">os.walk</span> 遍历、<span class="hl">shutil</span> 搬运文件</li>
+      <li>通关实验室「文件夹整理模拟器」+ 预言机 5 连 + Quiz ≥ 80 分</li>
+    </div>
+  </header>
+
+  <!-- 1 os 模块 -->
+  <section>
+    <h2><span class="num">1</span>os 模块：程序的眼睛和手</h2>
+    <p>到目前为止，你的程序只能记住内存里的数据——关机就忘。想读写硬盘上的文件、浏览文件夹，就需要请出 Python 自带的<span class="hl">os 模块</span>。它是「operating system」的缩写，是程序与操作系统之间的翻译官。</p>
+    <p>管家上岗第一件事：先弄清楚<b>我在哪</b>、<b>周围有什么</b>。</p>
+
+    <div class="dirtree">
+      <div class="dt-root">📁 pyproject <span class="dt-tag">当前目录</span></div>
+      <div class="dt-children">
+        <div class="dt-item">📄 demo.py <span class="dt-note">文件</span></div>
+        <div class="dt-item">📄 notes.txt <span class="dt-note">文件</span></div>
+        <div class="dt-item">📁 data <span class="dt-note">文件夹</span></div>
+        <div class="dt-item">📁 图片 <span class="dt-note">文件夹</span></div>
+      </div>
+    </div>
+    <p>把鼠标移到目录树的条目上看看。对应的代码只有两行：</p>
+    <div class="code"><span class="k">import</span> <span class="v">os</span>
+
+<span class="k">print</span>(<span class="v">os</span>.getcwd())              <span class="c"># 我现在在哪个目录？（get current working directory）</span>
+<span class="k">print</span>(<span class="k">sorted</span>(<span class="v">os</span>.listdir(<span class="s">"."</span>)))  <span class="c"># 当前目录下有哪些条目？（sorted 让顺序稳定）</span></div>
+    <div class="out">/Users/adeai/pyproject
+['data', 'demo.py', 'notes.txt', '图片']</div>
+
+    <p>三个要点：</p>
+    <p>① <span class="hl">os.getcwd()</span> 返回当前工作目录的路径——你的程序此刻"站"在哪里。</p>
+    <p>② <span class="hl">os.listdir(".")</span> 返回一个列表，装着目录里<b>所有条目的名字</b>（文件和文件夹都有，但只看一层，不会钻进子文件夹）。不加 sorted 的话，顺序是不保证的。</p>
+    <p>③ <span class="hl-c">"."</span> 表示当前目录，<span class="hl-c">".."</span> 表示上一级目录。</p>
+  </section>
+
+  <!-- 2 os.path -->
+  <section>
+    <h2><span class="num">2</span>os.path 四件套：探路神器</h2>
+    <p>动手搬文件之前，得先探路：这条路存不存在？是文件还是文件夹？这就轮到 <span class="hl">os.path</span> 家族出场。</p>
+    <div class="code"><span class="v">os</span>.path.exists(<span class="s">"notes.txt"</span>)  <span class="c"># 这条路径存在吗？→ True / False</span>
+<span class="v">os</span>.path.isfile(<span class="s">"notes.txt"</span>)  <span class="c"># 是一个文件吗？</span>
+<span class="v">os</span>.path.isdir(<span class="s">"图片"</span>)        <span class="c"># 是一个文件夹吗？（文件和文件夹互斥）</span>
+<span class="v">os</span>.path.join(<span class="s">"data"</span>, <span class="s">"a.txt"</span>)  <span class="c"># 把两段路径拼成一条</span></div>
+
+    <p>🧪 亲自试试：下面是刚才那棵目录树，选一条路径，再点按钮查看结果。</p>
+    <div class="lab-input">
+      <select id="path-sel">
+        <option>demo.py</option>
+        <option>notes.txt</option>
+        <option>data</option>
+        <option>图片</option>
+        <option>data/backup.zip</option>
+        <option>图片/头像.png</option>
+        <option>攻略.pdf</option>
+      </select>
+      <button class="btn" onclick="checkPath('exists')">exists?</button>
+      <button class="btn" onclick="checkPath('isfile')">isfile?</button>
+      <button class="btn" onclick="checkPath('isdir')">isdir?</button>
+    </div>
+    <div class="out" id="path-out" style="display:none"></div>
+
+    <p>⚠️ <span class="hl">join 的跨平台陷阱</span>：macOS 和 Linux 用 <span class="hl-c">/</span> 分隔路径，Windows 却用 <span class="hl-c">\</span>。同一个 join，两边结果不同：</p>
+    <div class="code"><span class="v">os</span>.path.join(<span class="s">"data"</span>, <span class="s">"a.txt"</span>)
+<span class="c"># 在 macOS / Linux 上 → 'data/a.txt'</span>
+<span class="c"># 在 Windows 上      → 'data\a.txt'（反斜杠）</span></div>
+    <p>所以拼路径<span class="hl">永远用 join，永远别手写分隔符</span>——你的程序才能在所有电脑上活着。</p>
+
+    <p>还有个拆名字的好工具 <span class="hl">os.path.splitext</span>：把文件名拆成「主名 + 扩展名」。</p>
+    <div class="code"><span class="k">print</span>(<span class="v">os</span>.path.splitext(<span class="s">"攻略.pdf"</span>))
+<span class="k">print</span>(<span class="v">os</span>.path.splitext(<span class="s">"a.tar.gz"</span>))  <span class="c"># 只认最后一个点！</span></div>
+    <div class="out">('攻略', '.pdf')
+('a.tar', '.gz')</div>
+  </section>
+
+  <!-- 3 makedirs / 遍历 / walk -->
+  <section>
+    <h2><span class="num">3</span>建文件夹与遍历：os 的进阶操作</h2>
+    <p>想让程序自己建目录？<span class="hl">os.makedirs</span> 可以一次建出<b>多级文件夹</b>，而且有个保命参数：</p>
+    <div class="code"><span class="v">os</span>.makedirs(<span class="s">"下载/图片"</span>, exist_ok=<span class="k">True</span>)</div>
+    <p>① 「下载」和「图片」两级会一起创建（父目录不存在也没关系）；② <span class="hl-c">exist_ok=True</span> 表示"已经存在也不报错"。不加这个参数，第二次运行就会炸出 <span class="hl-c">FileExistsError</span>——写脚本时加上它，脚本就能反复运行不出错。</p>
+
+    <p>遍历文件夹的标准套路：<span class="hl">for + listdir + isfile</span>：</p>
+    <div class="code"><span class="k">for</span> <span class="v">name</span> <span class="k">in</span> <span class="v">os</span>.listdir(<span class="s">"下载"</span>):
+    <span class="v">full</span> = <span class="v">os</span>.path.join(<span class="s">"下载"</span>, <span class="v">name</span>)   <span class="c"># 拼出完整路径，专业习惯</span>
+    <span class="k">if</span> <span class="v">os</span>.path.isfile(<span class="v">full</span>):
+        <span class="k">print</span>(<span class="s">"文件："</span>, <span class="v">name</span>)
+    <span class="k">else</span>:
+        <span class="k">print</span>(<span class="s">"文件夹："</span>, <span class="v">name</span>)</div>
+
+    <p>如果文件夹套文件夹、还想要<span class="hl">连子文件夹一起钻进去</span>，就用 <span class="hl">os.walk</span>（走遍整棵目录树）。它每次交给你三个值：<b>root</b>（现在走到哪）、<b>dirs</b>（这里的子文件夹列表）、<b>files</b>（这里的文件列表）。</p>
+    <div class="code"><span class="k">for</span> <span class="v">root</span>, <span class="v">dirs</span>, <span class="v">files</span> <span class="k">in</span> <span class="v">os</span>.walk(<span class="s">"项目"</span>):
+    <span class="k">print</span>(<span class="v">root</span>, <span class="v">dirs</span>, <span class="v">files</span>)</div>
+    <div class="out">项目 ['utils', 'docs'] ['config.txt', 'main.py']
+项目/utils [] ['helper.py']
+项目/docs [] ['readme.md']</div>
+    <p style="font-size:13px;color:var(--muted)">（示例输出，子文件夹的顺序在不同电脑上可能不同）</p>
+  </section>
+
+  <!-- 4 shutil -->
+  <section>
+    <h2><span class="num">4</span>shutil：搬家公司 + 一把砍树刀</h2>
+    <p>os 负责看路，<span class="hl">shutil</span> 负责干活：复制、移动、删除，它全包了。</p>
+    <div class="code"><span class="k">import</span> <span class="v">shutil</span>
+
+<span class="c"># 复制：原件原地不动，多出一份副本</span>
+<span class="v">shutil</span>.copy(<span class="s">"攻略.pdf"</span>, <span class="s">"备份/攻略.pdf"</span>)
+
+<span class="c"># 移动（搬家）：搬完之后，原位置就没了</span>
+<span class="v">shutil</span>.move(<span class="s">"旧作业.docx"</span>, <span class="s">"文档/旧作业.docx"</span>)</div>
+    <p>一句话记住区别：<span class="hl">copy 是复制，原件还在；move 是搬家，原件消失。</span></p>
+
+    <div class="warnbox">
+      ⚠️ <b>rmtree 是本课最危险的技能，没有之一</b><br>
+      <code style="font-family:ui-monospace,Menlo,monospace;color:var(--red)">shutil.rmtree("测试数据")</code> 会把「测试数据」<b>整个文件夹连同里面所有子文件夹、所有文件</b>全部删除——<b>不进回收站，删了就是删了，无法撤销</b>。路径写错一格，多年珍藏瞬间蒸发。rmtree = remove tree，连根拔树。
+    </div>
+    <p>所以本课立下一条<span class="hl">安全铁律</span>：删除之前，永远先 print 确认内容，再问一句"真的要删吗"：</p>
+    <div class="code"><span class="k">print</span>(<span class="v">os</span>.listdir(<span class="s">"测试数据"</span>))        <span class="c"># 第一步：先看清里面装了什么</span>
+<span class="v">answer</span> = <span class="k">input</span>(<span class="s">"确认删除？(y/n) "</span>)  <span class="c"># 第二步：再让人拍板</span>
+<span class="k">if</span> <span class="v">answer</span> == <span class="s">"y"</span>:
+    <span class="v">shutil</span>.rmtree(<span class="s">"测试数据"</span>)           <span class="c"># 第三步：看清了才准删</span></div>
+  </section>
+
+  <!-- 5 实验室 -->
+  <section>
+    <h2><span class="num">5</span>🎮 实验室 · 文件夹整理模拟器</h2>
+    <p>你的「下载」文件夹已经惨不忍睹：14 个文件挤在一起。点<b>一键整理</b>，看 Python 如何按扩展名把它们分门别类搬进 图片 / 文档 / 视频 / 压缩包 四个子文件夹——右侧代码会同步逐行高亮执行。整理完还能撤销重玩。</p>
+    <div class="lab-input">
+      <button class="btn" id="btn-organize" onclick="organize()">⚡ 一键整理</button>
+      <button class="btn btn-ghost" id="btn-undo" onclick="undoOrganize()" disabled>↩ 撤销整理</button>
+      <button class="btn btn-ghost" id="btn-reset" onclick="resetLab()">🔄 重新开始</button>
+    </div>
+    <div class="lab2col">
+      <div class="folder-area">
+        <div class="folder-root">
+          <div class="folder-title">📁 下载</div>
+          <div class="file-zone" id="dl-zone"></div>
+          <div class="cat-zone" id="cat-zone"></div>
+        </div>
+        <div class="lab-hint">💡 页面用动画模拟了文件搬家，右侧就是完全等价的 Python 代码——课后请在电脑上真实跑一遍。</div>
+      </div>
+      <div class="code-side">
+        <div class="code lab-code" id="code-organize"></div>
+        <div class="code lab-code" id="code-undo" style="display:none"></div>
+        <div class="out" id="lab-log" style="display:none;margin-top:10px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 预言机 -->
+  <section>
+    <h2><span class="num">6</span>🔮 预言机挑战 · 5 连击</h2>
+    <p>预言机展示一段代码，<span class="hl">先在心里预测输出，再点选项验证</span>。全对才能获得预言家徽章。</p>
+    <div id="oracle"></div>
+  </section>
+
+  <!-- 7 记忆卡片 -->
+  <section>
+    <h2><span class="num">7</span>🃏 记忆卡片 · 点击翻面</h2>
+    <p>每张卡片正面是问题，背面是答案。全都翻熟了，这些知识就焊死在脑子里了。</p>
+    <div class="cards-grid" id="cards"></div>
+    <div class="cards-tip">小技巧：先全部翻一遍看答案，再从头自测——答不出来的卡片多翻几次。</div>
+  </section>
+
+  <!-- 8 Quiz -->
+  <section>
+    <h2><span class="num">8</span>⚔️ 终极 Quiz · 10 题 · 80 分解锁下一课</h2>
+    <div id="quiz"></div>
+    <div id="quiz-result"></div>
+  </section>
+
+  <!-- 9 课后 -->
+  <section class="homework">
+    <h2><span class="num">9</span>🌙 今晚的修炼（真实上机 · 约 20 分钟）</h2>
+    <li>① 打开电脑终端（Windows 用 cmd，macOS 用终端），输入 <code>python</code> 进入交互模式，敲 <code>import os</code>，然后依次试 <code>os.getcwd()</code> 和 <code>os.listdir(".")</code>，看看你的程序"站"在哪、周围有什么</li>
+    <li>② 在合适位置用 <code>os.makedirs("practice/图片", exist_ok=True)</code> 建出练习目录，再随便建 <code>practice/文档</code></li>
+    <li>③ 往 practice 里放 3 个不同类型的测试文件，把实验室那段整理代码<b>逐行亲手敲一遍</b>跑起来（注意每一步都先 print 看清楚）</li>
+    <li>④ ⚠️ 安全演习：把「删除前必须先做的两步」写成两行代码记进笔记本（提示：先 print 内容，再 input 确认）。<b>今晚不碰 rmtree</b></li>
+    <li>⑤ 写 3 行学习日志：今天学到啥 / 卡在哪 / 明天想练啥</li>
+  </section>
+
+  <footer>
+    通关条件：预言机 5/5 + Quiz ≥ 80 分 ｜ 下一课预告：<b>第 15 课「正则表达式 —— 密码猎人」</b>
+  </footer>
+</div>
+
+<script>
+/* ============ 通用：Python 代码高亮 ============ */
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function pyHi(line){
+  var t = escHtml(line);
+  var comment = '';
+  var h = t.indexOf('#');
+  if(h > -1){
+    comment = '<span class="c">' + t.slice(h) + '</span>';
+    t = t.slice(0, h);
+  }
+  t = t.replace(/(r?"[^"]*")/g,'<span class="s">$1</span>');
+  t = t.replace(/(os\.path\.[a-zA-Z]+|os\.[a-zA-Z]+|shutil\.[a-zA-Z]+)/g,'<span class="k">$1</span>');
+  t = t.replace(/(\bimport\b|\bfor\b|\bin\b|\bif\b|\bnot\b|\belse\b|\bcontinue\b|\bprint\b|\binput\b|\bsorted\b|\bTrue\b|\bFalse\b|\bNone\b)/g,'<span class="k">$1</span>');
+  t = t.replace(/(^|\s)(\d+)(?=\s|$)/g,'$1<span class="n">$2</span>');
+  return t + comment;
+}
+
+/* ============ 知识点小工具：os.path 探路仪 ============ */
+var VFS = {
+  'demo.py': 'file',
+  'notes.txt': 'file',
+  'data': 'dir',
+  '图片': 'dir',
+  'data/backup.zip': 'file',
+  '图片/头像.png': 'file',
+  '攻略.pdf': 'none'
+};
+function checkPath(fn){
+  var path = document.getElementById('path-sel').value;
+  var type = VFS[path];
+  var result, note;
+  if(fn === 'exists'){
+    result = (type !== 'none' && type !== undefined);
+    note = result ? '存在！' : '不存在（树里没有它）';
+  }else if(fn === 'isfile'){
+    result = (type === 'file');
+    note = result ? '它是一个文件' : (type === 'dir' ? '不是文件，是文件夹' : '路径不存在，谈不上是文件');
+  }else{
+    result = (type === 'dir');
+    note = result ? '它是一个文件夹' : (type === 'file' ? '不是文件夹，是文件' : '路径不存在，谈不上是文件夹');
+  }
+  var out = document.getElementById('path-out');
+  out.style.display = 'block';
+  out.textContent = '>>> os.path.' + fn + '("' + path + '")\n' + (result ? 'True' : 'False') + '   ← ' + note;
+}
+
+/* ============ 实验室：文件夹整理模拟器 ============ */
+var FILES = [
+  '假期照片1.jpg', '假期照片2.jpg', '表情包.png', '风景壁纸.jpg',
+  'Python入门教程.pdf', '期末论文.docx', '简历模板.doc', '读书笔记.txt',
+  '会议录像.mp4', '生日聚会.mp4', '游戏录屏.mov',
+  '项目源码.zip', '设计素材.rar', '备份.zip'
+];
+var CATS = [
+  ['图片', ['.jpg', '.png']],
+  ['文档', ['.pdf', '.docx', '.doc', '.txt']],
+  ['视频', ['.mp4', '.mov']],
+  ['压缩包', ['.zip', '.rar']]
+];
+var labAnimating = false;
+var labOrganized = false;
+
+function iconFor(name){
+  var ext = name.slice(name.lastIndexOf('.'));
+  if(ext === '.jpg' || ext === '.png'){ return '🖼️'; }
+  if(ext === '.pdf'){ return '📕'; }
+  if(ext === '.docx' || ext === '.doc'){ return '📄'; }
+  if(ext === '.txt'){ return '📝'; }
+  if(ext === '.mp4' || ext === '.mov'){ return '🎬'; }
+  return '🗜️';
+}
+function catOf(name){
+  var ext = name.slice(name.lastIndexOf('.'));
+  for(var i = 0; i < CATS.length; i++){
+    if(CATS[i][1].indexOf(ext) > -1){ return CATS[i][0]; }
+  }
+  return null;
+}
+function makeChip(name){
+  var d = document.createElement('div');
+  d.className = 'file-chip';
+  d.id = 'chip-' + name;
+  d.textContent = iconFor(name) + ' ' + name;
+  return d;
+}
+/* 整理代码（逐行，key 用于高亮） */
+var ORG_CODE = [
+  ['import os, shutil', ''],
+  ['', ''],
+  ['rules = {".jpg": "图片", ".png": "图片",', ''],
+  ['         ".pdf": "文档", ".docx": "文档",', ''],
+  ['         ".doc": "文档", ".txt": "文档",', ''],
+  ['         ".mp4": "视频", ".mov": "视频",', ''],
+  ['         ".zip": "压缩包", ".rar": "压缩包"}', ''],
+  ['', ''],
+  ['for folder in ["图片", "文档", "视频", "压缩包"]:', '1'],
+  ['    os.makedirs(os.path.join("下载", folder), exist_ok=True)', '2'],
+  ['    print("创建文件夹：", folder)', '3'],
+  ['', ''],
+  ['for name in os.listdir("下载"):', '4'],
+  ['    full = os.path.join("下载", name)', '5'],
+  ['    if not os.path.isfile(full):', '6'],
+  ['        continue              # 跳过文件夹，只搬文件', ''],
+  ['    ext = os.path.splitext(name)[1]   # 拿到 ".jpg" 这样的扩展名', '7'],
+  ['    folder = rules.get(ext)', '8'],
+  ['    if folder:', '9'],
+  ['        shutil.move(full, os.path.join("下载", folder, name))', '10'],
+  ['        print("移动：", name, "→", folder)', '11'],
+  ['', ''],
+  ['print("整理完成！")', '12']
+];
+var UNDO_CODE = [
+  ['# 第一步：把文件搬回下载根目录', ''],
+  ['for folder in ["图片", "文档", "视频", "压缩包"]:', 'u1'],
+  ['    for name in os.listdir(os.path.join("下载", folder)):', 'u1'],
+  ['        shutil.move(os.path.join("下载", folder, name),', 'u2'],
+  ['                    os.path.join("下载", name))', 'u2'],
+  ['        print("搬回：", folder + "/" + name)', 'u3'],
+  ['', ''],
+  ['# 第二步：删掉空文件夹 —— 删前必须先 print 确认！', ''],
+  ['for folder in ["图片", "文档", "视频", "压缩包"]:', 'u4'],
+  ['    path = os.path.join("下载", folder)', 'u4'],
+  ['    print("即将删除：", path, os.listdir(path))  # 确认是空的 []', 'u4'],
+  ['    shutil.rmtree(path)   # ⚠️ 不可逆！看清了才准删', 'u5']
+];
+function renderCode(boxId, lines){
+  var box = document.getElementById(boxId);
+  box.innerHTML = lines.map(function(l){
+    return '<span class="cl" data-l="' + l[1] + '">' + pyHi(l[0]) + '</span>';
+  }).join('\n');
+}
+function setActive(boxId, key){
+  var box = document.getElementById(boxId);
+  box.querySelectorAll('.cl').forEach(function(el){
+    el.classList.toggle('active', el.getAttribute('data-l') === key && key !== '');
+  });
+}
+function logLine(text){
+  var log = document.getElementById('lab-log');
+  log.style.display = 'block';
+  log.textContent += text + '\n';
+  log.scrollTop = log.scrollHeight;
+}
+function setLabButtons(){
+  document.getElementById('btn-organize').disabled = labAnimating || labOrganized;
+  document.getElementById('btn-undo').disabled = labAnimating || !labOrganized;
+  document.getElementById('btn-reset').disabled = labAnimating;
+}
+function buildInitial(){
+  var zone = document.getElementById('dl-zone');
+  zone.innerHTML = '';
+  FILES.forEach(function(f){ zone.appendChild(makeChip(f)); });
+  document.getElementById('cat-zone').innerHTML = '';
+  document.getElementById('lab-log').textContent = '';
+  document.getElementById('lab-log').style.display = 'none';
+  document.getElementById('code-organize').style.display = 'block';
+  document.getElementById('code-undo').style.display = 'none';
+  setActive('code-organize', '');
+}
+function organize(){
+  if(labAnimating || labOrganized){ return; }
+  labAnimating = true; setLabButtons();
+  buildInitial();
+  renderCode('code-organize', ORG_CODE);
+  document.getElementById('code-organize').style.display = 'block';
+  document.getElementById('code-undo').style.display = 'none';
+  document.getElementById('lab-log').textContent = '';
+  document.getElementById('lab-log').style.display = 'block';
+  var steps = [];
+  CATS.forEach(function(c){ steps.push({type:'mkdir', cat:c[0]}); });
+  FILES.forEach(function(f){ steps.push({type:'move', file:f}); });
+  steps.push({type:'done'});
+  var i = 0;
+  function next(){
+    if(i >= steps.length){ return; }
+    var s = steps[i]; i++;
+    if(s.type === 'mkdir'){
+      setActive('code-organize', '2');
+      var box = document.createElement('div');
+      box.className = 'folder-box';
+      box.id = 'fbox-' + s.cat;
+      box.innerHTML = '<h4>📁 ' + s.cat + '</h4><div class="fz" id="fz-' + s.cat + '"></div>';
+      document.getElementById('cat-zone').appendChild(box);
+      logLine('创建文件夹： ' + s.cat);
+      setTimeout(next, 340);
+    }else if(s.type === 'move'){
+      var cat = catOf(s.file);
+      setActive('code-organize', '10');
+      var chip = document.getElementById('chip-' + s.file);
+      chip.classList.add('mv');
+      setTimeout(function(){
+        document.getElementById('fz-' + cat).appendChild(chip);
+        chip.classList.remove('mv');
+      }, 180);
+      logLine('移动： ' + s.file + ' → ' + cat);
+      setTimeout(next, 300);
+    }else{
+      setActive('code-organize', '12');
+      logLine('整理完成！');
+      labAnimating = false; labOrganized = true; setLabButtons();
+    }
+  }
+  setTimeout(next, 400);
+}
+function undoOrganize(){
+  if(labAnimating || !labOrganized){ return; }
+  labAnimating = true; setLabButtons();
+  renderCode('code-undo', UNDO_CODE);
+  document.getElementById('code-organize').style.display = 'none';
+  document.getElementById('code-undo').style.display = 'block';
+  document.getElementById('lab-log').textContent = '';
+  document.getElementById('lab-log').style.display = 'block';
+  var steps = [];
+  /* 搬回所有文件（按文件夹分组） */
+  CATS.forEach(function(c){
+    FILES.forEach(function(f){
+      if(catOf(f) === c[0]){ steps.push({type:'back', file:f, cat:c[0]}); }
+    });
+  });
+  CATS.forEach(function(c){ steps.push({type:'rmtree', cat:c[0]}); });
+  steps.push({type:'reset'});
+  var i = 0;
+  function next(){
+    if(i >= steps.length){ return; }
+    var s = steps[i]; i++;
+    if(s.type === 'back'){
+      setActive('code-undo', 'u2');
+      var chip = document.getElementById('chip-' + s.file);
+      chip.classList.add('mv');
+      setTimeout(function(){
+        document.getElementById('dl-zone').appendChild(chip);
+        chip.classList.remove('mv');
+      }, 180);
+      logLine('搬回： ' + s.cat + '/' + s.file);
+      setTimeout(next, 160);
+    }else if(s.type === 'rmtree'){
+      setActive('code-undo', 'u4');
+      logLine('即将删除： 下载/' + s.cat + ' []');
+      var box = document.getElementById('fbox-' + s.cat);
+      setTimeout(function(){
+        setActive('code-undo', 'u5');
+        box.classList.add('dying');
+        logLine('rmtree： 下载/' + s.cat + '（已确认内部为空）');
+        setTimeout(function(){ box.remove(); }, 350);
+      }, 250);
+      setTimeout(next, 620);
+    }else{
+      labAnimating = false; labOrganized = false; setLabButtons();
+    }
+  }
+  setTimeout(next, 400);
+}
+function resetLab(){
+  if(labAnimating){ return; }
+  labOrganized = false;
+  buildInitial();
+  renderCode('code-organize', ORG_CODE);
+  setLabButtons();
+}
+renderCode('code-organize', ORG_CODE);
+renderCode('code-undo', UNDO_CODE);
+buildInitial();
+setLabButtons();
+
+/* ============ 预言机 ============ */
+var oracleData = [
+  {
+    title:'第 1 预言 · 拆解文件名',
+    code:'import os\nprint(os.path.splitext("a.tar.gz"))',
+    opts:["('a.tar', '.gz')", "('a', '.tar.gz')", "('a.tar.gz', '')", "('a.tar', 'gz')"],
+    ans:0,
+    exp:'splitext 只认最后一个点：从右往左找到第一个点，前面是主名、后面是扩展名。所以 a.tar.gz 拆成 ("a.tar", ".gz")。'
+  },
+  {
+    title:'第 2 预言 · 复制之后原件还在吗？',
+    code:'import os, shutil\nshutil.copy("攻略.pdf", "备份.pdf")\nprint(os.path.exists("攻略.pdf"))',
+    opts:['True','False','报错'],
+    ans:0,
+    exp:'copy 是复制：原件原地不动，只是多出一份副本。move 才是搬家——搬完原位置就空了。'
+  },
+  {
+    title:'第 3 预言 · 跑两遍也不怕',
+    code:'import os\nos.makedirs("data/cache", exist_ok=True)\nos.makedirs("data/cache", exist_ok=True)  # 再跑一次',
+    opts:['第二次报错 FileExistsError','两次都不报错','第二次会先清空文件夹再建'],
+    ans:1,
+    exp:'exist_ok=True 的意思就是"已存在也没关系"。不加这个参数，文件夹已存在时第二遍会报 FileExistsError——这正是脚本要加它的原因。'
+  },
+  {
+    title:'第 4 预言 · Windows 上的路径拼接',
+    code:'# 在 Windows 电脑上运行\nimport os\nprint(os.path.join("data", "a.txt"))',
+    opts:['data/a.txt','data\\a.txt','data:a.txt','报错'],
+    ans:1,
+    exp:'Windows 用反斜杠 \\ 做路径分隔符，join 会根据当前系统自动选对 / 或 \\。这就是"拼路径永远用 join、永远别手写分隔符"的原因。'
+  },
+  {
+    title:'第 5 预言 · 消失的文件夹',
+    code:'import os, shutil\nshutil.rmtree("测试数据")\nprint(os.path.exists("测试数据"))',
+    opts:['False，且内部文件被永久删除、无法恢复','False，但可以从回收站找回','True','报错'],
+    ans:0,
+    exp:'rmtree 把整棵目录树连根拔起：不进回收站，删了就是删了。所以动手之前必须先 print 确认内容——这条铁律请焊死在脑子里。'
+  }
+];
+(function(){
+  var box = document.getElementById('oracle');
+  oracleData.forEach(function(q){
+    var div = document.createElement('div');
+    div.className = 'oracle-q';
+    var codeHtml = q.code.split('\n').map(pyHi).join('\n');
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="opt" data-i="' + i + '">' + escHtml(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qtitle">' + q.title + '</div>' +
+      '<div class="code" style="margin:6px 0">' + codeHtml + '</div>' +
+      '<div class="oracle-opts">' + optsHtml + '</div>' +
+      '<div class="explain">' + q.exp + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')){ return; }
+        var i = +btn.getAttribute('data-i');
+        if(i === q.ans){ btn.classList.add('right'); }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.explain').classList.add('show');
+      });
+    });
+  });
+})();
+
+/* ============ 记忆卡片 ============ */
+var cardData = [
+  ['os.getcwd() 干嘛的？','返回当前工作目录的路径（get current working directory）'],
+  ['os.listdir(".") 返回什么？','当前目录下所有条目名字的列表（文件+文件夹，只看一层不钻子目录）'],
+  ['os.path.exists() 判断什么？','路径是否存在（文件或文件夹都算），返回 True / False'],
+  ['为什么拼路径要用 join()？','系统分隔符不同：Windows 是 \\，macOS/Linux 是 /，join 自动选对'],
+  ['isfile 和 isdir 的区别？','isfile 判断是不是文件，isdir 判断是不是文件夹，两者互斥'],
+  ['makedirs("a/b/c", exist_ok=True)？','一次创建多级文件夹；已存在也不报错（不加 exist_ok 会 FileExistsError）'],
+  ['os.walk() 交给你哪三个值？','root 当前路径、dirs 子文件夹列表、files 文件列表；自动一层层钻完整棵树'],
+  ['shutil.copy 之后原文件？','还在！copy 是复制，多出一份副本'],
+  ['shutil.move 之后原文件？','没了！move 是搬家，原位置不再存在'],
+  ['shutil.rmtree 为什么可怕？','整棵目录树连根删除，不进回收站、不可恢复。铁律：删前先 print 看内容']
+];
+(function(){
+  var grid = document.getElementById('cards');
+  cardData.forEach(function(c){
+    var d = document.createElement('div');
+    d.className = 'mcard';
+    d.innerHTML = '<div class="mcard-inner">' +
+      '<div class="mface mfront">' + escHtml(c[0]) + '</div>' +
+      '<div class="mface mback">' + escHtml(c[1]) + '</div></div>';
+    d.addEventListener('click', function(){ d.classList.toggle('flip'); });
+    grid.appendChild(d);
+  });
+})();
+
+/* ============ Quiz ============ */
+var quizData = [
+  {q:'想知道"我的程序现在在哪个目录"，该用哪个函数？',
+   opts:['os.getcwd()','os.listdir()','os.path.exists()','os.mkdir()'], ans:0,
+   exp:'getcwd = get current working directory，返回当前工作目录的路径。'},
+  {q:'os.listdir("data") 的返回值是？',
+   opts:['一个列表，装着 data 里所有文件和子文件夹的名字','一个字典','data 里每个文件的完整路径','文件的总个数'], ans:0,
+   exp:'listdir 返回名字列表（不带路径），只看一层；顺序不保证，需要稳定就套一层 sorted()。'},
+  {q:'判断某条路径（文件或文件夹都行）是否存在，用？',
+   opts:['os.path.exists()','os.path.isdir()','os.getcwd()','shutil.copy()'], ans:0,
+   exp:'exists 对文件和文件夹都返回 True；isdir / isfile 则分别只认文件夹 / 文件。'},
+  {q:'拼路径为什么推荐 os.path.join("data", "a.txt") 而不是手写 "data/a.txt"？',
+   opts:['不同系统分隔符不同（Windows 用 \\），join 会自动选对','因为 join 拼得更快','因为手写的路径 Python 读不懂','其实完全没区别'], ans:0,
+   exp:'join 会按当前操作系统选择正确的分隔符，程序才能跨平台运行。'},
+  {q:'notes.txt 是一个真实存在的文件，os.path.isfile("notes.txt") 返回？',
+   opts:['True','False','"notes.txt"','报错'], ans:0,
+   exp:'isfile：是文件就 True。注意如果它是个文件夹，isfile 会返回 False 而不是报错。'},
+  {q:'os.makedirs("a/b/c") 成功执行后，原样再执行一遍，会发生什么？',
+   opts:['报错 FileExistsError','什么都不做，也不报错','文件夹被清空重建','报错 KeyError'], ans:0,
+   exp:'makedirs 默认不允许目录已存在。想让脚本反复运行不出错，要加 exist_ok=True。'},
+  {q:'想遍历"下载"文件夹里所有条目的名字，正确写法是？',
+   opts:['for name in os.listdir("下载")','for name in os.path.exists("下载")','for name in os.path.split("下载")','for name in os.getcwd("下载")'], ans:0,
+   exp:'listdir(路径) 返回名字列表，正好用 for 逐个取出；配合 os.path.isfile 可以区分文件和文件夹。'},
+  {q:'shutil.copy 和 shutil.move 的核心区别是？',
+   opts:['copy 复制后原文件还在，move 搬走后原文件消失','copy 只能复制文件夹，move 只能移动文件','move 比 copy 慢','没有区别，只是名字不同'], ans:0,
+   exp:'copy 留原件多一份副本；move 是搬家，原位置不再存在。'},
+  {q:'关于 shutil.rmtree，下面说法正确的是？',
+   opts:['整个文件夹及所有内容被永久删除，不进回收站，删前务必先 print 确认','删除的东西会进回收站，随时可恢复','只能删除空文件夹','只删除文件，不动文件夹'], ans:0,
+   exp:'rmtree 连根拔树：文件、子文件夹全部消失且不可恢复。删前先 print(os.listdir(...)) 确认是保命习惯。'},
+  {q:'os.path.splitext("照片.jpg") 的结果是？',
+   opts:["('照片', '.jpg')","('照片.jpg', '')","('', '.jpg')","('照片', 'jpg')"], ans:0,
+   exp:'拆成（主名, 扩展名）二元组，扩展名带着点。按扩展名分类文件就靠它。'}
+];
+(function(){
+  var box = document.getElementById('quiz');
+  var answered = 0, score = 0;
+  quizData.forEach(function(q, idx){
+    var div = document.createElement('div');
+    div.className = 'quiz-q';
+    var optsHtml = q.opts.map(function(o, i){
+      return '<button class="qq-opt" data-i="' + i + '">' + String.fromCharCode(65 + i) + '. ' + escHtml(o) + '</button>';
+    }).join('');
+    div.innerHTML = '<div class="qq"><i>Q' + (idx + 1) + '</i>' + escHtml(q.q) + '</div>' +
+      '<div class="qq-opts">' + optsHtml + '</div>' +
+      '<div class="qq-exp">' + escHtml(q.exp) + '</div>';
+    box.appendChild(div);
+    div.querySelectorAll('.qq-opt').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        if(btn.classList.contains('right') || btn.classList.contains('wrong')){ return; }
+        var i = +btn.getAttribute('data-i');
+        answered++;
+        if(i === q.ans){ btn.classList.add('right'); score++; }
+        else{
+          btn.classList.add('wrong');
+          div.querySelectorAll('.qq-opt')[q.ans].classList.add('right');
+        }
+        div.querySelector('.qq-exp').classList.add('show');
+        if(answered === quizData.length){ showResult(score); }
+      });
+    });
+  });
+  function showResult(s){
+    var pts = s * 10;
+    var el = document.getElementById('quiz-result');
+    var msg = pts >= 80
+      ? (pts === 100 ? '满分！文件管家本家，下一课已为你解锁 🔓' : '通关成功！第 15 课「正则表达式」已解锁 🔓')
+      : '差一点点！把错题对应的记忆卡片再翻三遍，然后点击刷新重新挑战（每次可重新作答）';
+    el.innerHTML = '<b>' + pts + ' 分</b>' + s + ' / ' + quizData.length + ' 正确<br>' + msg;
+    el.classList.add('show');
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+})();
+</script>
+</body>
+</html>
