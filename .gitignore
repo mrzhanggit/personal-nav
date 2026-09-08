@@ -1,3 +1,4 @@
 .workbuddy/memory/
 .workbuddy/automations/
 .DS_Store
+.tokenize
