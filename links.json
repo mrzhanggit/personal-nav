@@ -35,7 +35,7 @@
         {
           "title": "拿破仑时代",
           "subtitle": "法国大革命与拿破仑帝国兴衰",
-          "url": "https://6ee63770f087428e815c551eca4c73f9.bj8.agentos-app.net",
+          "url": "https://mrzhanggit.github.io/napoleon-era/",
           "emoji": "⚔️",
           "tag": "历史"
         }
@@ -96,7 +96,7 @@
         {
           "title": "美国历史学习地图",
           "subtitle": "从殖民地时代到现代美国的演进脉络 · 交互时间线",
-          "url": "https://bb654d340b1a4d4ab75ae12ebd62df95.app.workbuddy.link",
+          "url": "https://mrzhanggit.github.io/us-history-map/",
           "emoji": "🗽",
           "tag": "时间线"
         }
@@ -134,7 +134,7 @@
         {
           "title": "冯唐成事学 · 素材库",
           "subtitle": "胜者心法 × 强者破局 · 讲《资治通鉴》",
-          "url": "https://7a111e43c20242cabbb836d93b1eb7ca.app.workbuddy.link",
+          "url": "https://mrzhanggit.github.io/shengzhefa-library/",
           "emoji": "📖",
           "tag": "阅读"
         }
@@ -196,16 +196,23 @@
         {
           "title": "个人资产看板",
           "subtitle": "港股 / 美股 / 加密货币持仓 · ¥ 本币显示 · 每日自动刷新",
-          "url": "https://7508899b60c34897a00e4b3307f6d158.bj4.agentos-app.net",
+          "url": "https://mrzhanggit.github.io/asset-dashboard/",
           "emoji": "📊",
           "tag": "工具"
         },
         {
           "title": "习惯力 · 个人成长工作台",
           "subtitle": "习惯打卡 · 个人成长管理",
-          "url": "https://b80d669b65a64ad9a95f1c85bc9f729b.gz4.agentos-app.net",
+          "url": "https://mrzhanggit.github.io/habit-workbench/",
           "emoji": "💪",
           "tag": "工具"
+        },
+        {
+          "title": "太阳系 3D 模拟",
+          "subtitle": "交互式行星轨道 · 3D 可视化",
+          "url": "https://mrzhanggit.github.io/solar-system-3d/",
+          "emoji": "🪐",
+          "tag": "科普"
         }
       ]
     }
