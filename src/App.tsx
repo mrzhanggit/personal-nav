@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AppView } from './lib/spaces'
+import { WorkspaceView } from './components/WorkspaceView'
 import { SpaceView } from './components/SpaceView'
 import { FavoritesProvider } from './components/Favorites'
 import { FavoritesView } from './components/FavoritesView'
@@ -29,7 +30,7 @@ export function App() {
       <div className="ambient-scene" aria-hidden="true"><div className="mountain mountain-far" /><div className="mountain mountain-near" /><div className="lake" /></div>
       <Sidebar view={view.kind} onNavigate={kind => navigate({ kind })} />
       <div className="app-body"><TopBar /><main id="main" ref={mainRef} tabIndex={-1}>
-        {view.kind === 'home' ? <><Hero onOpenSpace={openSpace} /><BentoGrid onOpenSpace={openSpace} /><div className="activity-stack"><ActivitySection /><RecentResources /></div></> : view.kind === 'favorites' ? <FavoritesView /> : <SpaceView spaceId={view.spaceId} onOpenSpace={openSpace} onHome={() => navigate({ kind: 'home' })} />}
+        {view.kind === 'home' ? <><Hero onOpenSpace={openSpace} /><BentoGrid onOpenSpace={openSpace} /><div className="activity-stack"><ActivitySection /><RecentResources /></div></> : view.kind === 'favorites' ? <FavoritesView /> : view.kind === 'workspace' ? <WorkspaceView /> : <SpaceView spaceId={view.spaceId} onOpenSpace={openSpace} onHome={() => navigate({ kind: 'home' })} />}
         <Footer />
       </main></div>
     </div>

@@ -26,6 +26,12 @@ export function useOpenResource() {
     href => { window.open(href, '_blank', 'noopener,noreferrer') })
 }
 
+// Workspace calls this only after obtaining a window and dispatching target navigation.
+export function useRecordWorkspaceSuccess() {
+  const store = useStore()
+  return (resource: Resource, href: string) => store.openResource(resource.id, href, () => {})
+}
+
 export function ResourceAnchor({ resource, className, children }: { resource: Resource; className: string; children: ReactNode }) {
   const store = useStore()
   function activate(event: MouseEvent<HTMLAnchorElement>) {

@@ -3,14 +3,14 @@ import { Icon } from './Icon'
 
 const navigation = [['home', '首页'], ['star', '收藏'], ['grid', '应用'], ['folder', '项目'], ['bolt', '快速'], ['more', '更多']]
 
-type SidebarView = 'home' | 'favorites'
+type SidebarView = 'home' | 'favorites' | 'workspace'
 
 export function Sidebar({ view, onNavigate }: { view: SidebarView | 'space'; onNavigate: (view: SidebarView) => void }) {
   return <aside className="sidebar"><nav aria-label="主导航">
     {navigation.map(([icon, label], index) => {
-      const target = index === 0 ? 'home' : 'favorites'
-      const active = index < 2 && view === target
-      return <button key={label} type="button" className={`nav-item ${active ? 'is-active' : ''}`} aria-current={active ? 'page' : undefined} disabled={index > 1} title={index < 2 ? label : '尚未开放'} onClick={index < 2 ? () => onNavigate(target) : undefined}><Icon name={icon} /><span>{label}</span></button>
+      const target = index === 0 ? 'home' : index === 1 ? 'favorites' : index === 4 ? 'workspace' : null
+      const active = target !== null && view === target
+      return <button key={label} type="button" className={`nav-item ${active ? 'is-active' : ''}`} aria-current={active ? 'page' : undefined} disabled={!target} title={target ? label : '尚未开放'} onClick={target ? () => onNavigate(target) : undefined}><Icon name={icon} /><span>{label}</span></button>
     })}
   </nav><span className="side-bottom">PERSONAL<br />SPACE</span></aside>
 }
