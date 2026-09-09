@@ -3,9 +3,15 @@ import { Icon } from './Icon'
 
 const navigation = [['home', '首页'], ['star', '收藏'], ['grid', '应用'], ['folder', '项目'], ['bolt', '快速'], ['more', '更多']]
 
-export function Sidebar() {
+export type AppView = 'home' | 'favorites'
+
+export function Sidebar({ view, onNavigate }: { view: AppView; onNavigate: (view: AppView) => void }) {
   return <aside className="sidebar"><nav aria-label="主导航">
-    {navigation.map(([icon, label], index) => <button key={label} className={`nav-item ${index === 0 ? 'is-active' : ''}`} aria-current={index === 0 ? 'page' : undefined} disabled={index !== 0} title={index === 0 ? '首页' : '尚未开放'} onClick={index === 0 ? () => window.scrollTo({ top: 0, behavior: 'smooth' }) : undefined}><Icon name={icon} /><span>{label}</span></button>)}
+    {navigation.map(([icon, label], index) => {
+      const target = index === 0 ? 'home' : 'favorites'
+      const active = index < 2 && view === target
+      return <button key={label} type="button" className={`nav-item ${active ? 'is-active' : ''}`} aria-current={active ? 'page' : undefined} disabled={index > 1} title={index < 2 ? label : '尚未开放'} onClick={index < 2 ? () => onNavigate(target) : undefined}><Icon name={icon} /><span>{label}</span></button>
+    })}
   </nav><span className="side-bottom">PERSONAL<br />SPACE</span></aside>
 }
 

@@ -2,6 +2,7 @@ import resources from '../../docs/zcb-personal-os/data/links.v1.json'
 import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
 import { SearchTrigger } from './CommandPalette'
 import { ResourceAnchor } from './RecentResources'
+import { ResourceItem } from './ResourceItem'
 import { Icon } from './Icon'
 
 export function Hero() {
@@ -16,7 +17,7 @@ export function BentoGrid() {
   return <section className="spaces-section" aria-labelledby="spaces-heading"><div className="section-label"><h2 id="spaces-heading">我的空间 <span>MY SPACES</span></h2><span>让每一个入口，都有归处</span></div><div className="bento-grid">{spaces.map(space => {
     const items = resources.filter(resource => resource.space === space.id)
     const active = space.id === 'ai'
-    return <article key={space.id} className={`space-card space-${space.id} ${active ? 'expanded' : 'compact'}`}><div className="space-card-heading"><span className="space-icon"><Icon name={space.icon} /></span><div><h3>{space.name}</h3><p>{space.subtitle}</p></div>{active && <span className="active-indicator" aria-label="当前空间" />}</div>{items.length ? <div className="resource-grid">{items.slice(0, active ? 8 : 3).map(resource => <ResourceLink key={resource.id} resource={resource} />)}</div> : <div className="space-empty"><span className="empty-line" /><span>尚未添加资源</span><span className="empty-line" /></div>}<div className="space-card-footer"><span>{items.length ? `${items.length} 个资源` : '待补充'}</span>{active ? <span className="current-label">当前空间 <span>↗</span></span> : <span className="card-index">0{space.order}</span>}</div></article>
+    return <article key={space.id} className={`space-card space-${space.id} ${active ? 'expanded' : 'compact'}`}><div className="space-card-heading"><span className="space-icon"><Icon name={space.icon} /></span><div><h3>{space.name}</h3><p>{space.subtitle}</p></div>{active && <span className="active-indicator" aria-label="当前空间" />}</div>{items.length ? <div className="resource-grid">{items.slice(0, active ? 8 : 3).map(resource => active ? <ResourceItem key={resource.id} resource={resource} /> : <ResourceLink key={resource.id} resource={resource} />)}</div> : <div className="space-empty"><span className="empty-line" /><span>尚未添加资源</span><span className="empty-line" /></div>}<div className="space-card-footer"><span>{items.length ? `${items.length} 个资源` : '待补充'}</span>{active ? <span className="current-label">当前空间 <span>↗</span></span> : <span className="card-index">0{space.order}</span>}</div></article>
   })}</div></section>
 }
 

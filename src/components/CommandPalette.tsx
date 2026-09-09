@@ -5,6 +5,7 @@ import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
 import { createSearchIndex, nextSelection, paletteAction, searchResources } from '../lib/search'
 import type { Resource } from '../lib/search'
 import { useOpenResource } from './RecentResources'
+import { FavoriteButton } from './Favorites'
 import { Icon } from './Icon'
 import './command-palette.css'
 
@@ -77,15 +78,15 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
 
   return <PaletteContext.Provider value={open}>{children}<dialog ref={dialogRef} className="command-dialog" aria-label="搜索资源" aria-modal="true" onCancel={event => { event.preventDefault(); close() }} onClick={event => { if (event.target === event.currentTarget) close() }} onKeyDown={event => {
     if (event.key === 'Tab') {
+      const stops = Array.from(dialogRef.current!.querySelectorAll<HTMLElement>('input, button:not(:disabled)'))
+      const current = stops.indexOf(document.activeElement as HTMLElement)
       event.preventDefault()
-      // Only two tab stops: combobox and close. Options use aria-activedescendant.
-      if (document.activeElement === inputRef.current) closeRef.current?.focus()
-      else inputRef.current?.focus()
+      stops[(current + (event.shiftKey ? -1 : 1) + stops.length) % stops.length]?.focus()
       return
     }
     const action = paletteAction(event.nativeEvent)
     if (action === 'close') { event.preventDefault(); close() }
-    if (action === 'next' || action === 'previous') {
+    if ((action === 'next' || action === 'previous') && document.activeElement === inputRef.current) {
       event.preventDefault()
       inputRef.current?.focus()
       setSelected(current => nextSelection(current, action === 'next' ? 1 : -1, results.length))
@@ -95,11 +96,12 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
       if (active) openSelected(active.resource)
     }
   }}><div className="palette-panel">
-    <div className="palette-search"><Icon name="search" /><input ref={inputRef} role="combobox" aria-label="搜索真实资源" aria-autocomplete="list" aria-expanded={isOpen} aria-controls="palette-results" aria-activedescendant={active ? `palette-option-${active.resource.id}` : undefined} autoComplete="off" spellCheck={false} value={query} placeholder="搜索网站、项目、工具…" onChange={event => { setQuery(event.target.value); setSelected(0) }} /><button ref={closeRef} type="button" onClick={close} aria-label="关闭搜索">esc</button></div>
+    <div className="palette-search"><Icon name="search" /><input ref={inputRef} role="combobox" aria-label="搜索真实资源" aria-autocomplete="list" aria-haspopup="grid" aria-expanded={isOpen} aria-controls="palette-results" aria-activedescendant={active ? `palette-option-${active.resource.id}` : undefined} autoComplete="off" spellCheck={false} value={query} placeholder="搜索网站、项目、工具…" onChange={event => { setQuery(event.target.value); setSelected(0) }} /><button ref={closeRef} type="button" onClick={close} aria-label="关闭搜索">esc</button></div>
     <div className="palette-label" aria-live="polite"><span>{query.trim() ? '搜索结果' : '全部资源'}</span><span>{results.length} 个资源</span></div>
-    <div className="palette-results" id="palette-results" role="listbox" aria-label="资源列表">
-      {results.map((entry, position) => <div id={`palette-option-${entry.resource.id}`} key={entry.resource.id} role="option" aria-selected={position === selected} className="palette-option" onMouseEnter={() => setSelected(position)} onMouseDown={event => event.preventDefault()} onClick={() => openSelected(entry.resource)}>
-        <span className="resource-icon" aria-hidden="true">{entry.resource.icon}</span><div className="palette-result-copy"><strong>{entry.resource.name}</strong><p>{entry.resource.description}</p><small>{entry.spaceName}{entry.resource.category ? ` / ${entry.resource.category}` : ''}</small></div><span className="palette-destination">{entry.resource.hostingType === 'internal-static' ? '站内' : '外部'}</span><span className="palette-enter" aria-hidden="true">↵</span>
+    <div className="palette-results" id="palette-results" role="grid" aria-label="资源列表">
+      {results.map((entry, position) => <div id={`palette-option-${entry.resource.id}`} key={entry.resource.id} role="row" aria-selected={position === selected} className="palette-option" onMouseEnter={() => setSelected(position)}>
+        <div role="gridcell" className="palette-open" onMouseDown={event => event.preventDefault()} onClick={() => openSelected(entry.resource)}>
+        <span className="resource-icon" aria-hidden="true">{entry.resource.icon}</span><div className="palette-result-copy"><strong>{entry.resource.name}</strong><p>{entry.resource.description}</p><small>{entry.spaceName}{entry.resource.category ? ` / ${entry.resource.category}` : ''}</small></div><span className="palette-destination">{entry.resource.hostingType === 'internal-static' ? '站内' : '外部'}</span><span className="palette-enter" aria-hidden="true">↵</span></div><div role="gridcell"><FavoriteButton resource={entry.resource} /></div>
       </div>)}
     </div>
     {!results.length && <div className="palette-empty"><Icon name="search" /><p>没有找到相关资源</p><span>试试其他名称、标签或空间</span></div>}
