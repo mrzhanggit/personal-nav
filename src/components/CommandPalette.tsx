@@ -2,8 +2,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { ReactNode, MouseEvent } from 'react'
 import resources from '../../docs/zcb-personal-os/data/links.v1.json'
 import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
-import { createSearchIndex, nextSelection, paletteAction, resourceHref, searchResources } from '../lib/search'
+import { createSearchIndex, nextSelection, paletteAction, searchResources } from '../lib/search'
 import type { Resource } from '../lib/search'
+import { useOpenResource } from './RecentResources'
 import { Icon } from './Icon'
 import './command-palette.css'
 
@@ -19,6 +20,7 @@ export function SearchTrigger({ compact = false }: { compact?: boolean }) {
 }
 
 export function PaletteProvider({ children }: { children: ReactNode }) {
+  const openResource = useOpenResource()
   const [isOpen, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState(0)
@@ -69,7 +71,7 @@ export function PaletteProvider({ children }: { children: ReactNode }) {
   }, [isOpen, active?.resource.id])
 
   function openSelected(resource: Resource) {
-    window.open(resourceHref(resource, import.meta.env.BASE_URL), '_blank', 'noopener,noreferrer')
+    openResource(resource)
     close()
   }
 

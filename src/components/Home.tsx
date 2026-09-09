@@ -1,7 +1,7 @@
 import resources from '../../docs/zcb-personal-os/data/links.v1.json'
 import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
 import { SearchTrigger } from './CommandPalette'
-import { resourceHref } from '../lib/search'
+import { ResourceAnchor } from './RecentResources'
 import { Icon } from './Icon'
 
 export function Hero() {
@@ -9,8 +9,7 @@ export function Hero() {
 }
 
 function ResourceLink({ resource }: { resource: typeof resources[number] }) {
-  const href = resourceHref(resource, import.meta.env.BASE_URL)
-  return <a className="resource-link" href={href} target="_blank" rel="noopener noreferrer" title={`${resource.name}：${resource.description}（新标签页打开）`}><span className="resource-icon" aria-hidden="true">{resource.icon}</span><span className="resource-name">{resource.name}</span><Icon name="arrow" className="resource-arrow" /></a>
+  return <ResourceAnchor className="resource-link" resource={resource}><span className="resource-icon" aria-hidden="true">{resource.icon}</span><span className="resource-name">{resource.name}</span><Icon name="arrow" className="resource-arrow" /></ResourceAnchor>
 }
 
 export function BentoGrid() {
