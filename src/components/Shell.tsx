@@ -3,9 +3,9 @@ import { Icon } from './Icon'
 
 const navigation = [['home', '首页'], ['star', '收藏'], ['grid', '应用'], ['folder', '项目'], ['bolt', '快速'], ['more', '更多']]
 
-export type AppView = 'home' | 'favorites'
+type SidebarView = 'home' | 'favorites'
 
-export function Sidebar({ view, onNavigate }: { view: AppView; onNavigate: (view: AppView) => void }) {
+export function Sidebar({ view, onNavigate }: { view: SidebarView | 'space'; onNavigate: (view: SidebarView) => void }) {
   return <aside className="sidebar"><nav aria-label="主导航">
     {navigation.map(([icon, label], index) => {
       const target = index === 0 ? 'home' : 'favorites'

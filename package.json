@@ -11,7 +11,7 @@
     "build": "tsc --noEmit && vite build && npm run verify:legacy",
     "preview": "vite preview",
     "verify:legacy": "node scripts/verify-legacy.mjs",
-    "test": "node --experimental-strip-types --test scripts/verify-legacy.test.mjs scripts/command-palette.test.mjs scripts/recent.test.mjs scripts/favorites.test.mjs"
+    "test": "node --experimental-strip-types --test scripts/verify-legacy.test.mjs scripts/command-palette.test.mjs scripts/recent.test.mjs scripts/favorites.test.mjs scripts/spaces.test.mjs"
   },
   "dependencies": {
     "react": "19.2.8",
