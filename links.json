@@ -202,8 +202,8 @@
       "links": [
         {
           "title": "个人资产看板",
-          "subtitle": "港股 / 美股 / 加密货币持仓 · ¥ 本币显示 · 每日自动刷新",
-          "url": "https://mrzhanggit.github.io/asset-dashboard/",
+          "subtitle": "港股 / 美股 / 加密货币持仓 · 🔒 密码保护 · 仅本人可见",
+          "url": "https://assets.mrzhang.ccwu.cc/",
           "emoji": "📊",
           "tag": "工具"
         },
