@@ -32,13 +32,13 @@ test('repeated open updates count and time, deduplicates and moves to front', ()
   assert.equal(store.getSnapshot()[1].resourceId, resources[1].id)
 })
 
-test('all 23 resources navigate correctly, retaining only the latest 20', () => {
+test('all current resources navigate correctly, retaining only the latest 20', () => {
   const { store } = fixture()
   const opened = []
   resources.forEach((resource, index) => store.openResource(resource.id, resourceHref(resource, '/personal-nav/'), url => opened.push(url), 1000 + index))
-  assert.equal(opened.length, 23)
+  assert.equal(opened.length, resources.length)
   resources.forEach((resource, index) => assert.equal(opened[index], resource.hostingType === 'internal-static' ? '/personal-nav/' + resource.url : resource.url))
-  assert.deepEqual(store.getSnapshot().map(r => r.resourceId), resources.slice(3).reverse().map(r => r.id))
+  assert.deepEqual(store.getSnapshot().map(r => r.resourceId), resources.slice(-20).reverse().map(r => r.id))
 })
 
 test('reload preserves records, sorts and filters duplicates and unexpected entries', () => {

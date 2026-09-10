@@ -7,16 +7,16 @@ const read = name => JSON.parse(readFileSync(new URL(`../docs/zcb-personal-os/da
 const resources = read('links')
 const index = createSearchIndex(resources, read('spaces'))
 
-test('all 23 real resources are indexed and individually searchable', () => {
-  assert.equal(index.length, 23)
-  assert.equal(searchResources(index, '').length, 23)
+test('all current real resources are indexed and individually searchable', () => {
+  assert.equal(index.length, resources.length)
+  assert.equal(searchResources(index, '').length, resources.length)
   for (const resource of resources) assert.equal(searchResources(index, resource.name)[0].resource.id, resource.id)
 })
 test('Chinese, English, case, substring, Space and typo matching', () => {
   for (const query of ['Python', 'PYTHON', 'pyth', 'pyton']) assert(searchResources(index, query).some(x => x.resource.id === 'python-course'))
   assert(searchResources(index, '历史').length > 0)
   assert(searchResources(index, 'Claude').some(x => x.resource.id === 'claude-code-course'))
-  assert.equal(searchResources(index, '阅读学习').filter(x => x.resource.space === 'learn').length, 15)
+  assert.equal(searchResources(index, '阅读学习').filter(x => x.resource.space === 'learn').length, resources.filter(r => r.space === 'learn').length)
   assert.deepEqual(searchResources(index, 'zzzz不存在的资源zzzz'), [])
 })
 test('ranking respects title, tags, description and metadata priorities', () => {
@@ -47,7 +47,7 @@ test('keyboard mapping: toggles, Escape, arrows, Enter; composing input is ignor
   assert.equal(paletteAction({key:'Enter',isComposing:true}), null)
 })
 test('selection wraps safely, including no results', () => {
-  assert.equal(nextSelection(0,-1,23),22)
-  assert.equal(nextSelection(22,1,23),0)
+  assert.equal(nextSelection(0,-1,resources.length),resources.length-1)
+  assert.equal(nextSelection(resources.length-1,1,resources.length),0)
   assert.equal(nextSelection(0,1,0),0)
 })

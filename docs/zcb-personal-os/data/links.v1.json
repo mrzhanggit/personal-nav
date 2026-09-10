@@ -485,8 +485,8 @@
   {
     "id": "asset-dashboard",
     "name": "个人资产看板",
-    "description": "港股 / 美股 / 加密货币持仓 · ¥ 本币显示 · 每日自动刷新",
-    "url": "https://mrzhanggit.github.io/asset-dashboard/",
+    "description": "港股 / 美股 / 加密货币持仓 · 🔒 密码保护 · 仅本人可见",
+    "url": "https://assets.mrzhang.ccwu.cc/",
     "icon": "📊",
     "space": "invest",
     "category": "个人资产",
@@ -504,7 +504,7 @@
     ],
     "favorite": false,
     "legacyCategory": "个人工具",
-    "hostingType": "github-pages",
+    "hostingType": "custom-domain",
     "source": "legacy-personal-nav"
   },
   {
@@ -528,6 +528,29 @@
     "favorite": false,
     "legacyCategory": "个人工具",
     "hostingType": "github-pages",
+    "source": "legacy-personal-nav"
+  },
+  {
+    "id": "fengtang-zhengdao",
+    "name": "冯唐《正道》精读",
+    "description": "40 课交互式学习 · 讲《道德经》的管理哲学",
+    "url": "https://chengbin.vip/fengtang-zhengdao/",
+    "icon": "🌊",
+    "space": "learn",
+    "category": "文章档案",
+    "kind": "learning-project",
+    "tags": [
+      "冯唐",
+      "正道",
+      "阅读",
+      "道德经"
+    ],
+    "aliases": [
+      "阅读"
+    ],
+    "favorite": false,
+    "legacyCategory": "文章库",
+    "hostingType": "custom-domain",
     "source": "legacy-personal-nav"
   }
 ]

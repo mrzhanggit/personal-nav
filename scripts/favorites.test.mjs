@@ -46,10 +46,10 @@ test('storage access/read/write exceptions retain functional in-memory state', (
     store.removeFavorite(a); assert.equal(store.isFavorite(a),false)
   }
 })
-test('all 23 real resources can be favorited without duplicates', () => {
+test('all current real resources can be favorited without duplicates', () => {
   const {store} = fixture()
   for (const id of ids) { store.addFavorite(id); store.addFavorite(id) }
-  assert.equal(store.getSnapshot().length,23)
+  assert.equal(store.getSnapshot().length,resources.length)
 })
 test('subscribers synchronize and unsubscribe; unchanged operations do not notify', () => {
   const {store} = fixture(); let updates=0

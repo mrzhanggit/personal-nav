@@ -9,19 +9,18 @@ const read = file => JSON.parse(readFileSync(new URL(`../docs/zcb-personal-os/da
 const resources = read('links.v1.json')
 const spaces = read('spaces.v1.json')
 
-test('six real Spaces partition all 23 unique resources exactly once', () => {
+test('six real Spaces partition all current unique resources exactly once', () => {
   assert.deepEqual(spaces.map(s => s.id), ['ai','work','learn','invest','create','life'])
-  assert.equal(resources.length,23)
   const mapped = spaces.flatMap(space => resourcesForSpace(resources,space.id))
-  assert.equal(mapped.length,23)
-  assert.equal(new Set(mapped.map(r => r.id)).size,23)
+  assert.equal(mapped.length,resources.length)
+  assert.equal(new Set(mapped.map(r => r.id)).size,resources.length)
   assert.deepEqual(mapped.map(r => r.id).sort(),resources.map(r => r.id).sort())
   for (const resource of resources) {
     assert.deepEqual(spaces.filter(s => resourcesForSpace(resources,s.id).includes(resource)).map(s => s.id),[resource.space])
   }
 })
 test('Space selection retains original resource objects/order; complete counts and empty Spaces are honest', () => {
-  assert.deepEqual(spaces.map(s => resourcesForSpace(resources,s.id).length),[4,0,15,3,0,1])
+  assert.deepEqual(spaces.map(s => resourcesForSpace(resources,s.id).length),spaces.map(s => resources.filter(r => r.space === s.id).length))
   for (const space of spaces) {
     const selected=resourcesForSpace(resources,space.id)
     assert.deepEqual(selected,resources.filter(r => r.space === space.id))
