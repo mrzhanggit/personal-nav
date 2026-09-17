@@ -186,6 +186,13 @@
           "url": "https://chengbin.vip/pe-reading/",
           "emoji": "🌱",
           "tag": "阅读"
+        },
+        {
+          "title": "纳瓦尔宝典 · 精读",
+          "subtitle": "9 篇交互式精读 · 纳瓦尔的财富外在游戏与幸福内在功夫",
+          "url": "https://chengbin.vip/naval-reading/",
+          "emoji": "💎",
+          "tag": "阅读"
         }
       ]
     },
@@ -197,6 +204,13 @@
           "subtitle": "图像化联想 · 高效记单词",
           "url": "https://chengbin.vip/word-memory/",
           "emoji": "🔤",
+          "tag": "学习"
+        },
+        {
+          "title": "老人与海 · 单词彩绘本",
+          "subtitle": "海明威 · 31 幅水彩画面记单词",
+          "url": "https://chengbin.vip/otats-vocab/",
+          "emoji": "🐟",
           "tag": "学习"
         }
       ]
