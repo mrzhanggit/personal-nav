@@ -221,6 +221,20 @@
           "url": "https://chengbin.vip/latte-reading/",
           "emoji": "☕",
           "tag": "阅读"
+        },
+        {
+          "title": "时间贫困 · 精读",
+          "subtitle": "10 篇交互式精读 · 比缺钱更可怕的，是困在没时间里",
+          "url": "https://chengbin.vip/tsp-reading/",
+          "emoji": "⏳",
+          "tag": "阅读"
+        },
+        {
+          "title": "金钱的艺术 · 精读",
+          "subtitle": "11 篇交互式精读 · 豪泽尔谈金钱与人性的随笔集",
+          "url": "https://chengbin.vip/art-reading/",
+          "emoji": "💵",
+          "tag": "阅读"
         }
       ]
     },
