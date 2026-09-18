@@ -249,6 +249,20 @@
           "url": "https://chengbin.vip/djk-reading/",
           "emoji": "🃏",
           "tag": "阅读"
+        },
+        {
+          "title": "富爸爸穷爸爸 · 精读",
+          "subtitle": "12 篇交互式精读 · 穷人为钱奔波，富人让钱上班",
+          "url": "https://chengbin.vip/rfd-reading/",
+          "emoji": "🟣",
+          "tag": "阅读"
+        },
+        {
+          "title": "非对称风险 · 精读",
+          "subtitle": "14 篇交互式精读 · 塔勒布论风险共担与遍历性",
+          "url": "https://chengbin.vip/skin-reading/",
+          "emoji": "⚖️",
+          "tag": "阅读"
         }
       ]
     },
