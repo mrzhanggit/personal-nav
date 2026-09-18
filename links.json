@@ -263,6 +263,20 @@
           "url": "https://chengbin.vip/skin-reading/",
           "emoji": "⚖️",
           "tag": "阅读"
+        },
+        {
+          "title": "大空头 · 精读",
+          "subtitle": "11 篇交互式精读 · 2008 次贷危机中少数派的游戏",
+          "url": "https://chengbin.vip/bs-reading/",
+          "emoji": "🐻",
+          "tag": "阅读"
+        },
+        {
+          "title": "财富方程式 · 精读",
+          "subtitle": "12 篇交互式精读 · 加洛韦的自律、专注、时间与分散",
+          "url": "https://chengbin.vip/weq-reading/",
+          "emoji": "📐",
+          "tag": "阅读"
         }
       ]
     },
