@@ -277,6 +277,20 @@
           "url": "https://chengbin.vip/weq-reading/",
           "emoji": "📐",
           "tag": "阅读"
+        },
+        {
+          "title": "债务危机 · 精读",
+          "subtitle": "14 篇交互式精读 · 达利欧的债务周期模型与 48 个案例",
+          "url": "https://chengbin.vip/dcr-reading/",
+          "emoji": "📉",
+          "tag": "阅读"
+        },
+        {
+          "title": "聪明的投资者 · 精读",
+          "subtitle": "14 篇交互式精读 · 格雷厄姆的价值投资圣经（注疏点评版）",
+          "url": "https://chengbin.vip/iig-reading/",
+          "emoji": "📘",
+          "tag": "阅读"
         }
       ]
     },
