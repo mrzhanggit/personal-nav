@@ -2,6 +2,7 @@ import spaces from '../../docs/zcb-personal-os/data/spaces.v1.json'
 import type { Resource } from '../lib/search'
 import { ResourceAnchor } from './RecentResources'
 import { FavoriteButton } from './Favorites'
+import { ContinueButton } from './Continue'
 import { Icon } from './Icon'
 
 export function ResourceItem({ resource, detailed = false }: { resource: Resource; detailed?: boolean }) {
@@ -11,6 +12,6 @@ export function ResourceItem({ resource, detailed = false }: { resource: Resourc
       <span className="resource-copy"><span className="resource-name">{resource.name}</span>
         {detailed && <><span className="resource-description">{resource.description}</span><span className="resource-space">{spaces.find(space => space.id === resource.space)?.name ?? resource.space}</span><span className="resource-open">打开 <Icon name="arrow" /></span></>}
       </span>{!detailed && <Icon name="arrow" className="resource-arrow" />}
-    </ResourceAnchor><FavoriteButton resource={resource} />
+    </ResourceAnchor><FavoriteButton resource={resource} />{detailed && <ContinueButton resource={resource} />}
   </div>
 }
