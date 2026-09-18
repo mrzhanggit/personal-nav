@@ -235,6 +235,20 @@
           "url": "https://chengbin.vip/art-reading/",
           "emoji": "💵",
           "tag": "阅读"
+        },
+        {
+          "title": "金钱心理学 · 精读",
+          "subtitle": "10 篇交互式精读 · 财富、人性与幸福的永恒真相",
+          "url": "https://chengbin.vip/psy-reading/",
+          "emoji": "🧠",
+          "tag": "阅读"
+        },
+        {
+          "title": "对赌 · 精读",
+          "subtitle": "12 篇交互式精读 · 信息不足时如何做出高明决策",
+          "url": "https://chengbin.vip/djk-reading/",
+          "emoji": "🃏",
+          "tag": "阅读"
         }
       ]
     },
