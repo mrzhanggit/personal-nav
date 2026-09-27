@@ -312,6 +312,20 @@
           "url": "https://chengbin.vip/rgr-reading/",
           "emoji": "🌏",
           "tag": "阅读"
+        },
+        {
+          "title": "刻意练习 · 精读",
+          "subtitle": "12 篇交互式精读 · 从新手到大师的心理表征与黄金标准",
+          "url": "https://chengbin.vip/dp-reading/",
+          "emoji": "🎯",
+          "tag": "阅读"
+        },
+        {
+          "title": "稀缺 · 精读",
+          "subtitle": "12 篇交互式精读 · 稀缺心态如何俘获大脑与带宽",
+          "url": "https://chengbin.vip/sc-reading/",
+          "emoji": "🕳️",
+          "tag": "阅读"
         }
       ]
     },
