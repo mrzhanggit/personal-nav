@@ -4,6 +4,18 @@
   "footer": "设为浏览器首页 · 随时访问",
   "categories": [
     {
+      "name": "精读书房",
+      "links": [
+        {
+          "title": "超越感觉 · 交互精读",
+          "subtitle": "批判性思考指南 · 导读卡 + 划线批注 + 全书搜索",
+          "url": "https://mrzhanggit.github.io/cjg-reading/",
+          "emoji": "🧭",
+          "tag": "精读"
+        }
+      ]
+    },
+    {
       "name": "吴军系列",
       "links": [
         {
