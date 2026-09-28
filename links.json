@@ -4,18 +4,6 @@
   "footer": "设为浏览器首页 · 随时访问",
   "categories": [
     {
-      "name": "精读书房",
-      "links": [
-        {
-          "title": "超越感觉 · 交互精读",
-          "subtitle": "批判性思考指南 · 导读卡 + 划线批注 + 全书搜索",
-          "url": "https://mrzhanggit.github.io/cjg-reading/",
-          "emoji": "🧭",
-          "tag": "精读"
-        }
-      ]
-    },
-    {
       "name": "吴军系列",
       "links": [
         {
@@ -351,6 +339,20 @@
           "subtitle": "12 篇交互式精读 · 固定型与成长型思维模式",
           "url": "https://chengbin.vip/mg-reading/",
           "emoji": "🌱",
+          "tag": "阅读"
+        },
+        {
+          "title": "模型思维 · 精读",
+          "subtitle": "14 篇交互式精读 · 佩奇的多模型思维工具箱",
+          "url": "https://chengbin.vip/mt-reading/",
+          "emoji": "🧊",
+          "tag": "阅读"
+        },
+        {
+          "title": "世界观 · 精读",
+          "subtitle": "14 篇交互式精读 · 从亚里士多德到量子论的科学史",
+          "url": "https://chengbin.vip/wv-reading/",
+          "emoji": "🔭",
           "tag": "阅读"
         }
       ]
