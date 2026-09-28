@@ -338,6 +338,20 @@
           "url": "https://chengbin.vip/sc-reading/",
           "emoji": "🕳️",
           "tag": "阅读"
+        },
+        {
+          "title": "情商 · 精读",
+          "subtitle": "12 篇交互式精读 · 戈尔曼论情绪智能与杏仁核劫持",
+          "url": "https://chengbin.vip/eq-reading/",
+          "emoji": "💙",
+          "tag": "阅读"
+        },
+        {
+          "title": "终身成长 · 精读",
+          "subtitle": "12 篇交互式精读 · 固定型与成长型思维模式",
+          "url": "https://chengbin.vip/mg-reading/",
+          "emoji": "🌱",
+          "tag": "阅读"
         }
       ]
     },
