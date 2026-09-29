@@ -354,6 +354,20 @@
           "url": "https://chengbin.vip/wv-reading/",
           "emoji": "🔭",
           "tag": "阅读"
+        },
+        {
+          "title": "失控 · 精读",
+          "subtitle": "14 篇交互式精读 · 凯文·凯利论机器与生命的联姻",
+          "url": "https://chengbin.vip/ooc-reading/",
+          "emoji": "🦋",
+          "tag": "阅读"
+        },
+        {
+          "title": "直觉泵 · 精读",
+          "subtitle": "14 篇交互式精读 · 丹尼特的思维思考工具箱",
+          "url": "https://chengbin.vip/itp-reading/",
+          "emoji": "🧭",
+          "tag": "阅读"
         }
       ]
     },
