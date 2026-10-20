@@ -4,6 +4,18 @@
   "footer": "设为浏览器首页 · 随时访问",
   "categories": [
     {
+      "name": "精读书房",
+      "links": [
+        {
+          "title": "超越感觉 · 交互精读",
+          "subtitle": "批判性思考指南 · 导读卡 + 划线批注 + 全书搜索",
+          "url": "https://mrzhanggit.github.io/cjg-reading/",
+          "emoji": "🧭",
+          "tag": "精读"
+        }
+      ]
+    },
+    {
       "name": "吴军系列",
       "links": [
         {
@@ -38,6 +50,39 @@
           "url": "https://mrzhanggit.github.io/napoleon-era/",
           "emoji": "⚔️",
           "tag": "历史"
+        }
+      ]
+    },
+    {
+      "name": "文明的故事 · 文艺复兴",
+      "links": [
+        {
+          "title": "威尼斯王国",
+          "subtitle": "卷五·二部六章 · 1378—1534 · 从海洋帝国到艺术黄金时代",
+          "url": "renaissance/venice.html",
+          "emoji": "🛶",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "艾米利与前哨",
+          "subtitle": "卷五·二部七章 · 1378—1534 · 柯勒乔、博洛尼亚与乌尔比诺",
+          "url": "renaissance/emilia.html",
+          "emoji": "🎨",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "那不勒斯王国",
+          "subtitle": "卷五·二部八章 · 1378—1534 · 安茹到阿拉贡、瓦拉与《世外桃源》",
+          "url": "renaissance/naples.html",
+          "emoji": "🌋",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "利奥十世",
+          "subtitle": "卷五·三部五章 · 1513—1521 · 美第奇教皇与宗教改革的裂痕",
+          "url": "renaissance/leo10.html",
+          "emoji": "⛪",
+          "tag": "文艺复兴"
         }
       ]
     },
@@ -137,244 +182,6 @@
           "url": "https://mrzhanggit.github.io/shengzhefa-library/",
           "emoji": "📖",
           "tag": "阅读"
-        },
-        {
-          "title": "冯唐《正道》精读",
-          "subtitle": "40 课交互式学习 · 讲《道德经》的管理哲学",
-          "url": "https://chengbin.vip/fengtang-zhengdao/",
-          "emoji": "🌊",
-          "tag": "阅读"
-        },
-        {
-          "title": "冯唐《通关》精读",
-          "subtitle": "20 课交互式学习 · 讲《孙子兵法》十三篇 · 可检索原文库",
-          "url": "https://chengbin.vip/fengtang-tonghua/",
-          "emoji": "⚔️",
-          "tag": "阅读"
-        },
-        {
-          "title": "更富有、更睿智、更快乐 · 精读",
-          "subtitle": "10 篇交互式精读 · 顶尖投资者的思维与习惯",
-          "url": "https://rwh-close-reading.app.workbuddy.host/",
-          "emoji": "💎",
-          "tag": "阅读"
-        },
-        {
-          "title": "穷查理宝典 · 精读",
-          "subtitle": "12 篇交互式精读 · 芒格的思维模型与人类误判心理学",
-          "url": "https://chengbin.vip/qclb-reading/",
-          "emoji": "🧠",
-          "tag": "阅读"
-        },
-        {
-          "title": "枪炮、病菌与钢铁 · 精读",
-          "subtitle": "12 篇交互式精读 · 戴蒙德的地理视角与人类社会命运",
-          "url": "https://chengbin.vip/ggs-reading/",
-          "emoji": "🌍",
-          "tag": "阅读"
-        },
-        {
-          "title": "思考，快与慢 · 精读",
-          "subtitle": "12 篇交互式精读 · 卡尼曼的双系统、前景理论与两个自我",
-          "url": "https://chengbin.vip/tfas-reading/",
-          "emoji": "🐢",
-          "tag": "阅读"
-        },
-        {
-          "title": "贫穷的本质 · 精读",
-          "subtitle": "12 篇交互式精读 · 班纳吉与迪弗洛的随机对照实验与穷人经济学",
-          "url": "https://chengbin.vip/pe-reading/",
-          "emoji": "🌱",
-          "tag": "阅读"
-        },
-        {
-          "title": "纳瓦尔宝典 · 精读",
-          "subtitle": "9 篇交互式精读 · 纳瓦尔的财富外在游戏与幸福内在功夫",
-          "url": "https://chengbin.vip/naval-reading/",
-          "emoji": "💎",
-          "tag": "阅读"
-        },
-        {
-          "title": "更富有、更睿智、更快乐 · 精读",
-          "subtitle": "10 篇交互式精读 · 世界顶尖投资者的双赢心法",
-          "url": "https://chengbin.vip/rwh-reading/",
-          "emoji": "📈",
-          "tag": "阅读"
-        },
-        {
-          "title": "富有的习惯 · 精读",
-          "subtitle": "10 篇交互式精读 · 177 位白手起家者的习惯复利方程",
-          "url": "https://chengbin.vip/rh-reading/",
-          "emoji": "🪙",
-          "tag": "阅读"
-        },
-        {
-          "title": "一如既往 · 精读",
-          "subtitle": "12 篇交互式精读 · 不变的人性与致富心态",
-          "url": "https://chengbin.vip/yjjw-reading/",
-          "emoji": "🌲",
-          "tag": "阅读"
-        },
-        {
-          "title": "拿铁因素 · 精读",
-          "subtitle": "10 篇交互式精读 · 小拿铁与财务自由的复利秘密",
-          "url": "https://chengbin.vip/latte-reading/",
-          "emoji": "☕",
-          "tag": "阅读"
-        },
-        {
-          "title": "时间贫困 · 精读",
-          "subtitle": "10 篇交互式精读 · 比缺钱更可怕的，是困在没时间里",
-          "url": "https://chengbin.vip/tsp-reading/",
-          "emoji": "⏳",
-          "tag": "阅读"
-        },
-        {
-          "title": "金钱的艺术 · 精读",
-          "subtitle": "11 篇交互式精读 · 豪泽尔谈金钱与人性的随笔集",
-          "url": "https://chengbin.vip/art-reading/",
-          "emoji": "💵",
-          "tag": "阅读"
-        },
-        {
-          "title": "金钱心理学 · 精读",
-          "subtitle": "10 篇交互式精读 · 财富、人性与幸福的永恒真相",
-          "url": "https://chengbin.vip/psy-reading/",
-          "emoji": "🧠",
-          "tag": "阅读"
-        },
-        {
-          "title": "对赌 · 精读",
-          "subtitle": "12 篇交互式精读 · 信息不足时如何做出高明决策",
-          "url": "https://chengbin.vip/djk-reading/",
-          "emoji": "🃏",
-          "tag": "阅读"
-        },
-        {
-          "title": "富爸爸穷爸爸 · 精读",
-          "subtitle": "12 篇交互式精读 · 穷人为钱奔波，富人让钱上班",
-          "url": "https://chengbin.vip/rfd-reading/",
-          "emoji": "🟣",
-          "tag": "阅读"
-        },
-        {
-          "title": "非对称风险 · 精读",
-          "subtitle": "14 篇交互式精读 · 塔勒布论风险共担与遍历性",
-          "url": "https://chengbin.vip/skin-reading/",
-          "emoji": "⚖️",
-          "tag": "阅读"
-        },
-        {
-          "title": "大空头 · 精读",
-          "subtitle": "11 篇交互式精读 · 2008 次贷危机中少数派的游戏",
-          "url": "https://chengbin.vip/bs-reading/",
-          "emoji": "🐻",
-          "tag": "阅读"
-        },
-        {
-          "title": "财富方程式 · 精读",
-          "subtitle": "12 篇交互式精读 · 加洛韦的自律、专注、时间与分散",
-          "url": "https://chengbin.vip/weq-reading/",
-          "emoji": "📐",
-          "tag": "阅读"
-        },
-        {
-          "title": "债务危机 · 精读",
-          "subtitle": "14 篇交互式精读 · 达利欧的债务周期模型与 48 个案例",
-          "url": "https://chengbin.vip/dcr-reading/",
-          "emoji": "📉",
-          "tag": "阅读"
-        },
-        {
-          "title": "聪明的投资者 · 精读",
-          "subtitle": "14 篇交互式精读 · 格雷厄姆的价值投资圣经（注疏点评版）",
-          "url": "https://chengbin.vip/iig-reading/",
-          "emoji": "📘",
-          "tag": "阅读"
-        },
-        {
-          "title": "漫步华尔街 · 精读",
-          "subtitle": "14 篇交互式精读 · 马尔基尔的股市漫步指南（第13版）",
-          "url": "https://chengbin.vip/wsw-reading/",
-          "emoji": "🐂",
-          "tag": "阅读"
-        },
-        {
-          "title": "经济学原理 · 精读",
-          "subtitle": "14 篇交互式精读 · 马歇尔的供需与价值理论",
-          "url": "https://chengbin.vip/econ-reading/",
-          "emoji": "📜",
-          "tag": "阅读"
-        },
-        {
-          "title": "最富足的投资 · 精读",
-          "subtitle": "10 篇交互式精读 · 罗杰斯写给女儿的 21 封投资信",
-          "url": "https://chengbin.vip/rgr-reading/",
-          "emoji": "🌏",
-          "tag": "阅读"
-        },
-        {
-          "title": "刻意练习 · 精读",
-          "subtitle": "12 篇交互式精读 · 从新手到大师的心理表征与黄金标准",
-          "url": "https://chengbin.vip/dp-reading/",
-          "emoji": "🎯",
-          "tag": "阅读"
-        },
-        {
-          "title": "稀缺 · 精读",
-          "subtitle": "12 篇交互式精读 · 稀缺心态如何俘获大脑与带宽",
-          "url": "https://chengbin.vip/sc-reading/",
-          "emoji": "🕳️",
-          "tag": "阅读"
-        },
-        {
-          "title": "情商 · 精读",
-          "subtitle": "12 篇交互式精读 · 戈尔曼论情绪智能与杏仁核劫持",
-          "url": "https://chengbin.vip/eq-reading/",
-          "emoji": "💙",
-          "tag": "阅读"
-        },
-        {
-          "title": "终身成长 · 精读",
-          "subtitle": "12 篇交互式精读 · 固定型与成长型思维模式",
-          "url": "https://chengbin.vip/mg-reading/",
-          "emoji": "🌱",
-          "tag": "阅读"
-        },
-        {
-          "title": "模型思维 · 精读",
-          "subtitle": "14 篇交互式精读 · 佩奇的多模型思维工具箱",
-          "url": "https://chengbin.vip/mt-reading/",
-          "emoji": "🧊",
-          "tag": "阅读"
-        },
-        {
-          "title": "世界观 · 精读",
-          "subtitle": "14 篇交互式精读 · 从亚里士多德到量子论的科学史",
-          "url": "https://chengbin.vip/wv-reading/",
-          "emoji": "🔭",
-          "tag": "阅读"
-        },
-        {
-          "title": "失控 · 精读",
-          "subtitle": "14 篇交互式精读 · 凯文·凯利论机器与生命的联姻",
-          "url": "https://chengbin.vip/ooc-reading/",
-          "emoji": "🦋",
-          "tag": "阅读"
-        },
-        {
-          "title": "直觉泵 · 精读",
-          "subtitle": "14 篇交互式精读 · 丹尼特的思维思考工具箱",
-          "url": "https://chengbin.vip/itp-reading/",
-          "emoji": "🧭",
-          "tag": "阅读"
-        },
-        {
-          "title": "哲学智慧与人生思考 · 精读",
-          "subtitle": "45 讲交互式精读 · 郭春林的哲学启智、思维模式与知人智慧",
-          "url": "https://chengbin.vip/philosophy-reading/",
-          "emoji": "☯️",
-          "tag": "阅读"
         }
       ]
     },
@@ -386,13 +193,6 @@
           "subtitle": "图像化联想 · 高效记单词",
           "url": "https://chengbin.vip/word-memory/",
           "emoji": "🔤",
-          "tag": "学习"
-        },
-        {
-          "title": "老人与海 · 单词彩绘本",
-          "subtitle": "海明威 · 31 幅水彩画面记单词",
-          "url": "https://chengbin.vip/otats-vocab/",
-          "emoji": "🐟",
           "tag": "学习"
         }
       ]
@@ -440,8 +240,8 @@
       "links": [
         {
           "title": "个人资产看板",
-          "subtitle": "港股 / 美股 / 加密货币持仓 · 🔒 密码保护 · 仅本人可见",
-          "url": "https://assets.mrzhang.ccwu.cc/",
+          "subtitle": "港股 / 美股 / 加密货币持仓 · ¥ 本币显示 · 每日自动刷新",
+          "url": "https://mrzhanggit.github.io/asset-dashboard/",
           "emoji": "📊",
           "tag": "工具"
         },

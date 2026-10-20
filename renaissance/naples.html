@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>那不勒斯王国（1378—1534）· 交互式学习</title>
+<style>
+  :root{
+    --bg:#0b1626; --bg2:#0e1c30; --panel:#132441; --panel2:#182d50;
+    --line:rgba(212,175,55,.22); --line2:rgba(212,175,55,.45);
+    --gold:#d4af37; --gold-l:#e8c76a; --gold-d:#9a7b2d;
+    --text:#ede5d3; --dim:#a8b4c8; --blue:#4a7ab5;
+    --ok:#5aa876; --bad:#c05a5a;
+    --serif:"Songti SC","STSong","Noto Serif SC",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.75;font-size:16px}
+  ::selection{background:var(--gold);color:#0b1626}
+
+  /* ===== 顶部导航 ===== */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,22,38,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 18px;height:54px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .brand{font-family:var(--serif);color:var(--gold);font-size:17px;white-space:nowrap;margin-right:14px;display:flex;align-items:center;gap:8px}
+  .nav .brand svg{flex:none}
+  .nav a{color:var(--dim);text-decoration:none;font-size:13px;padding:6px 11px;border-radius:6px;white-space:nowrap;transition:.2s}
+  .nav a:hover{color:var(--gold-l);background:rgba(212,175,55,.08)}
+  .nav a.on{color:#0b1626;background:var(--gold)}
+  .nav .spacer{flex:1}
+  .nav .score-chip{white-space:nowrap;font-size:12px;color:var(--gold-l);border:1px solid var(--line2);border-radius:20px;padding:3px 12px}
+
+  /* ===== Hero ===== */
+  .hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px 24px 70px;position:relative;background:
+    radial-gradient(ellipse 80% 55% at 50% 0%,rgba(74,122,181,.16),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%,rgba(212,175,55,.07),transparent 60%),
+    linear-gradient(180deg,#0d1a2e 0%,var(--bg) 100%)}
+  .hero .kicker{color:var(--gold);letter-spacing:.35em;font-size:13px;margin-bottom:22px}
+  .hero h1{font-family:var(--serif);font-size:clamp(34px,6vw,62px);font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+  .hero h1 .gd{color:var(--gold);text-shadow:0 0 40px rgba(212,175,55,.35)}
+  .hero .sub{font-family:var(--serif);font-size:clamp(16px,2.4vw,21px);color:var(--dim);margin-bottom:36px}
+  .hero .meta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+  .hero .meta span{border:1px solid var(--line2);border-radius:20px;padding:5px 16px;font-size:13px;color:var(--gold-l)}
+  .hero .scene{width:min(680px,92vw);opacity:.9;margin-bottom:10px}
+  .hero .scroll-hint{position:absolute;bottom:26px;color:var(--dim);font-size:12px;letter-spacing:.25em;animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+  .hero .q{max-width:720px;color:var(--dim);font-family:var(--serif);font-size:15px;margin-top:6px}
+  .hero .q em{color:var(--gold-l);font-style:normal}
+
+  section{padding:78px 24px;max-width:1080px;margin:0 auto}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+  .sec-head .no{font-family:var(--serif);font-size:15px;color:var(--gold);border:1px solid var(--line2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .sec-head h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,32px);letter-spacing:.04em}
+  .sec-desc{color:var(--dim);font-size:14.5px;margin-bottom:34px;max-width:760px}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);max-width:1080px;margin:0 auto}
+
+  /* ===== 学习地图 ===== */
+  .map-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+  .map-card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.4)}
+  .map-card.done::after{content:"✓ 已读";position:absolute;top:12px;right:12px;font-size:11px;color:var(--ok);border:1px solid rgba(90,168,118,.5);border-radius:12px;padding:1px 9px}
+  .map-card .idx{font-family:var(--serif);color:var(--gold);font-size:13px;letter-spacing:.2em;margin-bottom:6px}
+  .map-card h3{font-family:var(--serif);font-size:20px;margin-bottom:10px}
+  .map-card .one{font-size:13.5px;color:var(--dim);margin-bottom:14px}
+  .map-card .detail{max-height:0;overflow:hidden;transition:max-height .45s ease;font-size:13.5px;color:var(--text)}
+  .map-card.open .detail{max-height:600px}
+  .map-card .detail ul{list-style:none;padding-top:6px}
+  .map-card .detail li{padding:5px 0 5px 20px;position:relative;border-top:1px dashed rgba(255,255,255,.06)}
+  .map-card .detail li::before{content:"◆";position:absolute;left:2px;color:var(--gold-d);font-size:9px;top:9px}
+  .map-card .detail li b{color:var(--gold-l);font-weight:600}
+  .map-card .toggle{font-size:12px;color:var(--gold);margin-top:14px;display:inline-block}
+  .read-btn{margin-top:16px;font-size:12px;color:var(--gold-l);background:rgba(212,175,55,.1);border:1px solid var(--line2);border-radius:8px;padding:5px 14px;cursor:pointer;transition:.2s}
+  .read-btn:hover{background:rgba(212,175,55,.22)}
+  .read-btn.marked{color:var(--ok);border-color:rgba(90,168,118,.5);background:rgba(90,168,118,.08)}
+
+  /* ===== 时间轴 ===== */
+  .tl{position:relative;padding-left:34px}
+  .tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--gold),var(--gold-d),transparent)}
+  .tl-item{position:relative;margin-bottom:26px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;transition:.25s}
+  .tl-item:hover{border-color:var(--line2);transform:translateX(4px)}
+  .tl-item::before{content:"";position:absolute;left:-31px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--gold);box-shadow:0 0 12px rgba(212,175,55,.5)}
+  .tl-item .yr{font-family:var(--serif);color:var(--gold);font-size:20px;font-weight:700;letter-spacing:.03em}
+  .tl-item .yr small{font-size:12px;color:var(--dim);font-weight:400;margin-left:10px;letter-spacing:.1em}
+  .tl-item p{font-size:14px;margin-top:6px;color:var(--text)}
+  .tl-item p b{color:var(--gold-l)}
+  .tl-item.era{background:linear-gradient(135deg,rgba(212,175,55,.14),var(--panel));border-color:var(--line2)}
+
+  /* ===== 人物画廊 ===== */
+  .fig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .fig{perspective:1200px;height:250px;cursor:pointer}
+  .fig-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .fig.flip .fig-inner{transform:rotateY(180deg)}
+  .fig-face,.fig-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .fig-face{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);align-items:center;justify-content:center;text-align:center}
+  .fig-face .glyph{font-family:var(--serif);font-size:44px;color:var(--gold);line-height:1;margin-bottom:14px;text-shadow:0 0 26px rgba(212,175,55,.45)}
+  .fig-face .nm{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+  .fig-face .en{font-size:11px;color:var(--dim);letter-spacing:.06em;margin-bottom:10px}
+  .fig-face .tag{font-size:11.5px;color:#0b1626;background:var(--gold);border-radius:12px;padding:2px 12px;font-weight:600}
+  .fig-face .hint{position:absolute;bottom:12px;font-size:11px;color:var(--dim)}
+  .fig-back{background:linear-gradient(160deg,#1b3358,var(--panel2));border:1px solid var(--line2);transform:rotateY(180deg);justify-content:flex-start;overflow-y:auto;font-size:12.8px;line-height:1.65}
+  .fig-back h4{font-family:var(--serif);color:var(--gold-l);font-size:15px;margin-bottom:8px}
+  .fig-back p{margin-bottom:6px;color:var(--text)}
+  .fig-back .die{color:var(--dim);font-size:11.5px;margin-top:auto;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12)}
+
+  .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+  .cat-tabs button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:20px;padding:6px 16px;font-size:13px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .cat-tabs button.on{background:var(--gold);color:#0b1626;border-color:var(--gold);font-weight:600}
+  .cat-tabs button:hover:not(.on){border-color:var(--line2);color:var(--gold-l)}
+
+  /* ===== 数据馆 ===== */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 16px;text-align:center;transition:.25s}
+  .stat:hover{border-color:var(--line2);transform:translateY(-3px)}
+  .stat .num{font-family:var(--serif);font-size:34px;color:var(--gold);font-weight:700;line-height:1.1}
+  .stat .num small{font-size:15px;color:var(--gold-d)}
+  .stat .lab{font-size:12.5px;color:var(--dim);margin-top:8px}
+  .revenue-note{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;font-size:13.5px}
+  .revenue-note h4{font-family:var(--serif);color:var(--gold-l);margin-bottom:10px;font-size:16px}
+  .rev-bars{display:grid;gap:8px}
+  .rev-bar{display:grid;grid-template-columns:110px 1fr 70px;align-items:center;gap:10px;font-size:13px}
+  .rev-bar .track{height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
+  .rev-bar .fill{height:100%;width:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-d),var(--gold));transition:width 1.2s cubic-bezier(.3,.7,.3,1)}
+  .rev-bar.top .fill{background:linear-gradient(90deg,#7a5c14,var(--gold-l));box-shadow:0 0 14px rgba(212,175,55,.4)}
+  .rev-bar .val{text-align:right;color:var(--gold-l);font-family:var(--serif)}
+
+  /* ===== 记忆闪卡 ===== */
+  .flash-app{max-width:680px;margin:0 auto}
+  .flash-ctrl{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:18px;font-size:13px;color:var(--dim)}
+  .flash-ctrl .btns{display:flex;gap:8px}
+  .flash-ctrl button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 14px;font-size:12.5px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .flash-ctrl button:hover{border-color:var(--line2);color:var(--gold-l)}
+  .fprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:26px}
+  .fprog .bar{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold));width:0;transition:width .4s}
+  .fcard{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:18px;min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;padding:36px 34px;cursor:pointer;position:relative;transition:.3s;user-select:none}
+  .fcard:hover{box-shadow:0 16px 44px rgba(0,0,0,.5)}
+  .fcard .face-q,.fcard .face-a{display:none}
+  .fcard.q .face-q{display:block}
+  .fcard.a .face-a{display:block}
+  .fcard .qmark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold-d);font-size:20px}
+  .fcard .amark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold);font-size:20px}
+  .fcard .face-q{font-family:var(--serif);font-size:clamp(18px,2.6vw,23px);line-height:1.6}
+  .fcard .face-a{font-size:15.5px;line-height:1.85;text-align:left}
+  .fcard .face-a b{color:var(--gold-l)}
+  .fcard .tap-hint{position:absolute;bottom:14px;right:20px;font-size:11px;color:var(--dim)}
+  .fb-btns{display:flex;gap:12px;margin-top:20px}
+  .fb-btns button{flex:1;border:none;border-radius:12px;padding:14px 8px;font-size:15px;font-family:var(--sans);cursor:pointer;transition:.2s;font-weight:600}
+  .b-no{background:rgba(192,90,90,.15);color:#e8a0a0;border:1px solid rgba(192,90,90,.4)!important}
+  .b-mid{background:rgba(212,175,55,.12);color:var(--gold-l);border:1px solid var(--line2)!important}
+  .b-yes{background:rgba(90,168,118,.15);color:#8fd0a8;border:1px solid rgba(90,168,118,.4)!important}
+  .fb-btns button:hover{transform:translateY(-2px)}
+  .flash-done{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:44px 30px;text-align:center}
+  .flash-done h3{font-family:var(--serif);color:var(--gold);font-size:24px;margin-bottom:10px}
+  .flash-done p{color:var(--dim);font-size:14px;margin-bottom:22px}
+
+  /* ===== 测验 ===== */
+  .quiz-wrap{max-width:720px;margin:0 auto}
+  .quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:12px}
+  .qprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:28px}
+  .qprog .bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));width:0;transition:width .4s}
+  .quiz-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px}
+  .quiz-q .stem{font-family:var(--serif);font-size:19px;margin-bottom:20px;line-height:1.6}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 16px;margin-bottom:10px;color:var(--text);font-size:15px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .opt:hover:not(:disabled){border-color:var(--line2);background:rgba(212,175,55,.07)}
+  .opt.right{border-color:var(--ok);background:rgba(90,168,118,.14);color:#a8e0be}
+  .opt.wrong{border-color:var(--bad);background:rgba(192,90,90,.12);color:#e8a0a0}
+  .opt:disabled{cursor:default}
+  .expl{margin-top:14px;padding:14px 16px;border-radius:10px;background:rgba(74,122,181,.1);border-left:3px solid var(--blue);font-size:13.5px;display:none;color:var(--text)}
+  .expl.show{display:block}
+  .qnxt{margin-top:18px;text-align:right}
+  .qnxt button{background:var(--gold);color:#0b1626;border:none;border-radius:10px;padding:10px 28px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .qnxt button:hover{background:var(--gold-l)}
+  .quiz-start,.quiz-result{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:44px 30px;text-align:center}
+  .quiz-start h3,.quiz-result h3{font-family:var(--serif);font-size:26px;color:var(--gold);margin-bottom:12px}
+  .quiz-start p{color:var(--dim);font-size:14px;max-width:480px;margin:0 auto 26px}
+  .quiz-start button,.quiz-result button{background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:13px 42px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+  .quiz-start button:hover,.quiz-result button:hover{background:var(--gold-l)}
+  .score-big{font-family:var(--serif);font-size:64px;color:var(--gold);line-height:1;margin:14px 0 6px}
+  .quiz-result .verdict{font-family:var(--serif);font-size:19px;margin-bottom:22px;color:var(--gold-l)}
+  .wrong-review{text-align:left;margin:22px auto 26px;max-width:560px}
+  .wrong-review .w{background:rgba(192,90,90,.07);border:1px solid rgba(192,90,90,.25);border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:10px}
+  .wrong-review .w b{color:#e8a0a0}
+
+  /* ===== 综合进度 ===== */
+  .progress-bar-wrap{max-width:1080px;margin:0 auto 60px;padding:0 24px}
+  .pbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+  .pbox .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;flex-wrap:wrap;gap:8px}
+  .pbox .row .t{font-family:var(--serif);color:var(--gold-l);font-size:17px}
+  .pbox .big{height:12px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
+  .pbox .big .bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-l));transition:width .8s;border-radius:6px}
+  .pbox .sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:14px;font-size:12.5px;color:var(--dim)}
+  .pbox .sub i{font-style:normal;color:var(--gold)}
+
+  footer{border-top:1px solid var(--line);padding:36px 24px;text-align:center;color:var(--dim);font-size:12.5px;line-height:2}
+  footer .gd{color:var(--gold)}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:640px){
+    section{padding:56px 16px}
+    .fig{height:230px}
+    .rev-bar{grid-template-columns:84px 1fr 62px;font-size:12px}
+    .tl{padding-left:28px}
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <span class="brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 17l5-9 3 5 3-7 4 11H3z" stroke="#d4af37" stroke-width="1.4" stroke-linejoin="round"/><path d="M14 6.5c.8-1.5 2.5-2 2.5-2" stroke="#d4af37" stroke-width="1.1"/><circle cx="18.5" cy="4" r="1.2" fill="#d4af37"/></svg>
+    那不勒斯王国
+  </span>
+  <a href="#map">学习地图</a>
+  <a href="#timeline">时间轴</a>
+  <a href="#figures">人物</a>
+  <a href="#stats">数据馆</a>
+  <a href="#flash">记忆卡</a>
+  <a href="#quiz">测验</a>
+  <span class="spacer"></span>
+  <span class="score-chip" id="navChip">进度 0%</span>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="kicker">文明的故事 · 卷05 文艺复兴 · 第二部</div>
+  <h1>那不勒斯王国<span class="gd">（1378—1534）</span></h1>
+  <div class="sub">从安茹的丝绳到阿拉贡的凯旋门——帝国南陲的王朝更替、武器化的学问与田园的源头</div>
+  <div class="meta">
+    <span>威尔·杜兰特</span><span>第八章</span><span>那不勒斯 → 西西里</span><span>阅读约 15 分钟 · 本章约 0.7 万字</span>
+  </div>
+  <svg class="scene" viewBox="0 0 680 190" fill="none">
+    <!-- 太阳 -->
+    <circle cx="120" cy="48" r="22" stroke="#e8c76a" stroke-width="1.6" opacity=".9"/>
+    <path d="M120 16v-8M120 88v8M88 48h-8M152 48h8M97 25l-6-6M143 25l6-6M97 71l-6 6M143 71l6 6" stroke="#e8c76a" stroke-width="1.2" opacity=".6"/>
+    <!-- 维苏威火山 -->
+    <path d="M300 160l48-84 20-14 22 16 44 82" stroke="#d4af37" stroke-width="1.7" stroke-linejoin="round" opacity=".9"/>
+    <path d="M348 76l20-14 22 16" stroke="#d4af37" stroke-width="1.1" opacity=".5"/>
+    <path d="M362 66q10-7 20 2l4 6q-14 7-27-1z" fill="#d4af37" opacity=".55"/>
+    <!-- 城堡拱门（新堡） -->
+    <path d="M470 160v-52c0-20 16-32 34-32s34 12 34 32v52" stroke="#d4af37" stroke-width="1.6" opacity=".85"/>
+    <path d="M504 76v-10M498 66h12" stroke="#d4af37" stroke-width="1.6" opacity=".85"/>
+    <path d="M546 160v-40c0-15 11-24 23-24s23 9 23 24v40" stroke="#d4af37" stroke-width="1.2" opacity=".5"/>
+    <!-- 帆船 -->
+    <path d="M240 148c22 0 40-5 52-12-12-4-30-5-45-5s-31 3-38 8c3 6 16 9 31 9z" stroke="#e8c76a" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M268 138v-44" stroke="#e8c76a" stroke-width="1.8"/>
+    <path d="M268 98c12 4 17 14 17 24-7-9-12-12-17-14z" fill="#e8c76a" opacity=".85"/>
+    <!-- 海波 -->
+    <path d="M0 168c40 8 80-8 120 0s80-8 120 0 80-8 120 0 80-8 120 0 80-8 120 0 80-8 120 0" stroke="#4a7ab5" stroke-width="1.1" opacity=".55"/>
+    <path d="M40 180c40 6 70-6 110 0s70-6 110 0 70-6 110 0 70-6 110 0 70-6 110 0" stroke="#4a7ab5" stroke-width=".9" opacity=".35"/>
+  </svg>
+  <p class="q">"这种做法恰似马丁·路德，但实则由阿方索授意——<em>人文主义演变成了战争的武器。</em>"</p>
+  <div class="scroll-hint">▾ 开始学习</div>
+</div>
+
+<!-- ① 学习地图 -->
+<section id="map">
+  <div class="sec-head reveal"><span class="no">壹</span><h2>学习地图 · 七大板块</h2></div>
+  <p class="sec-desc reveal">本章按"地方 → 王朝 → 庇护人 → 学问 → 暴政 → 学会 → 边陲"的逻辑推进。点击卡片展开每个板块的核心脉络；读完后点「标记已读」计入学习进度。</p>
+  <div class="map-wrap reveal">
+
+    <div class="map-card" data-sec="1">
+      <div class="idx">板块 01</div><h3>王国的形状</h3>
+      <div class="one">意大利"足背与趾部"——港口繁荣，内陆封建</div>
+      <div class="detail"><ul>
+        <li>地理：亚得里亚海岸的<b>佩斯卡拉、巴利、布林底希、奥特兰托</b>；内陆福查（腓特烈二世时代生气蓬勃的首都）；"足背"塔兰托、"趾部"雷焦</li>
+        <li>西南海岸如舞台布景依次展开：<b>萨莱诺、阿马尔菲、索伦托、卡普里岛</b>，及唯一的大都市那不勒斯——"繁忙、嘈杂、饶舌、热情、喜乐"</li>
+        <li>社会结构：<b>农业的、中古的、封建的</b>——农奴或奴隶耕种，自耕农劳作不得一饱，做工只换面包和一件衬衫</li>
+        <li>大采邑贵族<b>公然反抗君权</b>——国王从领地与式微的皇家商业收税，只够支付朝廷费用（1485 年贵族革命的伏笔）</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="2">
+      <div class="idx">板块 02</div><h3>两朝更替</h3>
+      <div class="one">安茹 174 年 → 阿拉贡 61 年——篡夺埋下战祸</div>
+      <div class="detail"><ul>
+        <li>崩塌三步：乔安娜一世被令<b>丝绳自缢</b>（1382）→ 乔安娜二世三嫁（逐走第二任、谋杀第三任），1420 立阿方索为义子、1423 反悔，死传安茹的勒内 → 继承战争爆发</li>
+        <li><b>狱中翻盘</b>：阿方索围攻吉塔被热那亚人俘虏，押到威斯孔蒂面前——他用"学校里绝对无法学到的逻辑"说服公爵重建法国势力钳制半个意大利，获释祝其"平安打回那不勒斯"</li>
+        <li>安茹王朝（<b>1268—1442</b>）终结，阿拉贡王朝（<b>1442—1503</b>）代之而起</li>
+        <li>深远后果：这场篡夺给了法国 <b>1494 年入侵意大利的合法借口</b>——"意大利悲剧的第一幕"</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="3">
+      <div class="idx">板块 03</div><h3>豁达大度的阿方索</h3>
+      <div class="one">人文主义者的"大施主"</div>
+      <div class="detail"><ul>
+        <li>严征税收、以威迫犹太人受洗勒索金钱，但税主要取自<b>商人阶级</b>——那不勒斯人认为他是好国王：走入人群<b>不带武器、毫无戒心、也无恐惧</b></li>
+        <li>与瓦拉、斐勒佛、曼尼提共餐参观宝藏；付波焦 500 克朗译色诺芬；付法齐奥 500 克朗写《阿方索传》、完稿再追加 <b>1500 克朗</b></li>
+        <li>1458 年临终以 <b>2 万杜卡特</b>分送文人；随身携带古典书籍，进餐时诵读、准学生旁听</li>
+        <li>疑是李维的遗骸在帕多瓦出土，派贝卡代利到威尼斯<b>买回一块骨骸</b>，以"善良的那不勒斯人的敬畏"接受它</li>
+        <li>听马内蒂拉丁文演说入迷——<b>苍蝇在鼻头上宴乐都没察觉</b>；给学者完全的演说自由，保护他们不受宗教裁判所审讯</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="4">
+      <div class="idx">板块 04</div><h3>瓦拉：学问成为武器</h3>
+      <div class="one">考据学第一次直接服务于列国战争</div>
+      <div class="detail"><ul>
+        <li>狂热拉丁文学者：反对意大利文为文学语言；在帕维亚嘲弄法学家巴尔托鲁的拉丁文，文法两科学生<b>由争辩演至动武</b>，瓦拉被解聘</li>
+        <li><b>《新约注释》</b>：指出哲罗姆拉丁译本诸多错谬——伊拉斯谟后来赞扬、节录并应用；<b>《优美口语化的拉丁文》</b>：为拉丁文的优雅淳朴立法，偏爱昆体良甚于西塞罗</li>
+        <li>对话体《喜乐和真善》：布鲁尼演斯多葛禁欲、贝卡代利演享乐主义、尼科利调停——借他人之口说出"令人吃惊的鲁莽"的结论</li>
+        <li>决定性一战：教皇尤金四世主张那不勒斯是教皇领地 → 瓦拉写<b>《君士坦丁的假信和欺捐》</b>——诏令是造假；即使真也无用；教皇世俗权力是<b>千年篡夺</b>；请求罗马人民推翻教皇政府、邀欧洲王子夺占教皇领属</li>
+        <li>"我不仅攻击已故去的人，也攻击活着的人"——恰似路德，实则由阿方索授意，<b>人文主义演变成战争的武器</b></li>
+        <li>结局：被宗教裁判所传召，阿方索强令放人；后推断国王欲与罗马修好便<b>公开道歉</b>，1448 年反成教廷书记，1457 年去世时几乎没有朋友</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="5">
+      <div class="idx">板块 05</div><h3>被焚的诗集</h3>
+      <div class="one">贝卡代利：越轨者的名利双收</div>
+      <div class="detail"><ul>
+        <li>1394 生于巴勒莫，绰号"帕诺里米塔"；锡耶纳高等教育——"也许还包括他那含糊的道德律"</li>
+        <li>约 1425 年拉丁情色诗集<b>《阴阳人》</b>对抗马休尔：科西莫·美第奇接受呈献，瓜里诺赞其雄辩</li>
+        <li>僧侣公开指责，尤金宣称<b>阅读者逐出教会</b>，诗集在费拉拉、博洛尼亚、米兰被公开焚毁</li>
+        <li>反转：1433 年西吉斯蒙德皇帝加冕<b>诗人桂冠</b>；从菲利普·玛利亚处领 <b>800 金币</b>年薪；受邀任那不勒斯宫廷史官</li>
+        <li>史著<b>《阿方索国王的嘉言嘉行》</b>被庇护二世考虑作为拉丁文范本；终年 77 岁，名利双收</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="6">
+      <div class="idx">板块 06</div><h3>费兰特与那不勒斯学会</h3>
+      <div class="one">木乃伊收藏的暴君 × 南意最后的学术黄金时代</div>
+      <div class="detail"><ul>
+        <li>费兰特出身可疑：母亲玛格丽特"除国王之外还有其他情人"，秘书蓬塔诺断言生父是<b>巴伦西亚的马拉诺</b>；家庭教师正是瓦拉；教皇使其合法化却拒绝承认他为王</li>
+        <li>两面夹击下以假和解诱杀仇敌：<b>甜食之后</b>杀之、监禁、饿死地牢、囚于笼中；尸体涂防腐香料、穿上爱服，<b>像木乃伊保藏在博物馆</b>（作者注：或为敌方史家捏造的"战争暴行"）</li>
+        <li>另一面：1479 年<b>非常公平地对待洛伦佐·美第奇</b>；1485 年平贵族革命；36 年统治死于太平盛世</li>
+        <li><b>那不勒斯学会</b>：贝卡代利创设、蓬塔诺扩展；会员皆文学之士、取拉丁文名字，自居承继罗马帝国庄严文学之士</li>
+        <li><b>蓬塔诺</b>：《论原则》献给太子阿方索二世——灌输《君主论》都会轻视的和善德行；用六音步诗讲<b>天文学与橙树栽培</b>；诗写假日生活；与彼特拉克、波利希安并列的双语作家</li>
+        <li><b>桑那扎罗</b>：两行拉丁诗讽恺撒·博尔贾（"西班牙公牛生下朱莉娅"）名动意大利；史诗《处女诞生说》以异教神祇写福音、与维吉尔第四首田园诗较量；绝妙之作<b>《世外桃源》</b>开创欧洲田园风——乔尔乔纳、提香取画题，斯宾塞留下《仙后》与英译本</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="7">
+      <div class="idx">板块 07</div><h3>艺术 · 西西里 · 收官</h3>
+      <div class="one">凯旋门与圣徒血液；静默的岛屿；通向罗马</div>
+      <div class="detail"><ul>
+        <li>建筑：<b>多纳泰洛与米开罗佐</b>自佛罗伦萨来，为红衣主教布兰卡奇造陵寝；阿方索为 1283 年始建的<b>新皇堡建凯旋门</b>——劳拉那设计、彼得罗·马蒂诺（或朱利亚诺·马亚诺参与）刻战争与和平浮雕</li>
+        <li>圣奇亚拉教堂保留 1343 年后哥特纪念碑；圣热内罗大教堂 15 世纪改内部装设；守护神圣耶诺里斯的血液<b>一年流动三次</b>——"以信心和爱确保一个城市的繁荣"</li>
+        <li><b>西西里避过了文艺复兴</b>：仅出的学者（奥里斯帕）与画家（安托尼洛）很快移往大陆；封建贵族喜爱 11 世纪甚于 15 世纪，民众太穷</li>
+        <li>西西里 1295—1409 拥戴自己的阿拉贡国王，此后三世纪是<b>"西班牙皇冠上的一颗明珠"</b></li>
+        <li>尾声综述次要艺术（天鹅绒丝缎、威尼斯镜子、锻铁花边、光辉陶器、象牙小画像）——"所有这些交织成意大利的文艺复兴，<b>并给美第奇家族统治下的罗马带来了满足和毁灭</b>"，第二部收官、引出教皇们</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ② 时间轴 -->
+<section id="timeline">
+  <div class="sec-head reveal"><span class="no">贰</span><h2>大事时间轴 · 1268—1534</h2></div>
+  <p class="sec-desc reveal">光晕卡片为改变意大利命运的分水岭。这条线的主旋律：<b style="color:var(--gold-l)">安茹衰微 → 阿拉贡篡夺 → 学问武器化 → 暴政与太平 → 战祸兑现</b>。</p>
+  <div class="tl">
+    <div class="tl-item reveal"><div class="yr">1268 <small>王朝奠基</small></div><p>安茹王朝开始统治那不勒斯——此后 174 年，至 1442 年终结。</p></div>
+    <div class="tl-item reveal"><div class="yr">1283</div><p>安茹的查理一世始建<b>新皇堡</b>。一个多世纪后，阿方索将为它加建凯旋门。</p></div>
+    <div class="tl-item reveal"><div class="yr">1382</div><p>安茹王朝因乔安娜一世的"越轨行为"迅速衰微——都拉索的查理令她<b>以丝绳自缢</b>。崩塌的第一块骨牌。</p></div>
+    <div class="tl-item reveal"><div class="yr">1414</div><p>乔安娜二世即位（年近 40）。三度结婚：驱逐第二任、谋杀第三任——她的废立将直接引发继承战争。</p></div>
+    <div class="tl-item reveal"><div class="yr">1420 → 1423</div><p>乔安娜二世为解反叛危机召阿方索来援、立为义子和继承人；得知他计划推翻自己后<b>否认了这一决定</b>。她死时传位安茹的勒内。</p></div>
+    <div class="tl-item reveal"><div class="yr">1435</div><p>阿方索围攻吉塔被热那亚人俘虏，押到威斯孔蒂面前——一场"学校里绝对无法学到的逻辑"的谈话后获释。<b>瓦拉也在这一年投奔阿方索</b>。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1442 <small>王朝更替</small></div><p>阿方索胜利入主那不勒斯：<b>安茹王朝（1268—1442）终结，阿拉贡王朝（1442—1503）开启</b>。这场篡夺给了法国 1494 年入侵意大利的合法借口。</p></div>
+    <div class="tl-item reveal"><div class="yr">1448</div><p>攻击教皇最凶的瓦拉，向尤金公开道歉、撤回异说——受尼古拉五世之聘成为<b>教廷书记</b>，翻译希腊文。</p></div>
+    <div class="tl-item reveal"><div class="yr">1457</div><p>瓦拉去世，安葬于圣墓。此时他是圣约翰浸礼所教堂的教士——去世时几乎没有一个朋友。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1458 <small>王权交接</small></div><p>阿方索去世，临终以 <b>2 万杜卡特分送文人</b>。私生子费兰特继位，面对安茹的勒内登陆与封建贵族群起反叛的两面夹击。</p></div>
+    <div class="tl-item reveal"><div class="yr">1479 / 1485</div><p>1479 年费兰特<b>非常公平地对待洛伦佐·美第奇</b>；1485 年贵族革命几乎把他推翻——他又站稳脚跟，完成 36 年统治，死于太平盛世。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1494 <small>战祸兑现</small></div><p>安茹一系的继承权主张成为查理八世南下的合法借口——<b>"意大利悲剧的第一幕"</b>。阿拉贡王朝亦于 1503 年终结。</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ③ 人物画廊 -->
+<section id="figures">
+  <div class="sec-head reveal"><span class="no">叁</span><h2>人物画廊 · 十五位面孔</h2></div>
+  <p class="sec-desc reveal">点击卡片翻面查看人物档案。建议记忆法：先记<b style="color:var(--gold-l)">两个王朝锚点</b>（阿方索→费兰特），再挂四位学者（瓦拉→贝卡代利→蓬塔诺→桑那扎罗），最后补对手与艺术家。</p>
+  <div class="cat-tabs reveal" id="figTabs">
+    <button class="on" data-cat="all">全部</button>
+    <button data-cat="gov">统治者 · 政治</button>
+    <button data-cat="scholar">学者文人</button>
+    <button data-cat="artist">艺术家 · 建筑</button>
+  </div>
+  <div class="fig-grid reveal" id="figGrid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ④ 数据馆 -->
+<section id="stats">
+  <div class="sec-head reveal"><span class="no">肆</span><h2>数字档案馆</h2></div>
+  <p class="sec-desc reveal">杜兰特用数字写就的那不勒斯。这九个数字撑起了整章的论证。</p>
+  <div class="stat-grid reveal">
+    <div class="stat"><div class="num"><span class="cnt" data-v="174">0</span><small> 年</small></div><div class="lab">安茹王朝统治（1268—1442）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="61">0</span><small> 年</small></div><div class="lab">阿拉贡王朝统治（1442—1503）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="36">0</span><small> 年</small></div><div class="lab">费兰特的统治时长</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="20000">0</span><small> 杜卡特</small></div><div class="lab">阿方索 1458 年临终分送文人</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="1500">0</span><small> 克朗</small></div><div class="lab">法齐奥《阿方索传》完稿追加稿酬</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="800">0</span><small> 金币</small></div><div class="lab">贝卡代利自威斯孔蒂处支领年薪</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="600">0</span><small> 杜卡特</small></div><div class="lab">威尼斯赏给桑那扎罗一首赞诗</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="3">0</span><small> 次/年</small></div><div class="lab">圣耶诺里斯血液流动次数</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="77">0</span><small> 岁</small></div><div class="lab">贝卡代利的享年（名利双收）</div></div>
+  </div>
+  <div class="revenue-note reveal">
+    <h4>王朝寿命对比（年）—— 篡夺者的江山，比被篡夺者的短了三分之二</h4>
+    <div class="rev-bars" id="revBars">
+      <div class="rev-bar top"><span>安茹王朝</span><div class="track"><div class="fill" data-w="100"></div></div><span class="val">174 年</span></div>
+      <div class="rev-bar top"><span>阿拉贡王朝</span><div class="track"><div class="fill" data-w="35"></div></div><span class="val">61 年</span></div>
+      <div class="rev-bar"><span>费兰特个人</span><div class="track"><div class="fill" data-w="21"></div></div><span class="val">36 年</span></div>
+    </div>
+    <p style="margin-top:14px;color:var(--dim);font-size:12.5px">王朝更短、君主更替更快——这正是南意政局不稳、沦为法国 / 西班牙 / 教皇三方角力场的缩影。而阿拉贡的 61 年埋下的 1494 年战祸，将把整个意大利拖入"悲剧的第一幕"。</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑤ 记忆闪卡 -->
+<section id="flash">
+  <div class="sec-head reveal"><span class="no">伍</span><h2>记忆闪卡 · 二十二张</h2></div>
+  <p class="sec-desc reveal">先自问再点卡翻面作答，然后诚实地点「认识 / 模糊 / 不会」——<b style="color:var(--gold-l)">"模糊"和"不会"的卡会优先重排到后面再出现</b>，直到全部掌握。进度自动保存。</p>
+  <div class="flash-app reveal">
+    <div class="flash-ctrl">
+      <span id="fCount"></span>
+      <div class="btns">
+        <button id="fShuffle">🔀 打乱</button>
+        <button id="fReset">↺ 重置进度</button>
+      </div>
+    </div>
+    <div class="fprog"><div class="bar" id="fBar"></div></div>
+    <div class="fcard q" id="fCard">
+      <span class="qmark">问</span><span class="amark" style="display:none">答</span>
+      <div class="face-q" id="fQ"></div>
+      <div class="face-a" id="fA"></div>
+      <span class="tap-hint">点击卡片翻面</span>
+    </div>
+    <div class="fb-btns">
+      <button class="b-no" id="fNo">✗ 不会</button>
+      <button class="b-mid" id="fMid">～ 模糊</button>
+      <button class="b-yes" id="fYes">✓ 认识</button>
+    </div>
+    <div class="flash-done" id="fDone" style="display:none">
+      <h3>🌾 本轮完成</h3>
+      <p id="fDoneTxt"></p>
+      <button id="fAgain" style="background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:12px 36px;font-size:15px;font-weight:600;cursor:pointer">再来一轮（只练未掌握）</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑥ 测验 -->
+<section id="quiz">
+  <div class="sec-head reveal"><span class="no">陆</span><h2>终极测验 · 十二题</h2></div>
+  <p class="sec-desc reveal">检验本章掌握程度。答错也没关系——错题的解析就是最好的复习材料。最高分会保存。</p>
+  <div class="quiz-wrap reveal">
+    <div class="quiz-start" id="qStart">
+      <h3>准备就绪？</h3>
+      <p>12 道选择题，覆盖王朝、学者、暴政、艺术全部板块。<br>预计用时 3–5 分钟。</p>
+      <button id="qGo">开始测验</button>
+      <p style="margin-top:16px;font-size:12.5px" id="qBest"></p>
+    </div>
+    <div id="qBody" style="display:none">
+      <div class="quiz-meta"><span id="qNo"></span><span id="qScore"></span></div>
+      <div class="qprog"><div class="bar" id="qBar"></div></div>
+      <div class="quiz-q">
+        <div class="stem" id="qStem"></div>
+        <div id="qOpts"></div>
+        <div class="expl" id="qExpl"></div>
+        <div class="qnxt"><button id="qNext" style="display:none">下一题 →</button></div>
+      </div>
+    </div>
+    <div class="quiz-result" id="qResult" style="display:none">
+      <h3>测验完成</h3>
+      <div class="score-big" id="qFinal"></div>
+      <div class="verdict" id="qVerdict"></div>
+      <div class="wrong-review" id="qWrong"></div>
+      <button id="qRetry">重新挑战</button>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 综合进度 -->
+<div class="progress-bar-wrap reveal">
+  <div class="pbox">
+    <div class="row"><span class="t">🌾 我的学习进度</span><span id="pPct">0%</span></div>
+    <div class="big"><div class="bar" id="pBar"></div></div>
+    <div class="sub">
+      <span>板块已读 <i id="pSec">0/7</i></span>
+      <span>闪卡已掌握 <i id="pFlash">0/22</i></span>
+      <span>测验最高分 <i id="pQuiz">—</i></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="gd">◆</span> 资料来源：威尔·杜兰特《文明的故事》卷05·文艺复兴·第二部·第八章《那不勒斯王国（1378—1534）》<br>
+  与「威尼斯王国」「艾米利与前哨」学习页同一系列 · 第二部三部曲至此收官，下一站：文艺复兴时代的教皇们<br>
+  学习进度保存在本机浏览器（localStorage），不清除缓存则长期有效 · 小满 🌾 为张总制作
+</footer>
+
+<script>
+/* ============ 数据 ============ */
+const FIGURES=[
+ {n:"阿方索（豁达大度）",en:"Alfonso the Magnanimous",cat:"gov",g:"👑",tag:"阿拉贡王朝开创者",
+  b:"<h4>\"大施主\"</h4><p>严征税收、勒索改宗的犹太人，但税主要取自商人阶级——那不勒斯人认他是好国王：<b>走入人群不带武器、毫无戒心、也无恐惧</b>。</p><p>人文主义狂热：与瓦拉、斐勒佛、曼尼提共餐；付波焦 500 克朗译色诺芬、法齐奥 500+1500 克朗写传；买回\"李维遗骸\"；听演说苍蝇上鼻不觉；临终 2 万杜卡特分送文人；<b>保护学者不受宗教裁判所审讯</b>。</p>",d:"1458 年去世，把王国留给私生子费兰特"},
+ {n:"乔安娜一世",en:"Joanna I of Anjou",cat:"gov",g:"🧵",tag:"安茹王朝的掘墓人",
+  b:"<h4>一根丝绳的王朝</h4><p>安茹王朝因她的\"越轨行为\"迅速衰微。1382 年，都拉索的查理令她<b>以丝绳自缢</b>——南意此后一个世纪的动荡由此开始。</p>",d:"她的死开启了一切继承权的混乱"},
+ {n:"乔安娜二世",en:"Joanna II of Anjou",cat:"gov",g:"🎭",tag:"三嫁女王 · 废立者",
+  b:"<h4>三嫁三废立</h4><p>1414 年即位（年近 40）。三度结婚：驱逐第二任、<b>谋杀第三任</b>。1420 年立阿方索为义子继承人，1423 年得知其欲推翻自己后反悔；死时传位安茹的勒内——<b>直接引发继承战争</b>。</p>",d:"她的遗嘱是一纸战书"},
+ {n:"费兰特",en:"Ferrante of Aragon",cat:"gov",g:"🕳",tag:"国王 · 在位36年",
+  b:"<h4>两副面孔</h4><p>出身可疑：母亲玛格丽特\"除国王之外还有其他情人\"，秘书蓬塔诺断言生父是巴伦西亚的<b>马拉诺</b>；家庭教师正是瓦拉。面对勒内登陆+贵族叛乱夹击，以假和解诱杀仇敌——甜食之后杀之，尸体防腐穿上爱服，<b>像木乃伊保藏在博物馆里</b>。</p><p>另一面：1479 年非常公平地对待洛伦佐·美第奇；1485 年平贵族革命；36 年统治死于太平盛世。</p>",d:"被敌方史家抹黑最狠、也确实配得上的国王"},
+ {n:"菲利普·玛利亚·威斯孔蒂",en:"Filippo Maria Visconti",cat:"gov",g:"♟",tag:"米兰公爵 · 被说服者",
+  b:"<h4>一场谈话改写南意</h4><p>阿方索围攻吉塔被热那亚人俘虏后押到他面前。阿方索\"用学校里绝对无法学到的逻辑\"说服他：让法国势力回那不勒斯，可与北面的米兰、西面的热那亚形成<b>虎头钳般控制半个意大利</b>——他赞同、释放，并祝阿方索平安打回那不勒斯。</p><p>也是贝卡代利 800 金币年薪的雇主。</p>",d:"俘虏说服了看守"},
+ {n:"尤金四世",en:"Pope Eugene IV",cat:"gov",g:"⛪",tag:"教皇 · 国王的对手",
+  b:"<h4>主张\"那不勒斯是教皇领地\"</h4><p>与阿方索争夺王位——于是瓦拉的学问成了对付他的武器。以宗教裁判所反击：传召瓦拉，被阿方索强令放人。宣布阅读《阴阳人》者<b>逐出教会</b>，诗集在多城焚毁。其继任者尼古拉五世反而广召瓦拉入教廷。</p>",d:"与国王斗了一生的教皇"},
+ {n:"洛伦佐·瓦拉",en:"Lorenzo Valla",cat:"scholar",g:"⚔",tag:"把学问变成武器",
+  b:"<h4>考据学家的战争</h4><p>狂热拉丁文学者：反对意大利文为文学语言；嘲弄法学家巴尔托鲁被两派学生动武解聘；《Elegantiae》为拉丁文立法、偏爱昆体良甚于西塞罗；《新约注释》纠<b>哲罗姆译本</b>之误——伊拉斯谟沿用。</p><p>在阿方索庇护下写<b>《君士坦丁的假信和欺捐》</b>：论证教皇世俗权力是千年篡夺，请罗马人民推翻教皇政府。被裁判所传召获国王力保；后见风转舵道歉，1448 年成教廷书记。<b>去世时几乎没有一个朋友</b>。</p>",d:"1407—1457 · 预演了路德的学者"},
+ {n:"贝卡代利（帕诺里米塔）",en:"Antonio Beccadelli",cat:"scholar",g:"🔥",tag:"被焚书的桂冠诗人",
+  b:"<h4>越轨者的胜利</h4><p>1394 生于巴勒莫。约 1425 年拉丁情色诗集<b>《阴阳人》</b>对抗马休尔——科西莫接受呈献、瓜里诺赞其雄辩；尤金绝罚、诗集在费拉拉/博洛尼亚/米兰公开焚毁；1433 年皇帝却加冕<b>诗人桂冠</b>。</p><p>领 800 金币年薪、任那不勒斯宫廷史官；创设<b>那不勒斯学会</b>；史著被庇护二世考虑作拉丁文范本。终年 77，名利双收。瓦拉《喜乐和真善》中享乐主义的代言人。</p>",d:"焚书烧不掉的桂冠"},
+ {n:"蓬塔诺",en:"Gioviano Pontano",cat:"scholar",g:"🍊",tag:"首相 · 学会灵魂",
+  b:"<h4>诗人+哲学家+外交家</h4><p>费兰特的秘书与首相，扩展贝卡代利创设的那不勒斯学会——会员皆文学之士、取拉丁文名（蓬塔努斯）。以拉丁文写伦理学论文赞颂费兰特忽视的美德；<b>《论原则》</b>献给太子阿方索二世：灌输《君主论》都会轻视的和善德行。</p><p>用<b>六音步诗</b>讲天文学的奥秘与橙树的正确栽培；诗写假日生活——少女旋舞手鼓铿锵、海湾舞会爱侣约会。作者把他与彼特拉克、波利希安并列的双语作家。</p>",d:"也是断言费兰特生父是马拉诺的人"},
+ {n:"桑那扎罗",en:"Jacopo Sannazaro",cat:"scholar",g:"🐑",tag:"《世外桃源》之父",
+  b:"<h4>田园文学的欧洲源头</h4><p>能写最纯的托斯卡纳方言，也能写不让马休尔的拉丁挽诗。两行诗讽恺撒·博尔贾（\"一只西班牙的公牛生下了朱莉娅\"）名动意大利；史诗<b>《处女诞生说》</b>以异教神祇陪衬福音、与维吉尔第四首田园诗较量——\"最美好的拉丁文\"，让克莱门特七世很愉快。</p><p>绝妙之作<b>《世外桃源》</b>：散文夹诗的乡间乌托邦——乔尔乔纳、提香等上百艺术家取画题；斯宾塞留下《仙后》与英译本。威尼斯曾为一首赞诗送他 600 杜卡特。</p>",d:"一本书让全欧洲做了三百年田园梦"},
+ {n:"波焦·布拉乔利尼",en:"Poggio Bracciolini",cat:"scholar",g:"📜",tag:"受雇的古典学者",
+  b:"<h4>餐桌上的译者</h4><p>阿方索付他 <b>500 克朗</b>，将色诺芬的《语义学大全》译成拉丁文——\"大施主\"延揽学者的又一例。与瓦拉、斐勒佛、曼尼提同列阿方索的餐桌。</p>",d:"文艺复兴学者的市价之一"},
+ {n:"巴托洛米奥·法齐奥",en:"Bartolommeo Fazio",cat:"scholar",g:"✒",tag:"最贵稿酬的史官",
+  b:"<h4>一本书挣了 2000 克朗</h4><p>受阿方索 500 克朗之聘写《阿方索传》（Historia Alfonsi），完稿后国王又给了他 <b>1500 克朗</b>——文艺复兴最豪爽的一笔稿酬。</p>",d:"用一部传记换得三倍稿酬"},
+ {n:"弗朗西斯科·劳拉那",en:"Francesco Laurana",cat:"artist",g:"🏛",tag:"凯旋门设计者",
+  b:"<h4>一座门宣示一个新王朝</h4><p>阿方索下令为 1283 年安茹的查理一世始建的新皇堡新建大门——由他设计，彼得罗·马蒂诺雕刻（朱利亚诺·马亚诺或参与），刻上国王<b>战争与和平的丰功伟绩</b>浮雕。阿拉贡时代的视觉宣言。</p>",d:"篡夺者的纪念碑"},
+ {n:"多纳泰洛与米开罗佐",en:"Donatello & Michelozzo",cat:"artist",g:"🗿",tag:"佛罗伦萨客串",
+  b:"<h4>北方手艺南下</h4><p>自佛罗伦萨来那不勒斯，为红衣主教里纳尔多·布兰卡奇在尼罗河畔的圣安杰洛教堂建造壮丽陵寝——文艺复兴城邦之间的艺术家\"劳务输出\"。</p>",d:"美第奇城的手艺为红衣主教服务"},
+ {n:"安托尼洛",en:"Antonello da Messina",cat:"artist",g:"🎨",tag:"西西里出走的大陆画家",
+  b:"<h4>走出西西里的人</h4><p>西西里仅有的画家之一（另有学者奥里斯帕），很快移往机会更多的大陆。他在威尼斯章再度出场：把佛兰德斯<b>颜料与油混合技法</b>带入威尼斯，\"揭开了威尼斯伟大的绘画时代\"——两个章节的故事在此交汇。</p>",d:"西西里避过文艺复兴，但它出走的孩子改变了威尼斯"},
+];
+
+const FLASH=[
+ ["安茹王朝在那不勒斯的起止年份？","<b>1268—1442 年（174 年）</b>。乔安娜一世被丝绳自缢（1382）后迅速衰微，1442 年阿方索夺位终结。"],
+ ["阿拉贡王朝在那不勒斯的起止年份？","<b>1442—1503 年（61 年）</b>。这场篡夺给了法国 1494 年入侵意大利的合法借口——\"意大利悲剧的第一幕\"。"],
+ ["乔安娜二世做了哪三件\"废立\"大事？","三度结婚（驱逐第二任、谋杀第三任）；1420 年立阿方索为义子继承人；1423 年反悔——死后传位安茹的勒内，直接引发继承战争。"],
+ ["那不勒斯人为什么认为阿方索是好国王？","他<b>走入人群不带武器、毫无戒心、也无恐惧</b>；税主要取自商人阶级而非全民——尽管他严征税收、勒索改宗的犹太人。"],
+ ["阿方索的人文主义狂热有哪些表现？（至少三个）","随身携带古典书籍、与学者共餐、买回\"李维遗骸\"一块骨骸、听演说苍蝇上鼻不觉、临终 2 万杜卡特分送文人、<b>保护学者不受宗教裁判所审讯</b>。"],
+ ["阿方索付出的两笔著名稿酬？","波焦译色诺芬 <b>500 克朗</b>；法齐奥写《阿方索传》先付 500 克朗、完稿<b>再追加 1500 克朗</b>——文艺复兴最豪爽的稿酬。"],
+ ["瓦拉最负盛名的论著及其核心论点？","<b>《君士坦丁的假信和欺捐》</b>：《康斯坦丁诏令》是荒谬的造假；即使捐赠是真的也无足轻重（君士坦丁没有能力这样做）；若捐赠为假，教皇世俗权力便是<b>历时千年的篡夺</b>；请求罗马人民推翻教皇政府、邀欧洲王子夺占教皇领属。"],
+ ["\"我不仅攻击已故去的人，也攻击活着的人\"——谁说的，什么背景？","瓦拉，在阿方索庇护下对教皇尤金四世的宣战书。\"这种做法恰似马丁·路德，但实则由阿方索授意——<b>人文主义演变成了战争的武器</b>\"。"],
+ ["瓦拉的一生如何收场？","被宗教裁判所传召，阿方索强令放人；后推断国王欲与罗马修好便<b>公开道歉、撤回异说</b>；1448 年受尼古拉五世聘任成教廷书记、翻译希腊文；1457 年去世，安葬于圣墓——去世时几乎没有一个朋友。"],
+ ["瓦拉的《Elegantiae》和《新约注释》各做了什么？","《优美口语化的拉丁文》给拉丁文的优雅淳朴<b>立法</b>、嘲弄中世纪拉丁文，偏爱昆体良甚于西塞罗；《新约注释》指出哲罗姆拉丁译本诸多错谬——<b>伊拉斯谟后来赞扬、节录并应用</b>。"],
+ ["《喜乐和真善》的三位代言人及其结论？","对话体：布鲁尼护卫<b>斯多葛禁欲</b>，贝卡代利辩护<b>享乐主义</b>，尼科利调停基督教与哲学。结论惊世：禁欲不自然、童贞错误且不必要——\"文雅高尚的妓女较之尼姑对人类有更多的价值\"。"],
+ ["《阴阳人》诗集的遭遇与作者的下场？","遭教皇尤金绝罚（阅读者逐出教会），在<b>费拉拉、博洛尼亚、米兰</b>公开焚毁；但作者 1433 年获皇帝<b>诗人桂冠</b>、领 800 金币年薪、任那不勒斯宫廷史官，终年 77 岁名利双收。"],
+ ["贝卡代利的史著地位？","《阿方索国王的嘉言嘉行》以极能表现拉丁语特性的笔法写成——教皇<b>庇护二世考虑将其作为拉丁文范本</b>。"],
+ ["费兰特的出身疑云？","母亲玛格丽特\"除国王之外还有其他情人\"；秘书蓬塔诺断言生父是巴伦西亚的<b>马拉诺</b>（皈依基督教的西班牙犹太人）；家庭教师是瓦拉；教皇使其出身合法化却<b>拒绝承认他为国王</b>。"],
+ ["木乃伊收藏的传说？","费兰特以假和解筵席诱敌，<b>甜食之后</b>杀死、监禁、饿死于地牢、囚于笼中；尸体涂防腐香料、穿上其最爱的服装，像木乃伊保藏在博物馆。作者注：\"也许是敌方军营中的历史学家捏造出来的战争暴行\"。"],
+ ["费兰特\"好的一面\"体现在哪？","1479 年<b>非常公平地对待洛伦佐·美第奇</b>；1485 年贵族革命几乎推翻他，他站稳脚跟；完成 <b>36 年统治，死于太平盛世</b>。"],
+ ["那不勒斯学会的规矩？","<b>贝卡代利创设、蓬塔诺扩展</b>；会员必须是文学之士，定期集会交换诗文和思想；取拉丁文的名字，自居\"承继罗马帝国庄严文学的承先启后之士\"。"],
+ ["蓬塔诺《论原则》写给谁、写了什么？","献给费兰特之子、继承人<b>阿方索二世</b>——将《君主论》都会轻视的所谓和善的德行灌输给统治者。蓬塔诺本人兼具诗人、哲学家与老练外交家的气质。"],
+ ["桑那扎罗讽刺恺撒·博尔贾的名句用了什么意象？","借宙斯化公牛劫欧罗巴的神话：<b>\"一只西班牙的公牛生下了朱莉娅\"</b>（讽博尔贾与朱莉娅·法尔内塞，他养着穿盔甲的西班牙公牛）；后又讽\"该称他恺撒还是博尔贾？他不是两样都是吗\"。"],
+ ["《世外桃源》的影响链？","散文夹诗的乡间乌托邦（壮男美女、无人老去）→ 开创欧洲田园文学风格 → <b>乔尔乔纳、提香</b>及身后上百艺术家取画题 → <b>斯宾塞《仙后》</b>与英文版《世外桃源》传至英格兰。作者评：任何人\"无须翻动书页即可建造起迎合自己爱好和奇想的城堡\"。"],
+ ["《处女诞生说》特别在哪？","用古典文学中<b>异教多神的结构</b>，把他们像伴随物带进福音故事，并在诗中引用维吉尔第四首田园诗与之较量——\"最美好的拉丁文\"，让克莱门特七世很愉快。"],
+ ["为什么说\"西西里避过了文艺复兴\"？","仅出的学者（奥里斯帕）与画家（安托尼洛）<b>很快移往大陆</b>；封建贵族喜爱 11 世纪甚于 15 世纪、轻蔑文学；被剥削的民众太穷。1295—1409 年拥戴自己的阿拉贡国王，此后三世纪是\"西班牙皇冠上的一颗明珠\"。"],
+];
+
+const QUIZ=[
+ {q:"安茹王朝在那不勒斯的统治终结于哪一年？",o:["1382","1442","1458","1503"],a:1,e:"1442 年阿方索夺位成功：安茹王朝（1268—1442，共 174 年）终结，阿拉贡王朝（1442—1503）开启。"},
+ {q:"乔安娜一世是怎么死的？",o:["战场阵亡","被毒杀","被令以丝绳自缢","流亡途中病逝"],a:2,e:"1382 年，都拉索的查理令她以丝绳自缢——安茹王朝迅速衰微的标志性事件。"},
+ {q:"阿方索被热那亚人俘虏后，靠什么获释？",o:["巨额赎金","教皇求情","说服威斯孔蒂的战略逻辑","越狱"],a:2,e:"他用\"学校里绝对无法学到的逻辑\"说服米兰公爵：让法国势力回那不勒斯，可与北部进迫米兰、西部进逼热那亚的势力形成虎头钳般控制半个意大利——公爵赞同并释放了他。"},
+ {q:"瓦拉最负盛名的论著攻击的是什么？",o:["亚里士多德哲学","《康斯坦丁诏令》（君士坦丁赠礼）","哲罗姆的人格","经院哲学"],a:1,e:"《君士坦丁的假信和欺捐》论证诏令是造假、教皇世俗权力是\"历时千年的篡夺\"——人文主义由此演变成战争的武器。"},
+ {q:"瓦拉攻击教皇最凶，最后却——",o:["流亡法国","被处死","成了教廷书记","终身隐居"],a:2,e:"他推断阿方索有意与罗马修好，便公开道歉、撤回异说；1448 年受尼古拉五世聘任翻译希腊文，死时是圣约翰浸礼所教堂的教士。"},
+ {q:"贝卡代利的《阴阳人》诗集遭遇了什么？",o:["洛阳纸贵、再版数十次","被绝罚并在多城公开焚毁","被封存于梵蒂冈","作者因此被处死"],a:1,e:"尤金宣布阅读者逐出教会，修道士在费拉拉、博洛尼亚、米兰公开焚毁诗集——但作者 1433 年获皇帝桂冠，领 800 金币年薪，终年 77 岁名利双收。"},
+ {q:"蓬塔诺的《论原则》是写给谁的？",o:["教皇","费兰特","太子阿方索二世","洛伦佐·美第奇"],a:2,e:"献给费兰特之子、继承人阿方索二世——将《君主论》都会轻视的所谓和善的德行灌输给统治者。"},
+ {q:"《世外桃源》在体裁上的开创性在于？",o:["第一部意大利语长篇小说","散文与诗混合的田园风格","第一部拉丁文史诗","对话体哲学著作"],a:1,e:"桑那扎罗以生动的语言、混合散文与诗的笔法写成——典型的田园诗由此诞生，并首先在意大利、继而法兰西和英格兰创造了一种风格。"},
+ {q:"《世外桃源》的影响不包括——",o:["乔尔乔纳、提香取画题","斯宾塞《仙后》","英文版流传英格兰","马基雅维利《君主论》"],a:3,e:"影响链是：田园文学风格 → 乔尔乔纳、提香等上百艺术家画题 → 斯宾塞《仙后》与英译本。《君主论》与它无关。"},
+ {q:"桑那扎罗讽刺恺撒·博尔贾的诗借用了哪个神话？",o:["宙斯化公牛劫欧罗巴","特洛伊木马","潘多拉魔盒","那喀索斯照水"],a:0,e:"\"欧罗巴曾骑古泰尔公牛，谁会怀疑？一只西班牙的公牛生下了朱莉娅\"——讽博尔贾（养穿盔甲的西班牙公牛）与朱莉娅·法尔内塞。"},
+ {q:"\"西西里避过了文艺复兴\"的原因是？",o:["被伊斯兰势力长期占领","地理与大陆隔绝","贵族恋旧、民众贫困、人才外流","教皇特别禁令"],a:2,e:"仅有的学者（奥里斯帕）与画家（安托尼洛）很快移往大陆；封建贵族喜爱 11 世纪甚于 15 世纪；被剥削的民众太穷。1295—1409 后它成为西班牙皇冠上的明珠。"},
+ {q:"本章在全书结构中的位置是？",o:["第二部开篇","第二部收官，引出罗马教皇","第五部总结","独立插曲"],a:1,e:"尾声综述次要艺术后宣告：\"所有这些交织成意大利的文艺复兴，并给美第奇家族统治下的罗马带来了满足和毁灭\"——下一部转向文艺复兴时代的教皇们。"},
+];
+
+/* ============ 工具 ============ */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const store={
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem("naples_ch8_"+k))??d}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem("naples_ch8_"+k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ============ 滚动显现 ============ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in")}),{threshold:.08});
+$$(".reveal").forEach(el=>io.observe(el));
+
+/* ============ 导航高亮 ============ */
+const navLinks=[...$$(".nav a")];
+const secIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));
+    }
+  });
+},{rootMargin:"-30% 0px -60% 0px"});
+["map","timeline","figures","stats","flash","quiz"].forEach(id=>{const el=document.getElementById(id);if(el)secIO.observe(el)});
+
+/* ============ 学习地图 ============ */
+$$(".map-card").forEach(c=>{
+  c.querySelector(".toggle").addEventListener("click",e=>{e.stopPropagation();c.classList.toggle("open");
+    c.querySelector(".toggle").textContent=c.classList.contains("open")?"▴ 收起脉络":"▾ 展开脉络";});
+  const btn=c.querySelector(".read-btn");
+  if(store.get("sec"+c.dataset.sec,false)){c.classList.add("done");btn.classList.add("marked");btn.textContent="✓ 已读";}
+  btn.addEventListener("click",e=>{e.stopPropagation();
+    const now=!c.classList.contains("done");
+    c.classList.toggle("done",now);btn.classList.toggle("marked",now);
+    btn.textContent=now?"✓ 已读":"○ 标记已读";
+    store.set("sec"+c.dataset.sec,now);updateProgress();});
+});
+
+/* ============ 人物画廊 ============ */
+function renderFigs(cat){
+  const g=$("#figGrid");g.innerHTML="";
+  FIGURES.filter(f=>cat==="all"||f.cat===cat).forEach((f,i)=>{
+    const d=document.createElement("div");d.className="fig";
+    d.innerHTML=`<div class="fig-inner">
+      <div class="fig-face"><div class="glyph">${f.g}</div><div class="nm">${f.n}</div><div class="en">${f.en}</div><span class="tag">${f.tag}</span><span class="hint">点击翻面 ↻</span></div>
+      <div class="fig-back"><h4>${f.n}</h4>${f.b}<div class="die">${f.d}</div></div>
+    </div>`;
+    d.addEventListener("click",()=>d.classList.toggle("flip"));
+    g.appendChild(d);
+  });
+}
+renderFigs("all");
+$("#figTabs").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  $$("#figTabs button").forEach(b=>b.classList.remove("on"));
+  e.target.classList.add("on");renderFigs(e.target.dataset.cat);
+});
+
+/* ============ 数字滚动 + 王朝条 ============ */
+const statIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    if(e.target.classList.contains("stat")){
+      const n=e.target.querySelector(".cnt");if(!n||n.dataset.done)return;n.dataset.done=1;
+      const v=+n.dataset.v,t0=performance.now(),dur=1400;
+      const step=t=>{const p=Math.min((t-t0)/dur,1);n.textContent=Math.round(v*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+      requestAnimationFrame(step);
+      statIO.unobserve(e.target);
+    }else if(e.target.id==="revBars"){
+      e.target.querySelectorAll(".fill").forEach((f,i)=>setTimeout(()=>f.style.width=f.dataset.w+"%",i*160));
+      statIO.unobserve(e.target);
+    }
+  });
+},{threshold:.4});
+$$(".stat").forEach(s=>statIO.observe(s));
+statIO.observe($("#revBars"));
+
+/* ============ 记忆闪卡 ============ */
+let deck=[...FLASH.keys()];
+let deckPos=0, curQ=0, curA=1, showing="q", roundStart=0;
+const mastery=store.get("flash",{});
+function flashRender(){
+  if(deckPos>=deck.length){finishRound();return;}
+  const i=deck[deckPos];
+  $("#fQ").innerHTML=FLASH[i][curQ];
+  $("#fA").innerHTML=FLASH[i][curA];
+  const c=$("#fCard");
+  c.className="fcard q";$(".qmark").style.display="";$(".amark").style.display="none";
+  showing="q";
+  $("#fCount").textContent=`第 ${deckPos+1} / ${deck.length} 张 · 全部 ${FLASH.length} 张中已掌握 ${Object.keys(mastery).filter(k=>mastery[k]>=2).length} 张`;
+  $("#fBar").style.width=(deckPos/deck.length*100)+"%";
+  updateProgress();
+}
+$("#fCard").addEventListener("click",()=>{
+  const c=$("#fCard");
+  if(showing==="q"){c.className="fcard a";showing="a";$(".qmark").style.display="none";$(".amark").style.display="";}
+  else{c.className="fcard q";showing="q";$(".qmark").style.display="";$(".amark").style.display="none";}
+});
+function grade(g){
+  const i=deck[deckPos];
+  mastery[i]=(mastery[i]||0)+ (g==="yes"?1:g==="mid"?0:-1);
+  if(mastery[i]<0)mastery[i]=0;
+  if(mastery[i]>=3)mastery[i]=3;
+  if(g!=="yes"){deck.push(i);}  // 未掌握：排到本轮末尾再见
+  store.set("flash",mastery);
+  deckPos++;flashRender();
+}
+$("#fYes").addEventListener("click",()=>grade("yes"));
+$("#fMid").addEventListener("click",()=>grade("mid"));
+$("#fNo").addEventListener("click",()=>grade("no"));
+$("#fShuffle").addEventListener("click",()=>{
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fReset").addEventListener("click",()=>{
+  Object.keys(mastery).forEach(k=>delete mastery[k]);store.set("flash",mastery);
+  deck=[...FLASH.keys()];deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fAgain").addEventListener("click",()=>{
+  const un=FLASH.map((_,i)=>i).filter(i=>(mastery[i]||0)<2);
+  deck=un.length?un:[...FLASH.keys()];
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+function finishRound(){
+  $("#fCard").style.display="none";$(".fb-btns").style.display="none";
+  $("#fDone").style.display="block";
+  const m=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  $("#fDoneTxt").innerHTML=`${FLASH.length} 张卡片中已牢固掌握 <b style="color:var(--gold)">${m}</b> 张。${m<FLASH.length?"点击下方按钮，专攻尚未掌握的卡片。":"全部掌握！本章记忆任务完成 🎉"}`;
+  $("#fBar").style.width="100%";
+  updateProgress();
+}
+flashRender();
+
+/* ============ 测验 ============ */
+let qOrder=[],qIdx=0,qRight=0,qWrongList=[];
+$("#qGo").addEventListener("click",startQuiz);
+$("#qRetry").addEventListener("click",startQuiz);
+$("#qNext").addEventListener("click",()=>{
+  qIdx++;
+  if(qIdx>=qOrder.length)endQuiz();else renderQ();
+});
+function startQuiz(){
+  qOrder=QUIZ.map((_,i)=>i);qIdx=0;qRight=0;qWrongList=[];
+  for(let i=qOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[qOrder[i],qOrder[j]]=[qOrder[j],qOrder[i]]}
+  $("#qStart").style.display="none";$("#qResult").style.display="none";$("#qBody").style.display="block";
+  renderQ();
+}
+function renderQ(){
+  const Q=QUIZ[qOrder[qIdx]];
+  $("#qNo").textContent=`第 ${qIdx+1} / ${qOrder.length} 题`;
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qBar").style.width=(qIdx/qOrder.length*100)+"%";
+  $("#qStem").textContent=Q.q;
+  const box=$("#qOpts");box.innerHTML="";
+  Q.o.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(65+i)+". "+t;
+    b.addEventListener("click",()=>answer(i,b));
+    box.appendChild(b);
+  });
+  $("#qExpl").className="expl";$("#qNext").style.display="none";
+}
+function answer(i,btn){
+  const Q=QUIZ[qOrder[qIdx]];
+  $$("#qOpts .opt").forEach((b,j)=>{b.disabled=true;if(j===Q.a)b.classList.add("right")});
+  if(i===Q.a){qRight++;}else{btn.classList.add("wrong");qWrongList.push(Q);}
+  const ex=$("#qExpl");ex.innerHTML=(i===Q.a?"✓ 正确。":"✗ 正确答案是 "+String.fromCharCode(65+Q.a)+"。")+Q.e;
+  ex.className="expl show";
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qNext").style.display="inline-block";
+  $("#qNext").textContent=qIdx===qOrder.length-1?"查看成绩 →":"下一题 →";
+}
+function endQuiz(){
+  $("#qBody").style.display="none";$("#qResult").style.display="block";
+  $("#qFinal").textContent=qRight+" / "+qOrder.length;
+  const pct=qRight/qOrder.length;
+  $("#qVerdict").textContent=pct===1?"满分！你已经完全掌握了这一章。":pct>=.8?"优秀！只有个别细节需要巩固。":pct>=.6?"不错，把错题的解析再读一遍会大有帮助。":"别灰心——错题解析就是最好的复习材料，再来一次。";
+  const w=$("#qWrong");
+  w.innerHTML=qWrongList.length?"<b style='color:var(--dim);font-size:12.5px'>错题回顾</b>"+qWrongList.map(Q=>`<div class="w"><b>${Q.q}</b><br>正确答案：${Q.o[Q.a]}<br><span style="color:var(--dim)">${Q.e}</span></div>`).join(""):"<p style='color:var(--ok);font-size:14px'>🎉 全部正确，无错题！</p>";
+  const best=store.get("quizBest",null);
+  if(best===null||qRight>best)store.set("quizBest",qRight);
+  updateProgress();
+}
+
+/* ============ 综合进度 ============ */
+function updateProgress(){
+  const secs=[1,2,3,4,5,6,7].filter(i=>store.get("sec"+i,false)).length;
+  const fl=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  const qb=store.get("quizBest",null);
+  const qsc=qb===null?0:qb/QUIZ.length;
+  const pct=Math.round((secs/7*0.4+fl/FLASH.length*0.4+qsc*0.2)*100);
+  $("#pPct").textContent=pct+"%";
+  $("#pBar").style.width=pct+"%";
+  $("#pSec").textContent=secs+"/7";
+  $("#pFlash").textContent=fl+"/"+FLASH.length;
+  $("#pQuiz").textContent=qb===null?"—":qb+" / "+QUIZ.length;
+  $("#navChip").textContent="进度 "+pct+"%";
+  const b=store.get("quizBest",null);
+  const be=$("#qBest");
+  if(be)be.innerHTML=b===null?"":"历史最高："+b+" / 12";
+}
+updateProgress();
+</script>
+</body>
+</html>
