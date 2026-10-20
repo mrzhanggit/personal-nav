@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>艾米利与前哨（1378—1534）· 交互式学习</title>
+<style>
+  :root{
+    --bg:#0b1626; --bg2:#0e1c30; --panel:#132441; --panel2:#182d50;
+    --line:rgba(212,175,55,.22); --line2:rgba(212,175,55,.45);
+    --gold:#d4af37; --gold-l:#e8c76a; --gold-d:#9a7b2d;
+    --text:#ede5d3; --dim:#a8b4c8; --blue:#4a7ab5;
+    --ok:#5aa876; --bad:#c05a5a;
+    --serif:"Songti SC","STSong","Noto Serif SC",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.75;font-size:16px}
+  ::selection{background:var(--gold);color:#0b1626}
+
+  /* ===== 顶部导航 ===== */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,22,38,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 18px;height:54px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .brand{font-family:var(--serif);color:var(--gold);font-size:17px;white-space:nowrap;margin-right:14px;display:flex;align-items:center;gap:8px}
+  .nav .brand svg{flex:none}
+  .nav a{color:var(--dim);text-decoration:none;font-size:13px;padding:6px 11px;border-radius:6px;white-space:nowrap;transition:.2s}
+  .nav a:hover{color:var(--gold-l);background:rgba(212,175,55,.08)}
+  .nav a.on{color:#0b1626;background:var(--gold)}
+  .nav .spacer{flex:1}
+  .nav .score-chip{white-space:nowrap;font-size:12px;color:var(--gold-l);border:1px solid var(--line2);border-radius:20px;padding:3px 12px}
+
+  /* ===== Hero ===== */
+  .hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px 24px 70px;position:relative;background:
+    radial-gradient(ellipse 80% 55% at 50% 0%,rgba(74,122,181,.16),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%,rgba(212,175,55,.07),transparent 60%),
+    linear-gradient(180deg,#0d1a2e 0%,var(--bg) 100%)}
+  .hero .kicker{color:var(--gold);letter-spacing:.35em;font-size:13px;margin-bottom:22px}
+  .hero h1{font-family:var(--serif);font-size:clamp(34px,6vw,62px);font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+  .hero h1 .gd{color:var(--gold);text-shadow:0 0 40px rgba(212,175,55,.35)}
+  .hero .sub{font-family:var(--serif);font-size:clamp(16px,2.4vw,21px);color:var(--dim);margin-bottom:36px}
+  .hero .meta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+  .hero .meta span{border:1px solid var(--line2);border-radius:20px;padding:5px 16px;font-size:13px;color:var(--gold-l)}
+  .hero .scene{width:min(680px,92vw);opacity:.9;margin-bottom:10px}
+  .hero .scroll-hint{position:absolute;bottom:26px;color:var(--dim);font-size:12px;letter-spacing:.25em;animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+  .hero .q{max-width:720px;color:var(--dim);font-family:var(--serif);font-size:15px;margin-top:6px}
+  .hero .q em{color:var(--gold-l);font-style:normal}
+
+  section{padding:78px 24px;max-width:1080px;margin:0 auto}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+  .sec-head .no{font-family:var(--serif);font-size:15px;color:var(--gold);border:1px solid var(--line2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .sec-head h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,32px);letter-spacing:.04em}
+  .sec-desc{color:var(--dim);font-size:14.5px;margin-bottom:34px;max-width:760px}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);max-width:1080px;margin:0 auto}
+
+  /* ===== 学习地图 ===== */
+  .map-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+  .map-card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.4)}
+  .map-card.done::after{content:"✓ 已读";position:absolute;top:12px;right:12px;font-size:11px;color:var(--ok);border:1px solid rgba(90,168,118,.5);border-radius:12px;padding:1px 9px}
+  .map-card .idx{font-family:var(--serif);color:var(--gold);font-size:13px;letter-spacing:.2em;margin-bottom:6px}
+  .map-card h3{font-family:var(--serif);font-size:20px;margin-bottom:10px}
+  .map-card .one{font-size:13.5px;color:var(--dim);margin-bottom:14px}
+  .map-card .detail{max-height:0;overflow:hidden;transition:max-height .45s ease;font-size:13.5px;color:var(--text)}
+  .map-card.open .detail{max-height:700px}
+  .map-card .detail ul{list-style:none;padding-top:6px}
+  .map-card .detail li{padding:5px 0 5px 20px;position:relative;border-top:1px dashed rgba(255,255,255,.06)}
+  .map-card .detail li::before{content:"◆";position:absolute;left:2px;color:var(--gold-d);font-size:9px;top:9px}
+  .map-card .detail li b{color:var(--gold-l);font-weight:600}
+  .map-card .toggle{font-size:12px;color:var(--gold);margin-top:14px;display:inline-block}
+  .read-btn{margin-top:16px;font-size:12px;color:var(--gold-l);background:rgba(212,175,55,.1);border:1px solid var(--line2);border-radius:8px;padding:5px 14px;cursor:pointer;transition:.2s}
+  .read-btn:hover{background:rgba(212,175,55,.22)}
+  .read-btn.marked{color:var(--ok);border-color:rgba(90,168,118,.5);background:rgba(90,168,118,.08)}
+
+  /* ===== 时间轴 ===== */
+  .tl{position:relative;padding-left:34px}
+  .tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--gold),var(--gold-d),transparent)}
+  .tl-item{position:relative;margin-bottom:26px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;transition:.25s}
+  .tl-item:hover{border-color:var(--line2);transform:translateX(4px)}
+  .tl-item::before{content:"";position:absolute;left:-31px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--gold);box-shadow:0 0 12px rgba(212,175,55,.5)}
+  .tl-item .yr{font-family:var(--serif);color:var(--gold);font-size:20px;font-weight:700;letter-spacing:.03em}
+  .tl-item .yr small{font-size:12px;color:var(--dim);font-weight:400;margin-left:10px;letter-spacing:.1em}
+  .tl-item p{font-size:14px;margin-top:6px;color:var(--text)}
+  .tl-item p b{color:var(--gold-l)}
+  .tl-item.era{background:linear-gradient(135deg,rgba(212,175,55,.14),var(--panel));border-color:var(--line2)}
+
+  /* ===== 人物画廊 ===== */
+  .fig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .fig{perspective:1200px;height:250px;cursor:pointer}
+  .fig-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .fig.flip .fig-inner{transform:rotateY(180deg)}
+  .fig-face,.fig-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .fig-face{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);align-items:center;justify-content:center;text-align:center}
+  .fig-face .glyph{font-family:var(--serif);font-size:44px;color:var(--gold);line-height:1;margin-bottom:14px;text-shadow:0 0 26px rgba(212,175,55,.45)}
+  .fig-face .nm{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+  .fig-face .en{font-size:11px;color:var(--dim);letter-spacing:.06em;margin-bottom:10px}
+  .fig-face .tag{font-size:11.5px;color:#0b1626;background:var(--gold);border-radius:12px;padding:2px 12px;font-weight:600}
+  .fig-face .hint{position:absolute;bottom:12px;font-size:11px;color:var(--dim)}
+  .fig-back{background:linear-gradient(160deg,#1b3358,var(--panel2));border:1px solid var(--line2);transform:rotateY(180deg);justify-content:flex-start;overflow-y:auto;font-size:12.8px;line-height:1.65}
+  .fig-back h4{font-family:var(--serif);color:var(--gold-l);font-size:15px;margin-bottom:8px}
+  .fig-back p{margin-bottom:6px;color:var(--text)}
+  .fig-back .die{color:var(--dim);font-size:11.5px;margin-top:auto;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12)}
+
+  .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+  .cat-tabs button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:20px;padding:6px 16px;font-size:13px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .cat-tabs button.on{background:var(--gold);color:#0b1626;border-color:var(--gold);font-weight:600}
+  .cat-tabs button:hover:not(.on){border-color:var(--line2);color:var(--gold-l)}
+
+  /* ===== 数据馆 ===== */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 16px;text-align:center;transition:.25s}
+  .stat:hover{border-color:var(--line2);transform:translateY(-3px)}
+  .stat .num{font-family:var(--serif);font-size:34px;color:var(--gold);font-weight:700;line-height:1.1}
+  .stat .num small{font-size:15px;color:var(--gold-d)}
+  .stat .lab{font-size:12.5px;color:var(--dim);margin-top:8px}
+
+  /* ===== 记忆闪卡 ===== */
+  .flash-app{max-width:680px;margin:0 auto}
+  .flash-ctrl{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:18px;font-size:13px;color:var(--dim)}
+  .flash-ctrl .btns{display:flex;gap:8px}
+  .flash-ctrl button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 14px;font-size:12.5px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .flash-ctrl button:hover{border-color:var(--line2);color:var(--gold-l)}
+  .fprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:26px}
+  .fprog .bar{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold));width:0;transition:width .4s}
+  .fcard{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:18px;min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;padding:36px 34px;cursor:pointer;position:relative;transition:.3s;user-select:none}
+  .fcard:hover{box-shadow:0 16px 44px rgba(0,0,0,.5)}
+  .fcard .face-q,.fcard .face-a{display:none}
+  .fcard.q .face-q{display:block}
+  .fcard.a .face-a{display:block}
+  .fcard .qmark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold-d);font-size:20px}
+  .fcard .amark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold);font-size:20px}
+  .fcard .face-q{font-family:var(--serif);font-size:clamp(18px,2.6vw,23px);line-height:1.6}
+  .fcard .face-a{font-size:15.5px;line-height:1.85;text-align:left}
+  .fcard .face-a b{color:var(--gold-l)}
+  .fcard .tap-hint{position:absolute;bottom:14px;right:20px;font-size:11px;color:var(--dim)}
+  .fb-btns{display:flex;gap:12px;margin-top:20px}
+  .fb-btns button{flex:1;border:none;border-radius:12px;padding:14px 8px;font-size:15px;font-family:var(--sans);cursor:pointer;transition:.2s;font-weight:600}
+  .b-no{background:rgba(192,90,90,.15);color:#e8a0a0;border:1px solid rgba(192,90,90,.4)!important}
+  .b-mid{background:rgba(212,175,55,.12);color:var(--gold-l);border:1px solid var(--line2)!important}
+  .b-yes{background:rgba(90,168,118,.15);color:#8fd0a8;border:1px solid rgba(90,168,118,.4)!important}
+  .fb-btns button:hover{transform:translateY(-2px)}
+  .flash-done{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:44px 30px;text-align:center}
+  .flash-done h3{font-family:var(--serif);color:var(--gold);font-size:24px;margin-bottom:10px}
+  .flash-done p{color:var(--dim);font-size:14px;margin-bottom:22px}
+
+  /* ===== 测验 ===== */
+  .quiz-wrap{max-width:720px;margin:0 auto}
+  .quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:12px}
+  .qprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:28px}
+  .qprog .bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));width:0;transition:width .4s}
+  .quiz-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px}
+  .quiz-q .stem{font-family:var(--serif);font-size:19px;margin-bottom:20px;line-height:1.6}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 16px;margin-bottom:10px;color:var(--text);font-size:15px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .opt:hover:not(:disabled){border-color:var(--line2);background:rgba(212,175,55,.07)}
+  .opt.right{border-color:var(--ok);background:rgba(90,168,118,.14);color:#a8e0be}
+  .opt.wrong{border-color:var(--bad);background:rgba(192,90,90,.12);color:#e8a0a0}
+  .opt:disabled{cursor:default}
+  .expl{margin-top:14px;padding:14px 16px;border-radius:10px;background:rgba(74,122,181,.1);border-left:3px solid var(--blue);font-size:13.5px;display:none;color:var(--text)}
+  .expl.show{display:block}
+  .qnxt{margin-top:18px;text-align:right}
+  .qnxt button{background:var(--gold);color:#0b1626;border:none;border-radius:10px;padding:10px 28px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .qnxt button:hover{background:var(--gold-l)}
+  .quiz-start,.quiz-result{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:44px 30px;text-align:center}
+  .quiz-start h3,.quiz-result h3{font-family:var(--serif);font-size:26px;color:var(--gold);margin-bottom:12px}
+  .quiz-start p{color:var(--dim);font-size:14px;max-width:480px;margin:0 auto 26px}
+  .quiz-start button,.quiz-result button{background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:13px 42px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+  .quiz-start button:hover,.quiz-result button:hover{background:var(--gold-l)}
+  .score-big{font-family:var(--serif);font-size:64px;color:var(--gold);line-height:1;margin:14px 0 6px}
+  .quiz-result .verdict{font-family:var(--serif);font-size:19px;margin-bottom:22px;color:var(--gold-l)}
+  .wrong-review{text-align:left;margin:22px auto 26px;max-width:560px}
+  .wrong-review .w{background:rgba(192,90,90,.07);border:1px solid rgba(192,90,90,.25);border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:10px}
+  .wrong-review .w b{color:#e8a0a0}
+
+  /* ===== 综合进度 ===== */
+  .progress-bar-wrap{max-width:1080px;margin:0 auto 60px;padding:0 24px}
+  .pbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+  .pbox .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;flex-wrap:wrap;gap:8px}
+  .pbox .row .t{font-family:var(--serif);color:var(--gold-l);font-size:17px}
+  .pbox .big{height:12px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
+  .pbox .big .bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-l));transition:width .8s;border-radius:6px}
+  .pbox .sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:14px;font-size:12.5px;color:var(--dim)}
+  .pbox .sub i{font-style:normal;color:var(--gold)}
+
+  footer{border-top:1px solid var(--line);padding:36px 24px;text-align:center;color:var(--dim);font-size:12.5px;line-height:2}
+  footer .gd{color:var(--gold)}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:640px){
+    section{padding:56px 16px}
+    .fig{height:230px}
+    .tl{padding-left:28px}
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <span class="brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 19c4-1 5-4 9-4s6 2 9 1" stroke="#d4af37" stroke-width="1.4"/><path d="M7 15l1.5-3.5M12 14l1-4M17 15l-.5-3" stroke="#d4af37" stroke-width="1.2"/><circle cx="12" cy="5" r="2" stroke="#d4af37" stroke-width="1.2"/></svg>
+    艾米利与前哨
+  </span>
+  <a href="#map">学习地图</a>
+  <a href="#timeline">时间轴</a>
+  <a href="#figures">人物</a>
+  <a href="#stats">数据馆</a>
+  <a href="#flash">记忆卡</a>
+  <a href="#quiz">测验</a>
+  <span class="spacer"></span>
+  <span class="score-chip" id="navChip">进度 0%</span>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="kicker">文明的故事 · 卷05 文艺复兴 · 第二部</div>
+  <h1>艾米利与前哨<span class="gd">（1378—1534）</span></h1>
+  <div class="sub">一条 175 英里的古罗马大道，串起帝国缝隙里的天才与城邦</div>
+  <div class="meta">
+    <span>威尔·杜兰特</span><span>第七章</span><span>柯勒乔 → 乌尔比诺</span><span>阅读约 25 分钟 · 本章约 2.3 万字</span>
+  </div>
+  <svg class="scene" viewBox="0 0 680 190" fill="none">
+    <!-- 落日 -->
+    <circle cx="120" cy="60" r="26" stroke="#e8c76a" stroke-width="1.6" opacity=".9"/>
+    <path d="M94 60h52M90 70h60M98 50h44" stroke="#e8c76a" stroke-width="1" opacity=".5"/>
+    <!-- 远山 -->
+    <path d="M0 130L90 84l60 30 70-38 80 40 60-26 90 40 70-30 60 30 100-24v60H0z" fill="#12233d" stroke="#3d5a86" stroke-width="1"/>
+    <!-- 山顶城（乌尔比诺）：双塔 + 拱廊宫 -->
+    <g stroke="#d4af37" stroke-width="1.5" opacity=".9">
+      <path d="M430 116V74l14-10 14 10v42"/>
+      <path d="M472 116V80l10-8 10 8v36"/>
+      <rect x="446" y="88" width="34" height="28" rx="2"/>
+      <path d="M452 116v-14h22v14M452 102h22" opacity=".6"/>
+      <path d="M444 92h38" opacity=".5"/>
+    </g>
+    <!-- 蜿蜒大道 -->
+    <path d="M20 168c60 0 90-18 150-16s90 14 140 10 70-18 120-14 80 16 130 12" stroke="#e8c76a" stroke-width="1.8" stroke-dasharray="1 7" stroke-linecap="round"/>
+    <!-- 大道路石 -->
+    <g fill="#d4af37" opacity=".75">
+      <rect x="60" y="150" width="7" height="7" rx="1"/><rect x="180" y="156" width="7" height="7" rx="1"/>
+      <rect x="300" y="148" width="7" height="7" rx="1"/><rect x="430" y="158" width="7" height="7" rx="1"/>
+      <rect x="560" y="152" width="7" height="7" rx="1"/>
+    </g>
+    <!-- 前方孤树（柯勒乔之乡） -->
+    <path d="M600 148v-26M600 122c-14-2-18-14-8-20-2-10 10-16 16-8 10-4 16 8 8 14 6 8-6 18-16 14z" stroke="#4a7ab5" stroke-width="1.3" opacity=".8"/>
+    <!-- 地平线光 -->
+    <path d="M0 186c120-8 240 8 360 0s240 8 320 0" stroke="#4a7ab5" stroke-width="1" opacity=".4"/>
+  </svg>
+  <p class="q">"乌尔比诺……面积只有<em>40 平方英里</em>，是 15 世纪世界上文明最发达的地区之一。"</p>
+  <div class="scroll-hint">▾ 开始学习</div>
+</div>
+
+<!-- ① 学习地图 -->
+<section id="map">
+  <div class="sec-head reveal"><span class="no">壹</span><h2>学习地图 · 四大板块</h2></div>
+  <p class="sec-desc reveal">本章按地理动线推进：沿艾米利大道从西向东（皮亚琴察→帕尔马→雷焦→摩德纳→博洛尼亚→伊摩拉→弗利→里米尼），再探南北两侧的拉韦纳、圣马力诺与洛雷托，最后深入内陆山城乌尔比诺。点击卡片展开脉络，读后标记已读。</p>
+  <div class="map-wrap reveal">
+
+    <div class="map-card" data-sec="1">
+      <div class="idx">板块 01</div><h3>柯勒乔</h3>
+      <div class="one">光影魔术师的一生 + 帕尔米贾尼诺的流星</div>
+      <div class="detail"><ul>
+        <li>小城柯勒乔因他而得名（本名<b>安东尼奥·亚莱格里</b>）；引荐人是伯爵夫人韦罗妮卡·甘巴拉——"第十位缪斯女神"</li>
+        <li>师承：舅父洛伦佐启蒙 → 深受<b>曼特尼亚</b>壁画影响 → 可能研习过达·芬奇、拉斐尔作品的摹本</li>
+        <li><b>1518 关键转折</b>：女修道院长乔瓦娜请他布置厅堂，选了狄安娜主题——"女修道院长使他叛离了基督教"</li>
+        <li>圣乔万尼传道会圆顶<b>12 使徒</b>（可与西斯廷米开朗基罗辉映）；帕尔马大教堂<b>《圣母升天》</b>被教士讥为"群蛙大餐"</li>
+        <li>晚期双璧：<b>《白昼》</b>（圣吉罗拉莫的圣母）与<b>《夜晚》</b>（牧羊人的崇拜）</li>
+        <li>贡萨加订件（献给查理五世）：爱情神话系列《丽达与天鹅》《加尼米德的遇劫》等</li>
+        <li><b>之死</b>：1534 年领 60 克朗分期付款全是铜板，携带徒步离开帕尔马，中暑发烧而死（40 岁，一说 45）</li>
+        <li>地位：<b>明暗对照法大师</b>；影响博洛尼亚画派（卡拉西、雷尼）与法国（凡尔赛装饰风、华托）——"征服法国的是柯勒乔而不是拉斐尔"</li>
+        <li><b>帕尔米贾尼诺</b>（"帕尔马人"）：孤儿神童，17 岁自画像传世；晚年沉迷炼金术荒废合约被通缉，1540 年猝逝于修道院</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="2">
+      <div class="idx">板块 02</div><h3>博洛尼亚</h3>
+      <div class="one">学府之城：温和僭主、拱廊建筑与画派盟主</div>
+      <div class="detail"><ul>
+        <li>政治：<b>本蒂沃利家族</b>温和独裁维持 15 世纪；乔万尼·本蒂沃利治理<b>37 年</b>（1469–1506），睿智公正、赞助艺术；晚年严刑峻法失民心，1506 年教皇尤利乌斯二世兵临城下迫其让位</li>
+        <li>此后至 1796 年拿破仑来临前，博洛尼亚一直是<b>教皇管区</b>（但自治政府与学术自由得到认可）</li>
+        <li>建筑：商人公会商业大厅、公证大厦、统治者宫（<b>布拉曼特</b>设计螺旋阶梯）；满城<b>拱廊</b>——"徒步数英里不被日晒雨淋"</li>
+        <li><b>圣彼得罗纽斯教堂</b>（1388 决议）：设计 700 英尺长，要"使佛罗伦萨人大教堂相形见绌"；因经费只建成低矮部分，但仍是杰作——奎尔恰的浮雕给米开朗基罗很大灵感</li>
+        <li>雕刻：女雕刻家<b>罗西</b>（教皇克莱门特七世欲见她时恰去世）；阿方索·伦巴底（扮提香仆人混入觐见、当场为查理五世塑像的轶事）</li>
+        <li>绘画双星：<b>科斯塔</b>（23 岁来此，住 26 年）与<b>弗兰西亚</b>（金匠名、造币厂厂长）莫逆共事</li>
+        <li><b>弗兰西亚与拉斐尔</b>的通信佳话（1508 年拉斐尔的谦逊书信）；瓦萨里称其见《圣西西里娅》后认清差距、郁郁而终（1517，67 岁）</li>
+        <li><b>莱蒙迪</b>：版画家——复制丢勒 36 块木刻、与拉斐尔合作刻版传播名作——"跟古登堡、马努蒂乌斯在学问和文学上的贡献相仿"</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="3">
+      <div class="idx">板块 03</div><h3>艾米利大道</h3>
+      <div class="one">沿线小城群像：母虎、魔头与圣屋</div>
+      <div class="detail"><ul>
+        <li>雷焦：奥古斯丁会僧侣卡里皮诺的<b>拉丁-意语对照字典</b>（后出 11 种文字版）；摩德纳：马佐尼的赤陶<b>《死亡的耶稣》</b>"真实感震惊同乡"</li>
+        <li><b>法恩扎</b>：因彩陶工业得名（faience 词源）——不透明瓷釉 + 金属氧化物，焙烧浮现紫绿蓝色</li>
+        <li><b>弗利 · 卡泰丽娜·斯福尔扎</b>（1488）：夫被弑、子被扣为质；她入城堡即闭门督战，面对"杀你孩子"的威胁，站在碉堡上答——<b>"我体内怀着另一个小孩，而且以后可以很容易得到更多"</b></li>
+        <li>拉韦纳（1441 年起属威尼斯）与<b>圣马力诺</b>（峻崖自治，1631 年教皇乌尔班八世正式承认独立）</li>
+        <li><b>里米尼 · 马拉泰斯塔家族</b>（诨名"魔头"）：<b>西吉斯蒙多</b>捏造通奸杀两妻、忠于情妇阿蒂并成婚、把圣水钵装墨水作弄信徒——但也是能将、诗人、艺术赞助人</li>
+        <li><b>马拉泰斯塔大庙</b>：阿尔贝蒂以<b>公元前 27 年奥古斯都拱门</b>为范改建立面；内部是"异教精神的礼赞"（行星诸神会堂、柏拉图派哲学家布雷托的骨灰）；庇护二世评"变成不信神者崇拜异端的地方"</li>
+        <li>1459 年庇护二世开除西吉斯蒙多教籍（异端、乱伦、通奸、伪誓、叛国、亵渎），他"付之一笑"；1463 年降服；后率威尼斯军胜土耳其，带回布雷托骨灰；1468 年去世——<b>"想到文艺复兴的总体印象时，千万不能忘记他"</b></li>
+        <li><b>洛雷托圣屋</b>：相传天使把玛利亚一家的拿撒勒小屋先迁达尔马提亚、再越海迁至洛雷托；每年成千上万朝圣者；布拉曼特设计大理石屏障——<b>"这也是文艺复兴的一部分"</b></li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="4">
+      <div class="idx">板块 04</div><h3>乌尔比诺与卡斯底里欧尼</h3>
+      <div class="one">理想君主、模范宫廷与《朝臣》挽歌</div>
+      <div class="detail"><ul>
+        <li><b>费德里科·蒙泰费尔特罗</b>：雇佣兵队长出身，统治<b>38 年从未败仗</b>；早晨花园听民疾苦、下午拉丁文审案；救济贫穷、帮孤女置嫁妆；1474 年封公爵，英王封嘉德骑士</li>
+        <li><b>宫殿</b>（1468 建于 500 官员之朝廷）："不似堡垒，倒像行政中心和文学艺术的避难所"（达尔马提亚人劳拉那设计）</li>
+        <li><b>图书馆</b>：30 名抄写员誊写 13 年——<b>梵蒂冈以外全意大利藏书最丰富</b>；视书为艺术品，不收印刷本；1502 年博尔贾劫掠估值<b>15 万杜卡特</b></li>
+        <li><b>圭多巴尔多夫妇</b>：公爵征战致瘫痪；夫人伊丽莎贝塔（伊莎贝拉之姐）"待他像妈妈"；宫廷问答——爱情最好的证明是<b>"同甘共苦"</b></li>
+        <li>1502 年恺撒·博尔贾夺城（全城妇女献首饰资助防御），1503 年复位；侄子罗维尔继嗣后维持 10 年和平</li>
+        <li>宫廷文化巅峰：1508 年意大利最早喜剧<b>《格兰大》</b>首演；谈话艺术"臻于文艺复兴的巅峰"（本博、比别纳、朱利亚诺·美第奇等常客）</li>
+        <li><b>卡斯底里欧尼与《朝臣》</b>：在乌尔比诺 11 年（与伊丽莎贝塔柏拉图之恋）；《朝臣》成书于罗马、压到 1528 年出版；10 年内有法译本，1561 年英译本成为伊丽莎白时代必读</li>
+        <li>结局：1524 年出使马德里失败，罗马遭劫（1527）心灰意冷，<b>1529 年卒于托莱多（51 岁）</b>；与亡妻合葬，碑文："当我与你同卧一墓时，我一定要活下去"</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ② 时间轴 -->
+<section id="timeline">
+  <div class="sec-head reveal"><span class="no">贰</span><h2>大事时间轴 · 1378—1534</h2></div>
+  <p class="sec-desc reveal">本章时间跨度与上一章（威尼斯）平行。金点为城邦事件，光晕卡为改变人物命运的节点。</p>
+  <div class="tl">
+    <div class="tl-item reveal"><div class="yr">1378—1417 <small>背景</small></div><p>天主教会大分裂，教皇约束力徒具虚文——艾米利各城邦豪族（本蒂沃利、马拉泰斯塔等）借机崛起当权。</p></div>
+    <div class="tl-item reveal"><div class="yr">1388</div><p>博洛尼亚市议会决议建<b>圣彼得罗纽斯教堂</b>——设计 700 英尺长，要使佛罗伦萨大教堂相形见绌。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1459 <small>绝罚</small></div><p>教皇庇护二世在曼图亚会议上<b>开除西吉斯蒙多教籍</b>，罪名包括异端、忤逆、乱伦、通奸、伪誓、叛国、亵渎神明。西吉斯蒙多对敕书"付之一笑，一点儿也没影响他的酒量和食欲"。</p></div>
+    <div class="tl-item reveal"><div class="yr">1463 → 1468</div><p>西吉斯蒙多 1463 年跪在教皇使节前悔罪；后率威尼斯军战胜土耳其，带回柏拉图派哲学家布雷托的骨灰；1468 年去世。</p></div>
+    <div class="tl-item reveal"><div class="yr">1468</div><p>同一年：<b>费德里科开建乌尔比诺宫殿</b>（劳拉那设计）；洛雷托圣屋上的教堂动工（1468 年，朱利亚诺兄弟）。</p></div>
+    <div class="tl-item reveal"><div class="yr">1469—1506</div><p><b>乔万尼·本蒂沃利治理博洛尼亚 37 年</b>：铺路、开运河、济贫、减少失业、赞助艺术（把科斯塔带到博洛尼亚）。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1488 <small>城头母虎</small></div><p>弗利叛军弑其夫、以孩子相要挟，<b>卡泰丽娜·斯福尔扎</b>在碉堡上回答："我的体内怀着另一个小孩，而且以后可以很容易得到更多。"</p></div>
+    <div class="tl-item reveal"><div class="yr">1502</div><p><b>恺撒·博尔贾突袭乌尔比诺</b>，宫廷艺术瑰宝（估值 15 万杜卡特）被占为己有；圭多巴尔多夫妇流亡威尼斯。</p></div>
+    <div class="tl-item reveal"><div class="yr">1503 → 1508</div><p>教皇亚历山大六世死，乌尔比诺起义迎回圭多巴尔多；1506 年尤利乌斯二世逐本蒂沃利出博洛尼亚；<b>1508 年意大利最早喜剧《格兰大》首演于乌尔比诺宫廷</b>。</p></div>
+    <div class="tl-item reveal"><div class="yr">1508 → 1517</div><p>拉斐尔致弗兰西亚的著名谦逊书信（9 月 5 日）；瓦萨里称弗兰西亚 1517 年见《圣西西里娅》后郁郁而终（67 岁）。</p></div>
+    <div class="tl-item reveal"><div class="yr">1518</div><p>女修道院长乔瓦娜请<b>柯勒乔</b>画狄安娜壁画——异教动机闯进基督教题材的转折点。</p></div>
+    <div class="tl-item reveal"><div class="yr">1520 → 1530</div><p>柯勒乔先后完成圣乔万尼传道会圆顶（12 使徒）与帕尔马大教堂<b>《圣母升天》</b>——后者被讥为"群蛙大餐"，教士们对"以人的躯体祝贺圣母"表示怀疑。</p></div>
+    <div class="tl-item reveal"><div class="yr">1527</div><p><b>罗马大劫</b>。卡斯底里欧尼："精致文化与相互关怀的大同世界的理想，终于在罗马的一场浩劫中破灭。"</p></div>
+    <div class="tl-item era reveal"><div class="yr">1528 <small>《朝臣》出版</small></div><p>卡斯底里欧尼《朝臣》在朋友强迫下出版；不到 10 年有法译本；1561 年霍比爵士英译——每个伊丽莎白时代知识分子的必读书。</p></div>
+    <div class="tl-item reveal"><div class="yr">1529</div><p>卡斯底里欧尼<b>卒于托莱多，51 岁</b>。遗体归葬曼图亚，与亡妻伊坡里塔合葬。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1534 <small>本章终</small></div><p>3 月 5 日，<b>柯勒乔</b>领 60 克朗铜板徒步返乡，中暑发烧死于农庄（40 岁，一说 45）。帕尔米贾尼诺尚在炼金炉边（1540 年亦猝逝）——艾米利的光，在罗马劫掠后的暮色里渐暗。</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ③ 人物画廊 -->
+<section id="figures">
+  <div class="sec-head reveal"><span class="no">叁</span><h2>人物画廊 · 十六位群星</h2></div>
+  <p class="sec-desc reveal">记忆锚点：两个画家（柯勒乔/帕尔米贾尼诺）、两个"雷"（僭主本蒂沃利/魔头西吉斯蒙多）、一对夫妇（圭多巴尔多/伊丽莎贝塔）、一本书的作者（卡斯底里欧尼）。</p>
+  <div class="cat-tabs reveal" id="figTabs">
+    <button class="on" data-cat="all">全部</button>
+    <button data-cat="gov">统治者 · 豪族</button>
+    <button data-cat="painter">画家</button>
+    <button data-cat="writer">文学 · 出版</button>
+    <button data-cat="arch">建筑 · 雕刻</button>
+  </div>
+  <div class="fig-grid reveal" id="figGrid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ④ 数据馆 -->
+<section id="stats">
+  <div class="sec-head reveal"><span class="no">肆</span><h2>数字档案馆</h2></div>
+  <p class="sec-desc reveal">本章的九个关键数字——小城邦的体量与天才的密度。</p>
+  <div class="stat-grid reveal">
+    <div class="stat"><div class="num"><span class="cnt" data-v="175">0</span></div><div class="lab">艾米利大道全长（英里）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="40">0</span></div><div class="lab">乌尔比诺面积（平方英里）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="38">0</span></div><div class="lab">费德里科统治年数</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="30">0</span></div><div class="lab">誊写典籍的抄写员（13 年）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="15">0</span><small> 万</small></div><div class="lab">博尔贾劫掠乌尔比诺瑰宝估值（杜卡特）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="37">0</span></div><div class="lab">本蒂沃利治博洛尼亚年数</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="700">0</span></div><div class="lab">圣彼得罗纽斯教堂设计长度（英尺）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="36">0</span></div><div class="lab">莱蒙迪复制的丢勒木刻数</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="51">0</span><small> 岁</small></div><div class="lab">卡斯底里欧尼享年</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑤ 记忆闪卡 -->
+<section id="flash">
+  <div class="sec-head reveal"><span class="no">伍</span><h2>记忆闪卡 · 二十二张</h2></div>
+  <p class="sec-desc reveal">先自问再点卡翻面作答，然后诚实地点「认识 / 模糊 / 不会」——未掌握的卡会排到后面重练，直到全部通关。进度自动保存。</p>
+  <div class="flash-app reveal">
+    <div class="flash-ctrl">
+      <span id="fCount"></span>
+      <div class="btns">
+        <button id="fShuffle">🔀 打乱</button>
+        <button id="fReset">↺ 重置进度</button>
+      </div>
+    </div>
+    <div class="fprog"><div class="bar" id="fBar"></div></div>
+    <div class="fcard q" id="fCard">
+      <span class="qmark">问</span><span class="amark" style="display:none">答</span>
+      <div class="face-q" id="fQ"></div>
+      <div class="face-a" id="fA"></div>
+      <span class="tap-hint">点击卡片翻面</span>
+    </div>
+    <div class="fb-btns">
+      <button class="b-no" id="fNo">✗ 不会</button>
+      <button class="b-mid" id="fMid">～ 模糊</button>
+      <button class="b-yes" id="fYes">✓ 认识</button>
+    </div>
+    <div class="flash-done" id="fDone" style="display:none">
+      <h3>🌾 本轮完成</h3>
+      <p id="fDoneTxt"></p>
+      <button id="fAgain" style="background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:12px 36px;font-size:15px;font-weight:600;cursor:pointer">再来一轮（只练未掌握）</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑥ 测验 -->
+<section id="quiz">
+  <div class="sec-head reveal"><span class="no">陆</span><h2>终极测验 · 十二题</h2></div>
+  <p class="sec-desc reveal">检验本章掌握程度。错题的解析就是最好的复习材料。最高分会保存。</p>
+  <div class="quiz-wrap reveal">
+    <div class="quiz-start" id="qStart">
+      <h3>准备就绪？</h3>
+      <p>12 道选择题，覆盖柯勒乔、博洛尼亚、艾米利大道、乌尔比诺全部板块。<br>预计用时 3–5 分钟。</p>
+      <button id="qGo">开始测验</button>
+      <p style="margin-top:16px;font-size:12.5px" id="qBest"></p>
+    </div>
+    <div id="qBody" style="display:none">
+      <div class="quiz-meta"><span id="qNo"></span><span id="qScore"></span></div>
+      <div class="qprog"><div class="bar" id="qBar"></div></div>
+      <div class="quiz-q">
+        <div class="stem" id="qStem"></div>
+        <div id="qOpts"></div>
+        <div class="expl" id="qExpl"></div>
+        <div class="qnxt"><button id="qNext" style="display:none">下一题 →</button></div>
+      </div>
+    </div>
+    <div class="quiz-result" id="qResult" style="display:none">
+      <h3>测验完成</h3>
+      <div class="score-big" id="qFinal"></div>
+      <div class="verdict" id="qVerdict"></div>
+      <div class="wrong-review" id="qWrong"></div>
+      <button id="qRetry">重新挑战</button>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 综合进度 -->
+<div class="progress-bar-wrap reveal">
+  <div class="pbox">
+    <div class="row"><span class="t">🌾 我的学习进度</span><span id="pPct">0%</span></div>
+    <div class="big"><div class="bar" id="pBar"></div></div>
+    <div class="sub">
+      <span>板块已读 <i id="pSec">0/4</i></span>
+      <span>闪卡已掌握 <i id="pFlash">0/22</i></span>
+      <span>测验最高分 <i id="pQuiz">—</i></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="gd">◆</span> 资料来源：威尔·杜兰特《文明的故事》卷05·文艺复兴·第二部·第七章《艾米利与前哨（1378—1534）》<br>
+  学习进度保存在本机浏览器（localStorage），不清除缓存则长期有效 · 小满 🌾 为张总制作
+</footer>
+
+<script>
+/* ============ 数据 ============ */
+const FIGURES=[
+ {n:"柯勒乔",en:"Correggio / Antonio Allegri",cat:"painter",g:"☀",tag:"光影魔术师",
+  b:"<h4>1489—1534</h4><p>本名安东尼奥·亚莱格里，生于柯勒乔小城（城因人得名）。舅父启蒙→曼特尼亚影响→研习达·芬奇与拉斐尔的摹本。</p><p><b>明暗对照法大师</b>：色彩柔和（紫、橘、玫瑰、蓝、银），大胆尝试角锥形/对角线/圆形构图。帕尔马大教堂《圣母升天》被教士讥为<b>\"群蛙大餐\"</b>。</p><p>1534 年领 60 克朗铜板徒步返乡，中暑发烧而死（40 岁，一说 45）。</p>",d:"\"征服法国的是柯勒乔而不是拉斐尔\"——影响直抵凡尔赛与华托"},
+ {n:"帕尔米贾尼诺",en:"Parmigianino / F. Mazzuoli",cat:"painter",g:"🪞",tag:"早熟的神童",
+  b:"<h4>1503—1540</h4><p>本名弗朗西斯科·马佐利，\"帕尔马人\"。孤儿，画家舅父抚养，天才早熟——<b>17 岁的镜前自画像</b>是\"艺术上最动人的自画像\"，呈现少年的文雅、敏感和骄傲。</p><p>1523 年避教皇军围城赴罗马，正要声名大噪时遇<b>罗马遭劫</b>（1527），逃博洛尼亚又被抢劫一空。代表作《土耳其奴隶》《圣凯瑟琳的婚礼》。</p><p>晚年热衷<b>炼金术</b>，荒废绘画被教会通缉，逃入卡萨尔修道院，1540 年得寒热病猝逝。</p>",d:"\"也许受到灾祸与贫穷的刺激\""},
+ {n:"韦罗妮卡·甘巴拉",en:"Veronica Gambara",cat:"writer",g:"📜",tag:"第十位缪斯女神",
+  b:"<h4>柯勒乔城伯爵夫人</h4><p>能说拉丁语、熟谙经院哲学、评注早期基督教神学、擅长彼特拉克式精致文体——被称为<b>\"第十位缪斯女神\"</b>。</p><p>把小宫廷布置成艺术家和诗人的沙龙，传播浪漫式女性崇拜风气，将意大利艺术塑造成女性魅力的呈现。</p><p>1528 年 9 月 3 日写信给伊莎贝拉，盛赞柯勒乔刚完成的《抹大拉的玛利亚》\"旷世佳作\"——她是最早为他扬名的人。</p>",d:"才女 + 伯乐的双重身份"},
+ {n:"乔万尼·本蒂沃利",en:"Giovanni Bentivoglio",cat:"gov",g:"🏛",tag:"博洛尼亚僭主 · 37年",
+  b:"<h4>治理博洛尼亚 1469—1506</h4><p>温和独裁，保留共和形式。睿智公正：广铺大道、修路、开运河、施物济贫、组织公共事务减少失业，还把洛伦佐·科斯塔带到博洛尼亚。</p><p>晚年受阴谋刺激转用严刑峻法，丧失民心。1506 年教皇尤利乌斯二世兵临城下，他<b>毫无抵抗地投降</b>，两年后死于米兰。</p>",d:"\"教皇的统治果然比本蒂沃利来得有秩序和自由\""},
+ {n:"弗兰西亚",en:"Francesco Francia",cat:"painter",g:"🪙",tag:"博洛尼亚画派盟主",
+  b:"<h4>1450—1517</h4><p>本名拉伊博利尼，以<b>金匠师傅之名</b>行世。冶金、造银、黑金镶嵌、瓷釉样样精通，任<b>造币厂厂长</b>——铜板美得\"超凡脱俗\"，死后价格倍增。</p><p>本蒂沃利发现其绘画天才。瓦萨里描其\"谈话风趣，可使最忧郁的人忘忧解愁\"。</p><p><b>与拉斐尔的通信</b>是文艺复兴最愉快的逸事；瓦萨里称其见拉斐尔《圣西西里娅》后认清差距、再也提不起劲作画，不久去世（67 岁）——杜兰特注：此说存疑。</p>",d:"\"他称得上拉斐尔的前驱\""},
+ {n:"莱蒙迪",en:"Marcantonio Raimondi",cat:"writer",g:"🖨",tag:"版画传播者",
+  b:"<h4>文艺复兴的\"复印机\"</h4><p>在威尼斯见丢勒雕刻，几乎花光旅费买下<b>36 块《基督受难图》木刻</b>，复印到铜板上以丢勒名义出售。</p><p>后在罗马与拉斐尔合作——拉斐尔答应其许多作品可供雕刻制版。以这种新奇方法维生，使欧洲艺术家<b>不必亲访意大利</b>就能看到文艺复兴诸大师名作。</p><p>杜兰特评：他跟古登堡、马努蒂乌斯在学问和文学上的贡献相仿——继往开来。</p>",d:"印刷术之于绘画"},
+ {n:"卡泰丽娜·斯福尔扎",en:"Caterina Sforza",cat:"gov",g:"🦁",tag:"弗利的母虎",
+  b:"<h4>1488 年弗利城头</h4><p>米兰大公之女，嫁给弗利暴君里亚里奥。1488 年臣属反叛弑其夫、拘其母子，效忠她的军队仍守城堡。</p><p>她以劝降为名进入城堡后<b>立即闭门督战</b>。叛军威胁杀害她的孩子，她站在碉堡上回答：<b>\"我的体内怀着另一个小孩，而且以后可以很容易得到更多。\"</b></p><p>米兰的洛多维科及时派军解围，平定叛军。</p>",d:"文艺复兴最著名的女性刚烈形象之一"},
+ {n:"西吉斯蒙多·马拉泰斯塔",en:"Sigismondo Malatesta",cat:"gov",g:"⚔",tag:"里米尼的\"魔头\"",
+  b:"<h4>里米尼统治者 · 卒于1468</h4><p>马拉泰斯塔家族（诨名 Evil Heads）最有名者：<b>捏造通奸罪名杀掉两个妻子</b>；对情妇阿蒂异常忠诚并成婚，死后为其立碑；把圣水钵装满墨水作弄信徒是\"十分有趣的游戏\"。</p><p>另一面：能干的将才、写诗、学拉丁文希腊文、资助学者艺术家。1459 年被庇护二世<b>开除教籍</b>（异端/乱伦/通奸/伪誓/叛国/亵渎），他对敕书付之一笑；1463 年终降服教皇。</p>",d:"杜兰特：想到文艺复兴的总体印象时，千万不能忘记他"},
+ {n:"费德里科·蒙泰费尔特罗",en:"Federico da Montefeltro",cat:"gov",g:"👑",tag:"乌尔比诺理想君主",
+  b:"<h4>统治38年 · 政通人和</h4><p>雇佣兵队长出身、花钱谨慎。从不打败仗，也不让战火蹂躏国土——\"一封伪造的函件\"就能占领一个城镇。</p><p>仁政：早晨在花园垂听民疾苦，下午操拉丁文审案；救济贫穷、帮孤女添嫁妆、荒年贱卖囤粮。与百姓相处不带武器、不用卫护。1474 年封公爵，英王封<b>嘉德骑士</b>。</p><p>\"他的一生是他尊贵的老师维托里诺所曾得过的最好的礼赞。\"</p>",d:"连了不起的洛伦佐都瞠乎其后"},
+ {n:"圭多巴尔多",en:"Guidobaldo da Montefeltro",cat:"gov",g:"🕊",tag:"瘫痪的公爵",
+  b:"<h4>费德里科之子</h4><p>尽力效法先父，不幸南北征战得一场大病<b>终生瘫痪</b>。1502 年恺撒·博尔贾突袭，乌尔比诺<b>全城妇女献出钻石珠宝</b>资助防御，仍不敌，夫妇流亡（先曼图亚后威尼斯）。</p><p>1503 年博尔贾势力崩溃，百姓揭竿起义迎接他们回来。收侄子罗维尔（教皇尤利乌斯二世之侄）为继承人，小侯国又维持 10 年和平。</p>",d:"宫廷问答：爱情最好的证明是\"同甘共苦\""},
+ {n:"伊丽莎贝塔·贡萨加",en:"Elisabetta Gonzaga",cat:"gov",g:"💐",tag:"忠诚的公爵夫人",
+  b:"<h4>曼图亚伊莎贝拉之姐</h4><p>身体虚弱、胆小温和，知道丈夫性事无能\"或许曾松一口气\"——\"以姐妹的身份和他生活在一起已经心满意足\"，待他<b>像妈妈不像姐姐</b>，颠沛流离也不曾抛弃。</p><p>她写给妹妹的家书\"在道德品格常被忽略的文艺复兴时代显得尤其可贵\"。卡斯底里欧尼在乌尔比诺 11 年，把她的照片藏在镜后，偷偷写十四行诗歌颂她。</p>",d:"《朝臣》里理想化宫廷的女主人"},
+ {n:"卡斯底里欧尼",en:"Baldassare Castiglione",cat:"writer",g:"⚜",tag:"文艺复兴君子 · 《朝臣》",
+  b:"<h4>1478—1529</h4><p>18 岁入米兰宫廷；投圭多巴尔多军队却敲破脚踝，遂在乌尔比诺养病<b>一住 11 年</b>——与伊丽莎贝塔柏拉图之恋（公爵竟同意\"三位一体\"地共享）。</p><p>51 岁前才娶小 23 岁的伊坡里塔，旋即丧偶。1524 年奉使马德里与查理五世修好，任务失败；1527 年罗马遭劫，理想破灭；<b>1529 年卒于托莱多</b>。</p><p>碑文（自撰悼亡妻）：\"当我与你同卧一墓时，我一定要活下去。\"</p>",d:"卢浮宫拉斐尔画像：诗人多愁善感 + 哲人深思内涵"},
+ {n:"阿尔贝蒂",en:"Leon Battista Alberti",cat:"arch",g:"🏛",tag:"马拉泰斯塔大庙设计者",
+  b:"<h4>改造里米尼圣方济各教堂</h4><p>受西吉斯蒙多指派，抛弃 13 世纪哥特式教堂的完整形式，在正面依据<b>公元前 27 年立于里米尼的奥古斯都拱门</b>饰以古典图案。</p><p>计划中的诗班圆顶始终没完成，成了\"不堪入目的框架\"——时人讥称\"马拉泰斯塔大庙\"。内部则是异教精神的礼赞（行星诸神会堂）。</p>",d:"庇护二世：\"似乎变成不信神者崇拜异端的地方\""},
+ {n:"阿方索·伦巴底",en:"Alfonso Lombardi",cat:"arch",g:"🗿",tag:"雕刻家的机智",
+  b:"<h4>借提香之光的雕刻家</h4><p>得知查理五世来博洛尼亚（1530），说服提香<b>把自己以仆人身份带去</b>。提香作画时，他半躲身后用灰泥为君王素描——被查理发现，非常欣赏，命复制于大理石。</p><p>查理付提香 1000 克朗时嘱咐：\"其中有一半是给伦巴底的。\"后赴罗马为利奥十世与克莱门特七世刻墓；1535 年赞助者主教去世后失业，不到一年便去世。</p>",d:"浮雕博得米开朗基罗的赞美"},
+ {n:"洛伦佐·科斯塔",en:"Lorenzo Costa",cat:"painter",g:"🎨",tag:"博洛尼亚 · 26年",
+  b:"<h4>费拉拉画派的使者</h4><p>23 岁到博洛尼亚（1483），一住 26 年。与弗兰西亚同室工作、莫逆共琢，有时合力画一张画。为圣彼得罗纽斯替本蒂沃利画《加冕的圣母》获得名利。</p><p>1506 年尤利乌斯二世逼近、本蒂沃利出逃，科斯塔应邀<b>接替曼特尼亚在曼图亚的位置</b>。</p>",d:"与弗兰西亚同领博洛尼亚画派"},
+ {n:"奎尔恰",en:"Jacopo della Quercia",cat:"arch",g:"🪵",tag:"锡耶纳雕刻大师",
+  b:"<h4>圣彼得罗纽斯的浮雕</h4><p>为博洛尼亚圣彼得罗纽斯教堂正门侧柱与楣梁刻浮雕——题材可与吉贝尔蒂的佛罗伦萨洗礼堂大门相比，<b>功力则远在其上</b>。</p><p>三角墙上的《圣母与圣子像》\"可与米开朗基罗的《圣觞》相提并论\"。他的作品给米开朗基罗很大灵感——杜兰特暗示：若米氏多学一点奎尔恰的古典纯粹性，或许可避免过分夸张的肌肉风格。</p>",d:"被杜兰特点名\"超过吉贝尔蒂\""},
+];
+
+const FLASH=[
+ ["艾米利大道的地理范围？","从<b>皮亚琴察</b>经帕尔马、雷焦、摩德纳、博洛尼亚、伊摩拉、弗利、西斯纳，直到<b>里米尼</b>，全长 <b>175 英里</b>——古罗马大道，本章的叙事主线。"],
+ ["柯勒乔是谁？","本名<b>安东尼奥·亚莱格里</b>，生于柯勒乔小城（城因人得名）。舅父洛伦佐启蒙，深受曼特尼亚壁画影响，可能研习过达·芬奇与拉斐尔作品的摹本——融汇成以\"柯勒乔\"闻名于世的个人风格。"],
+ ["柯勒乔 1518 年的关键转折？","帕尔马圣保罗女修道院院长乔瓦娜请他布置厅堂，选了<b>狄安娜女神</b>主题。此后人体（多为裸体）成为其图画装饰要素——杜兰特妙语：\"<b>女修道院长使他叛离了基督教</b>。\""],
+ ["帕尔马大教堂《圣母升天》与\"群蛙大餐\"？","1522 年受命，从 1526 年做到去世整整 8 年。以人体回旋成图案\"使许多教士大吃一惊\"，一位教士当众批评为<b>\"群蛙大餐\"</b>，教会人士对\"以人的躯体祝贺圣母\"表示怀疑，教堂内工作一度中断。"],
+ ["柯勒乔是怎么死的？","1534 年领到 60 克朗分期付款<b>全是铜板</b>，携带沉重的金属<b>徒步</b>离开帕尔马——中暑、饮水过多、发高烧，3 月 5 日死在农庄，时年 40（一说 45）。"],
+ ["柯勒乔的艺术史地位？","<b>明暗对照法大师</b>；紫橘玫瑰蓝银的柔和色彩。影响博洛尼亚画派（卡拉西、圭多·雷尼）与法国装饰艺术（勒布朗、凡尔赛、华托）——<b>\"征服法国的是柯勒乔而不是拉斐尔\"</b>，影响力在华托之前历久不衰。晚期作品象征 16 世纪意大利\"维纳斯凌驾于圣母\"的趋势。"],
+ ["帕尔米贾尼诺是谁？","本名弗朗西斯科·马佐利，\"帕尔马人\"。孤儿早熟——<b>17 岁镜前自画像</b>传世。两次遭劫（1523 围城逃罗马、1527 罗马遭劫逃博洛尼亚又被抢光）。代表作《土耳其奴隶》《圣凯瑟琳的婚礼》。晚年沉迷<b>炼金术</b>被教会通缉，1540 年在卡萨尔修道院猝逝。"],
+ ["韦罗妮卡·甘巴拉是谁？","柯勒乔城伯爵夫人，<b>\"第十位缪斯女神\"</b>：通拉丁语、谙经院哲学、擅彼特拉克式文体。沙龙女主人，传播女性崇拜风气。1528 年写信向伊莎贝拉盛赞柯勒乔——《抹大拉的玛利亚》\"旷世佳作\"的最早推手。"],
+ ["博洛尼亚的政治史脉络？","本蒂沃利豪族<b>温和独裁</b>维持 15 世纪（乔万尼治理 37 年：1469–1506，铺路开运河济贫赞助艺术）→ 1506 年<b>尤利乌斯二世</b>率军迫其让位 → 此后至 1796 年拿破仑来临前，一直是<b>教皇管区</b>（但自治与学术自由得到认可）。"],
+ ["圣彼得罗纽斯教堂的野心与结局？","1388 年市议会决议建造：设计 <b>700 英尺长</b>、圆顶离地 500 英尺——要使佛罗伦萨人大教堂<b>相形见绌</b>。因经费短缺只建成低矮部分，但这部分仍是文艺复兴高尚情操的杰作。奎尔恰的浮雕给米开朗基罗很大灵感。"],
+ ["弗兰西亚是谁？","本名拉伊博利尼，以<b>金匠师傅之名</b>行世；<b>造币厂厂长</b>，铜板雕刻超凡（死后价格倍增）。本蒂沃利发现其绘画天才。与科斯塔莫逆共室。瓦萨里称其见拉斐尔《圣西西里娅》后认清差距、郁郁而终（1517，67 岁）——杜兰特注明此说存疑。"],
+ ["拉斐尔 1508 年写给弗兰西亚的信为何著名？","充满文艺复兴式的<b>谦让与真挚</b>：\"有生以来从没有见过能比您的作品更美丽、更虔诚、更完美的了！\"\"请相信您的苦痛就是我的苦痛。\"——两大画家通信佳话，展现前辈大师对同行的礼敬。"],
+ ["莱蒙迪的贡献是什么？","版画家：在威尼斯买下丢勒 <b>36 块木刻</b>、复印到铜板以丢勒名义出售 → 后在罗马与拉斐尔合作，将其名作刻版传播。使欧洲艺术家<b>不必亲访意大利</b>即可知文艺复兴名作。杜兰特评：\"跟古登堡、马努蒂乌斯等人在学问和文学上的贡献相仿。\""],
+ ["法恩扎为何重要？","因<b>彩陶工业</b>得名（faience 一词的词源）。15–16 世纪陶工用不透明瓷釉美化陶土表层、涂金属氧化物，焙烧时浮现亮丽的<b>紫、绿、蓝</b>色。"],
+ ["1488 年卡泰丽娜·斯福尔扎的弗利守城？","夫被弑、母子被拘。她以\"劝降守军\"为名获释入城堡，<b>一进城立即下令闭门督战</b>。叛军威胁杀她的孩子，她站在碉堡上答：\"我的体内怀着另一个小孩，而且以后可以很容易得到更多。\"米兰洛多维科及时解围平叛。"],
+ ["西吉斯蒙多·马拉泰斯塔是怎样的人？","里米尼\"魔头\"家族最有名者：捏造通奸杀<b>两任妻子</b>；对情妇阿蒂忠诚并成婚、死后立碑；把圣水钵装墨水作弄信徒。另一面：<b>能将、诗人、古典学者、艺术赞助人</b>。杜兰特：\"想到文艺复兴的总体印象时，千万不能忘记他。\""],
+ ["马拉泰斯塔大庙是什么？","阿尔贝蒂改造里米尼圣方济各教堂：正面仿<b>公元前 27 年的奥古斯都拱门</b>；内部是异教精神的礼赞——战神、墨丘利、维纳斯等诸神会堂，还葬着柏拉图派哲学家<b>布雷托的骨灰</b>。庇护二世评：\"似乎变成不信神者崇拜异端的地方。\""],
+ ["洛雷托圣屋的传说与意义？","相传天使把玛利亚、约瑟和耶稣在拿撒勒的圣屋，先迁到达尔马提亚，再越过亚得里亚海迁到洛雷托的桂树林。每年<b>成千上万朝圣者</b>跋涉瞻仰；布拉曼特设计大理石屏障，圣索维诺补上雕刻。杜兰特：<b>\"这也是文艺复兴的一部分\"</b>——异教与朝圣同为时代面貌。"],
+ ["费德里科·蒙泰费尔特罗的统治特点？","雇佣兵队长出身，统治乌尔比诺 <b>38 年从未败仗</b>、不让战火蹂躏国土。早晨花园听民疾苦、下午拉丁文审案；济贫、帮孤女置嫁妆、荒年贱卖囤粮。与百姓相处<b>不带武器不用卫护</b>。1474 年封公爵，英王亨利七世封嘉德骑士。"],
+ ["蒙泰费尔特罗宫与图书馆？","1468 年建（达尔马提亚人劳拉那设计）——\"不像防御堡垒，倒像<b>行政中心和文学艺术的避难所</b>\"。图书馆：30 名抄写员誊写 13 年，<b>梵蒂冈以外全意大利藏书最丰</b>；视书为艺术品、不收印刷本。1502 年博尔贾劫掠估值 15 万杜卡特。"],
+ ["《朝臣》的内容要点？","分析<b>君子的条件</b>：出身高贵（悠闲气氛）+ 骑士与战术训练 + 文学艺术修养（不可狂热到削弱军事素养）。女人的角色：学音乐舞蹈文学、培养谦和与内在美。爱情观（借本博之口）：<b>\"美是抽象而无形体的\"</b>，柏拉图式爱情。名句：\"没有一个朝廷能够没有女人而能有悦目、光明或快乐。\""],
+ ["卡斯底里欧尼的一生线索？","18 岁米兰宫廷 → 乌尔比诺 <b>11 年</b>（与伊丽莎贝塔柏拉图之恋）→ 娶小 23 岁的伊坡里塔旋即丧偶 → 《朝臣》压到 <b>1528 年</b>出版（10 年内有法译本；1561 年英译成伊丽莎白时代必读）→ 1524 出使马德里失败、1527 罗马遭劫 → <b>1529 年卒于托莱多（51 岁）</b>，与亡妻合葬，碑文：\"当我与你同卧一墓时，我一定要活下去。\""],
+];
+
+const QUIZ=[
+ {q:"画家柯勒乔的本名是？",o:["帕尔米贾尼诺·马佐利","安东尼奥·亚莱格里","洛伦佐·科斯塔","弗朗西斯科·班吉"],a:1,e:"本名安东尼奥·亚莱格里（Antonio Allegri），以出生的小城\"柯勒乔\"之名行世——城因人得名。"},
+ {q:"使柯勒乔转向异教题材的关键事件是？",o:["教皇的订件","女修道院长请他画狄安娜壁画","费拉拉宫廷的邀请","曼图亚的战争"],a:1,e:"1518 年帕尔马圣保罗女修道院院长乔瓦娜请他布置厅堂，选了贞洁女神狄安娜为主题。杜兰特：\"女修道院长使他叛离了基督教。\""},
+ {q:"帕尔马大教堂圆顶《圣母升天》被一位教士批评为？",o:["\"群蛙大餐\"","\"醉酒的酒神\"","\"地狱的幻象\"","\"异端的狂欢\""],a:0,e:"教士对画中众多手臂和大腿大惑不解，当众批评为\"群蛙大餐\"。柯勒乔在教堂的工作一度中断。"},
+ {q:"柯勒乔之死的直接原因是？",o:["绘画时从圆顶脚手架坠落","染上鼠疫","领铜板薪饷徒步返乡中暑发烧","被仇家毒杀"],a:2,e:"1534 年他领到 60 克朗分期付款全是铜板，携带沉重金属徒步离开帕尔马，中暑、饮水过多、发高烧，3 月 5 日死于农庄。"},
+ {q:"\"征服法国的是柯勒乔而不是拉斐尔\"指的是什么？",o:["柯勒乔的画被法国王室高价收购","柯勒乔曾为法国国王作画","柯勒乔的风格主导了法国装饰艺术","法国文艺复兴由柯勒乔发起"],a:2,e:"经勒布朗、米诺德等人，柯勒乔式的\"玫瑰色娇艳的装饰式样\"在凡尔赛大行其道，影响力一直延续到华托（Watteau）。"},
+ {q:"1488 年弗利城头，卡泰丽娜·斯福尔扎如何回应叛军以孩子相威胁？",o:["献出城堡换回孩子","\"我的体内怀着另一个小孩，以后可以很容易得到更多\"","派军队夜袭劫回孩子","向教皇求援"],a:1,e:"这句名言出自碉堡之上——她此前已以\"劝降\"为名入城并立即闭门督战。米兰洛多维科及时派军解围。"},
+ {q:"马拉泰斯塔大庙（里米尼圣方济各教堂）的正面设计仿照什么？",o:["帕特农神庙","公元前 27 年立在里米尼的奥古斯都拱门","君士坦丁凯旋门","梵蒂冈的圣彼得大教堂"],a:1,e:"阿尔贝蒂抛弃哥特式教堂的完整形式，依据里米尼本地的奥古斯都拱门饰以古典图案。"},
+ {q:"教皇庇护二世如何处置西吉斯蒙多·马拉泰斯塔？",o:["授予他公爵头衔","请他统率教皇军队","开除教籍并罗列多项罪名","没收全部领地"],a:2,e:"1459 年庇护二世将绝罚敕书丢在他身上，罪名包括异端、忤逆、乱伦、通奸、伪誓、叛国、亵渎神明。西吉斯蒙多\"付之一笑\"，1463 年才降服。"},
+ {q:"费德里科·蒙泰费尔特罗的图书馆有何特点？",o:["只收藏印刷书籍","30 名抄写员誊写 13 年，视书为艺术品不收印刷本","藏书全部购自威尼斯","只收希腊文手稿"],a:1,e:"梵蒂冈以外全意大利藏书最丰富。他和图书管理员比斯底奇都认为印刷书不应在收集之列——书应是装订、书写与图案组成的艺术品。"},
+ {q:"意大利最早的一出喜剧《格兰大》1508 年首演于哪里？",o:["佛罗伦萨美第奇宫廷","乌尔比诺宫廷","罗马教廷","威尼斯"],a:1,e:"比别纳的《格兰大》（Calandra）首演于圭多巴尔多的乌尔比诺宫廷——雕刻家画家做布景、后台乐队奏乐、幕间芭蕾、扮装丘比特吟诗。"},
+ {q:"《朝臣》一书描绘并理想化了哪个圈子的谈话？",o:["罗马教廷","乌尔比诺宫廷","曼图亚宫廷","米兰斯福尔扎宫廷"],a:1,e:"卡斯底里欧尼假想乌尔比诺的美好人们讨论\"君子的条件\"，所用名字都是真实在场者的姓名，并依各人个性赋予感情——借本博之口道出柏拉图式爱情的讴歌。"},
+ {q:"卡斯底里欧尼的结局是？",o:["寿终于乌尔比诺宫","在罗马大劫中身亡","1524 年出使马德里失败，1529 年卒于托莱多","隐居修道院终老"],a:2,e:"1527 年罗马遭劫使他\"心灰意冷\"——\"精致文化与相互关怀的大同世界的理想，终于在罗马的一场浩劫中破灭\"。1529 年卒于托莱多，51 岁，后与亡妻合葬。"},
+];
+
+/* ============ 工具 ============ */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const store={
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem("emilia_ch7_"+k))??d}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem("emilia_ch7_"+k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ============ 滚动显现 ============ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in")}),{threshold:.08});
+$$(".reveal").forEach(el=>io.observe(el));
+
+/* ============ 导航高亮 ============ */
+const navLinks=[...$$(".nav a")];
+const secIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));
+    }
+  });
+},{rootMargin:"-30% 0px -60% 0px"});
+["map","timeline","figures","stats","flash","quiz"].forEach(id=>{const el=document.getElementById(id);if(el)secIO.observe(el)});
+
+/* ============ 学习地图 ============ */
+$$(".map-card").forEach(c=>{
+  c.querySelector(".toggle").addEventListener("click",e=>{e.stopPropagation();c.classList.toggle("open");
+    c.querySelector(".toggle").textContent=c.classList.contains("open")?"▴ 收起脉络":"▾ 展开脉络";});
+  const btn=c.querySelector(".read-btn");
+  if(store.get("sec"+c.dataset.sec,false)){c.classList.add("done");btn.classList.add("marked");btn.textContent="✓ 已读";}
+  btn.addEventListener("click",e=>{e.stopPropagation();
+    const now=!c.classList.contains("done");
+    c.classList.toggle("done",now);btn.classList.toggle("marked",now);
+    btn.textContent=now?"✓ 已读":"○ 标记已读";
+    store.set("sec"+c.dataset.sec,now);updateProgress();});
+});
+
+/* ============ 人物画廊 ============ */
+function renderFigs(cat){
+  const g=$("#figGrid");g.innerHTML="";
+  FIGURES.filter(f=>cat==="all"||f.cat===cat).forEach((f,i)=>{
+    const d=document.createElement("div");d.className="fig";
+    d.innerHTML=`<div class="fig-inner">
+      <div class="fig-face"><div class="glyph">${f.g}</div><div class="nm">${f.n}</div><div class="en">${f.en}</div><span class="tag">${f.tag}</span><span class="hint">点击翻面 ↻</span></div>
+      <div class="fig-back"><h4>${f.n}</h4>${f.b}<div class="die">${f.d}</div></div>
+    </div>`;
+    d.addEventListener("click",()=>d.classList.toggle("flip"));
+    g.appendChild(d);
+  });
+}
+renderFigs("all");
+$("#figTabs").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  $$("#figTabs button").forEach(b=>b.classList.remove("on"));
+  e.target.classList.add("on");renderFigs(e.target.dataset.cat);
+});
+
+/* ============ 数字滚动 ============ */
+const statIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    const n=e.target.querySelector(".cnt");if(!n||n.dataset.done)return;n.dataset.done=1;
+    const v=+n.dataset.v,t0=performance.now(),dur=1400;
+    const step=t=>{const p=Math.min((t-t0)/dur,1);n.textContent=Math.round(v*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+    requestAnimationFrame(step);
+    statIO.unobserve(e.target);
+  });
+},{threshold:.4});
+$$(".stat").forEach(s=>statIO.observe(s));
+
+/* ============ 记忆闪卡 ============ */
+let deck=[...FLASH.keys()];
+let deckPos=0, curQ=0, curA=1, showing="q";
+const mastery=store.get("flash",{});
+function flashRender(){
+  if(deckPos>=deck.length){finishRound();return;}
+  const i=deck[deckPos];
+  $("#fQ").innerHTML=FLASH[i][curQ];
+  $("#fA").innerHTML=FLASH[i][curA];
+  const c=$("#fCard");
+  c.className="fcard q";$(".qmark").style.display="";$(".amark").style.display="none";
+  showing="q";
+  $("#fCount").textContent=`第 ${deckPos+1} / ${deck.length} 张 · 全部 22 张中已掌握 ${Object.keys(mastery).filter(k=>mastery[k]>=2).length} 张`;
+  $("#fBar").style.width=(deckPos/deck.length*100)+"%";
+  updateProgress();
+}
+$("#fCard").addEventListener("click",()=>{
+  const c=$("#fCard");
+  if(showing==="q"){c.className="fcard a";showing="a";$(".qmark").style.display="none";$(".amark").style.display="";}
+  else{c.className="fcard q";showing="q";$(".qmark").style.display="";$(".amark").style.display="none";}
+});
+function grade(g){
+  const i=deck[deckPos];
+  mastery[i]=(mastery[i]||0)+ (g==="yes"?1:g==="mid"?0:-1);
+  if(mastery[i]<0)mastery[i]=0;
+  if(mastery[i]>=3)mastery[i]=3;
+  if(g!=="yes"){deck.push(i);}
+  store.set("flash",mastery);
+  deckPos++;flashRender();
+}
+$("#fYes").addEventListener("click",()=>grade("yes"));
+$("#fMid").addEventListener("click",()=>grade("mid"));
+$("#fNo").addEventListener("click",()=>grade("no"));
+$("#fShuffle").addEventListener("click",()=>{
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fReset").addEventListener("click",()=>{
+  Object.keys(mastery).forEach(k=>delete mastery[k]);store.set("flash",mastery);
+  deck=[...FLASH.keys()];deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fAgain").addEventListener("click",()=>{
+  const un=FLASH.map((_,i)=>i).filter(i=>(mastery[i]||0)<2);
+  deck=un.length?un:[...FLASH.keys()];
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+function finishRound(){
+  $("#fCard").style.display="none";$(".fb-btns").style.display="none";
+  $("#fDone").style.display="block";
+  const m=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  $("#fDoneTxt").innerHTML=`22 张卡片中已牢固掌握 <b style="color:var(--gold)">${m}</b> 张。${m<22?"点击下方按钮，专攻尚未掌握的卡片。":"全部掌握！本章记忆任务完成 🎉"}`;
+  $("#fBar").style.width="100%";
+  updateProgress();
+}
+flashRender();
+
+/* ============ 测验 ============ */
+let qOrder=[],qIdx=0,qRight=0,qWrongList=[];
+$("#qGo").addEventListener("click",startQuiz);
+$("#qRetry").addEventListener("click",startQuiz);
+$("#qNext").addEventListener("click",()=>{
+  qIdx++;
+  if(qIdx>=qOrder.length)endQuiz();else renderQ();
+});
+function startQuiz(){
+  qOrder=QUIZ.map((_,i)=>i);qIdx=0;qRight=0;qWrongList=[];
+  for(let i=qOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[qOrder[i],qOrder[j]]=[qOrder[j],qOrder[i]]}
+  $("#qStart").style.display="none";$("#qResult").style.display="none";$("#qBody").style.display="block";
+  renderQ();
+}
+function renderQ(){
+  const Q=QUIZ[qOrder[qIdx]];
+  $("#qNo").textContent=`第 ${qIdx+1} / ${qOrder.length} 题`;
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qBar").style.width=(qIdx/qOrder.length*100)+"%";
+  $("#qStem").textContent=Q.q;
+  const box=$("#qOpts");box.innerHTML="";
+  Q.o.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(65+i)+". "+t;
+    b.addEventListener("click",()=>answer(i,b));
+    box.appendChild(b);
+  });
+  $("#qExpl").className="expl";$("#qNext").style.display="none";
+}
+function answer(i,btn){
+  const Q=QUIZ[qOrder[qIdx]];
+  $$("#qOpts .opt").forEach((b,j)=>{b.disabled=true;if(j===Q.a)b.classList.add("right")});
+  if(i===Q.a){qRight++;}else{btn.classList.add("wrong");qWrongList.push(Q);}
+  const ex=$("#qExpl");ex.innerHTML=(i===Q.a?"✓ 正确。":"✗ 正确答案是 "+String.fromCharCode(65+Q.a)+"。")+Q.e;
+  ex.className="expl show";
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qNext").style.display="inline-block";
+  $("#qNext").textContent=qIdx===qOrder.length-1?"查看成绩 →":"下一题 →";
+}
+function endQuiz(){
+  $("#qBody").style.display="none";$("#qResult").style.display="block";
+  $("#qFinal").textContent=qRight+" / "+qOrder.length;
+  const pct=qRight/qOrder.length;
+  $("#qVerdict").textContent=pct===1?"满分！你已经完全掌握了这一章。":pct>=.8?"优秀！只有个别细节需要巩固。":pct>=.6?"不错，把错题的解析再读一遍会大有帮助。":"别灰心——错题解析就是最好的复习材料，再来一次。";
+  const w=$("#qWrong");
+  w.innerHTML=qWrongList.length?"<b style='color:var(--dim);font-size:12.5px'>错题回顾</b>"+qWrongList.map(Q=>`<div class="w"><b>${Q.q}</b><br>正确答案：${Q.o[Q.a]}<br><span style="color:var(--dim)">${Q.e}</span></div>`).join(""):"<p style='color:var(--ok);font-size:14px'>🎉 全部正确，无错题！</p>";
+  const best=store.get("quizBest",null);
+  if(best===null||qRight>best)store.set("quizBest",qRight);
+  updateProgress();
+}
+
+/* ============ 综合进度 ============ */
+function updateProgress(){
+  const secs=[1,2,3,4].filter(i=>store.get("sec"+i,false)).length;
+  const fl=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  const qb=store.get("quizBest",null);
+  const qsc=qb===null?0:qb/QUIZ.length;
+  const pct=Math.round((secs/4*0.4+fl/FLASH.length*0.4+qsc*0.2)*100);
+  $("#pPct").textContent=pct+"%";
+  $("#pBar").style.width=pct+"%";
+  $("#pSec").textContent=secs+"/4";
+  $("#pFlash").textContent=fl+"/"+FLASH.length;
+  $("#pQuiz").textContent=qb===null?"—":qb+" / "+QUIZ.length;
+  $("#navChip").textContent="进度 "+pct+"%";
+  const b=store.get("quizBest",null);
+  const be=$("#qBest");
+  if(be)be.innerHTML=b===null?"":"历史最高："+b+" / 12";
+}
+updateProgress();
+</script>
+</body>
+</html>

@@ -42,6 +42,39 @@
       ]
     },
     {
+      "name": "文明的故事 · 文艺复兴",
+      "links": [
+        {
+          "title": "威尼斯王国",
+          "subtitle": "卷五·二部六章 · 1378—1534 · 从海洋帝国到艺术黄金时代",
+          "url": "https://chengbin.vip/personal-nav/renaissance/venice.html",
+          "emoji": "🛶",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "艾米利与前哨",
+          "subtitle": "卷五·二部七章 · 1378—1534 · 柯勒乔、博洛尼亚与乌尔比诺",
+          "url": "https://chengbin.vip/personal-nav/renaissance/emilia.html",
+          "emoji": "🎨",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "那不勒斯王国",
+          "subtitle": "卷五·二部八章 · 1378—1534 · 安茹到阿拉贡、瓦拉与《世外桃源》",
+          "url": "https://chengbin.vip/personal-nav/renaissance/naples.html",
+          "emoji": "🌋",
+          "tag": "文艺复兴"
+        },
+        {
+          "title": "利奥十世",
+          "subtitle": "卷五·三部五章 · 1513—1521 · 美第奇教皇与宗教改革的裂痕",
+          "url": "https://chengbin.vip/personal-nav/renaissance/leo10.html",
+          "emoji": "⛪",
+          "tag": "文艺复兴"
+        }
+      ]
+    },
+    {
       "name": "历史时间线",
       "links": [
         {
