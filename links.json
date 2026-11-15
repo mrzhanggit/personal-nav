@@ -87,6 +87,18 @@
       ]
     },
     {
+      "name": "文明的故事 · 跨卷专题",
+      "links": [
+        {
+          "title": "英国历史全景",
+          "subtitle": "卷三—卷十一 · 43—1815 · 从罗马不列颠到滑铁卢",
+          "url": "topics/britain-history.html",
+          "emoji": "📜",
+          "tag": "专题"
+        }
+      ]
+    },
+    {
       "name": "历史时间线",
       "links": [
         {

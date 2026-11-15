@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英国历史全景（不列颠—1815）· 交互式学习</title>
+<style>
+  :root{
+    --bg:#0b1626; --bg2:#0e1c30; --panel:#132441; --panel2:#182d50;
+    --line:rgba(212,175,55,.22); --line2:rgba(212,175,55,.45);
+    --gold:#d4af37; --gold-l:#e8c76a; --gold-d:#9a7b2d;
+    --text:#ede5d3; --dim:#a8b4c8; --blue:#4a7ab5;
+    --ok:#5aa876; --bad:#c05a5a;
+    --serif:"Songti SC","STSong","Noto Serif SC",serif;
+    --sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.75;font-size:16px}
+  ::selection{background:var(--gold);color:#0b1626}
+
+  /* ===== 顶部导航 ===== */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(11,22,38,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;padding:0 18px;height:54px;overflow-x:auto;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav .brand{font-family:var(--serif);color:var(--gold);font-size:17px;white-space:nowrap;margin-right:14px;display:flex;align-items:center;gap:8px}
+  .nav .brand svg{flex:none}
+  .nav a{color:var(--dim);text-decoration:none;font-size:13px;padding:6px 11px;border-radius:6px;white-space:nowrap;transition:.2s}
+  .nav a:hover{color:var(--gold-l);background:rgba(212,175,55,.08)}
+  .nav a.on{color:#0b1626;background:var(--gold)}
+  .nav .spacer{flex:1}
+  .nav .score-chip{white-space:nowrap;font-size:12px;color:var(--gold-l);border:1px solid var(--line2);border-radius:20px;padding:3px 12px}
+
+  /* ===== Hero ===== */
+  .hero{min-height:88vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:110px 24px 70px;position:relative;background:
+    radial-gradient(ellipse 80% 55% at 50% 0%,rgba(74,122,181,.16),transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 90%,rgba(212,175,55,.07),transparent 60%),
+    linear-gradient(180deg,#0d1a2e 0%,var(--bg) 100%)}
+  .hero .kicker{color:var(--gold);letter-spacing:.35em;font-size:13px;margin-bottom:22px}
+  .hero h1{font-family:var(--serif);font-size:clamp(34px,6vw,62px);font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+  .hero h1 .gd{color:var(--gold);text-shadow:0 0 40px rgba(212,175,55,.35)}
+  .hero .sub{font-family:var(--serif);font-size:clamp(16px,2.4vw,21px);color:var(--dim);margin-bottom:36px}
+  .hero .meta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+  .hero .meta span{border:1px solid var(--line2);border-radius:20px;padding:5px 16px;font-size:13px;color:var(--gold-l)}
+  .hero .scene{width:min(680px,92vw);opacity:.9;margin-bottom:10px}
+  .hero .scroll-hint{position:absolute;bottom:26px;color:var(--dim);font-size:12px;letter-spacing:.25em;animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+  .hero .q{max-width:720px;color:var(--dim);font-family:var(--serif);font-size:15px;margin-top:6px}
+  .hero .q em{color:var(--gold-l);font-style:normal}
+
+  section{padding:78px 24px;max-width:1080px;margin:0 auto}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+  .sec-head .no{font-family:var(--serif);font-size:15px;color:var(--gold);border:1px solid var(--line2);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex:none;align-self:center}
+  .sec-head h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,32px);letter-spacing:.04em}
+  .sec-desc{color:var(--dim);font-size:14.5px;margin-bottom:34px;max-width:760px}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);max-width:1080px;margin:0 auto}
+
+  /* ===== 学习地图 ===== */
+  .map-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .map-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 22px 18px;cursor:pointer;transition:.25s;position:relative;overflow:hidden}
+  .map-card:hover{transform:translateY(-3px);border-color:var(--line2);box-shadow:0 12px 34px rgba(0,0,0,.4)}
+  .map-card.done::after{content:"✓ 已读";position:absolute;top:12px;right:12px;font-size:11px;color:var(--ok);border:1px solid rgba(90,168,118,.5);border-radius:12px;padding:1px 9px}
+  .map-card .idx{font-family:var(--serif);color:var(--gold);font-size:13px;letter-spacing:.2em;margin-bottom:6px}
+  .map-card h3{font-family:var(--serif);font-size:20px;margin-bottom:10px}
+  .map-card .one{font-size:13.5px;color:var(--dim);margin-bottom:14px}
+  .map-card .detail{max-height:0;overflow:hidden;transition:max-height .45s ease;font-size:13.5px;color:var(--text)}
+  .map-card.open .detail{max-height:1400px}
+  .map-card .detail ul{list-style:none;padding-top:6px}
+  .map-card .detail li{padding:5px 0 5px 20px;position:relative;border-top:1px dashed rgba(255,255,255,.06)}
+  .map-card .detail li::before{content:"◆";position:absolute;left:2px;color:var(--gold-d);font-size:9px;top:9px}
+  .map-card .detail li b{color:var(--gold-l);font-weight:600}
+  .map-card .toggle{font-size:12px;color:var(--gold);margin-top:14px;display:inline-block}
+  .read-btn{margin-top:16px;font-size:12px;color:var(--gold-l);background:rgba(212,175,55,.1);border:1px solid var(--line2);border-radius:8px;padding:5px 14px;cursor:pointer;transition:.2s}
+  .read-btn:hover{background:rgba(212,175,55,.22)}
+  .read-btn.marked{color:var(--ok);border-color:rgba(90,168,118,.5);background:rgba(90,168,118,.08)}
+
+  /* ===== 时间轴 ===== */
+  .tl{position:relative;padding-left:34px}
+  .tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--gold),var(--gold-d),transparent)}
+  .tl-item{position:relative;margin-bottom:26px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;transition:.25s}
+  .tl-item:hover{border-color:var(--line2);transform:translateX(4px)}
+  .tl-item::before{content:"";position:absolute;left:-31px;top:24px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--gold);box-shadow:0 0 12px rgba(212,175,55,.5)}
+  .tl-item .yr{font-family:var(--serif);color:var(--gold);font-size:20px;font-weight:700;letter-spacing:.03em}
+  .tl-item .yr small{font-size:12px;color:var(--dim);font-weight:400;margin-left:10px;letter-spacing:.1em}
+  .tl-item p{font-size:14px;margin-top:6px;color:var(--text)}
+  .tl-item p b{color:var(--gold-l)}
+  .tl-item.era{background:linear-gradient(135deg,rgba(212,175,55,.14),var(--panel));border-color:var(--line2)}
+
+  /* ===== 人物画廊 ===== */
+  .fig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+  .fig{perspective:1200px;height:250px;cursor:pointer}
+  .fig-inner{position:relative;width:100%;height:100%;transition:transform .65s cubic-bezier(.4,.2,.2,1);transform-style:preserve-3d}
+  .fig.flip .fig-inner{transform:rotateY(180deg)}
+  .fig-face,.fig-back{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:20px;display:flex;flex-direction:column}
+  .fig-face{background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line);align-items:center;justify-content:center;text-align:center}
+  .fig-face .glyph{font-family:var(--serif);font-size:44px;color:var(--gold);line-height:1;margin-bottom:14px;text-shadow:0 0 26px rgba(212,175,55,.45)}
+  .fig-face .nm{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+  .fig-face .en{font-size:11px;color:var(--dim);letter-spacing:.06em;margin-bottom:10px}
+  .fig-face .tag{font-size:11.5px;color:#0b1626;background:var(--gold);border-radius:12px;padding:2px 12px;font-weight:600}
+  .fig-face .hint{position:absolute;bottom:12px;font-size:11px;color:var(--dim)}
+  .fig-back{background:linear-gradient(160deg,#1b3358,var(--panel2));border:1px solid var(--line2);transform:rotateY(180deg);justify-content:flex-start;overflow-y:auto;font-size:12.8px;line-height:1.65}
+  .fig-back h4{font-family:var(--serif);color:var(--gold-l);font-size:15px;margin-bottom:8px}
+  .fig-back p{margin-bottom:6px;color:var(--text)}
+  .fig-back .die{color:var(--dim);font-size:11.5px;margin-top:auto;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12)}
+
+  .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+  .cat-tabs button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:20px;padding:6px 16px;font-size:13px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .cat-tabs button.on{background:var(--gold);color:#0b1626;border-color:var(--gold);font-weight:600}
+  .cat-tabs button:hover:not(.on){border-color:var(--line2);color:var(--gold-l)}
+
+  /* ===== 数据馆 ===== */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 16px;text-align:center;transition:.25s}
+  .stat:hover{border-color:var(--line2);transform:translateY(-3px)}
+  .stat .num{font-family:var(--serif);font-size:34px;color:var(--gold);font-weight:700;line-height:1.1}
+  .stat .num small{font-size:15px;color:var(--gold-d)}
+  .stat .lab{font-size:12.5px;color:var(--dim);margin-top:8px}
+  .revenue-note{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 24px;font-size:13.5px}
+  .revenue-note h4{font-family:var(--serif);color:var(--gold-l);margin-bottom:10px;font-size:16px}
+  .rev-bars{display:grid;gap:8px}
+  .rev-bar{display:grid;grid-template-columns:110px 1fr 70px;align-items:center;gap:10px;font-size:13px}
+  .rev-bar .track{height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden}
+  .rev-bar .fill{height:100%;width:0;border-radius:7px;background:linear-gradient(90deg,var(--gold-d),var(--gold));transition:width 1.2s cubic-bezier(.3,.7,.3,1)}
+  .rev-bar.top .fill{background:linear-gradient(90deg,#7a5c14,var(--gold-l));box-shadow:0 0 14px rgba(212,175,55,.4)}
+  .rev-bar .val{text-align:right;color:var(--gold-l);font-family:var(--serif)}
+
+  /* ===== 记忆闪卡 ===== */
+  .flash-app{max-width:680px;margin:0 auto}
+  .flash-ctrl{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:18px;font-size:13px;color:var(--dim)}
+  .flash-ctrl .btns{display:flex;gap:8px}
+  .flash-ctrl button{background:var(--panel);border:1px solid var(--line);color:var(--dim);border-radius:8px;padding:6px 14px;font-size:12.5px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .flash-ctrl button:hover{border-color:var(--line2);color:var(--gold-l)}
+  .fprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:26px}
+  .fprog .bar{height:100%;background:linear-gradient(90deg,var(--gold-d),var(--gold));width:0;transition:width .4s}
+  .fcard{background:linear-gradient(165deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:18px;min-height:300px;display:flex;align-items:center;justify-content:center;text-align:center;padding:36px 34px;cursor:pointer;position:relative;transition:.3s;user-select:none}
+  .fcard:hover{box-shadow:0 16px 44px rgba(0,0,0,.5)}
+  .fcard .face-q,.fcard .face-a{display:none}
+  .fcard.q .face-q{display:block}
+  .fcard.a .face-a{display:block}
+  .fcard .qmark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold-d);font-size:20px}
+  .fcard .amark{position:absolute;top:16px;left:20px;font-family:var(--serif);color:var(--gold);font-size:20px}
+  .fcard .face-q{font-family:var(--serif);font-size:clamp(18px,2.6vw,23px);line-height:1.6}
+  .fcard .face-a{font-size:15.5px;line-height:1.85;text-align:left}
+  .fcard .face-a b{color:var(--gold-l)}
+  .fcard .tap-hint{position:absolute;bottom:14px;right:20px;font-size:11px;color:var(--dim)}
+  .fb-btns{display:flex;gap:12px;margin-top:20px}
+  .fb-btns button{flex:1;border:none;border-radius:12px;padding:14px 8px;font-size:15px;font-family:var(--sans);cursor:pointer;transition:.2s;font-weight:600}
+  .b-no{background:rgba(192,90,90,.15);color:#e8a0a0;border:1px solid rgba(192,90,90,.4)!important}
+  .b-mid{background:rgba(212,175,55,.12);color:var(--gold-l);border:1px solid var(--line2)!important}
+  .b-yes{background:rgba(90,168,118,.15);color:#8fd0a8;border:1px solid rgba(90,168,118,.4)!important}
+  .fb-btns button:hover{transform:translateY(-2px)}
+  .flash-done{background:var(--panel);border:1px solid var(--line2);border-radius:18px;padding:44px 30px;text-align:center}
+  .flash-done h3{font-family:var(--serif);color:var(--gold);font-size:24px;margin-bottom:10px}
+  .flash-done p{color:var(--dim);font-size:14px;margin-bottom:22px}
+
+  /* ===== 测验 ===== */
+  .quiz-wrap{max-width:720px;margin:0 auto}
+  .quiz-meta{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin-bottom:12px}
+  .qprog{height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:28px}
+  .qprog .bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--gold));width:0;transition:width .4s}
+  .quiz-q{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px 26px 22px}
+  .quiz-q .stem{font-family:var(--serif);font-size:19px;margin-bottom:20px;line-height:1.6}
+  .opt{display:block;width:100%;text-align:left;background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.1);border-radius:10px;padding:13px 16px;margin-bottom:10px;color:var(--text);font-size:15px;cursor:pointer;transition:.2s;font-family:var(--sans)}
+  .opt:hover:not(:disabled){border-color:var(--line2);background:rgba(212,175,55,.07)}
+  .opt.right{border-color:var(--ok);background:rgba(90,168,118,.14);color:#a8e0be}
+  .opt.wrong{border-color:var(--bad);background:rgba(192,90,90,.12);color:#e8a0a0}
+  .opt:disabled{cursor:default}
+  .expl{margin-top:14px;padding:14px 16px;border-radius:10px;background:rgba(74,122,181,.1);border-left:3px solid var(--blue);font-size:13.5px;display:none;color:var(--text)}
+  .expl.show{display:block}
+  .qnxt{margin-top:18px;text-align:right}
+  .qnxt button{background:var(--gold);color:#0b1626;border:none;border-radius:10px;padding:10px 28px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .qnxt button:hover{background:var(--gold-l)}
+  .quiz-start,.quiz-result{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:44px 30px;text-align:center}
+  .quiz-start h3,.quiz-result h3{font-family:var(--serif);font-size:26px;color:var(--gold);margin-bottom:12px}
+  .quiz-start p{color:var(--dim);font-size:14px;max-width:480px;margin:0 auto 26px}
+  .quiz-start button,.quiz-result button{background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:13px 42px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--sans)}
+  .quiz-start button:hover,.quiz-result button:hover{background:var(--gold-l)}
+  .score-big{font-family:var(--serif);font-size:64px;color:var(--gold);line-height:1;margin:14px 0 6px}
+  .quiz-result .verdict{font-family:var(--serif);font-size:19px;margin-bottom:22px;color:var(--gold-l)}
+  .wrong-review{text-align:left;margin:22px auto 26px;max-width:560px}
+  .wrong-review .w{background:rgba(192,90,90,.07);border:1px solid rgba(192,90,90,.25);border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:10px}
+  .wrong-review .w b{color:#e8a0a0}
+
+  /* ===== 综合进度 ===== */
+  .progress-bar-wrap{max-width:1080px;margin:0 auto 60px;padding:0 24px}
+  .pbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px 28px}
+  .pbox .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:14px;flex-wrap:wrap;gap:8px}
+  .pbox .row .t{font-family:var(--serif);color:var(--gold-l);font-size:17px}
+  .pbox .big{height:12px;background:rgba(255,255,255,.07);border-radius:6px;overflow:hidden}
+  .pbox .big .bar{height:100%;width:0;background:linear-gradient(90deg,var(--gold-d),var(--gold),var(--gold-l));transition:width .8s;border-radius:6px}
+  .pbox .sub{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:14px;font-size:12.5px;color:var(--dim)}
+  .pbox .sub i{font-style:normal;color:var(--gold)}
+
+  footer{border-top:1px solid var(--line);padding:36px 24px;text-align:center;color:var(--dim);font-size:12.5px;line-height:2}
+  footer .gd{color:var(--gold)}
+
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s}
+  .reveal.in{opacity:1;transform:none}
+
+  @media(max-width:640px){
+    section{padding:56px 16px}
+    .fig{height:230px}
+    .rev-bar{grid-template-columns:84px 1fr 62px;font-size:12px}
+    .tl{padding-left:28px}
+  }
+</style>
+</head>
+<body>
+
+<!-- 导航 -->
+<nav class="nav">
+  <span class="brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 18h18M4.5 18l1-9 4.5 4 2-7 2 7 4.5-4 1 9" stroke="#d4af37" stroke-width="1.4" stroke-linejoin="round"/><circle cx="12" cy="4" r="1.2" fill="#d4af37"/></svg>
+    英国历史全景
+  </span>
+  <a href="#map">学习地图</a>
+  <a href="#timeline">时间轴</a>
+  <a href="#figures">人物</a>
+  <a href="#stats">数据馆</a>
+  <a href="#flash">记忆卡</a>
+  <a href="#quiz">测验</a>
+  <span class="spacer"></span>
+  <span class="score-chip" id="navChip">进度 0%</span>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="kicker">文明的故事 · 全 11 卷 · 英国线索合辑</div>
+  <h1>英国历史<span class="gd">全景</span></h1>
+  <div class="sub">从罗马行省到宗教改革，从光荣革命到工业革命——把散在 11 卷里的英格兰串成一条线</div>
+  <div class="meta">
+    <span>威尔·杜兰特</span><span>卷03 — 卷11</span><span>主轴：1300—1558</span><span>阅读约 30 分钟</span>
+  </div>
+  <svg class="scene" viewBox="0 0 680 190" fill="none">
+    <!-- 王冠 -->
+    <circle cx="340" cy="24" r="4.5" stroke="#e8c76a" stroke-width="1.4"/>
+    <path d="M340 30v10M270 92l16-42 24 26 30-38 30 38 24-26 16 42z" stroke="#d4af37" stroke-width="1.8" stroke-linejoin="round"/>
+    <path d="M270 92h140v13H270z" stroke="#d4af37" stroke-width="1.8"/>
+    <path d="M270 105l70 12 70-12" stroke="#e8c76a" stroke-width="1.1" opacity=".7"/>
+    <circle cx="286" cy="50" r="3" fill="#e8c76a" opacity=".85"/>
+    <circle cx="394" cy="50" r="3" fill="#e8c76a" opacity=".85"/>
+    <circle cx="340" cy="98" r="3.5" fill="#e8c76a"/>
+    <!-- 都铎玫瑰 -->
+    <circle cx="132" cy="94" r="31" stroke="#d4af37" stroke-width="1.5"/>
+    <path d="M132 63c10 10 10 20 0 31-10-11-10-21 0-31zM163 94c-10 10-20 10-31 0 11-10 21-10 31 0zM132 125c-10-10-10-20 0-31 10 11 10 21 0 31zM101 94c10-10 20-10 31 0-11 10-21 10-31 0z" stroke="#e8c76a" stroke-width="1.2" opacity=".8"/>
+    <circle cx="132" cy="94" r="10" stroke="#e8c76a" stroke-width="1.3"/>
+    <circle cx="132" cy="94" r="3" fill="#e8c76a"/>
+    <!-- 伦敦塔 -->
+    <path d="M496 160V78h64v82M492 78h72" stroke="#d4af37" stroke-width="1.6"/>
+    <path d="M500 66v12M528 56v22M556 66v12" stroke="#d4af37" stroke-width="1.4"/>
+    <path d="M510 96h8v14h-8zM542 96h8v14h-8zM510 126h8v14h-8zM542 126h8v14h-8z" stroke="#e8c76a" stroke-width="1" opacity=".6"/>
+    <path d="M520 160v-18h16v18" stroke="#e8c76a" stroke-width="1.2" opacity=".7"/>
+    <!-- 帆船 -->
+    <path d="M398 150c30 0 54-8 68-18-16-6-38-8-58-8s-38 6-46 14c6 8 20 12 36 12z" stroke="#e8c76a" stroke-width="1.7" stroke-linejoin="round"/>
+    <path d="M430 132v-52" stroke="#e8c76a" stroke-width="1.6"/>
+    <path d="M430 86c16 5 22 18 22 32-9-11-15-16-22-18z" fill="#e8c76a" opacity=".8"/>
+    <!-- 水波 -->
+    <path d="M0 168c40 8 80-8 120 0s80-8 120 0 80-8 120 0 80-8 120 0 80-8 120 0 80-8 120 0" stroke="#4a7ab5" stroke-width="1.1" opacity=".55"/>
+    <path d="M40 180c40 6 70-6 110 0s70-6 110 0 70-6 110 0 70-6 110 0 70-6 110 0" stroke="#4a7ab5" stroke-width=".9" opacity=".35"/>
+  </svg>
+  <p class="q">「宗教改革的所有要素均集于威克利夫……若非这次大革命阻止了政府对威克利夫改革运动的保护，<em>宗教改革在德国发生前 130 年，可能已在英国成形</em>。」</p>
+  <div class="scroll-hint">▾ 开始学习</div>
+</div>
+
+<!-- ① 学习地图 -->
+<section id="map">
+  <div class="sec-head reveal"><span class="no">壹</span><h2>学习地图 · 七大板块</h2></div>
+  <p class="sec-desc reveal">这条线按「底子 → 14 世纪 → 15 世纪 → 脱离罗马 → 摇摆 → 后续卷次」推进。张总刚读完卷06 前两章，<b style="color:var(--gold-l)">板块 01 专门回答那三个问号</b>；每个板块都标了对应书章，读完可直接回头接原文。点卡片展开脉络，读完点「标记已读」计入进度。</p>
+  <div class="map-wrap reveal">
+
+    <div class="map-card" data-sec="1">
+      <div class="idx">板块 01</div><h3>读完前两章的三个问号</h3>
+      <div class="one">卷06·第一部 第一章《罗马天主教会》→ 第二章《英国：威克利夫、乔叟与大叛乱》</div>
+      <div class="detail"><ul>
+        <li><b>问号一：为什么讲完教会突然切到英国？</b>因为全书第一部叫「从威克利夫到路德」——杜兰特要证明：宗教改革最早的一整套要素<b>不是 1517 年出现在德国，而是 14 世纪出现在英国</b>。</li>
+        <li><b>问号二：威克利夫是谁？</b>约 1320—1384，牛津神学教授。主张教会放弃财产、《圣经》为唯一权威、否定化体说与秘密告解、译英文《圣经》、组织「穷传教士」（罗拉德派）。杜兰特：<b>「宗教改革的所有要素均集于威克利夫」</b>。</li>
+        <li><b>问号三：为什么英国没先改教成功？</b>1381 大叛乱把贵族吓坏了，政府撤回对威克利夫的保护；1382 年牛津驱逐他及其门徒。杜兰特说宗教改革因此在英国<b>推迟了约 130 年</b>。</li>
+        <li>更早的铺垫：1333 年拒付教皇贡金、<b>1351《圣职候补人法》</b>、<b>1353《王权侵害罪法》</b>、1366 年国会再度拒绝纳贡——王权收教权，比亨利八世早两百年。</li>
+        <li>第一章给的是「病灶」（教会财富、赎罪券、教廷分裂），第二章给的是「第一次发作」。<b>读后面第八—十一章时，把这两章当序章看</b>。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="2">
+      <div class="idx">板块 02</div><h3>不列颠的底子（卷03—卷04）</h3>
+      <div class="one">罗马行省 → 盎格鲁—撒克逊 → 诺曼征服 → 金雀花</div>
+      <div class="detail"><ul>
+        <li><b>卷03《恺撒与基督》</b>专节「不列颠」：恺撒两度渡海、公元 43 年克劳狄乌斯派 4 万部队使其成罗马一省、61 年布狄卡起义、122—127 年哈德良长城。</li>
+        <li><b>卷04《信仰的时代》</b>：409 年罗马人不再统治不列颠；449 年朱特人亨吉斯特、霍尔萨；<b>577 年迪奥哈姆之役</b>后出现「盎格鲁地」即英格兰；七国并立，829 年爱格伯加冕为全英之王。</li>
+        <li>871 年阿尔弗雷德即位、878 年埃塔敦胜丹麦人；1016 年丹麦人克努特为全英格兰王。<b>1066 年哈斯丁之役</b>，威廉一世入主；1085 年下令编《末日审判书》。</li>
+        <li>1154 年金雀花王朝始；1170 年贝克特在坎特伯雷教堂遇刺；<b>1215 年《大宪章》</b>（卷04 年表标 1215；专节纪「约翰王朝第 17 年 6 月 15 日」），确立人身保护令与陪审团。</li>
+        <li>1209 年牛津学生事件促成剑桥；1284 年威尔士并入英格兰、1301 年起威尔士亲王属英王长子；1314 年班诺克本之役苏格兰大败英军。</li>
+        <li>卷04 另有「英国的诺曼底式建筑（1066—1200）」「英国的哥特式建筑（1175—1280）」「英格兰诸大学」等专节——<b>中世纪英国的底子在卷04，不在卷05</b>。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="3">
+      <div class="idx">板块 03</div><h3>14 世纪：国会、瘟疫与改革预演</h3>
+      <div class="one">卷06·第一部 第二章（1308—1400）——您刚读完的这一章</div>
+      <div class="detail"><ul>
+        <li><b>1295 年「模范国会」</b>：爱德华一世因同时与法、苏、威交战需钱，令每城派 2 名市民、每郡派 2 名骑士参会 → 首次出现上院与下院；下院唯一的武器是<b>「钱袋权力」</b>。</li>
+        <li>1308 年爱德华二世加冕宣誓守「先王的法律习俗」，旋即贵族叛变：1312 年杀宠臣加韦斯顿、1314 年班诺克本败于苏格兰、1326 年被妻伊莎贝拉与莫蒂默推翻。<b>1330 年爱德华三世亲政</b>，为征法国而把权力让给国会。</li>
+        <li><b>1349 年黑死病</b>自诺曼底传入，此后 1361、1368、1375、1382、1390 年反复回来，<b>每 3 个英国人中死去 1 个</b>，近半数教士死亡；劳动力短缺 → 1349 年法令、1351 年《劳工法》冻结工资 → 阶级冲突激化。</li>
+        <li><b>1381 年大叛乱</b>：1380 年起的人头税（10 万镑、15 岁以上皆须纳）引爆；瓦特·泰勒、约翰·鲍尔（「亚当耕田夏娃织，那时谁又是绅士？」）率众入伦敦；6 月 14 日米莱恩德、15 日史密斯菲尔德，14 岁的理查二世一句<b>「你们将射杀你们的国王吗？」</b>化解危局；事后翻脸：<b>「你们仍然是农奴，并且将永为农奴」</b>。</li>
+        <li>1362 年英语成为法律与法庭通用语；<b>乔叟（1340—1400）</b>约 1387 年始写《坎特伯雷故事集》，朗格朗德《农夫彼尔士》成为叛乱者的精神符号。</li>
+        <li>1399 年根特的约翰死后，亨利·博林布鲁克废理查二世即位为<b>亨利四世</b>——1154 年开始的金雀花王朝终结，兰开斯特王朝开始。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="4">
+      <div class="idx">板块 04</div><h3>15 世纪：玫瑰战争与都铎开局</h3>
+      <div class="one">卷06·第一部 第五章（1399—1509）——英国文艺复兴的「补课章」</div>
+      <div class="detail"><ul>
+        <li>亨利四世疲于威尔士戈林之乱（1401—1408）与珀西叛乱（1403 什鲁斯伯里）；<b>亨利五世</b>1415 年阿让库尔大捷，1422 年 35 岁死于热病；亨利六世 9 个月即位、精神失常，百年战争以英国失败收场。</li>
+        <li><b>1454—1485 玫瑰战争</b>：兰开斯特红玫瑰 vs 约克白玫瑰。1461 年道敦之役后爱德华四世即位；「拥立国王者」沃里克 1470 年一度复立亨利六世，1471 年巴尼特战死；1483 年理查三世与「塔中两王子」。</li>
+        <li><b>1485 年包斯华斯之役</b>理查三世阵亡，亨利·都铎即位为<b>亨利七世</b>，都铎王朝开始（至伊丽莎白而终）。他创<b>星室法院</b>压制贵族、以罚金充国库，是 1216 年以来第一位靠自己收入开支的英王——留给亨利八世一个「有秩序、有财力、统一而和平的国家」。</li>
+        <li>经济底盘：圈地养羊 → 布匹出口取代羊毛贸易；1497 年卡伯特发现纽芬兰；1500 年农奴仅占人口 1%；1450 年杰克·凯德叛乱攻入伦敦。</li>
+        <li><b>1476 年卡克斯顿</b>在威斯敏斯特装上英国第一台活版印刷机，此后 15 年印 98 本书；1485 年印马洛里《亚瑟王之死》。</li>
+        <li>1401 年《火焚异教徒》法令后，1400—1485 年共处死异端 11 件，但罗拉德派一直存续到 1521 年；<b>格罗辛、利纳克尔、科利特、莫尔</b>把意大利人文主义带回英国，1499 年伊拉斯谟访英。<b>注意：卷05《文艺复兴》没有英国专章，本书的英国文艺复兴补在这一章</b>。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="5">
+      <div class="idx">板块 05</div><h3>亨利八世：脱离罗马的四步</h3>
+      <div class="one">卷06·第二部 第八、九章（1509—1535）——「您正在往后的内容」</div>
+      <div class="detail"><ul>
+        <li><b>1509 年</b>18 岁的亨利八世即位，六周后公开庆祝与寡嫂凯瑟琳的婚姻；<b>1521 年</b>亲撰《述七圣礼斥马丁路德》，获教皇利奥十世赐号<b>「基督教卫士」</b>——极具反讽：他后来成了教廷的叛逆。</li>
+        <li><b>沃尔西</b>：1514 年约克大主教、1515 年红衣主教兼御前大臣，以「均势政策」让英国成为欧洲砝码；财富极盛时约占全英宗教收入 1/3，威尼斯大使称「他在英国的权力比教皇大 7 倍」。1520 年金缕地会盟极尽奢华。</li>
+        <li>转折点：1527 年查理五世军队占领罗马、教皇被掳，废后案永远等不到有利判决；1529 年 6 月庭审、7 月 23 日休庭并撤回罗马；同年 10 月沃尔西倒台，1530 年 11 月 29 日死于莱斯特修道院。</li>
+        <li><b>四步立法</b>：① 1529 年 11 月 3 日「宗教改革国会」定三大政策（削教产、保佛兰德斯商贸、助王求男嗣）；② 1531 年教士缴 11.8 万镑并认王为「英国教会最高保护者」；③ <b>1532 年 5 月 15 日</b>教士会议宣誓效忠、交出立法权，杜兰特称「英国国教宣布诞生」；④ <b>1533 年 2 月《诉愿法》</b>切断向罗马上诉，<b>1534 年 11 月 11 日《王权至上法案》</b>正式建立「英国国教会」。</li>
+        <li>配套人事：1532 年 5 月 16 日莫尔辞御前大臣；1533 年 5 月 23 日克拉默宣布婚姻无效、9 月 7 日伊丽莎白出生；1535 年 6 月 22 日费希尔、<b>7 月 7 日莫尔</b>先后被斩。</li>
+        <li><b>杜兰特的判断</b>：「引发英国宗教改革的导火线，不是安妮的美色，而是凯瑟琳和查理的顽固」；「不许教皇管理教会，是基于民族意识。这种意识，英国较德国尤甚，<b>王权就是靠这种意识提高的</b>」。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="6">
+      <div class="idx">板块 06</div><h3>修道院、摇摆与「血腥」玛丽</h3>
+      <div class="one">卷06·第二部 第十—十二章（1535—1558）+ 苏格兰、爱尔兰</div>
+      <div class="detail"><ul>
+        <li><b>1536 年《黑皮书》</b>（今已不传）：克伦威尔派 3 个视察团查遍 600 余所修道院，建议封闭年入 200 镑以下者 → 清理 <b>376 所</b>、遣散 2000 余人；引发 1536 年「求恩巡礼」（林肯 6 万人、约克阿斯克 9000 人），亨利假意赦免后 1537 年尽诛首领。</li>
+        <li>约 1540 年除有主教坐镇者外尽封男女修道院：原文记男修院 <b>578 所</b>、女修院 <b>130 所</b>，遣散修士 6521 人、修女 1560 人；亨利至少凭空收入 <b>142.35 万镑</b>。1539 年「六条款」却以<b>纯粹罗马天主教观点</b>重定教义——改革止于「谁管教会」。</li>
+        <li>1540 年 7 月 28 日克伦威尔被枭首；1547 年 1 月亨利八世死（55 岁、秉政 37 年）。10 岁的<b>爱德华六世</b>即位、萨默塞特摄政：英语礼拜、抹去圣像、1548 年《祈祷书》、1549 年凯特之乱（1.6 万人、死者 3500 余人）；1552 年《祈祷书》第二册 +《再度统一法案》。</li>
+        <li>1553 年 7 月 6 日爱德华 15 岁病故；7 月 9 日简·格雷的「十日王位」；<b>37 岁的玛丽一世</b>即位。1554 年 3 月 4 日下令恢复天主教、3 月 6 日与西班牙的菲利普（腓力）婚礼；11 月 20 日波尔返英。火刑自 1555—1556 年（里德利、拉蒂默、克拉默），<b>致死 300 余人，其中 273 人在最后 4 年</b>。</li>
+        <li>1558 年 1 月 6 日失加来（英国领有 <b>211 年</b>）；同年 11 月玛丽传位伊丽莎白。<b>杜兰特的冷结论</b>：「英国宗教改革事实上是提高富人，压低穷人」；「国权压倒了教权……英国却投进了绝对专制君主的怀抱」。<br><b>文化上的印证</b>（卷06 第三部第八章《霍尔拜因时代的艺术（1517—1564）》内专节「都铎时代的风格（1517—1558）」）：该节讲英国都铎建筑与雕刻——亨利七世贵妇小礼拜堂、彼得罗·托里贾诺的作品、沃尔西墓被亨利八世没收等，恰以 <b>1558</b> 收束，可作伊丽莎白时代之前的都铎文化背景；已核标题与正文一致，非卷10/11 那种「标题／正文错位」。</li>
+        <li><b>爱尔兰支线（第十章专节「顽强的爱尔兰人（1300—1558）」）</b>：1366 年《基尔肯尼法案》禁止英裔与爱尔兰人通婚往来、1494 年「波伊宁斯法律」使爱尔兰议会受制于英王、1539 年爱尔兰酋长接受英王为宗教领袖、<b>1541 年爱尔兰宣布为王国，与英国共奉亨利为王</b>。</li>
+        <li><b>苏格兰支线（第十二章《从罗伯特·布鲁斯到约翰·诺克斯》）</b>：1314 年班诺克本、1557 年 12 月 3 日「第一苏格兰条约」、1559 年诺克斯回爱丁堡、<b>1560 年 8 月 1 日宗教改革国会仅 8 票反对</b>通过《信仰的宣告》。<b>1558—1560 接缝</b>：1558 年 7 月诺克斯把《对苏格兰贵族和议员阶级的呼吁》草稿带到日内瓦秘密印行、不署真名，印本送回英格兰；玛丽下令禁书，持有者一律极刑。1559 年他又写《简短的劝告》送给英国人，劝其在信奉新教的女王治下采用加尔文派教条与道德纪律「以赎玛丽的迫害之罪」，<b>英格兰拒绝了他的劝告</b>，同年他回苏格兰——正接卷07 第五章「1560 年苏格兰废天主教、奉加尔文教为国教」。杜兰特：苏格兰改教由贵族发起，与英国由国王和商人发起不同。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+    <div class="map-card" data-sec="7">
+      <div class="idx">板块 07</div><h3>1558 以后：卷07—卷11 的英国</h3>
+      <div class="one">读完卷06 往哪走——一份按卷次的阅读索引</div>
+      <div class="detail"><ul>
+        <li><b>卷07 第一部「理性的觉醒」整部 8 章皆英国</b>：第一章《伟大的女王（1558—1603）》<b>才是卷06 的直接续章</b>（卷07 记 1558 年 11 月 17 日禀告即位、1559 年加冕；<b>卷06 第十一章另记 11 月 6 日传位、玛丽 11 月 11 日望弥撒后次日卒——传位与禀告是不同事件，并不矛盾</b>）；第二章《欢乐的英国（1558—1625）》写社会经济（1563 年《学徒法》有效至 1815 年、1600 年东印度公司、1588 年无敌舰队）；另有《派那西斯山坡》《威廉·莎士比亚（1564—1616）》《苏格兰女王玛丽（1542—1587）》《詹姆士六世和詹姆士一世（1567—1625）》《召唤理性》《大革命（1625—1649）》。</li>
+        <li><b>卷08《路易十四时代》共 8 章</b>：第二部「英伦与欧陆的革命与改革」5 章——《克伦威尔（1649—1660）》《弥尔顿（1608—1674）》《复辟（1660—1685）》《光荣革命（1685—1714）》《自德莱登至斯威夫特的英国文学》；第三部《知识的探索》另有《科学的探求（1648—1715）》（1662 年皇家学会特许状）、《伊萨克·牛顿（1642—1727）》《英国哲学（1648—1715）》。1649 年 1 月 30 日斩查理一世、1653 年克伦威尔任护国主、<b>1689 年《人权条例》(Bill of Rights)</b>、1701 年《继位法案》。</li>
+        <li><b>卷09《伏尔泰时代》第一部「伏尔泰与英国」共 6 章</b>：《法国：摄政时期》《人民（1714—1756）》《统治者》《宗教与哲学》《文学与戏剧》《艺术与音乐》；部内小节含「伏尔泰在英国（1726—1728）」「论英国书札」「爱尔兰（1714—1756）」「苏格兰（1714—1756）」。1714 年乔治一世即位；1694 年《执照法案》期满未续，出版自由自动建立。</li>
+        <li><b>卷10 第四部「卢梭时代的英国」前 7 章皆英国</b>：<b>第一章《工业革命》</b>（铁、煤、殖民地、海军）、《政坛风云（1756—1792）》《英国人（1756—1789）》《雷诺兹时代》《英格兰之邻》（苏格兰启蒙、亚当·斯密、彭斯）《文坛景象》《塞缪尔·约翰逊》。1756—1763 年七年战争（老皮特）、1765／1769 年瓦特改良蒸汽机。<b>该部第 8—12 章实为法国大革命前夜，非英国主体</b>。</li>
+        <li><b>卷11 第二部「法国大革命与英国」共 10 章</b>：《英格兰在忙碌》《英国的生活》《英国的艺术》（特纳、康斯太布尔）《英国的科学》《英国的哲学》《文学的转变》（简·奥斯汀）《湖畔诗人》《反叛的诗人》《英格兰的邻邦（1789—1815）》（<b>1707 年英苏联合</b>）《皮特、纳尔逊和拿破仑（1789—1812）》。1798 年尼罗河战役、1805 年特拉法尔加纳尔逊阵亡、1815 年滑铁卢（下册第四部第十一章）。</li>
+        <li><b>一句话记忆与阅读路径</b>：卷03—04 打底子、卷05 空缺、卷06—07 是主战场（王权与教权、伊丽莎白时代）、卷08—11 是立宪、科学与工业的后续。<b>卷06 读完 → 卷07 第一章《伟大的女王》 → 第二章《欢乐的英国》</b>。</li>
+      </ul></div>
+      <span class="toggle">▾ 展开脉络</span><br>
+      <button class="read-btn">○ 标记已读</button>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ② 时间轴 -->
+<section id="timeline">
+  <div class="sec-head reveal"><span class="no">贰</span><h2>大事时间轴 · 不列颠 → 1815</h2></div>
+  <p class="sec-desc reveal">每个条目后的小字是<b style="color:var(--gold-l)">它在《文明的故事》里的卷次位置</b>，方便张总按图索骥。光晕卡片为王朝或时代的转折点；主线：<b style="color:var(--gold-l)">行省 → 封建王国 → 王权收教权 → 国教会 → 摇摆 → 立宪与工业</b>。</p>
+  <div class="tl">
+    <div class="tl-item era reveal"><div class="yr">公元 43 <small>卷03 · 不列颠</small></div><p>克劳狄乌斯派 4 万人渡海，不列颠成为罗马一省；61 年布狄卡起义，122—127 年筑哈德良长城。409 年罗马人不再统治不列颠。</p></div>
+    <div class="tl-item reveal"><div class="yr">577 <small>卷04 · 大不列颠成为英格兰</small></div><p>迪奥哈姆之役后，萨克森人驱退不列颠人，「盎格鲁地」（英格兰）之名出现；七国并立，829 年爱格伯加冕为全英之王。871 年阿尔弗雷德即位，878 年埃塔敦胜丹麦人。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1066 · 10 · 14 <small>卷04 · 部02 第五章年表／部03 结语图注</small></div><p>哈斯丁之役，哈罗德阵亡，威廉一世入主——明确日期见卷04 部02 第五章末「历史大事年表」与部03《结语 中古的遗产》插图图注；1085 年编《末日审判书》，索尔兹伯里约 6 万地主直接向国王宣誓。<b>诺曼征服</b>让英格兰第一次与欧陆封建体系绑紧。</p></div>
+    <div class="tl-item reveal"><div class="yr">1154 → 1215 <small>卷04 · 金雀花／大宪章</small></div><p>亨利二世开金雀花王朝；1170 年贝克特遇刺；<b>1215 年 6 月 15 日《大宪章》</b>（卷04 年表标 1215，专节纪「约翰王朝第 17 年」），确立人身保护令与陪审团。1209 年牛津学生事件促成剑桥。</p></div>
+    <div class="tl-item reveal"><div class="yr">1295 <small>卷06 · 第一部第二章</small></div><p>爱德华一世因三面作战需钱，召集每城 2 市民、每郡 2 骑士的「模范国会」——<b>上院与下院首次分立</b>，下院握有「钱袋权力」。</p></div>
+    <div class="tl-item reveal"><div class="yr">1308 → 1330 <small>卷06 · 第一部第二章</small></div><p>爱德华二世加冕宣誓守先王法律，旋即贵族叛变、1314 年败于苏格兰班诺克本、1326 年被废；1330 年<b>爱德华三世</b>亲政，为征法国而与国会合作。</p></div>
+    <div class="tl-item reveal"><div class="yr">1337 → 1353 <small>卷06 · 第一部第二、三章</small></div><p>百年战争开打；1333 年拒付教皇贡金，<b>1351《圣职候补人法》</b>终止教皇控制英国圣职，<b>1353《王权侵害罪法》</b>禁止向「外国」（教皇）法庭上诉。国会在立法，王权在收教权。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1349 <small>卷06 · 大叛乱一节</small></div><p>黑死病自诺曼底传入英格兰与威尔士，此后 1361、1368、1375、1382、1390 年反复回访，<b>每 3 个英国人中死去 1 个</b>、近半数教士死亡。1349 年法令与 1351 年《劳工法》冻结工资 → 采邑制瓦解、阶级冲突激化。</p></div>
+    <div class="tl-item reveal"><div class="yr">1362 → 1384 <small>卷06 · 新文学／威克利夫</small></div><p>1362 年英语成为法律与法庭通用语；<b>威克利夫（约 1320—1384）</b>在牛津提出《圣经》至上、教会弃产，1377 年被教皇谴责 18 项论题，1382 年黑衣僧会议谴责 24 项；他译英文《圣经》、派「穷传教士」，1384 年 12 月 28 日中风，3 天后去世。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1381 <small>卷06 · 大叛乱</small></div><p>人头税引爆<b>大叛乱</b>：瓦特·泰勒与约翰·鲍尔率众入伦敦，6 月 14 日米莱恩德、15 日史密斯菲尔德；14 岁的理查二世以「我将做你们的首领」化解，事后宣布「你们仍然是农奴，并且将永为农奴」。<b>威克利夫因此失去政府保护，英国宗教改革推迟约 130 年</b>。</p></div>
+    <div class="tl-item reveal"><div class="yr">1399 <small>卷06 · 理查二世一节</small></div><p>亨利·博林布鲁克废理查二世，即位为<b>亨利四世</b>——1154 年起的金雀花王朝终结，兰开斯特王朝开始。约 1387 年乔叟开始写《坎特伯雷故事集》。</p></div>
+    <div class="tl-item reveal"><div class="yr">1415 → 1453 <small>卷06 · 第五章／第三章</small></div><p>亨利五世阿让库尔大捷，1422 年 35 岁暴卒；亨利六世 9 个月即位、精神失常，<b>百年战争以英国失败告终</b>。1450 年杰克·凯德叛乱攻入伦敦。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1454 → 1485 <small>卷06 · 第五章「国王」</small></div><p><b>玫瑰战争</b>：兰开斯特红玫瑰 vs 约克白玫瑰，盎格鲁—诺曼贵族自相残杀 31 年。1461 年道敦之役拥立爱德华四世；1471 年沃里克战死；1483 年理查三世与「塔中两王子」。</p></div>
+    <div class="tl-item reveal"><div class="yr">1476 → 1485 <small>卷06 · 卡克斯顿与马洛里</small></div><p>1476 年<b>卡克斯顿</b>在威斯敏斯特装上英国第一台印刷机，15 年印 98 本书；1485 年出版马洛里《亚瑟王之死》。同年<b>包斯华斯之役</b>理查三世阵亡，亨利七世开创<b>都铎王朝</b>，创星室法院、以罚金充国库。</p></div>
+    <div class="tl-item reveal"><div class="yr">1497 → 1499 <small>卷06 · 第五章</small></div><p>卡伯特自布里斯托出海发现纽芬兰；格罗辛、利纳克尔、科利特把意大利人文主义带回牛津，<b>1499 年伊拉斯谟访英</b>。杜兰特：「伴随着和平的宗教改革而来的英国文艺复兴运动，已臻成熟。」</p></div>
+    <div class="tl-item era reveal"><div class="yr">1509 <small>卷06 · 第二部第八章</small></div><p>18 岁的<b>亨利八世</b>即位，万民欢腾「黄金时代来了」；六周后公开庆祝与寡嫂凯瑟琳的婚姻。1521 年撰《述七圣礼斥马丁路德》，获「基督教卫士」称号。</p></div>
+    <div class="tl-item reveal"><div class="yr">1527 → 1529 <small>卷06 · 第八、九章</small></div><p>查理五世军队占领罗马、教皇被掳，废后案无望；1529 年 6 月庭审、7 月 23 日休庭并撤回罗马，10 月<b>沃尔西倒台</b>（1530 年 11 月 29 日死）。<b>11 月 3 日「宗教改革国会」</b>开会，定削教产、保商贸、助王求男嗣三大政策。</p></div>
+    <div class="tl-item reveal"><div class="yr">1531 → 1533 <small>卷06 · 第九章</small></div><p>1531 年教士缴 11.8 万镑罚款、认王为「英国教会最高保护者」；<b>1532 年 5 月 15 日</b>教士会议交出立法权（「英国国教宣布诞生」），次日莫尔辞职；<b>1533 年 2 月《诉愿法》</b>切断向罗马上诉；5 月 23 日克拉默宣布婚姻无效，9 月 7 日伊丽莎白出生。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1534 · 11 · 11 <small>卷06 · 第九章</small></div><p><b>《王权至上法案》（Statute of Supremacy）</b>：王对国家及教会拥有绝对主权，教会更名「英国国教会」（Ecclesia Anglicana），原属罗马教廷的一切权力归国王。同年 3 月 30 日《王位继承法》已使玛丽成为私生女。<b>英国宗教改革的法律骨架在这一年立完</b>。</p></div>
+    <div class="tl-item reveal"><div class="yr">1535 → 1540 <small>卷06 · 第九、十章</small></div><p>1535 年 6 月 22 日费希尔、7 月 7 日<b>莫尔</b>被斩；1536 年《黑皮书》清理 376 所修道院，引发「求恩巡礼」；1539 年「六条款」以天主教观点重定教义；约 1540 年<b>尽封男女修道院</b>，亨利至少收入 142.35 万镑；7 月 28 日克伦威尔被枭首。</p></div>
+    <div class="tl-item reveal"><div class="yr">1547 → 1553 <small>卷06 · 第十一章</small></div><p>1547 年 1 月亨利八世死，10 岁的<b>爱德华六世</b>即位、萨默塞特摄政：1548 年《祈祷书》、英语礼拜、抹去圣像；1549 年凯特之乱；1552 年《祈祷书》第二册与《再度统一法案》；1553 年 7 月 6 日爱德华 15 岁病故，简·格雷「十日王位」。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1553 → 1558 <small>卷06 · 第十一章</small></div><p>37 岁的<b>玛丽一世</b>即位：1554 年恢复天主教、与西班牙菲利普联姻；1555—1556 年火刑（里德利、拉蒂默、克拉默），<b>致死 300 余人</b>。1558 年 1 月 6 日失加来（英国领有该地曾达 211 年）。<b>本章记三个 11 月节点</b>：11 月 6 日<b>传位</b>给伊丽莎白、11 月 11 日玛丽望弥撒、次日天不亮去世（原文未给确切卒日）；本章无「11 月 17 日」，也无「即位／加冕」字样。卷07 第一章另记 11 月 17 日<b>禀告即位</b>——传位、去世、禀告是不同事件，<b>并不矛盾</b>。卷06 的英国线到此结束。</p></div>
+    <div class="tl-item reveal"><div class="yr">1557 → 1560 <small>卷06 · 第十二章 苏格兰</small></div><p>1557 年 12 月 3 日苏格兰贵族签「第一苏格兰条约」；1559 年 5 月 2 日<b>约翰·诺克斯</b>回爱丁堡；<b>1560 年 8 月 1 日宗教改革国会仅 8 票反对</b>通过《信仰的宣告》，废除教皇管辖权与弥撒。</p></div>
+    <div class="tl-item reveal"><div class="yr">1558 → 1625 <small>卷07 · 第一部「理性的觉醒」</small></div><p><b>卷07 第一部整部 8 章皆英国</b>：第一章《伟大的女王（1558—1603）》是卷06 的直接续章（卷07 记 1558 年 11 月 17 日禀告伊丽莎白已是女王、<b>45 年统治开始</b>，1559 年 1 月 15 日加冕；卷06 第十一章记的是 11 月 6 日<b>传位</b>与玛丽约 11 月 12 日卒，<b>三件事不同、并不冲突</b>）；第二章《欢乐的英国》写 1581 年约 500 万人、1563 年《学徒法》、1600 年东印度公司、1588 年无敌舰队；另有《莎士比亚》《苏格兰女王玛丽》《詹姆士六世和詹姆士一世》《召唤理性》《大革命（1625—1649）》。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1649 → 1701 <small>卷08 · 第二部／第三部</small></div><p>1649 年 1 月 30 日查理一世被斩、5 月建「大英共和国」；1653 年 12 月克伦威尔任护国主；1660 年查理二世复辟；1662 年皇家学会获特许状；<b>1688 年光荣革命</b>（11 月 5 日威廉登陆）、<b>1689 年《人权条例》(Bill of Rights)</b>、1701 年《继位法案》。同卷第三部有《科学的探求》《伊萨克·牛顿（1642—1727）》《英国哲学（1648—1715）》。<b>1707 年英苏联合见卷11《英格兰的邻邦》</b>。</p></div>
+    <div class="tl-item reveal"><div class="yr">1714 → 1756 <small>卷09 · 第一部「伏尔泰与英国」</small></div><p>第一部 6 章：《法国：摄政时期》《人民（1714—1756）》《统治者》《宗教与哲学》《文学与戏剧》《艺术与音乐》——写英国社会、君主立宪、自然神论与报刊文学。1714 年安妮女王卒、乔治一世即位；<b>伏尔泰旅英三年（1726—1728）</b>写成《论英国书札》；1694 年《执照法案》期满未续，出版自由自动建立。</p></div>
+    <div class="tl-item reveal"><div class="yr">1756 → 1789 <small>卷10 · 第四部 卢梭时代的英国</small></div><p>该部前 7 章皆英国：<b>第一章《工业革命》</b>（铁、煤、殖民地、海军）、《政坛风云（1756—1792）》《英国人》《雷诺兹时代》《英格兰之邻》（苏格兰启蒙、亚当·斯密、彭斯）《文坛景象》《塞缪尔·约翰逊》。1756—1763 年七年战争由老皮特主导；<b>1765／1769 年瓦特改良蒸汽机</b>、1769 年阿克莱特水架。注意该部第 8—12 章实为法国大革命前夜，非英国主体。</p></div>
+    <div class="tl-item era reveal"><div class="yr">1789 → 1815 <small>卷11 · 第二部／下册第四部</small></div><p>第二部「法国大革命与英国」共 10 章：《英格兰在忙碌》《英国的生活》《英国的艺术》（特纳、康斯太布尔）《英国的科学》《英国的哲学》《文学的转变》（简·奥斯汀）《湖畔诗人》《反叛的诗人》《英格兰的邻邦》（<b>1707 年英苏联合</b>）《皮特、纳尔逊和拿破仑（1789—1812）》。1798 年尼罗河战役、<b>1805 年特拉法尔加纳尔逊阵亡</b>、1815 年滑铁卢（下册第四部第十一章）。<b>全书英国线索在此收束</b>。</p></div>
+    <div class="tl-item reveal"><div class="yr">1793 → 1815·6 <small>卷11 · 插图图注补遗</small></div><p>卷11 两份插图文件（部01《07_插图.md》、部02《11_插图.md》）的<b>图注藏着正文没写的明确日期</b>：1793 年小皮特在下议院演讲、奥普西荷英组成第一次反法联盟；1794 年《皇家学会汇刊》扉页；1798 年拿破仑远征埃及意在「切断通向印度—英国财富的来源」、尼罗河一战法国舰队被英国彻底摧毁；1805 年特拉法尔加「确立了英国海军长达 100 多年的优势」；1814 年 1 月奥俄普英四国同盟约定不单独谈判；<b>1815 年 6 月滑铁卢，威灵顿指挥英军</b>。图注另记 1782 年诺斯内阁倒台、小皮特出任首相，与正文第十章「1783 年」两存。人物图注（潘恩、边沁、简·奥斯汀、华兹华斯、拜伦、雪莱等）与第二部第 3—8 章一一对应。</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ③ 人物画廊 -->
+<section id="figures">
+  <div class="sec-head reveal"><span class="no">叁</span><h2>人物画廊 · 二十一位群星</h2></div>
+  <p class="sec-desc reveal">点击卡片翻面查看档案。记忆法：先抓<b style="color:var(--gold-l)">四个锚点</b>（威克利夫 → 亨利七世 → 亨利八世 → 伊丽莎白），再把改革者、权臣、文人挂到各自的时代上。</p>
+  <div class="cat-tabs reveal" id="figTabs">
+    <button class="on" data-cat="all">全部</button>
+    <button data-cat="monarch">君主</button>
+    <button data-cat="reform">改革者 · 殉道者</button>
+    <button data-cat="power">权臣 · 摄政</button>
+    <button data-cat="mind">文人 · 学者</button>
+  </div>
+  <div class="fig-grid reveal" id="figGrid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ④ 数据馆 -->
+<section id="stats">
+  <div class="sec-head reveal"><span class="no">肆</span><h2>数字档案馆</h2></div>
+  <p class="sec-desc reveal">九个撑起论证的数字，全部取自卷06 原文（口径见每条标签）。读前两章时觉得「抽象」的地方，用数字落一下地。</p>
+  <div class="stat-grid reveal">
+    <div class="stat"><div class="num"><span class="cnt" data-v="300">0</span><small> 万</small></div><div class="lab">1307 年英格兰与威尔士人口（1066 年推定 250 万）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="10">0</span><small> 万镑</small></div><div class="lab">1380 年起开征的人头税总额，15 岁以上皆须纳</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="1295">0</span></div><div class="lab">首届「模范国会」，上院与下院分立之年</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="3">0</span><small> 人中 1 人</small></div><div class="lab">黑死病夺去的英国人比例（1349 年起反复回访）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="11.8">0</span><small> 万镑</small></div><div class="lab">1531 年教士为免《王权侵害法》追诉缴纳的罚款</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="600">0</span><small> 余所</small></div><div class="lab">1535 年全国修道院总数（《黑皮书》视察对象）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="376">0</span></div><div class="lab">1536 年首批应封闭的修道院（年入 200 镑以下）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="142">0</span><small> 万镑</small></div><div class="lab">没收教产后亨利八世至少凭空收入（原文 142.35 万）</div></div>
+    <div class="stat"><div class="num"><span class="cnt" data-v="300">0</span><small> 余人</small></div><div class="lab">玛丽朝火刑致死人数（其中 273 人在最后 4 年）</div></div>
+  </div>
+  <div class="revenue-note reveal">
+    <h4>全书 11 卷的英国线索密度 · 含英国关键词的小节标题数（自动统计）</h4>
+    <div class="rev-bars" id="revBars">
+      <div class="rev-bar"><span>卷03 恺撒</span><div class="track"><div class="fill" data-w="6"></div></div><span class="val">1</span></div>
+      <div class="rev-bar"><span>卷04 信仰</span><div class="track"><div class="fill" data-w="59"></div></div><span class="val">10</span></div>
+      <div class="rev-bar"><span>卷05 文艺复兴</span><div class="track"><div class="fill" data-w="0"></div></div><span class="val">0</span></div>
+      <div class="rev-bar top"><span>卷06 宗教改革</span><div class="track"><div class="fill" data-w="47"></div></div><span class="val">8</span></div>
+      <div class="rev-bar top"><span>卷07 理性开始</span><div class="track"><div class="fill" data-w="100"></div></div><span class="val">17</span></div>
+      <div class="rev-bar"><span>卷08 路易十四</span><div class="track"><div class="fill" data-w="65"></div></div><span class="val">11</span></div>
+      <div class="rev-bar"><span>卷09 伏尔泰</span><div class="track"><div class="fill" data-w="29"></div></div><span class="val">5</span></div>
+      <div class="rev-bar"><span>卷10 卢梭</span><div class="track"><div class="fill" data-w="18"></div></div><span class="val">3</span></div>
+      <div class="rev-bar"><span>卷11 拿破仑</span><div class="track"><div class="fill" data-w="41"></div></div><span class="val">7</span></div>
+    </div>
+    <p style="margin-top:14px;color:var(--dim);font-size:12.5px">口径说明：对全书 Markdown 中含「英国／英格兰／不列颠／苏格兰／爱尔兰／伊丽莎白／牛顿／光荣革命…」等词的<b>小节标题</b>逐卷计数，卷01、卷02 为 0 未列。它衡量的是「标题层面的英国可见度」，<b>不等于章节数</b>——卷06 的第十一章《爱德华六世与玛丽·都铎》标题里没有「英国」，却是最核心的英国章节之一。真正的高峰是卷07（伊丽莎白时代）与卷06（宗教改革）。</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑤ 记忆闪卡 -->
+<section id="flash">
+  <div class="sec-head reveal"><span class="no">伍</span><h2>记忆闪卡 · 二十二张</h2></div>
+  <p class="sec-desc reveal">22 张覆盖从威克利夫到光荣革命。先自问再点卡翻面作答，然后诚实地点「认识 / 模糊 / 不会」——<b style="color:var(--gold-l)">"模糊"和"不会"的卡会优先重排到后面再出现</b>，直到全部掌握。进度自动保存。</p>
+  <div class="flash-app reveal">
+    <div class="flash-ctrl">
+      <span id="fCount"></span>
+      <div class="btns">
+        <button id="fShuffle">🔀 打乱</button>
+        <button id="fReset">↺ 重置进度</button>
+      </div>
+    </div>
+    <div class="fprog"><div class="bar" id="fBar"></div></div>
+    <div class="fcard q" id="fCard">
+      <span class="qmark">问</span><span class="amark" style="display:none">答</span>
+      <div class="face-q" id="fQ"></div>
+      <div class="face-a" id="fA"></div>
+      <span class="tap-hint">点击卡片翻面</span>
+    </div>
+    <div class="fb-btns">
+      <button class="b-no" id="fNo">✗ 不会</button>
+      <button class="b-mid" id="fMid">～ 模糊</button>
+      <button class="b-yes" id="fYes">✓ 认识</button>
+    </div>
+    <div class="flash-done" id="fDone" style="display:none">
+      <h3>🌾 本轮完成</h3>
+      <p id="fDoneTxt"></p>
+      <button id="fAgain" style="background:var(--gold);color:#0b1626;border:none;border-radius:12px;padding:12px 36px;font-size:15px;font-weight:600;cursor:pointer">再来一轮（只练未掌握）</button>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ⑥ 测验 -->
+<section id="quiz">
+  <div class="sec-head reveal"><span class="no">陆</span><h2>终极测验 · 十二题</h2></div>
+  <p class="sec-desc reveal">检验全书英国线索的掌握程度。答错也没关系——错题的解析就是最好的复习材料。最高分会保存。</p>
+  <div class="quiz-wrap reveal">
+    <div class="quiz-start" id="qStart">
+      <h3>准备就绪？</h3>
+      <p>12 道选择题，覆盖王朝更替、法案、人物与卷次索引。<br>预计用时 3–5 分钟。</p>
+      <button id="qGo">开始测验</button>
+      <p style="margin-top:16px;font-size:12.5px" id="qBest"></p>
+    </div>
+    <div id="qBody" style="display:none">
+      <div class="quiz-meta"><span id="qNo"></span><span id="qScore"></span></div>
+      <div class="qprog"><div class="bar" id="qBar"></div></div>
+      <div class="quiz-q">
+        <div class="stem" id="qStem"></div>
+        <div id="qOpts"></div>
+        <div class="expl" id="qExpl"></div>
+        <div class="qnxt"><button id="qNext" style="display:none">下一题 →</button></div>
+      </div>
+    </div>
+    <div class="quiz-result" id="qResult" style="display:none">
+      <h3>测验完成</h3>
+      <div class="score-big" id="qFinal"></div>
+      <div class="verdict" id="qVerdict"></div>
+      <div class="wrong-review" id="qWrong"></div>
+      <button id="qRetry">重新挑战</button>
+    </div>
+  </div>
+</section>
+
+<!-- ⑦ 综合进度 -->
+<div class="progress-bar-wrap reveal">
+  <div class="pbox">
+    <div class="row"><span class="t">🌾 我的学习进度</span><span id="pPct">0%</span></div>
+    <div class="big"><div class="bar" id="pBar"></div></div>
+    <div class="sub">
+      <span>板块已读 <i id="pSec">0/7</i></span>
+      <span>闪卡已掌握 <i id="pFlash">0/22</i></span>
+      <span>测验最高分 <i id="pQuiz">—</i></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span class="gd">◆</span> 资料来源：威尔·杜兰特《文明的故事》卷03《恺撒与基督》「不列颠」、卷04《信仰的时代》英格兰／苏格兰／爱尔兰诸节、<b>卷06《宗教改革》第一部第二章、第五章及第二部第八—十二章（主轴）</b>、卷07—卷11 英国相关章节<br>
+  年代与数字均依中译本原文；前史与 1558 年以后部分为跨卷索引，卷05《文艺复兴》无英国专章 · 学习进度保存在本机浏览器（localStorage）<br>
+  <b>译名对照</b>（中译本 ↔ 通行译名）：布林恩＝安妮·博林；菲利普＝腓力（西班牙）；《祈祷书》(Common Prayer)＝《公祷书》；《诉愿法》(Statute of Appeals)＝《禁止上诉法》；《王权至上法案》(Statute of Supremacy)＝《至尊法案》；《人权条例》(Bill of Rights)＝《权利法案》。本页优先采用中译本原文译名，便于张总对照原书；卷07 第一章作「安妮·博林（Anne Boleyn）」、卷06 作「布林恩」。<b>同名异人须辨</b>：「菲利普」全书至少四类——〔马其顿〕卷02 第一章《菲利普王》；〔法王〕卷04 第八章「奥古斯都」菲利普、法兰西菲利普一世（与理查、约翰、《大宪章》同章，最易误链）；〔西班牙〕卷06／卷07 的腓力二世（查理五世之子、玛丽一世之夫）；〔法国摄政〕卷09 第一章奥尔良公爵（1715 年后）。本页保留各卷原译并括注类别<br>
+  <b>史料口径</b>：① 1558 年三个节点按卷次并列——卷06 第十一章「11 月 6 日传位／11 月 11 日望弥撒后次日卒」，卷07 第一章「11 月 17 日禀告伊丽莎白已是女王」；<b>传位、去世、禀告是不同事件，并不矛盾</b>，本页不合并。② 小皮特出任首相年份，卷11 正文（1783）与插图图注（1782）确有出入，两存。③ 卷11 两份插图图注含正文未写的明确日期（1793、1794、1814.1、1815.6），已补进时间轴。④「吉斯公爵攻陷加来」「新年刚过」为中译本原文所无，本页不取；卷06 原文只作「1558 年 1 月 6 日此役英国丢掉了加来，领有该地曾达 211 年之久」。卷07 的「吉斯公爵」均出现在 1559 年后的法国宗教战争语境，卷07 第一章的「加来」则指 1588 年无敌舰队下锚处，与 1558 失加来无关<br>
+  <span class="gd">小满 🌾</span> 为张总制作 · 建议读完本页后直接接卷07 第一章《伟大的女王（1558—1603）》，再看第二章《欢乐的英国》
+</footer>
+
+<script>
+/* ============ 数据 ============ */
+const FIGURES=[
+ {n:"爱德华三世",en:"Edward III",cat:"monarch",g:"⚔",tag:"金雀花 · 1327—1377",
+  b:"<h4>战士国王，把权力让给国会</h4><p>1330 年 18 岁亲政。为使法国附庸英国而大事搜刮，<b>友善地将权力让给国会，只求国会支援作战</b>；约 1349 年建袜带骑士团。1331 年起引佛兰德斯织布匠入英、禁羊毛出口，奠定英国纺织业。</p><p>晚年宠信艾丽斯·佩雷尔斯、政事交给根特的约翰，1376 年「好国会」弹劾贪官；1377 年去世，由 11 岁的孙儿理查二世继位。</p>",d:"他的战争与国会，是第一章之后英国故事的起点"},
+ {n:"理查二世",en:"Richard II",cat:"monarch",g:"👑",tag:"金雀花末代 · 1377—1399",
+  b:"<h4>14 岁救下王位，33 岁失去一切</h4><p>1381 年大叛乱中，他在米莱恩德答应废除农奴制，又在史密斯菲尔德以<b>「你们将射杀你们的国王吗？我将做你们的首领」</b>化解危局；事后却翻脸：「你们仍然是农奴，并且将永为农奴」。</p><p>1390—1397 年曾守法安治 7 年；1399 年没收根特的约翰遗产，被亨利·博林布鲁克推翻，次年死于庞蒂弗拉克特监狱。</p>",d:"金雀花王朝在他手里终结（1154—1399）"},
+ {n:"亨利七世",en:"Henry VII",cat:"monarch",g:"🏰",tag:"都铎开国 · 1485—1509",
+  b:"<h4>把破败国家收拾成「有财力的国家」</h4><p>1485 年包斯华斯之役击败理查三世即位，玫瑰战争终结。创<b>星室法院</b>以秘密会议审讯不惧地方法官的贵族；巧妙征税、以罚金充国库，是<b>1216 年以来第一位靠自己收入开支的英王</b>。</p><p>培根说他「喜欢财库充裕时的快乐」。1497 年卡伯特发现纽芬兰。他留给亨利八世一个「有秩序、有财力、统一而和平的国家」。</p>",d:"杜兰特：阴沉、工心计，却完成了中央集权"},
+ {n:"亨利八世",en:"Henry VIII",cat:"monarch",g:"♛",tag:"都铎 · 1509—1547",
+  b:"<h4>从「基督教卫士」到教廷叛逆</h4><p>1509 年 18 岁即位，博学、善音乐骑射，万民欢呼黄金时代。1521 年亲撰《述七圣礼斥马丁路德》获教皇赐号<b>「基督教卫士」</b>；因求男嗣与废后案与罗马决裂，1534 年《王权至上法案》自任英国教会最高领袖。</p><p>1536 年起没收修道院、1539 年「六条款」仍守天主教教义。1547 年 1 月去世，55 岁、秉政 37 年。莫尔说他「既是一个大英雄又是一个大恶棍」。</p>",d:"杜兰特：他的宗教改革是政治革命，不是神学革命"},
+ {n:"爱德华六世",en:"Edward VI",cat:"monarch",g:"🕊",tag:"都铎 · 1547—1553",
+  b:"<h4>10 岁即位、15 岁病故的「天使」</h4><p>母亲简·西摩，老师克拉默，是彻头彻尾的新教徒。萨默塞特摄政时期：废止迫害法规、英语礼拜、抹去教堂圣像、<b>1548 年《祈祷书》</b>；1552 年《祈祷书》第二册与《再度统一法案》把英国教会推向新教。</p><p>1549 年凯特之乱（1.6 万人、死者 3500 余人）与圈地苦况，是这一时期的社会底色。</p>",d:"英国国教会在他手里真正「新教化」"},
+ {n:"玛丽一世",en:"Mary I",cat:"monarch",g:"🕯",tag:"都铎 · 1553—1558",
+  b:"<h4>「血腥」玛丽，也是被废黜的长女</h4><p>1534 年《王位继承法》使她成为私生女；1553 年 37 岁即位，1554 年 3 月 4 日下令恢复天主教、3 月 6 日与西班牙菲利普（腓力）联姻，11 月 20 日波尔返英。</p><p>1555—1556 年火刑烧死里德利、拉蒂默、克拉默等，<b>共致死 300 余人，其中 273 人在最后 4 年</b>。1558 年 1 月失加来（英国领有 211 年），11 月传位伊丽莎白。</p>",d:"杜兰特：宽厚的女王 → 血腥玛丽，转折在 1554 年"},
+ {n:"伊丽莎白一世",en:"Elizabeth I",cat:"monarch",g:"🌹",tag:"都铎末代 · 1558—1603",
+  b:"<h4>卷07 第一章《伟大的女王》的主角</h4><p>1533 年 9 月 7 日生，安妮·博林之女；曾被《王位继承法》立为继承人，又被宣布为私生女。卷07 记 <b>1558 年 11 月 17 日禀告伊丽莎白已是女王、1559 年 1 月 15 日加冕</b>为「英格兰、法兰西及爱尔兰女王」；<b>卷06 第十一章另记 11 月 6 日传位、11 月 11 日望弥撒后次日天不亮去世——传位／去世／禀告是三件不同的事，日期不冲突</b>。<b>卷07 第一章《伟大的女王（1558—1603）》是卷06 的直接续章</b>；第二章《欢乐的英国》写她治下的社会：宗教妥协、1563 年《学徒法》、1600 年东印度公司、1588 年无敌舰队。</p><p>杜兰特笔下的伊丽莎白时代：鲁莽、富有侵略性、坦诚而富裕，给了莎士比亚语言与灵感。</p>",d:"读完卷06 后，下一站就是她"},
+ {n:"玛丽·斯图亚特",en:"Mary, Queen of Scots",cat:"monarch",g:"⚜",tag:"苏格兰女王 · 1542—1587",
+  b:"<h4>卷07 第五章的悲剧</h4><p>1547 年平克·克莱格之役时，她还是「年仅 15 岁的法国女孩」——萨默塞特曾提出英苏联合、由她的后裔继承大不列颠统治权的宽大方案，苏格兰贵族因领法国年金而不热衷。</p><p>卷07 专章《苏格兰女王玛丽（1542—1587）》；卷06 第十二章则铺陈 1560 年苏格兰宗教改革的背景。</p>",d:"英苏联合实际开始于 1603 年（其子詹姆士六世入主英格兰）"},
+ {n:"约翰·威克利夫",en:"John Wyclif",cat:"reform",g:"✝",tag:"改革先驱 · 约1320—1384",
+  b:"<h4>比路德早 130 年的整套改革纲领</h4><p>约 1320 年生于约克郡，牛津神学教授、1360 年巴利奥尔学院院长。主张：教会放弃一切财产、<b>《圣经》为唯一权威且每个识字的英国人都该读</b>、否定化体说与秘密告解、否认教士是神人中介、国家应终止做教皇的附属。</p><p>1377 年教皇谴责其 18 项论题；1381 年大叛乱后失去保护，1382 年被牛津驱逐，退居拉特沃思；1384 年 12 月 28 日中风，3 天后去世。1415 年康斯坦茨会议下令掘墓焚骨。</p>",d:"杜兰特：宗教改革的所有要素均集于他"},
+ {n:"瓦特·泰勒",en:"Wat Tyler",cat:"reform",g:"🔥",tag:"1381 大叛乱领袖",
+  b:"<h4>把乌合之众编成军队的人</h4><p>来历不明的退伍军人，1381 年 6 月 7 日被肯特郡起义者推举为领袖；6 月 10 日入坎特伯雷、6 月 13 日进伦敦，纪律严明到「想偷银杯的暴民遭群众杀害」。</p><p>6 月 14 日在米莱恩德迫使国王答应废除农奴制；次日于史密斯菲尔德再提没收教产，与伦敦市长沃尔沃思冲突中被刺死。此后理查二世取消一切赦书，110 余人被处死。</p>",d:"与约翰·鲍尔并称叛乱双领袖"},
+ {n:"威廉·廷德尔",en:"William Tyndale",cat:"reform",g:"📖",tag:"英译《新约》· 1536 殉道",
+  b:"<h4>让英国人用英语读《圣经》</h4><p>1525—1526 年印行英译《新约》6000 本，<b>直接译自希腊文／希伯来文</b>（威克利夫版译自拉丁文），在沃尔姆斯加注后偷运入英；伦敦主教图斯塔尔收购焚毁也烧不尽。</p><p>1530 年译《旧约五书》，1536 年在维尔福德被活活烧死，临终祷词「主啊，求你打开英国国王的眼睛」。<b>1611 年权威英译本 90% 出自他的译文</b>。</p>",d:"杜兰特称他是影响英国最大的文学作品的真正译者"},
+ {n:"托马斯·莫尔",en:"Thomas More",cat:"reform",g:"🕊",tag:"《乌托邦》· 1535 殉道",
+  b:"<h4>人文主义者，也是不肯宣誓的人</h4><p>亨利八世的重要辅臣，1529 年 11 月接替沃尔西任御前大臣，共 31 个月；著《乌托邦》，曾写 578 页《驳辩书》批廷德尔译本、下令烧死新教徒。</p><p>1532 年 5 月 16 日因反教士立法而辞职；1534 年 4 月 17 日因拒誓遵《王位继承法》入狱；1535 年 7 月 1 日判叛国罪，<b>7 月 7 日上断头台</b>，留下「我是为天主教而牺牲的」「虽死但仍是王的忠仆，不过愿把上帝放在第一位」。</p>",d:"伊拉斯谟：「我们俩虽有两个躯壳，却共着一个灵魂」"},
+ {n:"托马斯·克拉默",en:"Thomas Cranmer",cat:"reform",g:"⛪",tag:"坎特伯雷大主教",
+  b:"<h4>英国国教礼仪的缔造者</h4><p>1533 年以坎特伯雷大主教身份宣布亨利与凯瑟琳婚姻无效、5 月 28 日承认安妮为后；爱德华六世的老师。</p><p>主持编写 <b>1548 年《祈祷书》（Common Prayer）</b>——弃绝弥撒的供祭、大体保留天主教仪式、采取部分路德思想；1552 年出第二册。玛丽朝与里德利、拉蒂默一同被处以火刑（1555—1556）。</p>",d:"杜兰特：书中文情并茂，处处是克拉默的才情"},
+ {n:"约翰·诺克斯",en:"John Knox",cat:"reform",g:"🏴",tag:"苏格兰宗教改革 · 1505—1559",
+  b:"<h4>把日内瓦的火种带回苏格兰</h4><p>卷06 第十二章《从罗伯特·布鲁斯到约翰·诺克斯（1300—1561）》的核心人物。1557 年 12 月 3 日苏格兰贵族签「第一苏格兰条约」；<b>1559 年 5 月 2 日他回爱丁堡</b>；1560 年 8 月 1 日宗教改革国会仅 8 票反对通过《信仰的宣告》，废除教皇管辖权与弥撒。</p><p>杜兰特：苏格兰改教由贵族发起，<b>不像英国由国王和商人发起</b>。</p>",d:"苏格兰线在卷06 第十二章、卷07 接苏格兰女王玛丽"},
+ {n:"托马斯·沃尔西",en:"Thomas Wolsey",cat:"power",g:"🎩",tag:"红衣主教 · 御前大臣",
+  b:"<h4>「英国的第二国王」</h4><p>伊普斯威奇屠户之子，15 岁得牛津学士；1514 年约克大主教、1515 年红衣主教兼御前大臣。以「均势政策」在法国与神圣罗马帝国之间摆弄英国砝码，1520 年筹办金缕地会盟。</p><p>极盛时约占全英宗教收入 1/3，威尼斯大使称「他在英国的权力比教皇大 7 倍」；汉普敦宫因太富丽而献给国王。废后案失败后 1529 年 10 月倒台，1530 年 11 月 29 日死于莱斯特修道院。</p>",d:"杜兰特：办事井井有条，但「我想怎么做怎么做」"},
+ {n:"托马斯·克伦威尔",en:"Thomas Cromwell",cat:"power",g:"📜",tag:"宗教法权副手 · 1531—1540",
+  b:"<h4>把王权变成机器的人</h4><p>1485 年生于帕特尼铁匠之家，曾流浪法意、经营纺织与放贷，随沃尔西工作 5 年。1531—1540 年为亨利心腹与政府首脑，管外交、内政、司法、枢密院、星室法院、情报与教会。</p><p>1535 年任「宗教法权副手」，派 3 个视察团查修道院、1536 年上《黑皮书》；1539 年「六条款」、1540 年促成亨利与克莱沃的安妮联姻。<b>1540 年 7 月 28 日被枭首</b>，罪名是叛国与异端。</p>",d:"杜兰特：目的在提高王位、以没收教产支撑王权"},
+ {n:"奥利弗·克伦威尔",en:"Oliver Cromwell",cat:"power",g:"⚔",tag:"卷08 · 内战与共和",
+  b:"<h4>与托马斯·克伦威尔不是同一人</h4><p>属卷08《路易十四时代》第二部「英伦与欧陆的革命与改革」：1649 年查理一世被作为「暴君、叛国者、杀人犯和人民公敌」处决，克伦威尔与弥尔顿成为共和时期的核心人物。</p><p>这条线往下接《英国的经济（1660—1702）》、1688 年光荣革命、威廉三世与安妮女王。</p>",d:"记忆锚点：托马斯＝亨利八世的权臣；奥利弗＝内战护国公"},
+ {n:"杰弗里·乔叟",en:"Geoffrey Chaucer",cat:"mind",g:"✒",tag:"诗人 · 1340—1400",
+  b:"<h4>英语文学的开工者</h4><p>伦敦酒商之子，1359 年赴法作战被俘由国王赎回；1372 年出使热那亚、1378 年赴米兰，受意大利文学洗礼；曾任关税监督 12 年、1386 年入选国会。</p><p>约 1387 年始写<b>《坎特伯雷故事集》</b>——让各阶层朝圣者互讲故事，「用这些人物表现英国生活，似乎比历史上的芸芸众生更为真切」。《特罗伊拉斯与克莱西德》是第一首伟大的英文叙事诗。</p>",d:"1362 年英语成为法庭用语，他的时代才成为可能"},
+ {n:"威廉·卡克斯顿",en:"William Caxton",cat:"mind",g:"🖨",tag:"英国印刷第一人",
+  b:"<h4>1476 年，威斯敏斯特</h4><p>肯特郡人，在布鲁日经商、译法文爱情小说，因「手因写字太多而疲劳、眼睛因注视白纸而模糊」而学会印刷；1476 年带回活版铅字印刷机，此后 15 年印 <b>98 本书</b>。</p><p>1485 年出版马洛里《亚瑟王之死》，为英国散文树立永久典范；1491 年去世，助手温金继续其业。</p>",d:"杜兰特：15 世纪英国伟大的文化成就是第一家印刷厂"},
+ {n:"威廉·莎士比亚",en:"William Shakespeare",cat:"mind",g:"🎭",tag:"卷07 第四章 · 1564—1616",
+  b:"<h4>伊丽莎白舞台的顶点</h4><p>卷07 专章《威廉·莎士比亚（1564—1616）》。卷06 第五章已铺好来路：14 世纪的神迹剧、道德剧（《凡人》约 1480）、幕间插剧——<b>「多彩多姿的伊丽莎白舞台上的喜剧，由杂剧演化而来，而其悲剧则来自神剧与道德剧」</b>。</p><p>另：莎士比亚笔下的理查二世之死、亨利四世／五世，正是卷06 第五章那段王朝更替的文学回声。</p>",d:"读卷07 第四章时回看卷06 第五章，会格外有味"},
+ {n:"伊萨克·牛顿",en:"Isaac Newton",cat:"mind",g:"🔭",tag:"卷08 第三章 · 1642—1727",
+  b:"<h4>英国从「信仰之争」走向「知识之争」</h4><p>卷08 第三部《知识的探索》有《科学的探求（1648—1715）》（1662 年皇家学会获特许状）、第三章《伊萨克·牛顿（1642—1727）》与第四章《英国哲学（1648—1715）》（霍布斯、洛克）。此时英国的主角已不是主教与国王，而是科学家与哲学家。</p><p>往前往后各有一站：卷07 的莎士比亚（文学）、卷09 的伏尔泰在英国（1726—1728，把英国经验哲学介绍给欧陆）。</p>",d:"全书英国线索从政治史转向思想史的分水岭"},
+];
+
+const FLASH=[
+ ["为什么卷06 第一章讲教会、第二章突然讲英国？","因为第一部叫<b>「从威克利夫到路德」</b>：杜兰特要证明宗教改革的一整套要素最早出现在 14 世纪的英国，而不是 1517 年的德国。第一章给「病灶」（教会财富与教廷权威），第二章给「第一次发作」。"],
+ ["1295 年「模范国会」为何重要？","爱德华一世因同时与法、苏、威交战极需现金，令<b>每城派 2 名市民、每郡派 2 名骑士</b>参会 → 首次形成上院与下院。下院唯一的武器是<b>「钱袋权力」</b>：拖延拨款直到满意为止。国王不能公开更改国会法律，但一年中大部分时间可不受牵制地统治。"],
+ ["威克利夫的核心主张有哪几条？","①教会应<b>放弃一切财产</b>；②《圣经》是唯一无误的指引，<b>每个识字的英国人都该读</b>；③否定化体说、秘密告解、赎罪券；④否认教士是上帝与信徒之间的中介；⑤国家应终止做教皇的附属、控制教会财产；⑥组织「穷传教士」（罗拉德派）用英文布道。"],
+ ["威克利夫与马丁·路德相差多久？","约 <b>130 年</b>。杜兰特原话：「若非这次大革命阻止了政府对威克利夫改革运动的保护，<b>宗教改革在德国发生前 130 年，可能已在英国成形</b>。」他死于 1384 年；1415 年康斯坦茨会议下令掘其墓、投骸骨于河。"],
+ ["1351、1353 两个法令分别管什么？","<b>1351《圣职候补人法》(Statute of Provisors)</b>：终止教皇对英国神职人员与圣俸的控制。<b>1353《王权侵害罪法》(Praemunire)</b>：把原由国王裁定、却向「外国」（教皇）法庭申诉的行为定为非法。另有 1333 年拒付自 1213 年约翰王起承诺的教皇贡物、1366 年国会再度拒纳贡。"],
+ ["1381 年大叛乱的直接导火索与结局？","<b>1380 年起的人头税</b>：政府濒破产，10 万英镑重税落在 15 岁以上全体居民身上，又派监督官搜捕逃税者 → 肯特、埃塞克斯等地暴动。6 月 14 日理查二世在米莱恩德答应废除农奴制；15 日泰勒死，国王随后取消一切赦书，110 余人被处死，国会（全是地主）投票维持封建采邑制。"],
+ ["约翰·鲍尔那句流传最广的话？","<b>「亚当耕田夏娃织，那时谁又是绅士？」</b>——意为伊甸园里本无阶级区分。他是「肯特的疯牧师」，1381 年被泰勒从狱中放出，每天向队伍传教，最终在考文垂被捕、处吊刑并车裂分尸。"],
+ ["黑死病怎样改变了英国社会？","1349 年自诺曼底传入，每 3 个英国人中死 1 个、近半数教士死亡 → 劳动力奇缺、工资上涨。政府以 1349 年法令、<b>1351《劳工法》</b>把工资冻结在 1346 年标准并设执行机构 → 劳工与政府长期斗争，采邑制加速没落，成为 1381 年叛乱的经济根子。"],
+ ["英语何时成为正式语言？谁让它成了文学语言？","<b>1362 年</b>英语被宣布为法律上与法庭中的通用语，1363 年上议院议长首次以英语演讲。1066 年诺曼入侵曾打断盎格鲁—撒克逊语的演进，法语长期是官方语言。<b>乔叟</b>（1340—1400）以《坎特伯雷故事集》把英语写成文学；朗格朗德《农夫彼尔士》则成了叛乱者的象征。"],
+ ["1399 年发生了什么王朝更替？","理查二世没收根特的约翰遗产、远征爱尔兰时，被放逐的亨利·博林布鲁克率军登陆并废之，即位为<b>亨利四世</b>。<b>1154 年亨利二世开始的金雀花王朝终结，兰开斯特王朝开始</b>（至亨利六世而终）。理查二世 1400 年 33 岁死于庞蒂弗拉克特监狱。"],
+ ["玫瑰战争的交战双方与起止年代？","<b>1454—1485 年</b>，兰开斯特（红玫瑰）对约克（白玫瑰），都是爱德华三世后裔。1461 年道敦之役后爱德华四世即位；1471 年沃里克战死、亨利六世被刺；1483 年理查三世与「塔中两王子」；<b>1485 年包斯华斯</b>亨利·都铎获胜。"],
+ ["亨利七世用哪三招收拾残局？","①创<b>星室法院</b>，以秘密会议审讯不惧地方法官的强横贵族；②巧妙征税、热切利用罚金充实国库（是 1216 年以来第一位靠自己收入开支的英王）；③保护工商、鼓励海外贸易（1497 年卡伯特发现纽芬兰）。结果：给亨利八世留下「有秩序、有财力、统一而和平的国家」。"],
+ ["1476 年卡克斯顿做了什么？卷05 为何没有英国专章？","1476 年在威斯敏斯特装上英国第一台活版印刷机，15 年印 98 本书，1485 年出版马洛里《亚瑟王之死》。<b>卷05《文艺复兴》目录里没有英国相关章节</b>——本书把英国人文主义（格罗辛、利纳克尔、科利特、莫尔，1499 年伊拉斯谟访英）补在<b>卷06 第一部第五章</b>。"],
+ ["苏格兰与爱尔兰线索分别在哪几章？","爱尔兰：<b>卷06 第二部第十章「顽强的爱尔兰人（1300—1558）」</b>——1366 年《基尔肯尼法案》、1494 年波伊宁斯法律、1541 年爱尔兰宣布为王国；另有卷04 爱尔兰诸节、卷09《爱尔兰（1714—1756）》。苏格兰：<b>卷06 第二部第十二章《从罗伯特·布鲁斯到约翰·诺克斯（1300—1561）》</b>、卷07 第五章《苏格兰女王玛丽》、卷09《苏格兰（1714—1756）》。文化侧另有卷06 第三部第八章「都铎时代的风格（1517—1558）」。"],
+ ["1509 与 1521：亨利八世的两个反差节点？","1509 年 18 岁即位，博学英俊、万民欢腾「黄金时代来了」；六周后公开庆祝与寡嫂凯瑟琳的婚姻。<b>1521 年亲撰《述七圣礼斥马丁路德》</b>，痛骂路德为「魔鬼的爪牙」，获利奥十世赐号<b>「基督教卫士」</b>并刻上钱币——13 年后他却成了教廷的叛逆。"],
+ ["1529 年 11 月 3 日「宗教改革国会」定了哪三大政策？","①<b>减少宗教财富和权力</b>；②维持与佛兰德斯的商业关系；③支持国王为获男性继位者的努力。上院最有势力的是贵族、下院是商人。杜兰特：「不许教皇管理教会，是基于<b>民族意识</b>。这种意识，英国较德国尤甚，王权就是靠这种意识提高的。」"],
+ ["1533《诉愿法》与 1534《王权至上法案》各做了什么？","<b>1533 年 2 月《诉愿法》(Statute of Appeals)</b>：原须呈教廷裁决的一切事项改由国内宗教法庭裁决（注意：这是本书中译名，通史常称《禁止上诉法》）。<b>1534 年 11 月 11 日《王权至上法案》(Statute of Supremacy)</b>：王对国家及教会拥有绝对主权，教会更名<b>英国国教会</b>，原属教廷处理道德、教条、异端等一切大权归国王（通史常称《至尊法案》）。同年 3 月 30 日《王位继承法》已使玛丽成为私生女。"],
+ ["杜兰特认为英国宗教改革的真正导火线是什么？","<b>「不是安妮的美色，而是凯瑟琳和查理的顽固」</b>——1527 年查理五世军队占领罗马、教皇成为其俘虏，废后案永远等不到有利判决；加上英国教会财富流入教皇之手、民族意识高于德国、国会与商人早已想收回教产。<b>它是王权与国会的政治革命，不是路德式的神学革命</b>。"],
+ ["英国宗教改革与德国／日内瓦的关键差别？","杜兰特：<b>「前者（英国）理论变动小，后者理论变动大」</b>——亨利八世除教皇权力外一切仍与天主教国家无异（1539 年「六条款」甚至以纯粹罗马天主教观点重定教义）；德国、瑞士则重定救赎与圣礼。结果是「<b>国权压倒了教权</b>……英国却投进了绝对专制君主的怀抱」；而「英国宗教改革事实上是<b>提高富人，压低穷人</b>」。"],
+ ["1536 年《黑皮书》与解散修道院的数字？","1535 年克伦威尔派 3 个视察团查遍<b>600 余所</b>修道院；1536 年 2 月 4 日向国会呈《黑皮书》（今已不传），建议封闭年入 200 镑以下者 → 清理 <b>376 所</b>、遣散 2000 余人，引发「求恩巡礼」（林肯 6 万人、约克 9000 人）。约 1540 年尽封：男修院 578 所、女修院 130 所，遣散修士 6521 人、修女 1560 人；亨利至少收入 142.35 万镑。"],
+ ["1547—1558 英国信仰摆了几次？","三次：①<b>爱德华六世</b>（1547—1553）在萨默塞特／窝立克摄政下彻底新教化——英语礼拜、抹去圣像、1548 与 1552 年两版《祈祷书》；②<b>简·格雷</b>1553 年 7 月 9 日的「十日王位」；③<b>玛丽一世</b>（1553—1558）1554 年恢复天主教、1555—1556 年火刑，致死 300 余人。1558 年伊丽莎白继位才重新定盘。"],
+ ["读完卷06，后面哪几卷还会遇到英国？","<b>卷07</b> 第一部整部 8 章皆英国——第一章《伟大的女王（1558—1603）》是卷06 的直接续章，另有《欢乐的英国》《莎士比亚》《苏格兰女王玛丽》《大革命（1625—1649）》；<b>卷08</b>《克伦威尔》《弥尔顿》《复辟》《光荣革命》《科学的探求》《牛顿》《英国哲学》；<b>卷09</b> 第一部「伏尔泰与英国」6 章；<b>卷10</b> 第四部前 7 章（《工业革命》《英格兰之邻》等）；<b>卷11</b> 第二部 10 章（《皮特、纳尔逊和拿破仑》等）。"],
+];
+
+const QUIZ=[
+ {q:"《文明的故事》卷06 第一部第二章《英国：威克利夫、乔叟与大叛乱》覆盖的年代是？",o:["1066—1300","1308—1400","1399—1509","1509—1529"],a:1,e:"1308 年爱德华二世加冕宣誓起，至 1400 年乔叟去世、理查二世被废为止。15 世纪的英国另在第五章（1399—1509）。"},
+ {q:"1295 年「模范国会」最关键的结构性后果是？",o:["国王从此无权征税","上院与下院首次分立，下院掌握「钱袋权力」","教士退出国会","确立了君主立宪制"],a:1,e:"每城 2 市民、每郡 2 骑士参会，平民与骑士日后成为下议院；他们唯一也是最强有力的武器是拖延拨款（power of purse）。此时英国王室「既非绝对专制，也非完全立宪」。"},
+ {q:"按杜兰特的判断，威克利夫的改革比德国宗教改革早多久？",o:["约 50 年","约 80 年","约 130 年","约 200 年"],a:2,e:"原文：「若非这次大革命（1381 大叛乱）阻止了政府对威克利夫改革运动的保护，宗教改革在德国发生前 130 年，可能已在英国成形。」"},
+ {q:"1381 年大叛乱最直接的导火索是？",o:["百年战争连败","1380 年起开征的人头税","黑死病复发","威克利夫被判为异端"],a:1,e:"政府濒于破产，10 万英镑重税落在 15 岁以上全体居民身上，成千上万人逃税；政府派新监督官搜捕逃税者，人民遂拿起武器。战争失败与《劳工法》是更深的积怨。"},
+ {q:"1399 年被废的理查二世，其王位由谁接替、开启哪一王朝？",o:["亨利五世 · 兰开斯特","亨利四世 · 兰开斯特","爱德华四世 · 约克","亨利七世 · 都铎"],a:1,e:"根特的约翰之子亨利·博林布鲁克废理查二世，即位为亨利四世；1154 年开始的金雀花王朝终结，兰开斯特王朝开始。1485 年才轮到都铎。"},
+ {q:"1485 年包斯华斯之役的结果？",o:["理查三世获胜，约克王朝延续","亨利·都铎即位为亨利七世，都铎王朝开始","沃里克伯爵复立亨利六世","苏格兰并入英格兰"],a:1,e:"理查三世大部分兵士拒绝作战，阵亡；里士满伯爵亨利·都铎即位为亨利七世，玫瑰战争终结。杜兰特说这个王朝「到伊丽莎白时代才告终止」。"},
+ {q:"关于卷05《文艺复兴》与英国，下列说法正确的是？",o:["有专章《英国的文艺复兴》","英国文艺复兴的内容主要在卷06 第一部第五章补上","卷05 全卷都在讲英国","英国人文主义在卷03"],a:1,e:"卷05 目录中未见英国相关章节；格罗辛、利纳克尔、科利特、莫尔与 1499 年伊拉斯谟访英，都写在卷06 第一部第五章「英国的人文主义者」一节。"},
+ {q:"1521 年亨利八世因哪部作品获教皇赐号「基督教卫士」？",o:["《乌托邦》","《述七圣礼斥马丁路德》","《驳辩书》","《坎特伯雷故事集》"],a:1,e:"他撰文痛骂路德、捍卫七圣礼与教皇权威，利奥十世赐 Defender of the Faith 称号并刻上钱币。极具反讽：13 年后他成了教廷的叛逆。"},
+ {q:"1534 年 11 月 11 日通过的法案，本书中译作？",o:["《王位继承法》","《王权至上法案》（Statute of Supremacy）","《诉愿法》","《六条款》"],a:1,e:"本书中译《王权至上法案》（通史多称《至尊法案》）：王对国家及教会拥有绝对主权，教会更名「英国国教会」。同年 3 月 30 日另有《王位继承法》、1533 年 2 月有《诉愿法》（通史多称《禁止上诉法》）。"},
+ {q:"杜兰特认为引发英国宗教改革的导火线是？",o:["安妮·博林的美色","路德神学传入英国","凯瑟琳与查理五世的顽固，以及英国的民族意识","教皇主动放弃英国教会"],a:2,e:"原话「不是安妮的美色，而是凯瑟琳和查理的顽固」。1527 年查理军队占领罗马、教皇被掳，废后案无望；「不许教皇管理教会，是基于民族意识……王权就是靠这种意识提高的」。"},
+ {q:"1536 年《黑皮书》直接导致了什么？",o:["处死莫尔","封闭年入 200 镑以下的修道院，清理 376 所","与西班牙联姻","通过「六条款」"],a:1,e:"克伦威尔视察 600 余所修道院后上《黑皮书》（今已不传），国会接受建议，设「扩大委员会」清理 376 所、遣散 2000 余人，并引发 1536 年「求恩巡礼」。莫尔死于 1535 年，「六条款」在 1539 年。"},
+ {q:"1688 年光荣革命、牛顿与《英国哲学》应到哪一卷去找？",o:["卷07《理性开始的时代》","卷08《路易十四时代》","卷09《伏尔泰时代》","卷11《拿破仑时代》"],a:1,e:"卷08 第二部「英伦与欧陆的革命与改革」含《克伦威尔（1649—1660）》《弥尔顿》《复辟》《光荣革命（1685—1714）》；第三部《知识的探索》有《科学的探求》《伊萨克·牛顿（1642—1727）》《英国哲学（1648—1715）》。「威廉三世治下的英国」「安妮女王治下的英国」是该部的小节，不是章名。"},
+];
+
+/* ============ 工具 ============ */
+const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
+const store={
+  get:(k,d)=>{try{return JSON.parse(localStorage.getItem("britain_hist_"+k))??d}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem("britain_hist_"+k,JSON.stringify(v))}catch(e){}}
+};
+
+/* ============ 滚动显现 ============ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add("in")}),{threshold:.08});
+$$(".reveal").forEach(el=>io.observe(el));
+
+/* ============ 导航高亮 ============ */
+const navLinks=[...$$(".nav a")];
+const secIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+e.target.id));
+    }
+  });
+},{rootMargin:"-30% 0px -60% 0px"});
+["map","timeline","figures","stats","flash","quiz"].forEach(id=>{const el=document.getElementById(id);if(el)secIO.observe(el)});
+
+/* ============ 学习地图 ============ */
+$$(".map-card").forEach(c=>{
+  c.querySelector(".toggle").addEventListener("click",e=>{e.stopPropagation();c.classList.toggle("open");
+    c.querySelector(".toggle").textContent=c.classList.contains("open")?"▴ 收起脉络":"▾ 展开脉络";});
+  const btn=c.querySelector(".read-btn");
+  if(store.get("sec"+c.dataset.sec,false)){c.classList.add("done");btn.classList.add("marked");btn.textContent="✓ 已读";}
+  btn.addEventListener("click",e=>{e.stopPropagation();
+    const now=!c.classList.contains("done");
+    c.classList.toggle("done",now);btn.classList.toggle("marked",now);
+    btn.textContent=now?"✓ 已读":"○ 标记已读";
+    store.set("sec"+c.dataset.sec,now);updateProgress();});
+});
+
+/* ============ 人物画廊 ============ */
+function renderFigs(cat){
+  const g=$("#figGrid");g.innerHTML="";
+  FIGURES.filter(f=>cat==="all"||f.cat===cat).forEach((f,i)=>{
+    const d=document.createElement("div");d.className="fig";
+    d.innerHTML=`<div class="fig-inner">
+      <div class="fig-face"><div class="glyph">${f.g}</div><div class="nm">${f.n}</div><div class="en">${f.en}</div><span class="tag">${f.tag}</span><span class="hint">点击翻面 ↻</span></div>
+      <div class="fig-back"><h4>${f.n}</h4>${f.b}<div class="die">${f.d}</div></div>
+    </div>`;
+    d.addEventListener("click",()=>d.classList.toggle("flip"));
+    g.appendChild(d);
+  });
+}
+renderFigs("all");
+$("#figTabs").addEventListener("click",e=>{
+  if(e.target.tagName!=="BUTTON")return;
+  $$("#figTabs button").forEach(b=>b.classList.remove("on"));
+  e.target.classList.add("on");renderFigs(e.target.dataset.cat);
+});
+
+/* ============ 数字滚动 + 岁收条 ============ */
+const statIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting)return;
+    if(e.target.classList.contains("stat")){
+      const n=e.target.querySelector(".cnt");if(!n||n.dataset.done)return;n.dataset.done=1;
+      const v=+n.dataset.v,t0=performance.now(),dur=1400;
+      const step=t=>{const p=Math.min((t-t0)/dur,1);n.textContent=Math.round(v*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)};
+      requestAnimationFrame(step);
+      statIO.unobserve(e.target);
+    }else if(e.target.id==="revBars"){
+      e.target.querySelectorAll(".fill").forEach((f,i)=>setTimeout(()=>f.style.width=f.dataset.w+"%",i*160));
+      statIO.unobserve(e.target);
+    }
+  });
+},{threshold:.4});
+$$(".stat").forEach(s=>statIO.observe(s));
+statIO.observe($("#revBars"));
+
+/* ============ 记忆闪卡 ============ */
+let deck=[...FLASH.keys()];
+let deckPos=0, curQ=0, curA=1, showing="q", roundStart=0;
+const mastery=store.get("flash",{});
+function flashRender(){
+  if(deckPos>=deck.length){finishRound();return;}
+  const i=deck[deckPos];
+  $("#fQ").innerHTML=FLASH[i][curQ];
+  $("#fA").innerHTML=FLASH[i][curA];
+  const c=$("#fCard");
+  c.className="fcard q";$(".qmark").style.display="";$(".amark").style.display="none";
+  showing="q";
+  $("#fCount").textContent=`第 ${deckPos+1} / ${deck.length} 张 · 全部 22 张中已掌握 ${Object.keys(mastery).filter(k=>mastery[k]>=2).length} 张`;
+  $("#fBar").style.width=(deckPos/deck.length*100)+"%";
+  updateProgress();
+}
+$("#fCard").addEventListener("click",()=>{
+  const c=$("#fCard");
+  if(showing==="q"){c.className="fcard a";showing="a";$(".qmark").style.display="none";$(".amark").style.display="";}
+  else{c.className="fcard q";showing="q";$(".qmark").style.display="";$(".amark").style.display="none";}
+});
+function grade(g){
+  const i=deck[deckPos];
+  mastery[i]=(mastery[i]||0)+ (g==="yes"?1:g==="mid"?0:-1);
+  if(mastery[i]<0)mastery[i]=0;
+  if(mastery[i]>=3)mastery[i]=3;
+  if(g!=="yes"){deck.push(i);}  // 未掌握：排到本轮末尾再见
+  store.set("flash",mastery);
+  deckPos++;flashRender();
+}
+$("#fYes").addEventListener("click",()=>grade("yes"));
+$("#fMid").addEventListener("click",()=>grade("mid"));
+$("#fNo").addEventListener("click",()=>grade("no"));
+$("#fShuffle").addEventListener("click",()=>{
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]]}
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fReset").addEventListener("click",()=>{
+  Object.keys(mastery).forEach(k=>delete mastery[k]);store.set("flash",mastery);
+  deck=[...FLASH.keys()];deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+$("#fAgain").addEventListener("click",()=>{
+  const un=FLASH.map((_,i)=>i).filter(i=>(mastery[i]||0)<2);
+  deck=un.length?un:[...FLASH.keys()];
+  deckPos=0;$("#fDone").style.display="none";$("#fCard").style.display="";$(".fb-btns").style.display="";flashRender();});
+function finishRound(){
+  $("#fCard").style.display="none";$(".fb-btns").style.display="none";
+  $("#fDone").style.display="block";
+  const m=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  $("#fDoneTxt").innerHTML=`22 张卡片中已牢固掌握 <b style="color:var(--gold)">${m}</b> 张。${m<22?"点击下方按钮，专攻尚未掌握的卡片。":"全部掌握！本章记忆任务完成 🎉"}`;
+  $("#fBar").style.width="100%";
+  updateProgress();
+}
+flashRender();
+
+/* ============ 测验 ============ */
+let qOrder=[],qIdx=0,qRight=0,qWrongList=[];
+$("#qGo").addEventListener("click",startQuiz);
+$("#qRetry").addEventListener("click",startQuiz);
+$("#qNext").addEventListener("click",()=>{
+  qIdx++;
+  if(qIdx>=qOrder.length)endQuiz();else renderQ();
+});
+function startQuiz(){
+  qOrder=QUIZ.map((_,i)=>i);qIdx=0;qRight=0;qWrongList=[];
+  for(let i=qOrder.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[qOrder[i],qOrder[j]]=[qOrder[j],qOrder[i]]}
+  $("#qStart").style.display="none";$("#qResult").style.display="none";$("#qBody").style.display="block";
+  renderQ();
+}
+function renderQ(){
+  const Q=QUIZ[qOrder[qIdx]];
+  $("#qNo").textContent=`第 ${qIdx+1} / ${qOrder.length} 题`;
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qBar").style.width=(qIdx/qOrder.length*100)+"%";
+  $("#qStem").textContent=Q.q;
+  const box=$("#qOpts");box.innerHTML="";
+  Q.o.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="opt";b.textContent=String.fromCharCode(65+i)+". "+t;
+    b.addEventListener("click",()=>answer(i,b));
+    box.appendChild(b);
+  });
+  $("#qExpl").className="expl";$("#qNext").style.display="none";
+}
+function answer(i,btn){
+  const Q=QUIZ[qOrder[qIdx]];
+  $$("#qOpts .opt").forEach((b,j)=>{b.disabled=true;if(j===Q.a)b.classList.add("right")});
+  if(i===Q.a){qRight++;}else{btn.classList.add("wrong");qWrongList.push(Q);}
+  const ex=$("#qExpl");ex.innerHTML=(i===Q.a?"✓ 正确。":"✗ 正确答案是 "+String.fromCharCode(65+Q.a)+"。")+Q.e;
+  ex.className="expl show";
+  $("#qScore").textContent=`答对 ${qRight} 题`;
+  $("#qNext").style.display="inline-block";
+  $("#qNext").textContent=qIdx===qOrder.length-1?"查看成绩 →":"下一题 →";
+}
+function endQuiz(){
+  $("#qBody").style.display="none";$("#qResult").style.display="block";
+  $("#qFinal").textContent=qRight+" / "+qOrder.length;
+  const pct=qRight/qOrder.length;
+  $("#qVerdict").textContent=pct===1?"满分！你已经完全掌握了这一章。":pct>=.8?"优秀！只有个别细节需要巩固。":pct>=.6?"不错，把错题的解析再读一遍会大有帮助。":"别灰心——错题解析就是最好的复习材料，再来一次。";
+  const w=$("#qWrong");
+  w.innerHTML=qWrongList.length?"<b style='color:var(--dim);font-size:12.5px'>错题回顾</b>"+qWrongList.map(Q=>`<div class="w"><b>${Q.q}</b><br>正确答案：${Q.o[Q.a]}<br><span style="color:var(--dim)">${Q.e}</span></div>`).join(""):"<p style='color:var(--ok);font-size:14px'>🎉 全部正确，无错题！</p>";
+  const best=store.get("quizBest",null);
+  if(best===null||qRight>best)store.set("quizBest",qRight);
+  updateProgress();
+}
+
+/* ============ 综合进度 ============ */
+function updateProgress(){
+  const secs=[1,2,3,4,5,6,7].filter(i=>store.get("sec"+i,false)).length;
+  const fl=Object.keys(mastery).filter(k=>mastery[k]>=2).length;
+  const qb=store.get("quizBest",null);
+  const qsc=qb===null?0:qb/QUIZ.length;
+  const pct=Math.round((secs/7*0.4+fl/FLASH.length*0.4+qsc*0.2)*100);
+  $("#pPct").textContent=pct+"%";
+  $("#pBar").style.width=pct+"%";
+  $("#pSec").textContent=secs+"/7";
+  $("#pFlash").textContent=fl+"/"+FLASH.length;
+  $("#pQuiz").textContent=qb===null?"—":qb+" / "+QUIZ.length;
+  $("#navChip").textContent="进度 "+pct+"%";
+  const b=store.get("quizBest",null);
+  const be=$("#qBest");
+  if(be)be.innerHTML=b===null?"":"历史最高："+b+" / 12";
+}
+updateProgress();
+</script>
+</body>
+</html>
